@@ -1,0 +1,962 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Cargo {
+  id            String                @id @default(cuid())
+  codigo        String                @unique
+  nombre        String
+  descripcion   String?
+  jerarquia     Int?
+  activo        Boolean               @default(true)
+  sistemico     Boolean               @default(false)
+  institucionId String?
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+  institucion   InstitucionEducativa? @relation(fields: [institucionId], references: [id])
+  permisos      CargoPermiso[]
+  usuarios      User[]
+
+  @@unique([codigo, institucionId])
+  @@index([activo])
+  @@index([institucionId])
+}
+
+model EstadoUsuario {
+  id                         String                   @id @default(cuid())
+  codigo                     String                   @unique
+  nombre                     String
+  descripcion                String?
+  color                      String?
+  permiteLogin               Boolean                  @default(true)
+  esActivo                   Boolean                  @default(true)
+  sistemico                  Boolean                  @default(false)
+  orden                      Int?
+  institucionId              String?
+  activo                     Boolean                  @default(true)
+  createdAt                  DateTime                 @default(now())
+  updatedAt                  DateTime                 @updatedAt
+  institucion                InstitucionEducativa?    @relation(fields: [institucionId], references: [id])
+  historialEstadosAnteriores HistorialEstadoUsuario[] @relation("EstadoAnteriorHistorial")
+  historialEstadosNuevos     HistorialEstadoUsuario[] @relation("EstadoNuevoHistorial")
+  usuarios                   User[]
+
+  @@unique([codigo, institucionId])
+  @@index([esActivo])
+  @@index([sistemico])
+  @@index([institucionId])
+}
+
+model TipoDocumento {
+  id                 String                @id @default(cuid())
+  codigo             String                @unique
+  nombre             String
+  descripcion        String?
+  categoria          String?
+  requiereAprobacion Boolean               @default(false)
+  plantillaDefault   String?
+  formatosPermitidos String[]
+  vigencia           Int?
+  sistemico          Boolean               @default(false)
+  activo             Boolean               @default(true)
+  institucionId      String?
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+  documentos         Documento[]
+  institucion        InstitucionEducativa? @relation(fields: [institucionId], references: [id])
+
+  @@unique([codigo, institucionId])
+  @@index([categoria])
+  @@index([sistemico])
+  @@index([institucionId])
+}
+
+model TipoEvaluacion {
+  id                  String                @id @default(cuid())
+  codigo              String                @unique
+  nombre              String
+  descripcion         String?
+  categoria           String?
+  pesoMinimo          Float?
+  pesoMaximo          Float?
+  pesoSugerido        Float?
+  permiteRecuperacion Boolean               @default(true)
+  requiereFecha       Boolean               @default(true)
+  color               String?
+  sistemico           Boolean               @default(false)
+  activo              Boolean               @default(true)
+  institucionId       String?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  evaluaciones        Evaluacion[]
+  institucion         InstitucionEducativa? @relation(fields: [institucionId], references: [id])
+
+  @@unique([codigo, institucionId])
+  @@index([categoria])
+  @@index([sistemico])
+  @@index([institucionId])
+}
+
+model HistorialEstadoUsuario {
+  id               String         @id @default(cuid())
+  usuarioId        String
+  estadoAnteriorId String?
+  estadoNuevoId    String
+  motivo           String?
+  observaciones    String?
+  cambiadoPorId    String
+  fechaCambio      DateTime       @default(now())
+  cambiadoPor      User           @relation("CambiosEstadoRealizados", fields: [cambiadoPorId], references: [id])
+  estadoAnterior   EstadoUsuario? @relation("EstadoAnteriorHistorial", fields: [estadoAnteriorId], references: [id])
+  estadoNuevo      EstadoUsuario  @relation("EstadoNuevoHistorial", fields: [estadoNuevoId], references: [id])
+  usuario          User           @relation(fields: [usuarioId], references: [id])
+
+  @@index([usuarioId])
+  @@index([fechaCambio])
+}
+
+model Permiso {
+  id              String           @id @default(cuid())
+  codigo          String           @unique
+  nombre          String
+  descripcion     String?
+  modulo          String?
+  activo          Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  cargoPermisos   CargoPermiso[]
+  roles           RolPermiso[]
+  usuarioPermisos UsuarioPermiso[]
+}
+
+model RolPermiso {
+  id        String   @id @default(cuid())
+  rol       Role
+  permisoId String
+  createdAt DateTime @default(now())
+  permiso   Permiso  @relation(fields: [permisoId], references: [id])
+
+  @@unique([rol, permisoId])
+}
+
+model UsuarioPermiso {
+  id          String    @id @default(cuid())
+  usuarioId   String
+  permisoId   String
+  fechaInicio DateTime  @default(now())
+  fechaFin    DateTime?
+  activo      Boolean   @default(true)
+  permiso     Permiso   @relation(fields: [permisoId], references: [id])
+  usuario     User      @relation(fields: [usuarioId], references: [id])
+
+  @@unique([usuarioId, permisoId])
+  @@index([usuarioId])
+  @@index([permisoId])
+  @@index([activo])
+}
+
+model CargoPermiso {
+  id        String   @id @default(cuid())
+  cargoId   String
+  permisoId String
+  createdAt DateTime @default(now())
+  cargo     Cargo    @relation(fields: [cargoId], references: [id])
+  permiso   Permiso  @relation(fields: [permisoId], references: [id])
+
+  @@unique([cargoId, permisoId])
+  @@index([cargoId])
+  @@index([permisoId])
+}
+
+model InstitucionEducativa {
+  id                 String             @id @default(cuid())
+  codigoModular      String             @unique
+  nombreInstitucion  String
+  nombreComercial    String?
+  tipoGestion        TipoGestion
+  modalidad          Modalidad
+  ugel               String
+  dre                String
+  ubigeo             String
+  direccion          String
+  distrito           String
+  provincia          String
+  departamento       String
+  telefono           String?
+  email              String?
+  sitioWeb           String?
+  resolucionCreacion String?
+  fechaCreacion      DateTime?
+  resolucionActual   String?
+  logo               String?
+  directorId         String?            @unique
+  cicloEscolarActual Int                @default(2025)
+  fechaInicioClases  DateTime
+  fechaFinClases     DateTime
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  areasCurriculares  AreaCurricular[]
+  cargos             Cargo[]
+  conceptosPago      ConceptoPago[]
+  cursos             Curso[]
+  estadosUsuario     EstadoUsuario[]
+  director           User?              @relation("DirectorInstitucion", fields: [directorId], references: [id])
+  niveles            Nivel[]
+  nivelesAcademicos  NivelAcademico[]
+  periodos           PeriodoAcademico[]
+  prospectos         Prospecto[]
+  tiposDocumento     TipoDocumento[]
+  tiposEvaluacion    TipoEvaluacion[]
+  users              User[]
+}
+
+model User {
+  id                      String                   @id @default(cuid())
+  name                    String?
+  email                   String?                  @unique
+  password                String?
+  emailVerified           DateTime?
+  image                   String?
+  role                    Role                     @default(estudiante)
+  apellidoPaterno         String?
+  apellidoMaterno         String?
+  dni                     String?                  @unique
+  fechaNacimiento         DateTime?
+  sexo                    String?
+  estadoCivil             String?
+  nacionalidad            String?                  @default("PERUANA")
+  direccion               String?
+  ubigeo                  String?
+  distrito                String?
+  provincia               String?
+  departamento            String?
+  telefono                String?
+  telefonoEmergencia      String?
+  codigoEstudiante        String?                  @unique
+  codigoSiagie            String?                  @unique
+  codigoModular           String?                  @unique
+  numeroExpediente        String?
+  tipoSangre              String?
+  alergias                String?
+  condicionesMedicas      String?
+  contactoEmergencia      String?
+  cargoId                 String?
+  estadoId                String
+  area                    String?
+  fechaIngreso            DateTime?
+  fechaSalida             DateTime?
+  numeroContrato          String?
+  nivelAcademicoId        String?
+  turno                   Turno?
+  viveConPadres           Boolean?
+  tipoVivienda            String?
+  serviciosBasicos        String?
+  transporteEscolar       Boolean?                 @default(false)
+  becario                 Boolean?                 @default(false)
+  tipoBeca                String?
+  programaSocial          String?
+  especialidad            String?
+  titulo                  String?
+  colegioProfesor         String?
+  fechaContratacion       DateTime?
+  tipoContrato            String?
+  escalaMagisterial       String?
+  ocupacion               String?
+  lugarTrabajo            String?
+  ingresoFamiliar         String?
+  gradoInstruccion        String?
+  institucionId           String?
+  mustChangePassword      Boolean                  @default(false)
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  accounts                Account[]
+  admisionesAutorizadas   Admision[]               @relation("AutorizadoAdmision")
+  anunciosCreados         Anuncio[]
+  asistencias             Asistencia[]
+  asistenciasRegistradas  Asistencia[]             @relation("RegistrosAsistencia")
+  cronogramaPagos         CronogramaPago[]
+  cursosImpartidos        Curso[]                  @relation("ProfesorCursos")
+  documentosEmitidos      Documento[]              @relation("DocumentosEmitidos")
+  documentosEstudiante    Documento[]              @relation("DocumentosEstudiante")
+  eventosCreados          Evento[]
+  fichasEspecialista      FichaPsicopedagogica[]   @relation("EspecialistaPsico")
+  fichasEstudiante        FichaPsicopedagogica[]   @relation("EstudiantePsico")
+  cambiosEstadoRealizados HistorialEstadoUsuario[] @relation("CambiosEstadoRealizados")
+  historialEstados        HistorialEstadoUsuario[]
+  institucionDirector     InstitucionEducativa?    @relation("DirectorInstitucion")
+  matriculas              Matricula[]
+  cursosInscritos         MatriculaCurso[]
+  tutorDe                 NivelAcademico[]         @relation("TutorCursos")
+  notas                   Nota[]
+  pagos                   Pago[]
+  passwordResetToken      PasswordResetToken?
+  padresTutores           RelacionFamiliar[]       @relation("Hijo")
+  hijosDeTutor            RelacionFamiliar[]       @relation("PadreTutor")
+  cargo                   Cargo?                   @relation(fields: [cargoId], references: [id])
+  estado                  EstadoUsuario            @relation(fields: [estadoId], references: [id])
+  institucion             InstitucionEducativa?    @relation(fields: [institucionId], references: [id])
+  nivelAcademico          NivelAcademico?          @relation("StudentNivelAcademico", fields: [nivelAcademicoId], references: [id])
+  usuarioPermisos         UsuarioPermiso[]
+  comprobantesEnviados    ComprobantePago[]        @relation("ComprobantesPadre")
+  comprobantesVerificados ComprobantePago[]        @relation("ComprobantesVerificados")
+
+  @@index([cargoId])
+  @@index([estadoId])
+}
+
+model RelacionFamiliar {
+  id                String  @id @default(cuid())
+  padreTutorId      String
+  hijoId            String
+  parentesco        String
+  contactoPrimario  Boolean @default(false)
+  autorizadoRecoger Boolean @default(true)
+  viveCon           Boolean @default(true)
+  orden             Int?
+  hijo              User    @relation("Hijo", fields: [hijoId], references: [id])
+  padreTutor        User    @relation("PadreTutor", fields: [padreTutorId], references: [id])
+
+  @@unique([padreTutorId, hijoId])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String
+  expires   DateTime
+  userId    String   @unique
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Nivel {
+  id                String               @id @default(cuid())
+  nombre            String               @unique
+  descripcion       String?
+  institucionId     String
+  activo            Boolean              @default(true)
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  areasCurriculares AreaCurricular[]
+  cursos            Curso[]
+  grados            Grado[]
+  institucion       InstitucionEducativa @relation(fields: [institucionId], references: [id])
+  nivelesAcademicos NivelAcademico[]
+  anuncios          Anuncio[]            @relation("AnuncioToNivel")
+  eventos           Evento[]             @relation("EventoToNivel")
+
+  @@unique([institucionId, nombre])
+}
+
+model Grado {
+  id                String           @id @default(cuid())
+  nombre            String
+  codigo            String
+  descripcion       String?
+  orden             Int
+  nivelId           String
+  activo            Boolean          @default(true)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  cursos            Curso[]
+  nivel             Nivel            @relation(fields: [nivelId], references: [id], onDelete: Cascade)
+  nivelesAcademicos NivelAcademico[]
+  anuncios          Anuncio[]        @relation("AnuncioToGrado")
+  eventos           Evento[]         @relation("EventoToGrado")
+
+  @@unique([nivelId, codigo])
+  @@unique([nivelId, orden])
+}
+
+model NivelAcademico {
+  id              String               @id @default(cuid())
+  seccion         String
+  descripcion     String?
+  capacidad       Int                  @default(30)
+  capacidadMaxima Int?
+  aulaAsignada    String?
+  nivelId         String
+  gradoId         String
+  tutorId         String?
+  institucionId   String
+  anioAcademico   Int                  @default(2025)
+  activo          Boolean              @default(true)
+  turno           Turno                @default(MANANA)
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  cursos          Curso[]
+  matriculas      Matricula[]
+  grado           Grado                @relation(fields: [gradoId], references: [id], onDelete: Cascade)
+  institucion     InstitucionEducativa @relation(fields: [institucionId], references: [id])
+  nivel           Nivel                @relation(fields: [nivelId], references: [id], onDelete: Cascade)
+  tutor           User?                @relation("TutorCursos", fields: [tutorId], references: [id])
+  students        User[]               @relation("StudentNivelAcademico")
+
+  @@unique([nivelId, gradoId, seccion, anioAcademico, institucionId])
+}
+
+model PeriodoAcademico {
+  id            String               @id @default(cuid())
+  nombre        String
+  tipo          TipoPeriodo
+  numero        Int
+  fechaInicio   DateTime
+  fechaFin      DateTime
+  anioEscolar   Int
+  activo        Boolean              @default(true)
+  institucionId String
+  evaluaciones  Evaluacion[]
+  institucion   InstitucionEducativa @relation(fields: [institucionId], references: [id])
+
+  @@unique([tipo, numero, anioEscolar, institucionId])
+}
+
+model AreaCurricular {
+  id                String               @id @default(cuid())
+  nombre            String
+  codigo            String
+  descripcion       String?
+  orden             Int?
+  color             String?
+  activa            Boolean              @default(true)
+  competenciasTexto String?
+  institucionId     String
+  creditos          Int?
+  nivelId           String?
+  parentId          String?
+  institucion       InstitucionEducativa @relation(fields: [institucionId], references: [id])
+  nivel             Nivel?               @relation(fields: [nivelId], references: [id])
+  parent            AreaCurricular?      @relation("SubAreas", fields: [parentId], references: [id])
+  subAreas          AreaCurricular[]     @relation("SubAreas")
+  competencias      Competencia[]
+  cursos            Curso[]
+
+  @@unique([codigo, institucionId])
+}
+
+model Curso {
+  id               String                @id @default(cuid())
+  nombre           String
+  codigo           String
+  descripcion      String?
+  anioAcademico    Int
+  horasSemanales   Int?
+  creditos         Int?
+  areaCurricularId String
+  nivelAcademicoId String
+  gradoId          String?
+  profesorId       String
+  activo           Boolean               @default(true)
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+  alcance          AlcanceCurso          @default(SECCION_ESPECIFICA)
+  institucionId    String?
+  nivelId          String?
+  asistencias      Asistencia[]
+  areaCurricular   AreaCurricular        @relation(fields: [areaCurricularId], references: [id])
+  grado            Grado?                @relation(fields: [gradoId], references: [id])
+  institucion      InstitucionEducativa? @relation(fields: [institucionId], references: [id])
+  nivelAcademico   NivelAcademico        @relation(fields: [nivelAcademicoId], references: [id])
+  nivel            Nivel?                @relation(fields: [nivelId], references: [id])
+  profesor         User                  @relation("ProfesorCursos", fields: [profesorId], references: [id])
+  evaluaciones     Evaluacion[]
+  horarios         Horario[]
+  estudiantes      MatriculaCurso[]
+  notas            Nota[]
+
+  @@unique([codigo, anioAcademico, nivelAcademicoId])
+  @@unique([codigo, anioAcademico, gradoId])
+  @@unique([codigo, anioAcademico, institucionId])
+  @@unique([codigo, anioAcademico, nivelId])
+}
+
+model Horario {
+  id         String  @id @default(cuid())
+  cursoId    String
+  diaSemana  Int
+  horaInicio String
+  horaFin    String
+  aula       String?
+  curso      Curso   @relation(fields: [cursoId], references: [id])
+
+  @@unique([cursoId, diaSemana, horaInicio])
+}
+
+model Matricula {
+  id               String           @id @default(cuid())
+  numeroMatricula  String           @unique
+  estudianteId     String
+  nivelAcademicoId String
+  anioAcademico    Int
+  fechaMatricula   DateTime         @default(now())
+  estado           String           @default("activo")
+  esPrimeraVez     Boolean          @default(false)
+  esRepitente      Boolean          @default(false)
+  procedencia      String?
+  observaciones    String?
+  tipoBeca         String?          @default("ninguna")
+  descuentoBeca    Float?           @default(0)
+  estudiante       User             @relation(fields: [estudianteId], references: [id])
+  nivelAcademico   NivelAcademico   @relation(fields: [nivelAcademicoId], references: [id])
+  cursos           MatriculaCurso[]
+
+  @@unique([estudianteId, anioAcademico])
+}
+
+model MatriculaCurso {
+  id               String    @id @default(cuid())
+  matriculaId      String
+  cursoId          String
+  fechaInscripcion DateTime  @default(now())
+  estado           String    @default("activo")
+  userId           String?
+  curso            Curso     @relation(fields: [cursoId], references: [id])
+  matricula        Matricula @relation(fields: [matriculaId], references: [id])
+  User             User?     @relation(fields: [userId], references: [id])
+
+  @@unique([matriculaId, cursoId])
+}
+
+model Evaluacion {
+  id                 String             @id @default(cuid())
+  nombre             String
+  descripcion        String?
+  tipoEvaluacionId   String
+  fecha              DateTime
+  fechaLimite        DateTime?
+  peso               Float
+  notaMinima         Float?
+  escalaCalificacion EscalaCalificacion @default(VIGESIMAL)
+  cursoId            String
+  periodoId          String
+  activa             Boolean            @default(true)
+  recuperable        Boolean            @default(false)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  capacidadId        String?
+  capacidad          Capacidad?         @relation(fields: [capacidadId], references: [id])
+  curso              Curso              @relation(fields: [cursoId], references: [id])
+  periodo            PeriodoAcademico   @relation(fields: [periodoId], references: [id])
+  tipoEvaluacion     TipoEvaluacion     @relation(fields: [tipoEvaluacionId], references: [id])
+  notas              Nota[]
+
+  @@index([tipoEvaluacionId])
+}
+
+model Nota {
+  id               String     @id @default(cuid())
+  valor            Float
+  valorLiteral     String?
+  valorDescriptivo String?
+  comentario       String?
+  estudianteId     String
+  cursoId          String
+  evaluacionId     String
+  registradoPor    String?
+  fechaRegistro    DateTime   @default(now())
+  modificadoPor    String?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  curso            Curso      @relation(fields: [cursoId], references: [id])
+  estudiante       User       @relation(fields: [estudianteId], references: [id])
+  evaluacion       Evaluacion @relation(fields: [evaluacionId], references: [id])
+
+  @@unique([estudianteId, evaluacionId])
+}
+
+model Asistencia {
+  id              String   @id @default(cuid())
+  fecha           DateTime
+  presente        Boolean
+  tardanza        Boolean  @default(false)
+  horaLlegada     String?
+  justificada     Boolean  @default(false)
+  justificacion   String?
+  estudianteId    String
+  cursoId         String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  registradoPorId String?
+  curso           Curso    @relation(fields: [cursoId], references: [id])
+  estudiante      User     @relation(fields: [estudianteId], references: [id])
+  registradoPor   User?    @relation("RegistrosAsistencia", fields: [registradoPorId], references: [id])
+
+  @@unique([estudianteId, cursoId, fecha])
+}
+
+model Documento {
+  id                 String        @id @default(cuid())
+  tipoDocumentoId    String
+  descripcion        String?
+  verificado         Boolean       @default(false)
+  archivoUrl         String?
+  codigo             String        @unique
+  codigoVerificacion String?       @unique
+  contenido          String
+  createdAt          DateTime      @default(now())
+  datosAdicionales   Json?
+  emisorId           String
+  estado             String        @default("activo")
+  estudianteId       String?
+  fechaEmision       DateTime      @default(now())
+  fechaExpiracion    DateTime?
+  firmado            Boolean       @default(false)
+  formato            String        @default("PDF")
+  plantilla          String?
+  titulo             String
+  updatedAt          DateTime      @updatedAt
+  emisor             User          @relation("DocumentosEmitidos", fields: [emisorId], references: [id])
+  estudiante         User?         @relation("DocumentosEstudiante", fields: [estudianteId], references: [id])
+  tipoDocumento      TipoDocumento @relation(fields: [tipoDocumentoId], references: [id])
+
+  @@index([tipoDocumentoId])
+}
+
+model Pago {
+  id               String          @id @default(cuid())
+  numeroBoleta     String?         @unique
+  concepto         String
+  descripcion      String?
+  monto            Float
+  moneda           String          @default("PEN")
+  fechaVencimiento DateTime
+  fechaPago        DateTime?
+  fechaRegistro    DateTime        @default(now())
+  estado           String          @default("pendiente")
+  metodoPago       String?
+  referenciaPago   String?
+  numeroOperacion  String?
+  entidadBancaria  String?
+  comprobante      String?
+  recibo           String?
+  estudianteId     String
+  observaciones    String?
+  descuento        Float?          @default(0)
+  mora             Float?          @default(0)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  cronogramaPagoId String?
+  cronogramaPago   CronogramaPago? @relation(fields: [cronogramaPagoId], references: [id])
+  estudiante       User            @relation(fields: [estudianteId], references: [id])
+}
+
+model Anuncio {
+  id               String    @id @default(cuid())
+  titulo           String
+  contenido        String
+  resumen          String?
+  imagen           String?
+  fechaPublicacion DateTime  @default(now())
+  fechaExpiracion  DateTime?
+  activo           Boolean   @default(true)
+  dirigidoA        String
+  importante       Boolean   @default(false)
+  urgente          Boolean   @default(false)
+  fijado           Boolean   @default(false)
+  autorId          String
+  vistas           Int       @default(0)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  autor            User      @relation(fields: [autorId], references: [id])
+  grados           Grado[]   @relation("AnuncioToGrado")
+  niveles          Nivel[]   @relation("AnuncioToNivel")
+}
+
+model Evento {
+  id                     String    @id @default(cuid())
+  titulo                 String
+  descripcion            String?
+  imagen                 String?
+  fechaInicio            DateTime
+  fechaFin               DateTime
+  horaInicio             String?
+  horaFin                String?
+  fechaLimiteInscripcion DateTime?
+  ubicacion              String?
+  aula                   String?
+  direccion              String?
+  modalidad              String?
+  enlaceVirtual          String?
+  tipo                   String
+  categoria              String?
+  publico                Boolean   @default(true)
+  dirigidoA              String?
+  capacidadMaxima        Int?
+  requiereInscripcion    Boolean   @default(false)
+  organizadorId          String
+  estado                 String    @default("programado")
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+  organizador            User      @relation(fields: [organizadorId], references: [id])
+  grados                 Grado[]   @relation("EventoToGrado")
+  niveles                Nivel[]   @relation("EventoToNivel")
+}
+
+model Competencia {
+  id               String         @id @default(cuid())
+  nombre           String
+  descripcion      String?
+  areaCurricularId String
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  capacidades      Capacidad[]
+  areaCurricular   AreaCurricular @relation(fields: [areaCurricularId], references: [id])
+
+  @@index([areaCurricularId])
+}
+
+model Capacidad {
+  id            String       @id @default(cuid())
+  nombre        String
+  descripcion   String?
+  competenciaId String
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  competencia   Competencia  @relation(fields: [competenciaId], references: [id])
+  evaluaciones  Evaluacion[]
+
+  @@index([competenciaId])
+}
+
+model Prospecto {
+  id              String               @id @default(cuid())
+  dni             String?              @unique
+  nombre          String
+  apellidoPaterno String
+  apellidoMaterno String
+  fechaNacimiento DateTime?
+  email           String?
+  telefono        String?
+  direccion       String?
+  gradoInteresId  String
+  anioPostulacion Int
+  estado          EstadoProspecto      @default(INTERESADO)
+  institucionId   String
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  admision        Admision?
+  institucion     InstitucionEducativa @relation(fields: [institucionId], references: [id])
+}
+
+model Admision {
+  id              String    @id @default(cuid())
+  prospectoId     String    @unique
+  fechaEntrevista DateTime?
+  resultadoExamen String?
+  observaciones   String?
+  autorizadoPorId String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  autorizadoPor   User?     @relation("AutorizadoAdmision", fields: [autorizadoPorId], references: [id])
+  prospecto       Prospecto @relation(fields: [prospectoId], references: [id])
+}
+
+model FichaPsicopedagogica {
+  id                String             @id @default(cuid())
+  estudianteId      String
+  especialistaId    String
+  fecha             DateTime           @default(now())
+  motivo            String?
+  descripcion       String
+  recomendaciones   String?
+  categoriaId       String
+  visibleParaPadres Boolean            @default(false)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  categoria         CategoriaIncidente @relation(fields: [categoriaId], references: [id])
+  especialista      User               @relation("EspecialistaPsico", fields: [especialistaId], references: [id])
+  estudiante        User               @relation("EstudiantePsico", fields: [estudianteId], references: [id])
+
+  @@index([estudianteId])
+  @@index([especialistaId])
+}
+
+model CategoriaIncidente {
+  id          String                 @id @default(cuid())
+  nombre      String                 @unique
+  descripcion String?
+  fichas      FichaPsicopedagogica[]
+}
+
+model ConceptoPago {
+  id            String               @id @default(cuid())
+  nombre        String
+  montoSugerido Float
+  moneda        String               @default("PEN")
+  activo        Boolean              @default(true)
+  institucionId String
+  moraDiaria    Float                @default(0)
+  institucion   InstitucionEducativa @relation(fields: [institucionId], references: [id])
+  cronogramas   CronogramaPago[]
+}
+
+model CronogramaPago {
+  id               String            @id @default(cuid())
+  estudianteId     String
+  conceptoId       String
+  monto            Float
+  montoPagado      Float             @default(0)
+  fechaVencimiento DateTime
+  pagado           Boolean           @default(false)
+  moraAcumulada    Float             @default(0)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  concepto         ConceptoPago      @relation(fields: [conceptoId], references: [id])
+  estudiante       User              @relation(fields: [estudianteId], references: [id])
+  pagos            Pago[]
+  comprobantes     ComprobantePago[]
+
+  @@index([estudianteId])
+  @@index([conceptoId])
+}
+
+enum Role {
+  estudiante
+  profesor
+  administrativo
+  padre
+}
+
+enum TipoGestion {
+  PUBLICA
+  PRIVADA
+  PARROQUIAL
+  CONVENIO
+}
+
+enum Modalidad {
+  PRESENCIAL
+  DISTANCIA
+  SEMIPRESENCIAL
+}
+
+enum Turno {
+  MANANA
+  TARDE
+  NOCHE
+  CONTINUO
+}
+
+enum EscalaCalificacion {
+  VIGESIMAL
+  LITERAL
+  DESCRIPTIVA
+}
+
+enum TipoPeriodo {
+  BIMESTRE
+  TRIMESTRE
+  SEMESTRE
+  ANUAL
+}
+
+enum TipoContrato {
+  NOMBRADO
+  CONTRATADO
+  PRATICANTE
+  SUPLENTE
+}
+
+enum EscalaMagisterial {
+  I
+  II
+  III
+  IV
+  V
+  VI
+  VII
+  VIII
+}
+
+enum EstadoProspecto {
+  INTERESADO
+  EVALUANDO
+  ADMITIDO
+  RECHAZADO
+  MATRICULADO
+}
+
+enum AlcanceCurso {
+  SECCION_ESPECIFICA
+  TODO_EL_GRADO
+  TODO_EL_NIVEL
+  TODO_LA_INSTITUCION
+}
+
+model VariableSistema {
+  id          String   @id @default(cuid())
+  clave       String   @unique
+  valor       String
+  tipo        String   @default("string") // string, boolean, number, json
+  descripcion String?
+  seccion     String?  @default("general")
+  activo      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([clave])
+  @@index([seccion])
+}
+
+// ==================== PORTAL DE PADRES ====================
+
+model ComprobantePago {
+  id              String            @id @default(cuid())
+  cronogramaId    String
+  cronograma      CronogramaPago    @relation(fields: [cronogramaId], references: [id])
+  padreId         String
+  padre           User              @relation("ComprobantesPadre", fields: [padreId], references: [id])
+  archivoUrl      String
+  monto           Float
+  bancoOrigen     String?
+  numeroOperacion String?
+  fechaOperacion  DateTime
+  estado          EstadoComprobante @default(PENDIENTE)
+  motivoRechazo   String?
+  verificadoPorId String?
+  verificadoPor   User?             @relation("ComprobantesVerificados", fields: [verificadoPorId], references: [id])
+  verificadoEn    DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([cronogramaId])
+  @@index([padreId])
+  @@index([estado])
+}
+
+enum EstadoComprobante {
+  PENDIENTE
+  EN_REVISION
+  APROBADO
+  RECHAZADO
+}

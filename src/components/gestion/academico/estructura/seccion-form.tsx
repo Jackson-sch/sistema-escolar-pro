@@ -1,0 +1,246 @@
+"use client"
+
+import { useTransition } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
+import { toast } from "sonner"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { upsertSeccionAction } from "@/actions/academic-structure"
+import { TURNO_OPTIONS } from "@/lib/constants"
+
+const formSchema = z.object({
+  seccion: z.string().min(1, "La sección es requerida"),
+  gradoId: z.string().min(1, "El grado es requerido"),
+  tutorId: z.string().optional().nullable().or(z.literal("")),
+  capacidad: z.preprocess((val) => Number(val), z.number().min(1, "La capacidad debe ser al menos 1")),
+  aulaAsignada: z.string().optional().nullable().or(z.literal("")),
+  turno: z.enum(["MANANA", "TARDE", "NOCHE"]),
+  anioAcademico: z.preprocess((val) => Number(val), z.number().min(2000)),
+  institucionId: z.string().min(1),
+})
+
+type SeccionFormValues = z.infer<typeof formSchema>
+
+interface SeccionFormProps {
+  initialData?: any
+  grados: { id: string; nombre: string; nivel: { nombre: string } }[]
+  tutores: { id: string; name: string; apellidoPaterno: string; apellidoMaterno: string }[]
+  institucionId: string
+  onSuccess?: () => void
+}
+
+export function SeccionForm({
+  initialData,
+  grados,
+  tutores,
+  institucionId,
+  onSuccess
+}: SeccionFormProps) {
+  const [isPending, startTransition] = useTransition()
+
+  const form = useForm<SeccionFormValues>({
+    resolver: zodResolver(formSchema) as any,
+    defaultValues: initialData ? {
+      seccion: initialData.seccion,
+      gradoId: initialData.gradoId,
+      tutorId: initialData.tutorId || "",
+      capacidad: initialData.capacidad,
+      aulaAsignada: initialData.aulaAsignada || "",
+      turno: initialData.turno,
+      anioAcademico: initialData.anioAcademico,
+      institucionId: initialData.institucionId,
+    } : {
+      seccion: "",
+      gradoId: "",
+      tutorId: "",
+      capacidad: 30,
+      aulaAsignada: "",
+      turno: "MANANA",
+      anioAcademico: new Date().getFullYear(),
+      institucionId,
+    },
+  })
+
+  const onSubmit = (values: SeccionFormValues) => {
+    startTransition(async () => {
+      const res = await upsertSeccionAction(
+        {
+          ...values,
+          tutorId: values.tutorId === "none" ? null : values.tutorId || null,
+          aulaAsignada: values.aulaAsignada || null,
+        } as any,
+        initialData?.id
+      )
+
+      if (res.success) {
+        toast.success(res.success)
+        if (onSuccess) onSuccess()
+      }
+      if (res.error) toast.error(res.error)
+    })
+  }
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="gradoId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Grado</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Seleccionar grado" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {grados.map((grado) => (
+                    <SelectItem key={grado.id} value={grado.id}>
+                      {grado.nivel.nombre} - {grado.nombre}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="seccion"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Sección</FormLabel>
+                <FormControl>
+                  <Input placeholder="Ej: A" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="anioAcademico"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Año Académico</FormLabel>
+                <FormControl>
+                  <Input type="number" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <FormField
+          control={form.control}
+          name="tutorId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tutor (Opcional)</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                value={field.value || "none"}
+              >
+                <FormControl>
+                  <SelectTrigger className="w-full capitalize">
+                    <SelectValue placeholder="Sin tutor asignado" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="none">Sin tutor</SelectItem>
+                  {tutores.map((tutor) => (
+                    <SelectItem key={tutor.id} value={tutor.id} className="capitalize">
+                      {tutor.apellidoPaterno} {tutor.apellidoMaterno}, {tutor.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="turno"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Turno</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {TURNO_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="capacidad"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Capacidad</FormLabel>
+                <FormControl>
+                  <Input type="number" min={1} {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <FormField
+          control={form.control}
+          name="aulaAsignada"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Aula (Opcional)</FormLabel>
+              <FormControl>
+                <Input placeholder="Ej: Aula 101" {...field} value={field.value || ""} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <Button type="submit" className="w-full" disabled={isPending}>
+          {isPending ? "Guardando..." : initialData ? "Guardar Cambios" : "Crear Sección"}
+        </Button>
+      </form>
+    </Form>
+  )
+}
