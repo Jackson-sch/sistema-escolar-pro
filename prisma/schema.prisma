@@ -280,6 +280,7 @@ model User {
   asistencias             Asistencia[]
   asistenciasRegistradas  Asistencia[]             @relation("RegistrosAsistencia")
   cronogramaPagos         CronogramaPago[]
+  logros                  Logro[]
   cursosImpartidos        Curso[]                  @relation("ProfesorCursos")
   documentosEmitidos      Documento[]              @relation("DocumentosEmitidos")
   documentosEstudiante    Documento[]              @relation("DocumentosEstudiante")
@@ -799,6 +800,22 @@ model FichaPsicopedagogica {
 
   @@index([estudianteId])
   @@index([especialistaId])
+}
+
+model Logro {
+  id           String   @id @default(cuid())
+  titulo       String
+  descripcion  String?
+  fecha        DateTime
+  categoria    String   @default("OTROS") // ACADEMICO, DEPORTIVO, CULTURAL, VALORES, OTROS
+  institucion  String?
+  adjunto      String?
+  estudianteId String
+  estudiante   User     @relation(fields: [estudianteId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([estudianteId])
 }
 
 model CategoriaIncidente {

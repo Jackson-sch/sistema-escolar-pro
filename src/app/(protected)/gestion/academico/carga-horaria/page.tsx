@@ -1,10 +1,10 @@
-import { IconClock } from "@tabler/icons-react"
-import { getCoursesAction, getCurricularAreasAction } from "@/actions/academic"
-import { getNivelesAcademicosAction } from "@/actions/students"
-import { getStaffAction } from "@/actions/staff"
-import { columns } from "@/components/gestion/academico/course-table-columns"
-import { CourseTable } from "@/components/gestion/academico/course-table"
-import { AddCourseButton } from "@/components/gestion/academico/add-course-button"
+import { IconClock } from "@tabler/icons-react";
+import { getCoursesAction, getCurricularAreasAction } from "@/actions/academic";
+import { getNivelesAcademicosAction } from "@/actions/students";
+import { getStaffAction } from "@/actions/staff";
+import { columns } from "@/components/gestion/academico/cursos/components/course-table-columns";
+import { CourseTable } from "@/components/gestion/academico/cursos/course-table";
+import { AddCourseButton } from "@/components/gestion/academico/cursos/add-course-button";
 
 export default async function CargaHorariaPage() {
   // Carga paralela de dependencias para la carga horaria
@@ -12,16 +12,16 @@ export default async function CargaHorariaPage() {
     { data: courses = [] },
     { data: areas = [] },
     { data: nivelesAcademicos = [] },
-    { data: staff = [] }
+    { data: staff = [] },
   ] = await Promise.all([
     getCoursesAction(),
     getCurricularAreasAction(),
     getNivelesAcademicosAction(),
-    getStaffAction()
-  ])
+    getStaffAction(),
+  ]);
 
   // Filtrar solo los profesores para el selector
-  const profesores = staff.filter((s: any) => s.role === "profesor")
+  const profesores = staff.filter((s: any) => s.role === "profesor");
 
   return (
     <div className="space-y-4 px-2">
@@ -41,10 +41,10 @@ export default async function CargaHorariaPage() {
         data={courses as any}
         meta={{
           areas,
-            nivelesAcademicos,
-            profesores
-          }}
-        />
+          nivelesAcademicos,
+          profesores,
+        }}
+      />
     </div>
-  )
+  );
 }

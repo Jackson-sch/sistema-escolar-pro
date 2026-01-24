@@ -2,15 +2,15 @@ import {
   getCurricularAreasAction,
   getCompetenciesByAreaAction,
 } from "@/actions/competencies";
-import { CompetencyTable } from "@/components/gestion/academico/competency-table";
-import { AddCompetencyButton } from "@/components/gestion/academico/add-competency-button";
+import { CompetencyTable } from "@/components/gestion/academico/competencias/competency-table";
+import { AddCompetencyButton } from "@/components/gestion/academico/competencias/add-competency-button";
 
 export default async function CompetenciesPage() {
   const { data: areas = [] } = await getCurricularAreasAction();
 
   // Fetch competencies for all areas to show in a unified table (standard design)
   const allCompetenciesPromises = areas.map((area) =>
-    getCompetenciesByAreaAction(area.id)
+    getCompetenciesByAreaAction(area.id),
   );
   const results = await Promise.all(allCompetenciesPromises);
 
@@ -22,7 +22,7 @@ export default async function CompetenciesPage() {
         nombre: areas[index].nombre,
         color: areas[index].color,
       },
-    }))
+    })),
   );
 
   return (

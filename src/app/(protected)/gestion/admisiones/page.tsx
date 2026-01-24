@@ -2,8 +2,8 @@ import { IconUserPlus } from "@tabler/icons-react";
 import { getProspectosAction } from "@/actions/admissions";
 import { getGradosAction } from "@/actions/academic-structure";
 import { getInstitucionesAction } from "@/actions/academic";
-import { ProspectoTable } from "@/components/gestion/admisiones/prospecto-table";
-import { AddProspectoButton } from "@/components/gestion/admisiones/add-prospecto-button";
+import { ProspectoTable } from "@/components/gestion/admisiones/management/prospecto-table";
+import { AddProspectoButton } from "@/components/gestion/admisiones/components/add-prospecto-button";
 
 import { Suspense } from "react";
 

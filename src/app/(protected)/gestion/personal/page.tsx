@@ -9,9 +9,9 @@ import {
   getUserStatusessAction,
   getCargosAction,
 } from "@/actions/staff";
-import { columns } from "@/components/gestion/personal/columns";
-import { StaffTable } from "@/components/gestion/personal/staff-table";
-import { AddStaffButton } from "@/components/gestion/personal/add-staff-button";
+import { columns } from "@/components/gestion/personal/components/columns";
+import { StaffTable } from "@/components/gestion/personal/management/staff-table";
+import { AddStaffButton } from "@/components/gestion/personal/components/add-staff-button";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,

@@ -1,20 +1,18 @@
-import { IconBook } from "@tabler/icons-react"
-import { getCurricularAreasAction, getInstitucionesAction } from "@/actions/academic"
-import { columns } from "@/components/gestion/academico/area-table-columns"
-import { AreaTable } from "@/components/gestion/academico/area-table"
-import { AddAreaButton } from "@/components/gestion/academico/add-area-button"
+import { IconBook } from "@tabler/icons-react";
+import {
+  getCurricularAreasAction,
+  getInstitucionesAction,
+} from "@/actions/academic";
+import { columns } from "@/components/gestion/academico/areas/components/area-table-columns";
+import { AreaTable } from "@/components/gestion/academico/areas/area-table";
+import { AddAreaButton } from "@/components/gestion/academico/areas/add-area-button";
 
 export default async function AreasPage() {
-  const [
-    { data: areas = [] },
-    { data: instituciones = [] }
-  ] = await Promise.all([
-    getCurricularAreasAction(),
-    getInstitucionesAction()
-  ])
+  const [{ data: areas = [] }, { data: instituciones = [] }] =
+    await Promise.all([getCurricularAreasAction(), getInstitucionesAction()]);
 
   // Obtener la primera institución disponible (usualmente solo hay una)
-  const mainInstitucionId = instituciones[0]?.id || ""
+  const mainInstitucionId = instituciones[0]?.id || "";
 
   return (
     <div className="space-y-4 px-2">
@@ -31,5 +29,5 @@ export default async function AreasPage() {
         meta={{ institucionId: mainInstitucionId }}
       />
     </div>
-  )
+  );
 }

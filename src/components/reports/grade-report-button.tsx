@@ -47,7 +47,7 @@ export function GradeReportButton({ studentId, studentName, anioAcademico = 2025
         {({ loading: pdfLoading }) => (
           <Button
             variant="outline"
-            className="w-full font-semibold border-emerald-500/30 hover:bg-emerald-500/10 hover:text-emerald-500 transition-all active:scale-95 text-emerald-600"
+            className="w-full font-semibold border-emerald-500/30 hover:bg-emerald-500/10 hover:text-emerald-500 transition-all active:scale-95 text-emerald-600 rounded-full"
             disabled={pdfLoading}
           >
             <IconFileText className="size-4 mr-2" />
@@ -61,7 +61,7 @@ export function GradeReportButton({ studentId, studentName, anioAcademico = 2025
   return (
     <Button
       variant="outline"
-      className="w-full font-semibold border-border/40 hover:bg-muted/50 transition-all active:scale-95"
+      className="w-full rounded-full"
       onClick={handleFetchData}
       disabled={loading}
     >

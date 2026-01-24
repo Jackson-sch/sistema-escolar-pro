@@ -31,6 +31,9 @@ export async function getNivelesAction(institucionId?: string) {
  */
 export async function upsertNivelAction(values: any, id?: string) {
   try {
+    if (!values.nombre || values.nombre.trim() === "") {
+        return { error: "El nombre del nivel es requerido" }
+    }
     if (id) {
       const nivel = await prisma.nivel.update({
         where: { id },
@@ -98,6 +101,10 @@ export async function getGradosAction(nivelId?: string) {
  */
 export async function upsertGradoAction(values: any, id?: string) {
   try {
+    if (!values.nivelId) return { error: "Debe seleccionar un nivel" }
+    if (!values.nombre || values.nombre.trim() === "") return { error: "El nombre es requerido" }
+    if (!values.codigo || values.codigo.trim() === "") return { error: "El código es requerido" }
+
     if (id) {
       const grado = await prisma.grado.update({
         where: { id },

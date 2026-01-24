@@ -3,6 +3,12 @@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   IconBooks,
   IconLayoutGrid,
   IconSchool,
@@ -43,7 +49,7 @@ export default function AcademicoLayout({
       icon: IconTarget,
     },
     {
-      label: "Carga Horaria",
+      label: "Carga Académica",
       value: "/gestion/academico/carga-horaria",
       icon: IconLayoutGrid,
     },
@@ -75,18 +81,48 @@ export default function AcademicoLayout({
         onValueChange={(v) => router.push(v)}
         className="space-y-6"
       >
-        <TabsList className="bg-muted/50 p-1 h-auto sm:h-12 shadow-inner border flex-wrap sm:flex-nowrap justify-start">
-          {tabs.map((tab) => (
-            <TabsTrigger
-              key={tab.value}
-              value={tab.value}
-              className="px-3 sm:px-6 py-2 data-[state=active]:bg-white data-[state=active]:shadow-sm gap-2 text-xs sm:text-sm flex-1 sm:flex-initial"
-            >
-              <tab.icon className="size-4 shrink-0" />
-              <span className="truncate">{tab.label}</span>
-            </TabsTrigger>
-          ))}
-        </TabsList>
+        <div className="relative">
+          <TooltipProvider delayDuration={0}>
+            <TabsList className="bg-zinc-950/50 p-1.5 h-auto flex flex-wrap sm:flex-nowrap justify-center gap-1.5 border border-white/5 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-md">
+              {tabs.map((tab) => {
+                const isActive = pathname.startsWith(tab.value);
+                return (
+                  <Tooltip key={tab.value}>
+                    <TooltipTrigger asChild>
+                      <TabsTrigger
+                        value={tab.value}
+                        className={`
+                          flex flex-col items-center justify-center gap-2 px-5 py-4 h-auto transition-all duration-300 rounded-xl shrink-0 sm:flex-1
+                          ${
+                            isActive
+                              ? "bg-zinc-800/80 text-blue-500"
+                              : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
+                          }
+                        `}
+                      >
+                        <tab.icon
+                          className={`size-6 sm:size-5 transition-transform duration-300 ${isActive ? "scale-110 text-blue-500" : "scale-100"}`}
+                        />
+                        <span
+                          className={`text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-center transition-colors duration-300 ${isActive ? "text-blue-500" : "text-muted-foreground"}`}
+                        >
+                          {tab.label}
+                        </span>
+                      </TabsTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="bottom"
+                      sideOffset={8}
+                      className="bg-zinc-900 border-zinc-800 text-white"
+                    >
+                      <p>{tab.label}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                );
+              })}
+            </TabsList>
+          </TooltipProvider>
+        </div>
         {children}
       </Tabs>
     </div>

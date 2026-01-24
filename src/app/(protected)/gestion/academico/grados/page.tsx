@@ -1,15 +1,15 @@
-import { getGradosAction, getNivelesAction } from "@/actions/academic-structure"
-import { GradoTable } from "@/components/gestion/academico/estructura/grado-table"
-import { AddGradoButton } from "@/components/gestion/academico/estructura/add-grado-button"
+import {
+  getGradosAction,
+  getNivelesAction,
+} from "@/actions/academic-structure";
+import { GradoTable } from "@/components/gestion/academico/estructura/grados/grado-table";
+import { AddGradoButton } from "@/components/gestion/academico/estructura/grados/add-grado-button";
 
 export default async function GradosPage() {
-  const [
-    { data: grados = [] },
-    { data: niveles = [] }
-  ] = await Promise.all([
+  const [{ data: grados = [] }, { data: niveles = [] }] = await Promise.all([
     getGradosAction(),
-    getNivelesAction()
-  ])
+    getNivelesAction(),
+  ]);
 
   return (
     <div className="space-y-4 px-2">
@@ -21,5 +21,5 @@ export default async function GradosPage() {
       </div>
       <GradoTable data={grados} meta={{ niveles }} />
     </div>
-  )
+  );
 }

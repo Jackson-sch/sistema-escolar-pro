@@ -12,13 +12,13 @@ import {
 } from "@/actions/enrollments";
 import { getNivelesAcademicosAction } from "@/actions/students";
 import { getInstitucionAction } from "@/actions/institucion";
-import { columns } from "@/components/gestion/matriculas/columns";
-import { EnrollmentTable } from "@/components/gestion/matriculas/enrollment-table";
-import { AddEnrollmentButton } from "@/components/gestion/matriculas/add-enrollment-button";
+import { columns } from "@/components/gestion/matriculas/components/columns";
+import { EnrollmentTable } from "@/components/gestion/matriculas/management/enrollment-table";
+import { AddEnrollmentButton } from "@/components/gestion/matriculas/components/add-enrollment-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import Stats from "@/components/gestion/matriculas/stats";
+import Stats from "@/components/gestion/matriculas/components/stats";
 import {
   Tooltip,
   TooltipContent,
@@ -62,7 +62,7 @@ export default async function MatriculasPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-9 w-9 sm:w-auto sm:px-3"
+                  className="h-9 w-9 sm:w-auto sm:px-3 rounded-full"
                 >
                   <IconCloudDownload className="sm:mr-2 h-4 w-4" />
                   <span className="hidden sm:inline">Reporte Consolidado</span>

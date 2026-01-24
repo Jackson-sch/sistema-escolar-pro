@@ -4,8 +4,8 @@ import {
   getTutoresAction,
 } from "@/actions/academic-structure";
 import { getInstitucionesAction } from "@/actions/academic";
-import { SeccionTable } from "@/components/gestion/academico/estructura/seccion-table";
-import { AddSeccionButton } from "@/components/gestion/academico/estructura/add-seccion-button";
+import { SeccionTable } from "@/components/gestion/academico/estructura/secciones/seccion-table";
+import { AddSeccionButton } from "@/components/gestion/academico/estructura/secciones/add-seccion-button";
 
 export default async function SeccionesPage() {
   const { data: instituciones = [] } = await getInstitucionesAction();

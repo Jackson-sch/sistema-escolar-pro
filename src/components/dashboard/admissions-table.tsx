@@ -9,6 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { formatDate } from "@/lib/formats";
 
 interface AdmissionsTableProps {
   students?: any[];
@@ -48,14 +49,15 @@ export function AdmissionsTable({ students = [] }: AdmissionsTableProps) {
               : "No asignado"
             const statusLabel = student.estado?.nombre || "Sin estado"
             const statusKey = student.estado?.slug || "pendiente"
+            const date = formatDate(student.createdAt)
 
             return (
               <TableRow key={student.id}>
                 <TableCell className="font-medium">
                   <div className="flex flex-col">
-                    <span>{fullName}</span>
+                    <span className="capitalize">{fullName}</span>
                     <span className="text-xs text-muted-foreground">
-                      {new Date(student.createdAt).toLocaleDateString("es-PE")}
+                      {date}
                     </span>
                   </div>
                 </TableCell>

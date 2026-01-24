@@ -10,6 +10,7 @@ import {
 } from "@/actions/dashboard";
 import { TeacherDashboard } from "@/components/dashboard/teacher-dashboard";
 import { redirect } from "next/navigation";
+import { getInstitucionAction } from "@/actions/institucion";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -42,13 +43,15 @@ export default async function DashboardPage() {
   }
 
   // Vista para Administradores, Directores y Administrativos
-  const [statsRes, admissionsRes] = await Promise.all([
+  const [statsRes, admissionsRes, institucionRes] = await Promise.all([
     getDashboardStatsAction({}),
     getRecentAdmissionsAction({}),
+    getInstitucionAction(),
   ]);
 
   const stats = statsRes.success;
   const admissions = admissionsRes.success || [];
+  const institucion = institucionRes.data || [];
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-0 sm:p-4 pt-0 @container/main">
@@ -57,8 +60,8 @@ export default async function DashboardPage() {
           Dashboard Institucional
         </h1>
         <p className="text-xs sm:text-sm text-muted-foreground">
-          Bienvenido al panel de control de EduPeru Pro. Vista general del
-          periodo 2025.
+          Bienvenido al panel de control de {institucion?.nombreInstitucion}. Vista general del
+          periodo {institucion?.cicloEscolarActual}.
         </p>
       </div>
 
@@ -70,7 +73,7 @@ export default async function DashboardPage() {
         </div>
         <div className="lg:col-span-4">
           <Card className="h-full">
-            <CardHeader className="border-b bg-muted/20">
+            <CardHeader className="border-b">
               <CardTitle className="text-lg">Admisiones Recientes</CardTitle>
             </CardHeader>
             <CardContent className="pt-4">

@@ -6,9 +6,9 @@ import {
   getNivelesAcademicosAction,
 } from "@/actions/students";
 import { getInstitucionAction } from "@/actions/institucion";
-import { columns } from "@/components/gestion/estudiantes/columns";
-import { StudentTable } from "@/components/gestion/estudiantes/student-table";
-import { AddStudentButton } from "@/components/gestion/estudiantes/add-student-button";
+import { columns } from "@/components/gestion/estudiantes/components/columns";
+import { StudentTable } from "@/components/gestion/estudiantes/management/student-table";
+import { AddStudentButton } from "@/components/gestion/estudiantes/components/add-student-button";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -34,6 +34,8 @@ export default async function EstudiantesPage() {
     getInstitucionAction(),
   ]);
 
+  const periodoAcademico = institucion?.cicloEscolarActual;
+
   return (
     <div className="flex flex-1 flex-col gap-6 p-0 sm:p-4 pt-0 @container/main">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-4 sm:px-2">
@@ -50,11 +52,7 @@ export default async function EstudiantesPage() {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-10 border-border/40 hover:bg-muted/50 transition-all active:scale-95 group"
-                >
+                <Button variant="outline" size="sm" className="rounded-full">
                   <IconCloudDownload className="mr-2 h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                   <span className="hidden sm:inline font-semibold">
                     Descargar Padrón
@@ -70,6 +68,7 @@ export default async function EstudiantesPage() {
           <AddStudentButton
             instituciones={instituciones as any}
             estados={estados as any}
+            periodoAcademico={periodoAcademico}
           />
         </div>
       </div>

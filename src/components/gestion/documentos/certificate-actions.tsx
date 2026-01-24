@@ -8,10 +8,13 @@ import {
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 import { PDFDownloadLink } from "@react-pdf/renderer";
-import { ConstanciaEstudiosPDF } from "./constancia-estudios-pdf";
+import { ConstanciaEstudiosPDF } from "@/components/gestion/documentos/constancia-estudios-pdf";
 import { getConstanciaDataAction } from "@/actions/reports";
 import { registerDocumentAction } from "@/actions/documents";
 import { generateVerificationCode } from "@/lib/pdf-utils";
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
+import { IconCopy, IconCheck } from "@tabler/icons-react";
+import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -36,6 +39,7 @@ export function CertificateActions({
   const [data, setData] = useState<any>(null);
   const [verificationCode, setVerificationCode] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const { copied, copy } = useCopyToClipboard();
 
   const handlePrepareCert = async () => {
     setLoading(true);
@@ -73,14 +77,16 @@ export function CertificateActions({
     }
   };
 
+  // Función para copiar el código
+  const handleCopyCode = () => {
+    copy(verificationCode, "Código copiado al portapapeles");
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button
-          variant="outline"
-          className="w-full font-black uppercase tracking-widest text-[10px] h-11 border-border/40 hover:bg-muted/50 transition-all rounded-xl"
-        >
-          <IconFileCertificate className="size-4 mr-2 text-amber-500" />{" "}
+        <Button variant="outline" className="rounded-full">
+          <IconFileCertificate className="size-4 mr-2 text-amber-500" />
           Constancia
         </Button>
       </DialogTrigger>
@@ -97,15 +103,34 @@ export function CertificateActions({
 
         <div className="py-6 space-y-4">
           {data ? (
-            <div className="space-y-4">
-              <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/10 text-center">
+            <div className="flex flex-col space-y-4">
+              <button
+                onClick={handleCopyCode}
+                className={cn(
+                  "p-4 rounded-xl bg-amber-500/5 border border-amber-500/10 text-center w-full",
+                  "hover:bg-amber-500/10 transition-colors group relative cursor-pointer outline-none focus:ring-2 focus:ring-amber-500/20",
+                )}
+                title="Clic para copiar código"
+              >
                 <p className="text-[10px] font-black uppercase tracking-widest text-amber-600 mb-1">
                   CÓDIGO GENERADO
                 </p>
-                <p className="text-xl font-mono font-black text-foreground">
-                  {verificationCode}
-                </p>
-              </div>
+                <div className="flex items-center justify-center gap-2">
+                  <p className="text-xl font-mono font-black text-foreground">
+                    {verificationCode}
+                  </p>
+                  <div className="text-muted-foreground/50 group-hover:text-amber-600 transition-colors">
+                    {copied ? (
+                      <IconCheck className="size-4 animate-in zoom-in" />
+                    ) : (
+                      <IconCopy className="size-4" />
+                    )}
+                  </div>
+                </div>
+                <span className="text-[10px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-1 left-0 right-0">
+                  Clic para copiar
+                </span>
+              </button>
 
               <PDFDownloadLink
                 document={
@@ -119,10 +144,7 @@ export function CertificateActions({
                 fileName={`Constancia-${studentName}.pdf`}
               >
                 {({ loading: pdfLoading }) => (
-                  <Button
-                    className="w-full h-12 bg-amber-600 hover:bg-amber-700 font-bold rounded-xl shadow-lg shadow-amber-600/20"
-                    disabled={pdfLoading}
-                  >
+                  <Button className="w-full rounded-full" disabled={pdfLoading}>
                     <IconDownload className="mr-2 h-5 w-5" />
                     {pdfLoading ? "Generando PDF..." : "Descargar Constancia"}
                   </Button>
@@ -130,8 +152,8 @@ export function CertificateActions({
               </PDFDownloadLink>
 
               <Button
-                variant="ghost"
-                className="w-full text-xs"
+                variant="outline"
+                className="w-full rounded-full"
                 onClick={() => setData(null)}
               >
                 Regenerar Código
@@ -140,7 +162,7 @@ export function CertificateActions({
           ) : (
             <Button
               onClick={handlePrepareCert}
-              className="w-full h-12 bg-primary font-bold rounded-xl"
+              className="w-full rounded-full"
               disabled={loading}
             >
               {loading ? (

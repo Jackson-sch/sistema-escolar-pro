@@ -6,10 +6,12 @@ import {
   IconDownload,
   IconLoader2,
   IconFileCertificate,
+  IconCopy, // <-- Nuevo import
+  IconCheck, // <-- Nuevo import
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 import { PDFDownloadLink } from "@react-pdf/renderer";
-import { ConstanciaMatriculaPDF } from "../matriculas/constancia-pdf";
+import { ConstanciaMatriculaPDF } from "@/components/gestion/matriculas/components/constancia-pdf";
 import { getEnrollmentDataAction } from "@/actions/reports";
 import { registerDocumentAction } from "@/actions/documents";
 import { generateVerificationCode } from "@/lib/pdf-utils";
@@ -23,6 +25,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 
 interface EnrollmentCertificateActionsProps {
   studentId: string;
@@ -39,6 +43,7 @@ export function EnrollmentCertificateActions({
   const [data, setData] = useState<any>(null);
   const [verificationCode, setVerificationCode] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const { copied, copy } = useCopyToClipboard();
 
   const handlePrepareCert = async () => {
     setLoading(true);
@@ -76,14 +81,16 @@ export function EnrollmentCertificateActions({
     }
   };
 
+  // <-- Nueva función para copiar
+  const handleCopyCode = () => {
+    copy(verificationCode, "Código copiado al portapapeles");
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         {trigger || (
-          <Button
-            variant="outline"
-            className="w-full font-black uppercase tracking-widest text-[10px] h-11 border-border/40 hover:bg-muted/50 transition-all rounded-xl"
-          >
+          <Button variant="outline" className="w-full rounded-full">
             <IconSchool className="size-4 mr-2 text-blue-500" /> Matrícula
           </Button>
         )}
@@ -101,15 +108,36 @@ export function EnrollmentCertificateActions({
 
         <div className="py-6 space-y-4">
           {data ? (
-            <div className="space-y-4">
-              <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/10 text-center">
+            <div className=" flex flex-col space-y-4">
+              {/* SECCIÓN DEL CÓDIGO MODIFICADA */}
+              <button
+                onClick={handleCopyCode}
+                className={cn(
+                  "p-4 rounded-xl bg-blue-500/5 border border-blue-500/10 text-center w-full",
+                  "hover:bg-blue-500/10 transition-colors group relative cursor-pointer outline-none focus:ring-2 focus:ring-blue-500/20",
+                )}
+                title="Clic para copiar código"
+              >
                 <p className="text-[10px] font-black uppercase tracking-widest text-blue-600 mb-1">
                   CONTROL INSTITUCIONAL
                 </p>
-                <p className="text-xl font-mono font-black text-foreground">
-                  {verificationCode}
-                </p>
-              </div>
+                <div className="flex items-center justify-center gap-2">
+                  <p className="text-xl font-mono font-black text-foreground">
+                    {verificationCode}
+                  </p>
+                  <div className="text-muted-foreground/50 group-hover:text-blue-600 transition-colors">
+                    {copied ? (
+                      <IconCheck className="size-4 animate-in zoom-in" />
+                    ) : (
+                      <IconCopy className="size-4" />
+                    )}
+                  </div>
+                </div>
+                <span className="text-[10px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-1 left-0 right-0">
+                  Clic para copiar
+                </span>
+              </button>
+              {/* FIN SECCIÓN MODIFICADA */}
 
               <PDFDownloadLink
                 document={
@@ -122,10 +150,7 @@ export function EnrollmentCertificateActions({
                 fileName={`Matricula-${studentName}.pdf`}
               >
                 {({ loading: pdfLoading }) => (
-                  <Button
-                    className="w-full h-12 bg-blue-600 hover:bg-blue-700 font-bold rounded-xl shadow-lg shadow-blue-600/20"
-                    disabled={pdfLoading}
-                  >
+                  <Button className="w-full rounded-full" disabled={pdfLoading}>
                     <IconDownload className="mr-2 h-5 w-5" />
                     {pdfLoading ? "Generando PDF..." : "Descargar Constancia"}
                   </Button>
@@ -133,9 +158,11 @@ export function EnrollmentCertificateActions({
               </PDFDownloadLink>
 
               <Button
-                variant="ghost"
-                className="w-full text-xs"
-                onClick={() => setData(null)}
+                variant="outline"
+                className="w-full rounded-full"
+                onClick={() => {
+                  setData(null);
+                }}
               >
                 Regenerar Documento
               </Button>
@@ -143,7 +170,7 @@ export function EnrollmentCertificateActions({
           ) : (
             <Button
               onClick={handlePrepareCert}
-              className="w-full h-12 bg-primary font-bold rounded-xl"
+              className="w-full rounded-full"
               disabled={loading}
             >
               {loading ? (

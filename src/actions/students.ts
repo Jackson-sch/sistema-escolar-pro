@@ -134,6 +134,25 @@ export async function getNivelesAcademicosAction(anio?: number) {
 }
 
 /**
+ * Intenta dividir un nombre completo en nombre, paterno y materno.
+ */
+const splitFullName = (fullName: string) => {
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length === 1) return { name: parts[0], paterno: "", materno: "" };
+  if (parts.length === 2) return { name: parts[0], paterno: parts[1], materno: "" };
+  if (parts.length === 3) return { name: parts[0], paterno: parts[1], materno: parts[2] };
+  
+  // Para 4 o más partes, asumimos que las dos primeras son nombres o el primero es nombre y los dos últimos apellidos
+  // Usualmente en Perú: [Nombres...] [Paterno] [Materno]
+  // Una regla simple: el último es materno, el penúltimo es paterno, el resto es nombre
+  const materno = parts.pop() || "";
+  const paterno = parts.pop() || "";
+  const name = parts.join(" ");
+  
+  return { name, paterno, materno };
+};
+
+/**
  * Crea un nuevo estudiante
  */
 export async function createStudentAction(values: any) {
@@ -163,10 +182,18 @@ export async function createStudentAction(values: any) {
         where: { dni: dniApoderado }
       })
 
+      if (apoderado && apoderado.role !== "padre") {
+        const roleText = apoderado.role === "estudiante" ? "Estudiante" : "Personal";
+        return { error: `El DNI del apoderado ${dniApoderado} ya está registrado como ${roleText} y no puede ser usado aquí.` }
+      }
+
       if (!apoderado) {
+        const { name, paterno, materno } = splitFullName(nombreApoderado);
         apoderado = await prisma.user.create({
           data: {
-            name: nombreApoderado,
+            name,
+            apellidoPaterno: paterno,
+            apellidoMaterno: materno,
             dni: dniApoderado,
             telefono: telefonoApoderado,
             role: "padre" as Role,
@@ -223,10 +250,18 @@ export async function updateStudentAction(id: string, values: any) {
         where: { dni: dniApoderado }
       })
 
+      if (apoderado && apoderado.role !== "padre") {
+        const roleText = apoderado.role === "estudiante" ? "Estudiante" : "Personal";
+        return { error: `El DNI del apoderado ${dniApoderado} ya está registrado como ${roleText} y no puede ser usado aquí.` }
+      }
+
       if (!apoderado) {
+        const { name, paterno, materno } = splitFullName(nombreApoderado);
         apoderado = await prisma.user.create({
           data: {
-            name: nombreApoderado,
+            name,
+            apellidoPaterno: paterno,
+            apellidoMaterno: materno,
             dni: dniApoderado,
             telefono: telefonoApoderado,
             role: "padre" as Role,
@@ -235,11 +270,14 @@ export async function updateStudentAction(id: string, values: any) {
           }
         })
       } else {
+        const { name, paterno, materno } = splitFullName(nombreApoderado);
         // Si ya existe, actualizamos sus datos de contacto
         await prisma.user.update({
           where: { id: apoderado.id },
           data: {
-            name: nombreApoderado,
+            name,
+            apellidoPaterno: paterno,
+            apellidoMaterno: materno,
             telefono: telefonoApoderado,
           }
         })
@@ -309,7 +347,10 @@ export async function deleteStudentAction(id: string) {
 export async function getGuardianByDniAction(dni: string) {
   try {
     const guardian = await prisma.user.findFirst({
-      where: { dni }
+      where: { 
+        dni,
+        role: "padre" as Role
+      }
     })
 
     if (!guardian) return { data: null }

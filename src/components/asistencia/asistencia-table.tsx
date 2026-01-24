@@ -112,11 +112,11 @@ export function AsistenciaTable({ data, onEstadoChange, onJustificacionChange }:
                     <div className="flex items-center gap-4">
                       <Avatar className="h-10 w-10 border border-border/60 shadow-lg ring-1 ring-border/20">
                         <AvatarImage src={alumno.image || ""} alt={alumno.name} />
-                        <AvatarFallback className="bg-linear-to-br from-primary/20 to-primary/5 text-primary text-[10px] font-bold">
+                        <AvatarFallback className="bg-linear-to-br from-primary/20 to-primary/5 text-primary text-[10px] font-bold uppercase">
                           {alumno.name?.[0]}{alumno.apellidoPaterno?.[0]}
                         </AvatarFallback>
                       </Avatar>
-                      <div className="flex flex-col gap-0.5">
+                      <div className="flex flex-col gap-0.5 capitalize">
                         <span className="text-sm font-bold tracking-tight leading-none text-foreground/90">
                           {alumno.apellidoPaterno} {alumno.apellidoMaterno}
                         </span>

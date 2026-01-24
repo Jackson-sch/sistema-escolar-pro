@@ -687,6 +687,19 @@ exports.Prisma.FichaPsicopedagogicaScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.LogroScalarFieldEnum = {
+  id: 'id',
+  titulo: 'titulo',
+  descripcion: 'descripcion',
+  fecha: 'fecha',
+  categoria: 'categoria',
+  institucion: 'institucion',
+  adjunto: 'adjunto',
+  estudianteId: 'estudianteId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.CategoriaIncidenteScalarFieldEnum = {
   id: 'id',
   nombre: 'nombre',
@@ -869,6 +882,7 @@ exports.Prisma.ModelName = {
   Prospecto: 'Prospecto',
   Admision: 'Admision',
   FichaPsicopedagogica: 'FichaPsicopedagogica',
+  Logro: 'Logro',
   CategoriaIncidente: 'CategoriaIncidente',
   ConceptoPago: 'ConceptoPago',
   CronogramaPago: 'CronogramaPago',
