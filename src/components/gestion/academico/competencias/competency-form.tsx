@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState, useTransition } from "react";
 import { IconLoader2, IconTarget } from "@tabler/icons-react";
 import { toast } from "sonner";
+import { useFormModal } from "@/components/modals/form-modal-context";
 
 import { CompetencySchema, CompetencyValues } from "@/lib/schemas/competencies";
 import {
@@ -43,6 +44,7 @@ export function CompetencyForm({
 }: CompetencyFormProps) {
   const [isPending, startTransition] = useTransition();
   const [areas, setAreas] = useState<any[]>([]);
+  const { setIsDirty } = useFormModal();
 
   useEffect(() => {
     getCurricularAreasAction().then((res) => {
@@ -65,12 +67,20 @@ export function CompetencyForm({
         },
   });
 
+  const { isDirty } = form.formState;
+
+  useEffect(() => {
+    setIsDirty(isDirty);
+    return () => setIsDirty(false);
+  }, [isDirty, setIsDirty]);
+
   const onSubmit = (values: CompetencyValues) => {
     startTransition(() => {
       upsertCompetencyAction(values, id).then((data) => {
         if (data.error) toast.error(data.error);
         if (data.success) {
           toast.success(data.success);
+          setIsDirty(false);
           onSuccess?.();
         }
       });
@@ -144,14 +154,25 @@ export function CompetencyForm({
           )}
         />
 
-        <Button
-          disabled={isPending}
-          type="submit"
-          className="w-full rounded-full"
-        >
-          {isPending && <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {id ? "Guardar Cambios" : "Crear Competencia"}
-        </Button>
+        <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-white/5">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onSuccess}
+            className="w-full sm:w-auto rounded-full border-border/40 hover:bg-accent/50"
+            disabled={isPending}
+          >
+            Cancelar
+          </Button>
+          <Button
+            disabled={isPending}
+            type="submit"
+            className="w-full sm:w-auto rounded-full px-8"
+          >
+            {isPending && <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {id ? "Guardar Cambios" : "Crear Competencia"}
+          </Button>
+        </div>
       </form>
     </Form>
   );

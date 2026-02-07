@@ -38,6 +38,7 @@ import { toast } from "sonner";
 import { upsertFamilyMemberAction } from "@/actions/family";
 import { getGuardianByDniAction } from "@/actions/students";
 import { PARENTESCO_OPTIONS } from "@/lib/constants";
+import { useFormModal } from "@/components/modals/form-modal-context";
 
 const familySchema = z.object({
   dni: z.string().min(8, "DNI debe tener 8 caracteres"),
@@ -68,6 +69,7 @@ export function FamilyMemberForm({
   onSuccess,
 }: FamilyMemberFormProps) {
   const [isPending, startTransition] = useTransition();
+  const { setIsDirty } = useFormModal();
 
   const form = useForm<FamilyValues>({
     resolver: zodResolver(familySchema),
@@ -97,6 +99,13 @@ export function FamilyMemberForm({
           viveCon: true,
         },
   });
+
+  const { isDirty } = form.formState;
+
+  useEffect(() => {
+    setIsDirty(isDirty);
+    return () => setIsDirty(false);
+  }, [isDirty, setIsDirty]);
 
   const dni = form.watch("dni");
 
@@ -149,6 +158,7 @@ export function FamilyMemberForm({
       if (res.error) toast.error(res.error);
       if (res.success) {
         toast.success(res.success);
+        setIsDirty(false);
         onSuccess?.();
       }
     });
@@ -384,19 +394,31 @@ export function FamilyMemberForm({
           </div>
         </div>
 
-        <Button
-          disabled={isPending}
-          type="submit"
-          className="w-full  rounded-full"
-        >
-          {isPending ? (
-            <IconLoader2 className="animate-spin" />
-          ) : (
-            <>
-              <IconDeviceFloppy className="mr-2" /> Guardar Familiar
-            </>
-          )}
-        </Button>
+        <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-white/5">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onSuccess}
+            className="w-full sm:w-auto rounded-full border-border/40 hover:bg-accent/50"
+            disabled={isPending}
+          >
+            Cancelar
+          </Button>
+          <Button
+            disabled={isPending}
+            type="submit"
+            className="w-full sm:w-auto rounded-full px-8"
+          >
+            {isPending ? (
+              <IconLoader2 className="animate-spin" />
+            ) : (
+              <>
+                <IconDeviceFloppy className="size-4 mr-2" />
+                Guardar Familiar
+              </>
+            )}
+          </Button>
+        </div>
       </form>
     </Form>
   );

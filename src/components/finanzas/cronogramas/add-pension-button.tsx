@@ -95,7 +95,7 @@ export function AddPensionButton({ conceptos, secciones }: AddPensionButtonProps
         <TooltipTrigger asChild>
           <Button
             onClick={() => setOpen(true)}
-            className="h-9 w-9 sm:w-auto sm:px-4 shadow-md bg-primary hover:bg-primary/90 text-primary-foreground"
+            className="rounded-full"
           >
             <IconUsersPlus className="sm:mr-2 h-4 w-4" />
             <span className="hidden sm:inline">Generar Masivo</span>
@@ -124,7 +124,7 @@ export function AddPensionButton({ conceptos, secciones }: AddPensionButtonProps
                     <FormLabel>Concepto de Pago</FormLabel>
                     <Select onValueChange={(v) => onConceptoChange(v, field.onChange)} value={field.value}>
                       <FormControl>
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger className="w-full rounded-full">
                           <SelectValue placeholder="Seleccionar concepto..." />
                         </SelectTrigger>
                       </FormControl>
@@ -151,11 +151,11 @@ export function AddPensionButton({ conceptos, secciones }: AddPensionButtonProps
                       <FormLabel>Monto</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <span className="absolute left-3 top-2.5 text-sm text-muted-foreground font-medium">S/</span>
+                          <span className="absolute left-3 top-2 text-sm text-muted-foreground font-medium">S/</span>
                           <Input
                             type="number"
                             step="0.01"
-                            className="pl-8  font-medium"
+                            className="pl-8 rounded-full font-medium"
                             {...field}
                           />
                         </div>
@@ -177,7 +177,7 @@ export function AddPensionButton({ conceptos, secciones }: AddPensionButtonProps
                             <Button
                               variant={"outline"}
                               className={cn(
-                                " pl-3 text-left font-normal",
+                                " pl-3 text-left font-normal rounded-full",
                                 !field.value && "text-muted-foreground"
                               )}
                             >
@@ -224,7 +224,7 @@ export function AddPensionButton({ conceptos, secciones }: AddPensionButtonProps
                     </FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger className="w-full rounded-full">
                           <SelectValue placeholder="Toda la institución" />
                         </SelectTrigger>
                       </FormControl>
@@ -254,7 +254,7 @@ export function AddPensionButton({ conceptos, secciones }: AddPensionButtonProps
             <DialogFooter className="pt-2">
               <Button
                 type="submit"
-                className="w-full h-11 font-medium"
+                className="w-full rounded-full font-medium"
                 disabled={isPending}
               >
                 {isPending ? (

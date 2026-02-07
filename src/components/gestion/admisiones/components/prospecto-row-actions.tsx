@@ -40,7 +40,6 @@ interface ProspectoRowActionsProps {
 
 export function ProspectoRowActions({ row, table }: ProspectoRowActionsProps) {
   const p = row.original;
-  console.log("🚀 ~ ProspectoRowActions ~ p:", p);
   const [loading, setLoading] = useState(false);
   const [showFlow, setShowFlow] = useState(false);
   const [showEdit, setShowEdit] = useState(false);

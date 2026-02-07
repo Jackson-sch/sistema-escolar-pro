@@ -306,6 +306,29 @@ model User {
   comprobantesEnviados    ComprobantePago[]        @relation("ComprobantesPadre")
   comprobantesVerificados ComprobantePago[]        @relation("ComprobantesVerificados")
 
+  // Salud y condiciones
+  medicamentos              String?
+  seguroMedico              String?
+  discapacidades            String?
+  carnetConadis             String?
+  restriccionesAlimenticias String?
+  centroSaludPreferido      String?
+  peso                      Float?
+  talla                     Float?
+
+  // Contacto de Emergencia Adicional
+  parentescoContactoEmergencia  String?
+  nombreContactoEmergencia2     String?
+  telefonoContactoEmergencia2   String?
+  parentescoContactoEmergencia2 String?
+
+  // Información Administrativa Adicional
+  paisNacimiento  String?
+  lugarNacimiento String?
+  lenguaMaterna   String?
+  religion        String?
+  numeroHermanos  Int?
+
   @@index([cargoId])
   @@index([estadoId])
 }

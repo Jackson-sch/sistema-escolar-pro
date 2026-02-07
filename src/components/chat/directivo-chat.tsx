@@ -79,11 +79,11 @@ export function DirectivoChat({ context }: DirectivoChatProps) {
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4">
       {isOpen && (
-        <div className="w-[380px] h-[600px] bg-background/80 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-5 duration-300">
+        <div className="w-[380px] h-[600px] bg-background/80 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] shadow-xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-5 duration-300">
           {/* Header - Fixed height */}
-          <div className="h-20 p-6 bg-linear-to-r from-violet-600/20 to-indigo-600/20 border-b border-white/5 flex items-center justify-between shrink-0">
+          <div className="h-20 p-6 bg-linear-to-r from-primary/20 to-primary/20 border-b border-white/5 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-3">
-              <div className="size-10 rounded-2xl bg-violet-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
+              <div className="size-10 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
                 <IconSparkles className="size-5 text-white" />
               </div>
               <div>
@@ -116,29 +116,34 @@ export function DirectivoChat({ context }: DirectivoChatProps) {
                   key={m.id}
                   className={cn(
                     "flex flex-col gap-2",
-                    m.role === "user" ? "items-end" : "items-start"
+                    m.role === "user" ? "items-end" : "items-start",
                   )}
                 >
                   <div className="flex items-center gap-2">
                     {m.role === "assistant" && (
-                      <IconRobot className="size-3 text-violet-500" />
+                      <IconRobot className="size-3 text-primary" />
                     )}
-                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                       {m.role === "user" ? "Director" : "Asistente Pro"}
                     </span>
                     {m.role === "user" && (
-                      <IconUser className="size-3 text-indigo-500" />
+                      <IconUser className="size-3 text-primary" />
                     )}
                   </div>
                   <div
                     className={cn(
                       "max-w-[85%] px-4 py-3 rounded-2xl text-xs leading-relaxed shadow-sm",
                       m.role === "user"
-                        ? "bg-violet-600 text-white rounded-tr-none"
-                        : "bg-white/5 border border-white/5 text-foreground rounded-tl-none"
+                        ? "bg-primary shadow-2xl shadow-primary/20 text-white rounded-tr-none"
+                        : "bg-white/5 border border-white/5 text-foreground rounded-tl-none",
                     )}
                   >
-                    <div className="prose prose-invert prose-xs max-w-none wrap-break-word [&_p]:leading-relaxed [&_p]:m-0 [&_ul]:my-1 [&_ol]:my-1 [&_li]:m-0">
+                    <div
+                      className={cn(
+                        "prose prose-invert prose-xs max-w-none wrap-break-word [&_p]:leading-relaxed [&_p]:m-0 [&_ul]:my-1 [&_ol]:my-1 [&_li]:m-0 text-foreground text-sm",
+                        m.role === "user" ? "text-white" : "",
+                      )}
+                    >
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>
                         {getMessageContent(m)}
                       </ReactMarkdown>
@@ -155,7 +160,7 @@ export function DirectivoChat({ context }: DirectivoChatProps) {
                     </span>
                   </div>
                   <div className="bg-white/5 border border-white/5 px-4 py-3 rounded-2xl rounded-tl-none">
-                    <IconLoader2 className="size-4 animate-spin text-violet-500" />
+                    <IconLoader2 className="size-4 animate-spin text-primary" />
                   </div>
                 </div>
               )}
@@ -172,13 +177,13 @@ export function DirectivoChat({ context }: DirectivoChatProps) {
               placeholder="Haz una consulta ejecutiva..."
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
-              className="h-12 border-white/5 bg-white/5 rounded-2xl focus-visible:ring-violet-500/20 text-sm font-medium"
+              className="h-12 border rounded-full focus-visible:ring-violet-500/20 text-sm font-medium"
             />
             <Button
               type="submit"
               size="icon"
               disabled={isLoading || !chatInput.trim()}
-              className="size-12 rounded-2xl bg-violet-600 hover:bg-violet-700 shadow-xl shadow-violet-500/20 transition-all active:scale-95 shrink-0"
+              className="size-12 rounded-2xl bg-primary hover:bg-primary/80 shadow-xl shadow-primary/20 transition-all active:scale-95 shrink-0"
             >
               <IconSend className="size-5" />
             </Button>
@@ -192,21 +197,23 @@ export function DirectivoChat({ context }: DirectivoChatProps) {
         className={cn(
           "size-16 rounded-[2rem] shadow-2xl transition-all duration-500 group overflow-hidden",
           isOpen
-            ? "bg-background border border-white/10 text-violet-600 hover:bg-muted"
-            : "bg-violet-600 text-white hover:bg-violet-700 hover:scale-105"
+            ? "bg-background border border-white/10 text-primary hover:bg-muted"
+            : "bg-primary text-white hover:bg-primary/80 hover:scale-105",
         )}
       >
         <div className="relative size-full flex items-center justify-center">
           <IconMessageChatbot
             className={cn(
               "size-7 transition-all duration-500",
-              isOpen ? "opacity-0 scale-50 rotate-90" : "opacity-100 scale-100"
+              isOpen ? "opacity-0 scale-50 rotate-90" : "opacity-100 scale-100",
             )}
           />
           <IconX
             className={cn(
               "absolute size-7 transition-all duration-500",
-              isOpen ? "opacity-100 scale-100" : "opacity-0 scale-50 -rotate-90"
+              isOpen
+                ? "opacity-100 scale-100"
+                : "opacity-0 scale-50 -rotate-90",
             )}
           />
         </div>

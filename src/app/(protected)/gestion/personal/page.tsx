@@ -1,12 +1,8 @@
-import {
-  IconUsers,
-  IconCloudDownload,
-  IconBriefcase,
-} from "@tabler/icons-react";
+import { IconCloudDownload } from "@tabler/icons-react";
 import {
   getStaffAction,
   getInstitucionesAction,
-  getUserStatusessAction,
+  getUserStatusesAction,
   getCargosAction,
 } from "@/actions/staff";
 import { columns } from "@/components/gestion/personal/components/columns";
@@ -32,7 +28,7 @@ export default async function PersonalPage() {
   ] = await Promise.all([
     getStaffAction(),
     getInstitucionesAction(),
-    getUserStatusessAction(),
+    getUserStatusesAction(),
     getCargosAction(),
   ]);
 
@@ -55,7 +51,7 @@ export default async function PersonalPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-9 w-9 sm:w-auto sm:px-3"
+                  className="rounded-full sm:w-auto sm:px-3"
                 >
                   <IconCloudDownload className="sm:mr-2 h-4 w-4" />
                   <span className="hidden sm:inline">Exportar</span>

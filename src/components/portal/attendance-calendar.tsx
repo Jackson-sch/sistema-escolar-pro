@@ -96,19 +96,19 @@ export function AttendanceCalendar({
 
         <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground/80">
           <div className="flex items-center gap-1.5">
-            <div className="size-2.5 rounded-full bg-emerald-500" />
+            <div className="size-2.5 rounded-full bg-success" />
             <span>Asistencia</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="size-2.5 rounded-full bg-amber-500" />
+            <div className="size-2.5 rounded-full bg-warning" />
             <span>Tardanza</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="size-2.5 rounded-full bg-red-500" />
+            <div className="size-2.5 rounded-full bg-destructive" />
             <span>Falta</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="size-2.5 rounded-full bg-blue-500" />
+            <div className="size-2.5 rounded-full bg-info" />
             <span>Justificada</span>
           </div>
         </div>
@@ -144,7 +144,7 @@ export function AttendanceCalendar({
                 className={cn(
                   "relative h-28 border-r border-b border-border/50 p-2 transition-colors last:border-r-0 hover:bg-muted/30",
                   !isSameMonth(day, monthStart) && "text-muted-foreground/30",
-                  isToday(day) && "bg-primary/5"
+                  isToday(day) && "bg-primary/5",
                 )}
               >
                 <div className="flex items-center justify-between">
@@ -152,7 +152,7 @@ export function AttendanceCalendar({
                     className={cn(
                       "text-sm font-bold tabular-nums",
                       isToday(day) &&
-                        "flex size-6 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                        "flex size-6 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/20",
                     )}
                   >
                     {format(day, "d")}
@@ -163,16 +163,16 @@ export function AttendanceCalendar({
                       {attendance.presente &&
                         !attendance.tardanza &&
                         !attendance.justificada && (
-                          <IconCircleCheckFilled className="size-5 text-emerald-500" />
+                          <IconCircleCheckFilled className="size-5 text-success" />
                         )}
                       {attendance.tardanza && (
-                        <IconClockFilled className="size-5 text-amber-500" />
+                        <IconClockFilled className="size-5 text-warning" />
                       )}
                       {!attendance.presente && !attendance.justificada && (
-                        <IconCircleXFilled className="size-5 text-red-500" />
+                        <IconCircleXFilled className="size-5 text-destructive" />
                       )}
                       {attendance.justificada && (
-                        <IconCircleCheckFilled className="size-5 text-blue-500" />
+                        <IconCircleCheckFilled className="size-5 text-info" />
                       )}
                     </div>
                   )}
@@ -180,12 +180,12 @@ export function AttendanceCalendar({
 
                 {attendance?.justificada && attendance.justificacion && (
                   <div className="mt-2 group relative">
-                    <div className="flex items-center gap-1 text-[9px] font-bold text-blue-500 bg-blue-500/10 px-1.5 py-0.5 rounded border border-blue-500/20">
+                    <div className="flex items-center gap-1 text-[9px] font-bold text-info bg-info/10 px-1.5 py-0.5 rounded border border-info/20">
                       <IconInfoCircle className="size-2.5" />
                       <span className="truncate">Justificada</span>
                     </div>
                     {/* Tooltip simple */}
-                    <div className="absolute bottom-full left-0 mb-2 invisible group-hover:visible w-32 p-2 bg-blue-500 text-white text-[10px] rounded shadow-xl z-20">
+                    <div className="absolute bottom-full left-0 mb-2 invisible group-hover:visible w-32 p-2 bg-info text-white text-[10px] rounded shadow-xl z-20">
                       {attendance.justificacion}
                     </div>
                   </div>

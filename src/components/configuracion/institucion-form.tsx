@@ -1,14 +1,15 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { toast } from "sonner"
+import * as React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form"
-import { ImageUpload } from "@/components/ui/image-upload"
-import { updateInstitucionAction } from "@/actions/institucion"
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+} from "@/components/ui/form";
+import { updateInstitucionAction } from "@/actions/institucion";
 
 import {
   InformacionGeneralCard,
@@ -16,14 +17,17 @@ import {
   CalendarioSistemaCard,
   institucionFormSchema,
   type InstitucionFormValues,
-} from "./institucion"
+} from "./institucion";
+import { LogoInstitucionalCard } from "./institucion/logo-institucional-card";
+import { ResumenInstitucionalCard } from "./institucion/resumen-institucional-card";
+import { IconLoader2, IconDeviceFloppy } from "@tabler/icons-react";
 
 interface InstitucionFormProps {
-  initialData: any
+  initialData: any;
 }
 
 export function InstitucionForm({ initialData }: InstitucionFormProps) {
-  const [isPending, setIsPending] = React.useState(false)
+  const [isPending, setIsPending] = React.useState(false);
 
   const form = useForm<InstitucionFormValues>({
     // @ts-ignore
@@ -46,77 +50,80 @@ export function InstitucionForm({ initialData }: InstitucionFormProps) {
       logo: initialData?.logo || "",
       cicloEscolarActual: initialData?.cicloEscolarActual || 2025,
       fechaInicioClases: initialData?.fechaInicioClases
-        ? new Date(initialData.fechaInicioClases).toISOString().split('T')[0]
+        ? new Date(initialData.fechaInicioClases).toISOString().split("T")[0]
         : "",
       fechaFinClases: initialData?.fechaFinClases
-        ? new Date(initialData.fechaFinClases).toISOString().split('T')[0]
+        ? new Date(initialData.fechaFinClases).toISOString().split("T")[0]
         : "",
     },
-  })
+  });
 
   const onSubmit = async (values: InstitucionFormValues) => {
-    const institucionId = initialData?.id
+    const institucionId = initialData?.id;
     if (!institucionId) {
-      toast.error("No se pudo identificar la institución")
-      return
+      toast.error("No se pudo identificar la institución");
+      return;
     }
 
-    setIsPending(true)
+    setIsPending(true);
     try {
       // Ahora los valores ya contienen la URL del logo subido via API
-      const res = await updateInstitucionAction(institucionId, values)
+      const res = await updateInstitucionAction(institucionId, values);
 
       if (res.success) {
-        toast.success(res.success)
+        toast.success(res.success);
       } else {
-        toast.error(res.error)
+        toast.error(res.error);
       }
     } catch (error) {
-      console.error("Submit error:", error)
-      toast.error("Error al guardar los datos")
+      console.error("Submit error:", error);
+      toast.error("Error al guardar los datos");
     } finally {
-      setIsPending(false)
+      setIsPending(false);
     }
-  }
+  };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit as any)} className="space-y-8">
-        <div className="flex flex-col items-center justify-center py-4">
-          <FormField
-            name="logo"
-            render={({ field }) => (
-              <FormItem className="w-full max-w-xs">
-                <FormControl>
-                  <ImageUpload
-                    value={field.value}
-                    onChange={(url) => field.onChange(url)}
-                    onRemove={() => field.onChange("")}
-                    disabled={isPending}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Left Column: Sidebar (Logo & Summary) */}
+          <div className="lg:col-span-4 flex flex-col gap-6 sticky top-6">
+            <LogoInstitucionalCard
+              control={form.control}
+              disabled={isPending}
+            />
+            <ResumenInstitucionalCard control={form.control} />
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <InformacionGeneralCard control={form.control} />
-          <UbicacionContactoCard control={form.control} />
-          <CalendarioSistemaCard control={form.control} />
-        </div>
+          {/* Right Column: Main Content */}
+          <div className="lg:col-span-8 flex flex-col gap-6">
+            <InformacionGeneralCard control={form.control} />
+            <UbicacionContactoCard control={form.control} />
+            <CalendarioSistemaCard control={form.control} />
 
-        <div className="flex justify-end">
-          <Button
-            type="submit"
-            className="h-11 px-8 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg shadow-lg shadow-primary/20 transition-all active:scale-95"
-            disabled={isPending}
-          >
-            {isPending ? "Guardando cambios..." : "Guardar Configuración"}
-          </Button>
+            <div className="flex justify-end pt-4">
+              <Button
+                type="submit"
+                className="px-8 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-95 text-sm"
+                disabled={isPending}
+              >
+                {isPending ? (
+                  <>
+                    <IconLoader2 className="mr-2 size-4 animate-spin" />
+                    Guardando...
+                  </>
+                ) : (
+                  <>
+                    <IconDeviceFloppy className="mr-2 size-4" />
+                    Guardar Configuración
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
         </div>
       </form>
     </Form>
-  )
+  );
 }

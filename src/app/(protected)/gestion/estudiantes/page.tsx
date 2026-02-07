@@ -1,8 +1,8 @@
-import { IconUsers, IconCloudDownload } from "@tabler/icons-react";
+import { IconCloudDownload } from "@tabler/icons-react";
 import {
   getStudentsAction,
   getInstitucionesAction,
-  getUserStatusessAction,
+  getUserStatusesAction,
   getNivelesAcademicosAction,
 } from "@/actions/students";
 import { getInstitucionAction } from "@/actions/institucion";
@@ -29,7 +29,7 @@ export default async function EstudiantesPage() {
   ] = await Promise.all([
     getStudentsAction(),
     getInstitucionesAction(),
-    getUserStatusessAction(),
+    getUserStatusesAction(),
     getNivelesAcademicosAction(),
     getInstitucionAction(),
   ]);

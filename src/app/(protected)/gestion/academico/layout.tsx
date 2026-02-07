@@ -83,7 +83,7 @@ export default function AcademicoLayout({
       >
         <div className="relative">
           <TooltipProvider delayDuration={0}>
-            <TabsList className="bg-zinc-950/50 p-1.5 h-auto flex flex-wrap sm:flex-nowrap justify-center gap-1.5 border border-white/5 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-md">
+            <TabsList className="p-1.5 h-auto flex flex-wrap sm:flex-nowrap justify-center gap-1.5 border rounded-2xl overflow-hidden shadow-xl bg-background/20 backdrop-blur-md">
               {tabs.map((tab) => {
                 const isActive = pathname.startsWith(tab.value);
                 return (
@@ -92,11 +92,11 @@ export default function AcademicoLayout({
                       <TabsTrigger
                         value={tab.value}
                         className={`
-                          flex flex-col items-center justify-center gap-2 px-5 py-4 h-auto transition-all duration-300 rounded-xl shrink-0 sm:flex-1
+                          flex flex-col items-center justify-center gap-2 px-5 py-4 h-auto transition-all duration-300 rounded-xl shrink-0 sm:flex-1 
                           ${
                             isActive
-                              ? "bg-zinc-800/80 text-blue-500"
-                              : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
+                              ? "bg-background/20 text-primary border-muted-foreground/10"
+                              : "text-default hover:bg-background dark:hover:bg-white/5 hover:text-foreground "
                           }
                         `}
                       >
@@ -104,7 +104,7 @@ export default function AcademicoLayout({
                           className={`size-6 sm:size-5 transition-transform duration-300 ${isActive ? "scale-110 text-blue-500" : "scale-100"}`}
                         />
                         <span
-                          className={`text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-center transition-colors duration-300 ${isActive ? "text-blue-500" : "text-muted-foreground"}`}
+                          className={`text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-center transition-colors duration-300 ${isActive ? "text-blue-500" : "text-default"}`}
                         >
                           {tab.label}
                         </span>
@@ -113,7 +113,6 @@ export default function AcademicoLayout({
                     <TooltipContent
                       side="bottom"
                       sideOffset={8}
-                      className="bg-zinc-900 border-zinc-800 text-white"
                     >
                       <p>{tab.label}</p>
                     </TooltipContent>

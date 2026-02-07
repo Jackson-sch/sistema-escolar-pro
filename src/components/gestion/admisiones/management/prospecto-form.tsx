@@ -22,7 +22,8 @@ import {
 } from "@/components/ui/select";
 import { upsertProspectoAction } from "@/actions/admissions";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useFormModal } from "@/components/modals/form-modal-context";
 import { OCRButton } from "@/components/gestion/admisiones/components/ocr-button";
 
 const prospectoSchema = z.object({
@@ -54,6 +55,7 @@ export function ProspectoForm({
   id,
 }: ProspectoFormProps) {
   const [loading, setLoading] = useState(false);
+  const { setIsDirty } = useFormModal();
 
   const form = useForm<z.infer<typeof prospectoSchema>>({
     resolver: zodResolver(prospectoSchema),
@@ -72,12 +74,20 @@ export function ProspectoForm({
     },
   });
 
+  const { isDirty } = form.formState;
+
+  useEffect(() => {
+    setIsDirty(isDirty);
+    return () => setIsDirty(false);
+  }, [isDirty, setIsDirty]);
+
   const onSubmit = async (values: z.infer<typeof prospectoSchema>) => {
     setLoading(true);
     try {
       const res = await upsertProspectoAction(values, id);
       if (res.success) {
         toast.success(res.success);
+        setIsDirty(false);
         onSuccess();
       } else {
         toast.error(res.error);
@@ -287,14 +297,25 @@ export function ProspectoForm({
             />
           </div>
 
-          <Button
-            type="submit"
-            variant="default"
-            className="w-full rounded-full"
-            disabled={loading}
-          >
-            {loading ? "Registrando..." : "Guardar Prospecto"}
-          </Button>
+          <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-white/5">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onSuccess}
+              className="w-full sm:w-auto rounded-full border-border/40 hover:bg-accent/50"
+              disabled={loading}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              variant="default"
+              className="w-full sm:w-auto rounded-full px-8"
+              disabled={loading}
+            >
+              {loading ? "Registrando..." : "Guardar Prospecto"}
+            </Button>
+          </div>
         </form>
       </Form>
     </div>

@@ -31,8 +31,8 @@ export function AnnouncementCard({ anuncio }: AnnouncementCardProps) {
     <Card
       className={cn(
         "group relative overflow-hidden transition-all hover:shadow-xl hover:shadow-primary/5 border-border/50 bg-card/50",
-        anuncio.urgente && "border-red-500/30 bg-red-500/5",
-        anuncio.importante && "border-amber-500/30 bg-amber-500/5"
+        anuncio.urgente && "border-destructive/30 bg-destructive/5",
+        anuncio.importante && "border-warning/30 bg-warning/5",
       )}
     >
       <CardContent className="p-0">
@@ -51,7 +51,7 @@ export function AnnouncementCard({ anuncio }: AnnouncementCardProps) {
                 {anuncio.urgente && (
                   <Badge
                     variant="outline"
-                    className="bg-red-500/10 text-red-500 border-red-500/20 text-[9px] font-black uppercase px-2 py-0"
+                    className="bg-destructive/10 text-destructive border-destructive/20 text-[9px] font-black uppercase px-2 py-0"
                   >
                     <IconAlertTriangle className="size-2.5 mr-1" /> Urgente
                   </Badge>
@@ -59,7 +59,7 @@ export function AnnouncementCard({ anuncio }: AnnouncementCardProps) {
                 {anuncio.importante && (
                   <Badge
                     variant="outline"
-                    className="bg-amber-500/10 text-amber-500 border-amber-500/20 text-[9px] font-black uppercase px-2 py-0"
+                    className="bg-warning/10 text-warning border-warning/20 text-[9px] font-black uppercase px-2 py-0"
                   >
                     <IconBulb className="size-2.5 mr-1" /> Importante
                   </Badge>

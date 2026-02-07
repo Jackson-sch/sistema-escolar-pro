@@ -4,11 +4,10 @@ import {
   IconCheck,
   IconClock,
   IconX,
-  IconInfoCircle,
+  IconChartBar,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface AlumnoAsistencia {
   id: string;
@@ -24,92 +23,106 @@ export function AsistenciaResumen({ alumnos }: AsistenciaResumenProps) {
   const presentes = alumnos.filter((a) => a.estado === "presente").length;
   const tardanzas = alumnos.filter((a) => a.estado === "tarde").length;
   const ausentes = alumnos.filter((a) => a.estado === "ausente").length;
-  const justificados = alumnos.filter((a) => a.estado === "justificado").length;
 
   const registrados = alumnos.filter((a) => a.estado !== "").length;
   const porcentajeProgreso = total > 0 ? (registrados / total) * 100 : 0;
 
   const stats = [
     {
-      label: "Total Inscritos",
+      label: "TOTAL INSCRITOS",
       value: total,
       icon: IconUsers,
-      color: "bg-blue-500/10 text-blue-600 border-blue-500/20",
-      iconContainer: "bg-blue-500/10",
+      color: "bg-primary/5 border-primary/20",
+      iconColor: "bg-primary/20 text-primary",
+      valueColor: "text-primary",
     },
     {
-      label: "Presentes",
+      label: "PRESENTES",
       value: presentes,
       icon: IconCheck,
-      color: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-      iconContainer: "bg-emerald-500/10",
+      color: "bg-emerald-500/5 border-emerald-500/20",
+      iconColor: "bg-emerald-500/20 text-emerald-500",
+      valueColor: "text-emerald-500",
     },
     {
-      label: "Tardanzas",
+      label: "TARDANZAS",
       value: tardanzas,
       icon: IconClock,
-      color: "bg-orange-500/10 text-orange-600 border-orange-500/20",
-      iconContainer: "bg-orange-500/10",
+      color: "bg-amber-500/5 border-amber-500/20",
+      iconColor: "bg-amber-500/20 text-amber-500",
+      valueColor: "text-amber-500",
     },
     {
-      label: "Ausentes",
+      label: "AUSENTES",
       value: ausentes,
       icon: IconX,
-      color: "bg-red-500/10 text-red-600 border-red-500/20",
-      iconContainer: "bg-red-500/10",
+      color: "bg-rose-500/5 border-rose-500/20",
+      iconColor: "bg-rose-500/20 text-rose-500",
+      valueColor: "text-rose-500",
     },
   ];
 
   return (
-    <Card className="bg-card/30 border-border/40 backdrop-blur-sm rounded-2xl overflow-hidden shadow-2xl shadow-primary/5 h-full">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-lg font-black tracking-tight uppercase">
-          Resumen de Hoy
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-3">
-          {stats.map((stat, index) => (
-            <div
-              key={index}
+    <div className="bg-card backdrop-blur-md p-5 rounded-3xl border sticky top-8 shadow-xl">
+      <h2 className="text-sm font-bold mb-6 tracking-[0.2em] flex items-center gap-3 text-white/40 uppercase">
+        <IconChartBar className="size-4 text-primary" />
+        Resumen de Hoy
+      </h2>
+      <div className="space-y-3">
+        {stats.map((stat, index) => (
+          <div
+            key={index}
+            className={cn(
+              "p-4 rounded-2xl border flex items-center justify-between transition-all hover:bg-muted/20 group",
+              "bg-muted border-muted",
+            )}
+          >
+            <div className="flex items-center gap-4">
+              <div
+                className={cn(
+                  "w-10 h-10 rounded-xl flex items-center justify-center transition-colors shadow-inner",
+                  stat.iconColor,
+                )}
+              >
+                <stat.icon className="size-5" />
+              </div>
+              <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                {stat.label}
+              </span>
+            </div>
+            <span
               className={cn(
-                "flex items-center justify-between p-3 rounded-xl border transition-all duration-300",
-                stat.color,
+                "text-2xl font-black tabular-nums",
+                stat.valueColor,
               )}
             >
-              <div className="flex items-center gap-3">
-                <div className={cn("p-2 rounded-lg", stat.iconContainer)}>
-                  <stat.icon className="size-4" />
-                </div>
-                <span className="text-[11px] font-bold uppercase tracking-wider">
-                  {stat.label}
-                </span>
-              </div>
-              <span className="text-lg font-black">{stat.value}</span>
-            </div>
-          ))}
-        </div>
-
-        <div className="pt-4 border-t border-border/40 space-y-3">
-          <div className="flex justify-between items-end">
-            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-              Progreso
-            </span>
-            <span className="text-xs font-black text-primary">
-              {Math.round(porcentajeProgreso)}%
+              {stat.value}
             </span>
           </div>
-          <Progress
-            value={porcentajeProgreso}
-            className="h-2 rounded-full bg-muted/20"
-          />
-          <p className="text-[10px] font-medium text-center text-muted-foreground italic">
-            {porcentajeProgreso === 100
-              ? "Todos los estados registrados"
-              : `${total - registrados} alumnos pendientes por marcar`}
-          </p>
+        ))}
+      </div>
+
+      <div className="mt-8 pt-8 border-t border-muted">
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
+            Progreso del Registro
+          </span>
+          <span className="text-sm font-black text-primary tabular-nums">
+            {Math.round(porcentajeProgreso)}%
+          </span>
         </div>
-      </CardContent>
-    </Card>
+        <div className="w-full h-2 bg-muted rounded-full overflow-hidden p-[2px]">
+          <div
+            className="h-full bg-primary rounded-full transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(37,99,235,0.4)] relative"
+            style={{ width: `${porcentajeProgreso}%` }}
+          >
+            <div className="absolute inset-0 bg-linear-to-r from-transparent via-yellow-500/20 to-transparent animate-shimmer" />
+          </div>
+        </div>
+        <p className="text-center mt-5 text-[10px] text-muted-foreground font-bold uppercase tracking-widest italic">
+          {porcentajeProgreso === 100 ? "Completado" : "Sincronizando..."}
+        </p>
+      </div>
+    </div>
   );
 }

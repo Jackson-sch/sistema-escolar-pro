@@ -25,7 +25,7 @@ export function StudentCard({ hijo }: StudentCardProps) {
   const deudaHijo =
     hijo.cronogramaPagos?.reduce(
       (sum, c) => sum + (c.monto - Number(c.montoPagado)),
-      0
+      0,
     ) || 0;
   const tieneDeuda = deudaHijo > 0;
 
@@ -56,14 +56,14 @@ export function StudentCard({ hijo }: StudentCardProps) {
             {tieneDeuda ? (
               <Badge
                 variant="outline"
-                className="border-amber-500/50 bg-amber-500/10 text-amber-600"
+                className="border-warning/50 bg-warning/10 text-warning"
               >
                 Deuda Pendiente
               </Badge>
             ) : (
               <Badge
                 variant="outline"
-                className="border-green-500/50 bg-green-500/10 text-green-600"
+                className="border-success/50 bg-success/10 text-success"
               >
                 Al Día
               </Badge>
@@ -73,7 +73,7 @@ export function StudentCard({ hijo }: StudentCardProps) {
             <span className="text-sm text-muted-foreground">Monto Total:</span>
             <span
               className={`text-2xl font-black ${
-                tieneDeuda ? "text-amber-500" : "text-green-500"
+                tieneDeuda ? "text-warning" : "text-success"
               }`}
             >
               {tieneDeuda ? formatCurrency(deudaHijo) : "S/ 0.00"}

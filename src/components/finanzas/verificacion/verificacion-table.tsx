@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { toast } from "sonner";
 import {
   aprobarComprobanteAction,
@@ -9,31 +9,12 @@ import { useRouter } from "next/navigation";
 import { VerificacionCard } from "./verificacion-card";
 import { VerificacionEmptyState } from "./verificacion-empty-state";
 import { VerificacionDialogs } from "./verificacion-dialogs";
-
-interface Comprobante {
-  id: string;
-  archivoUrl: string;
-  monto: number;
-  bancoOrigen: string | null;
-  numeroOperacion: string | null;
-  fechaOperacion: string;
-  estado: string;
-  createdAt: string;
-  cronograma: {
-    concepto: { nombre: string };
-    estudiante: {
-      name: string;
-      apellidoPaterno: string;
-      apellidoMaterno: string;
-    };
-  };
-  padre: {
-    name: string;
-    email: string;
-    apellidoPaterno: string;
-    apellidoMaterno: string;
-  };
-}
+import { VerificacionDetail } from "./verificacion-detail";
+import { Input } from "@/components/ui/input";
+import { IconSearch, IconX } from "@tabler/icons-react";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { Comprobante } from "./types";
 
 interface VerificacionTableProps {
   comprobantes: Comprobante[];
@@ -42,10 +23,20 @@ interface VerificacionTableProps {
 export function VerificacionTable({ comprobantes }: VerificacionTableProps) {
   const router = useRouter();
   const [selectedComprobante, setSelectedComprobante] =
-    useState<Comprobante | null>(null);
+    useState<Comprobante | null>(comprobantes[0] || null);
+  const [searchTerm, setSearchTerm] = useState("");
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [motivoRechazo, setMotivoRechazo] = useState("");
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [showMobileDetail, setShowMobileDetail] = useState(false);
+
+  const filteredComprobantes = useMemo(() => {
+    return comprobantes.filter((c) => {
+      const searchStr =
+        `${c.cronograma.estudiante.name} ${c.cronograma.estudiante.apellidoPaterno} ${c.cronograma.concepto.nombre}`.toLowerCase();
+      return searchStr.includes(searchTerm.toLowerCase());
+    });
+  }, [comprobantes, searchTerm]);
 
   const handleAprobar = async (id: string) => {
     setLoadingId(id);
@@ -55,6 +46,15 @@ export function VerificacionTable({ comprobantes }: VerificacionTableProps) {
         toast.error(result.error);
       } else {
         toast.success(result.success || "Comprobante aprobado exitosamente");
+        // Seleccionar el siguiente si existe
+        const currentIndex = filteredComprobantes.findIndex((c) => c.id === id);
+        if (filteredComprobantes[currentIndex + 1]) {
+          setSelectedComprobante(filteredComprobantes[currentIndex + 1]);
+        } else if (filteredComprobantes[currentIndex - 1]) {
+          setSelectedComprobante(filteredComprobantes[currentIndex - 1]);
+        } else {
+          setSelectedComprobante(null);
+        }
         router.refresh();
       }
     } finally {
@@ -80,7 +80,14 @@ export function VerificacionTable({ comprobantes }: VerificacionTableProps) {
         toast.success(result.success || "Comprobante rechazado correctamente");
         setShowRejectDialog(false);
         setMotivoRechazo("");
-        setSelectedComprobante(null);
+        // Seleccionar el siguiente
+        const id = selectedComprobante.id;
+        const currentIndex = filteredComprobantes.findIndex((c) => c.id === id);
+        if (filteredComprobantes[currentIndex + 1]) {
+          setSelectedComprobante(filteredComprobantes[currentIndex + 1]);
+        } else {
+          setSelectedComprobante(null);
+        }
         router.refresh();
       }
     } finally {
@@ -93,33 +100,94 @@ export function VerificacionTable({ comprobantes }: VerificacionTableProps) {
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-700">
-      <div className="flex items-center justify-between px-2">
-        <h2 className="text-sm font-black uppercase tracking-widest text-muted-foreground/80">
-          Registros Pendientes ({comprobantes.length})
-        </h2>
-      </div>
+    <div className="flex h-[calc(100vh-120px)] overflow-hidden rounded-[1rem] border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#09090b] shadow-sm">
+      {/* Sidebar List (Aside) */}
+      <aside
+        className={cn(
+          "w-full sm:max-w-sm shrink-0 border-r border-zinc-200 dark:border-zinc-800 flex flex-col bg-zinc-50/50 dark:bg-zinc-900/20",
+          showMobileDetail ? "hidden sm:flex" : "flex",
+        )}
+      >
+        <div className="p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-xl font-bold">Pendientes</h2>
+            <Badge className="px-2 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 text-[10px] sm:text-xs font-bold tracking-wide">
+              {comprobantes.length} Pendientes
+            </Badge>
+          </div>
+          <div className="relative">
+            <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 size-4" />
+            <Input
+              className="w-full rounded-full border-zinc-200 dark:border-zinc-800 pl-10 text-sm focus:ring-primary focus:border-primary border h-10"
+              placeholder="Buscar por alumno o concepto..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
 
-      <div className="grid gap-6">
-        {comprobantes.map((comprobante) => (
-          <VerificacionCard
-            key={comprobante.id}
-            comprobante={comprobante}
-            loading={loadingId === comprobante.id}
+        <div className="flex-1 overflow-y-auto custom-scrollbar px-4 pb-6 space-y-3">
+          {filteredComprobantes.map((comprobante) => (
+            <VerificacionCard
+              key={comprobante.id}
+              comprobante={comprobante}
+              isActive={selectedComprobante?.id === comprobante.id}
+              onClick={() => {
+                setSelectedComprobante(comprobante);
+                setShowMobileDetail(true);
+              }}
+            />
+          ))}
+          {filteredComprobantes.length === 0 && (
+            <div className="p-8 text-center">
+              <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
+                Sin resultados
+              </p>
+            </div>
+          )}
+        </div>
+      </aside>
+
+      {/* Main Detail View (Section) */}
+      <section
+        className={cn(
+          "flex-1 overflow-y-auto custom-scrollbar bg-white dark:bg-[#09090b] relative",
+          !showMobileDetail ? "hidden sm:block" : "block",
+        )}
+      >
+        {selectedComprobante ? (
+          <VerificacionDetail
+            comprobante={selectedComprobante}
+            loading={loadingId === selectedComprobante.id}
             onAprobar={handleAprobar}
-            onVer={setSelectedComprobante}
             onRechazar={(c) => {
               setSelectedComprobante(c);
               setShowRejectDialog(true);
             }}
+            motivoRechazo={motivoRechazo}
+            setMotivoRechazo={setMotivoRechazo}
+            onBack={() => setShowMobileDetail(false)}
           />
-        ))}
-      </div>
+        ) : (
+          <div className="h-full flex flex-col items-center justify-center text-center p-8 space-y-4">
+            <div className="size-20 rounded-full bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center text-zinc-300">
+              <IconSearch className="size-10" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-lg font-bold text-zinc-800 dark:text-zinc-100">
+                Selecciona un registro
+              </h3>
+              <p className="text-sm text-zinc-500 max-w-xs">
+                Elige un comprobante de la lista lateral para visualizar sus
+                detalles y validarlo.
+              </p>
+            </div>
+          </div>
+        )}
+      </section>
 
       <VerificacionDialogs
-        selectedComprobante={selectedComprobante}
         showRejectDialog={showRejectDialog}
-        onClosePreview={() => setSelectedComprobante(null)}
         onCloseReject={() => {
           setShowRejectDialog(false);
           setMotivoRechazo("");

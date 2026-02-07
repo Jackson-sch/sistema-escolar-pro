@@ -6,6 +6,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
+import { useEffect } from "react";
+import { useFormModal } from "@/components/modals/form-modal-context";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -39,31 +41,6 @@ interface AddNivelButtonProps {
 
 export function AddNivelButton({ institucionId }: AddNivelButtonProps) {
   const [open, setOpen] = useState(false);
-  const [isPending, startTransition] = useTransition();
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      nombre: "",
-      institucionId,
-    },
-  });
-
-  const onSubmit = (values: FormValues) => {
-    startTransition(async () => {
-      const formattedValues = {
-        ...values,
-        nombre: values.nombre.toUpperCase().trim(),
-      };
-      const res = await upsertNivelAction(formattedValues);
-      if (res.success) {
-        toast.success(res.success);
-        form.reset();
-        setOpen(false);
-      }
-      if (res.error) toast.error(res.error);
-    });
-  };
 
   return (
     <>
@@ -91,35 +68,96 @@ export function AddNivelButton({ institucionId }: AddNivelButtonProps) {
         onOpenChange={setOpen}
         className="sm:max-w-xs"
       >
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField<FormValues>
-              control={form.control}
-              name="nombre"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nombre del Nivel</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Ej: SECUNDARIA"
-                      {...field}
-                      className="rounded-full placeholder:text-xs"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button
-              type="submit"
-              className="w-full rounded-full"
-              disabled={isPending}
-            >
-              {isPending ? "Guardando..." : "Crear Nivel"}
-            </Button>
-          </form>
-        </Form>
+        <NivelForm
+          institucionId={institucionId}
+          onSuccess={() => setOpen(false)}
+        />
       </FormModal>
     </>
+  );
+}
+
+function NivelForm({
+  institucionId,
+  onSuccess,
+}: {
+  institucionId: string;
+  onSuccess: () => void;
+}) {
+  const [isPending, startTransition] = useTransition();
+  const { setIsDirty } = useFormModal();
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      nombre: "",
+      institucionId,
+    },
+  });
+
+  const { isDirty } = form.formState;
+
+  useEffect(() => {
+    setIsDirty(isDirty);
+    return () => setIsDirty(false);
+  }, [isDirty, setIsDirty]);
+
+  const onSubmit = (values: FormValues) => {
+    startTransition(async () => {
+      const formattedValues = {
+        ...values,
+        nombre: values.nombre.toUpperCase().trim(),
+      };
+      const res = await upsertNivelAction(formattedValues);
+      if (res.success) {
+        toast.success(res.success);
+        setIsDirty(false);
+        form.reset();
+        onSuccess();
+      }
+      if (res.error) toast.error(res.error);
+    });
+  };
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField<FormValues>
+          control={form.control}
+          name="nombre"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nombre del Nivel</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Ej: SECUNDARIA"
+                  {...field}
+                  className="rounded-full placeholder:text-xs"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-white/5">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onSuccess}
+            className="w-full sm:w-auto rounded-full border-border/40 hover:bg-accent/50"
+            disabled={isPending}
+          >
+            Cancelar
+          </Button>
+          <Button
+            type="submit"
+            className="w-full sm:w-auto rounded-full px-8"
+            disabled={isPending}
+          >
+            {isPending ? "Guardando..." : "Crear Nivel"}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useQueryState, parseAsString } from "nuqs";
 import { useState } from "react";
 import { DataTable } from "@/components/ui/data-table";
 import { toast } from "sonner";
@@ -54,8 +55,17 @@ export function ConceptoTable({ data, meta }: ConceptoTableProps) {
         onEdit: handleEdit,
         onDelete: handleDelete,
       }),
-    []
+    [],
   );
+
+  const [searchQuery, setSearchQuery] = useQueryState(
+    "q",
+    parseAsString.withDefault(""),
+  );
+
+  const clearFilters = () => {
+    setSearchQuery("");
+  };
 
   return (
     <>
@@ -64,6 +74,10 @@ export function ConceptoTable({ data, meta }: ConceptoTableProps) {
         data={data}
         searchKey="nombre"
         searchPlaceholder="Buscar concepto..."
+        searchValue={searchQuery}
+        onSearchChange={setSearchQuery}
+        onClearFilters={clearFilters}
+        hasActiveFilters={searchQuery !== ""}
         meta={meta}
       />
 

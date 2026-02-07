@@ -101,6 +101,10 @@ export function NivelTable({ data, meta }: NivelTableProps) {
     }
   };
 
+  const clearFilters = () => {
+    setSearchQuery("");
+  };
+
   return (
     <>
       <DataTable
@@ -110,6 +114,8 @@ export function NivelTable({ data, meta }: NivelTableProps) {
         searchPlaceholder="Buscar nivel..."
         searchValue={searchQuery}
         onSearchChange={setSearchQuery}
+        onClearFilters={clearFilters}
+        hasActiveFilters={searchQuery !== ""}
         meta={meta}
       />
 

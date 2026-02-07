@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useTransition, useEffect, useRef } from "react";
-import { format } from "date-fns";
+import { useState, useTransition, useEffect, useRef } from "react";
+import { format, startOfDay } from "date-fns";
 import { es } from "date-fns/locale";
 import {
   IconCalendar,
@@ -10,6 +10,7 @@ import {
   IconLoader2,
   IconDeviceFloppy,
   IconUsers,
+  IconCheck,
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 
@@ -28,13 +29,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import {
   useQueryState,
@@ -49,6 +43,8 @@ import {
 import { getSeccionesAction } from "@/actions/academic-structure";
 import { AsistenciaTable } from "./asistencia-table";
 import { AsistenciaResumen } from "./asistencia-resumen";
+import { Badge } from "../ui/badge";
+import { Input } from "../ui/input";
 
 interface AsistenciaClientProps {
   initialSecciones: any[];
@@ -63,7 +59,7 @@ export function AsistenciaClient({
 }: AsistenciaClientProps) {
   const [fecha, setFecha] = useQueryState(
     "fecha",
-    parseAsIsoDate.withDefault(new Date()),
+    parseAsIsoDate.withDefault(startOfDay(new Date())),
   );
   const [anio, setAnio] = useQueryState(
     "anio",
@@ -78,8 +74,9 @@ export function AsistenciaClient({
   const [isPending, startTransition] = useTransition();
   const [isLoadingSecciones, setIsLoadingSecciones] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-
   const [cursoId, setCursoId] = useState<string>("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState<string>("todos");
 
   const isFirstRender = useRef(true);
 
@@ -142,11 +139,29 @@ export function AsistenciaClient({
     setAlumnos((prev) => prev.map((a) => (a.id === id ? { ...a, estado } : a)));
   };
 
+  const handleMarkAllPresent = () => {
+    setAlumnos((prev) => prev.map((a) => ({ ...a, estado: "presente" })));
+    toast.success("Todos los estudiantes marcados como presentes");
+  };
+
   const handleObservacionChange = (id: string, justificacion: string) => {
     setAlumnos((prev) =>
       prev.map((a) => (a.id === id ? { ...a, justificacion } : a)),
     );
   };
+
+  const filteredAlumnos = alumnos.filter((a) => {
+    const matchesSearch = `${a.name} ${a.apellidoPaterno} ${a.apellidoMaterno}`
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+
+    if (filterStatus === "todos") return matchesSearch;
+    if (filterStatus === "ausentes")
+      return matchesSearch && a.estado === "ausente";
+    if (filterStatus === "tardanzas")
+      return matchesSearch && a.estado === "tarde";
+    return matchesSearch;
+  });
 
   const onSave = async () => {
     if (!cursoId) {
@@ -175,11 +190,11 @@ export function AsistenciaClient({
   };
 
   return (
-    <div className="flex flex-col gap-8 w-full animate-in fade-in duration-500">
-      <div className="bg-card/20 border border-border/40 rounded-2xl p-4 backdrop-blur-sm shadow-sm">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-          <div className="space-y-2.5 md:col-span-2">
-            <label className="text-[11px] font-semibold text-muted-foreground ml-1">
+    <div className="flex flex-col gap-4 w-full animate-in fade-in duration-500">
+      <div className="bg-card border border-border/40 rounded-2xl p-3 backdrop-blur-sm shadow-sm">
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="space-y-1.5 w-full sm:w-28">
+            <label className="text-xs font-bold text-muted-foreground ml-1">
               Periodo
             </label>
             <Select
@@ -187,7 +202,7 @@ export function AsistenciaClient({
               value={anio.toString()}
               disabled={isLoadingSecciones}
             >
-              <SelectTrigger className="bg-background/20 border-border/40 transition-all hover:bg-background/40 w-full">
+              <SelectTrigger className="transition-all hover:bg-background/40 w-full rounded-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -200,8 +215,8 @@ export function AsistenciaClient({
             </Select>
           </div>
 
-          <div className="space-y-2.5 md:col-span-3">
-            <label className="text-[11px] font-semibold text-muted-foreground ml-1">
+          <div className="space-y-1.5 w-full sm:w-56">
+            <label className="text-xs font-bold text-muted-foreground ml-1">
               Fecha de Registro
             </label>
             <Popover>
@@ -209,31 +224,31 @@ export function AsistenciaClient({
                 <Button
                   variant="outline"
                   className={cn(
-                    "w-full justify-start text-left font-medium bg-background/20 border-border/40 transition-all hover:bg-background/40",
+                    "w-full justify-start text-left font-medium transition-all hover:bg-background/40 rounded-full",
                     !fecha && "text-muted-foreground",
                   )}
                 >
                   <IconCalendar className="mr-2 h-4 w-4 text-primary" />
-                  {fecha ? (
-                    format(fecha, "PPP", { locale: es })
-                  ) : (
-                    <span>Seleccionar</span>
-                  )}
+                  <span className="truncate">
+                    {fecha
+                      ? format(fecha, "PPP", { locale: es })
+                      : "Seleccionar"}
+                  </span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
                   selected={fecha}
-                  onSelect={(d) => d && setFecha(d)}
+                  onSelect={(d) => d && setFecha(startOfDay(d))}
                   initialFocus
                 />
               </PopoverContent>
             </Popover>
           </div>
 
-          <div className="space-y-2.5 md:col-span-5">
-            <label className="text-[11px] font-semibold text-muted-foreground ml-1">
+          <div className="space-y-1.5 flex-1 min-w-[240px]">
+            <label className="text-xs font-bold text-muted-foreground ml-1">
               Sección / Grado
             </label>
             <Select
@@ -241,7 +256,7 @@ export function AsistenciaClient({
               value={seccionId}
               disabled={isLoadingSecciones}
             >
-              <SelectTrigger className="bg-background/20 border-border/40 transition-all hover:bg-background/40 w-full md:w-auto">
+              <SelectTrigger className="transition-all hover:bg-background/40  rounded-full">
                 <SelectValue
                   placeholder={
                     isLoadingSecciones ? "Cargando..." : "Seleccione sección"
@@ -256,7 +271,7 @@ export function AsistenciaClient({
                     </SelectItem>
                   ))
                 ) : (
-                  <div className="p-2 text-center text-[11px] font-medium text-muted-foreground">
+                  <div className="p-2 text-center text-xs font-medium text-muted-foreground">
                     Sin secciones para {anio}
                   </div>
                 )}
@@ -267,7 +282,7 @@ export function AsistenciaClient({
           <Button
             onClick={loadAsistencia}
             disabled={!seccionId || isPending}
-            className="md:col-span-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs shadow-lg shadow-primary/20 transition-all active:scale-95"
+            className="text-xs shadow-lg shadow-primary/20 transition-all active:scale-95 rounded-full w-full sm:w-auto ml-auto"
           >
             {isPending ? (
               <IconLoader2 className="animate-spin mr-2 h-4 w-4" />
@@ -279,86 +294,146 @@ export function AsistenciaClient({
         </div>
       </div>
 
-      <Separator className="bg-border/40" />
-
       {seccionId ? (
-        <div className="space-y-6 animate-in slide-in-from-bottom-2 duration-500">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-muted/20 px-6 py-4 rounded-2xl border border-border/40">
+        <div className="space-y-4 animate-in slide-in-from-bottom-2 duration-700">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-card backdrop-blur-xl px-5 py-4 md:px-6 md:py-4 rounded-2xl border shadow-sm">
             <div className="flex items-center gap-3">
-              <div className="bg-primary/10 p-2 rounded-xl border border-primary/20">
-                <IconUsers className="w-6 h-6 text-primary" />
+              <div className="bg-primary/10 p-2 rounded-xl border border-primary/20 shadow-inner shrink-0">
+                <IconUsers className="w-5 h-5 text-primary" />
               </div>
-              <div>
-                <h2 className="text-lg font-bold tracking-tight">
+              <div className="min-w-0">
+                <h2 className="text-lg font-bold tracking-tight text-muted-foreground truncate leading-tight">
                   Registro de Asistencia
                 </h2>
-                <p className="text-[11px] font-medium text-muted-foreground">
-                  {secciones.find((s) => s.id === seccionId)?.nivel.nombre} -{" "}
-                  {secciones.find((s) => s.id === seccionId)?.grado.nombre} "
-                  {secciones.find((s) => s.id === seccionId)?.seccion}"
-                </p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <Badge variant="outline" className="text-[9px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded-full whitespace-nowrap">
+                    {secciones.find((s) => s.id === seccionId)?.nivel.nombre}
+                  </Badge>
+                  <span className="text-[9px] font-bold text-muted-foreground whitespace-nowrap">
+                    - {secciones.find((s) => s.id === seccionId)?.grado.nombre}{" "}
+                    "{secciones.find((s) => s.id === seccionId)?.seccion}"
+                  </span>
+                </div>
               </div>
             </div>
 
-            <Button
-              onClick={onSave}
-              disabled={isSaving || alumnos.length === 0}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs h-10 px-8 shadow-lg shadow-primary/20 transition-all active:scale-95"
-            >
-              {isSaving ? (
-                <IconLoader2 className="animate-spin mr-2 h-4 w-4" />
-              ) : (
-                <IconDeviceFloppy className="mr-2 h-4 w-4" />
-              )}
-              {isSaving ? "Guardando..." : "Guardar Registro"}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={handleMarkAllPresent}
+                disabled={alumnos.length === 0}
+                className="text-xs px-4 rounded-full transition-all"
+              >
+                <IconCheck className="mr-2 h-3.5 w-3.5" />
+                Marcar todos
+              </Button>
+              <Button
+                onClick={onSave}
+                disabled={isSaving || alumnos.length === 0}
+                className="text-xs shadow-lg shadow-primary/20 transition-all active:scale-95 rounded-full"
+              >
+                {isSaving ? (
+                  <IconLoader2 className="animate-spin mr-2 h-3.5 w-3.5" />
+                ) : (
+                  <IconDeviceFloppy className="mr-2 h-3.5 w-3.5" />
+                )}
+                {isSaving ? "Guardando..." : "Guardar Registro"}
+              </Button>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            <div className="lg:col-span-8 bg-card/30 border border-border/40 rounded-2xl overflow-hidden shadow-sm">
-              {isPending ? (
-                <div className="flex flex-col items-center justify-center h-[400px] gap-4">
-                  <IconLoader2 className="h-10 w-10 animate-spin text-primary opacity-20" />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
-                    Sincronizando...
-                  </span>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+            <div className="lg:col-span-8 space-y-3">
+              {/* Barra de Búsqueda y Filtros Rápidos */}
+              <div className="flex flex-col md:flex-row gap-3 md:items-center justify-between bg-card border shadow-sm shadow-black/20 border-muted p-2 rounded-2xl">
+                <div className="relative w-full md:w-80 group">
+                  <IconSearch className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors" />
+                  <Input
+                    type="text"
+                    placeholder="Buscar estudiante..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full rounded-full pl-12 pr-4 text-sm transition-all"
+                  />
                 </div>
-              ) : alumnos.length > 0 ? (
-                <AsistenciaTable
-                  data={alumnos}
-                  onEstadoChange={handleEstadoChange}
-                  onJustificacionChange={handleObservacionChange}
-                />
-              ) : (
-                <div className="flex flex-col items-center justify-center h-[400px] text-center p-8 opacity-50">
-                  <IconSchool className="h-12 w-12 mb-4 text-muted-foreground/20" />
-                  <h3 className="text-sm font-bold uppercase tracking-widest">
-                    Sin estudiantes
-                  </h3>
-                  <p className="text-xs text-muted-foreground/60 mt-1">
-                    No hay alumnos matriculados en esta sección.
-                  </p>
+                <div className="flex items-center gap-1 p-0.5 bg-muted rounded-full border overflow-x-auto no-scrollbar shrink-0">
+                  {[
+                    { id: "todos", label: `TODOS (${alumnos.length})` },
+                    {
+                      id: "ausentes",
+                      label: `AUSENTES (${alumnos.filter((a) => a.estado === "ausente").length})`,
+                    },
+                    {
+                      id: "tardanzas",
+                      label: `TARDANZAS (${alumnos.filter((a) => a.estado === "tarde").length})`,
+                    },
+                  ].map((f) => (
+                    <button
+                      key={f.id}
+                      onClick={() => setFilterStatus(f.id)}
+                      className={cn(
+                        "px-3 md:px-4 py-2 rounded-full text-[9px] font-bold transition-all whitespace-nowrap",
+                        filterStatus === f.id
+                          ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                          : "text-muted-foreground hover:text-primary/40 hover:bg-primary/10 hover:blur-in",
+                      )}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
                 </div>
-              )}
+              </div>
+
+              {/* Lista de Tarjetas */}
+              <div className="bg-card/20 backdrop-blur-sm border border-white/5 rounded-2xl overflow-hidden shadow-sm">
+                {isPending ? (
+                  <div className="flex flex-col items-center justify-center h-[500px] gap-4">
+                    <IconLoader2 className="h-12 w-12 animate-spin text-primary opacity-20" />
+                    <span className="text-xs font-bold text-white/10">
+                      Sincronizando...
+                    </span>
+                  </div>
+                ) : filteredAlumnos.length > 0 ? (
+                  <AsistenciaTable
+                    data={filteredAlumnos}
+                    onEstadoChange={handleEstadoChange}
+                    onJustificacionChange={handleObservacionChange}
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-[500px] text-center p-8">
+                    <div className="bg-white/2 p-6 rounded-full border border-white/5 mb-6">
+                      <IconSchool className="h-12 w-12 text-white/10" />
+                    </div>
+                    <h3 className="text-sm font-bold tracking-[0.2em] text-white/40">
+                      Sin resultados
+                    </h3>
+                    <p className="text-[11px] text-white/50 font-bold mt-2">
+                      No se encontraron estudiantes con los criterios
+                      seleccionados.
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
 
-            <div className="lg:col-span-4 h-full">
+            <div className="lg:col-span-4 sticky top-8">
               <AsistenciaResumen alumnos={alumnos} />
             </div>
           </div>
         </div>
       ) : (
-        <div className="min-h-[400px] flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-dashed border-border/40 bg-muted/5">
-          <div className="relative mb-6">
-            <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full" />
-            <IconSearch className="relative w-12 h-12 text-primary/40" />
+        <div className="min-h-[500px] flex flex-col items-center justify-center p-8 rounded-[3rem] border border-dashed border-white/10 bg-[#0f0f0f]/20">
+          <div className="relative mb-8">
+            <div className="absolute inset-0 bg-primary/10 blur-[80px] rounded-full animate-pulse" />
+            <div className="relative bg-white/2 p-8 rounded-[2rem] border border-white/5">
+              <IconSearch className="w-14 h-14 text-primary opacity-40" />
+            </div>
           </div>
-          <h3 className="text-xl font-bold tracking-tight mb-2">
-            Listo para el Registro
+          <h3 className="text-2xl font-bold tracking-tight mb-3 text-white/80">
+            Control de Asistencia
           </h3>
-          <p className="max-w-[320px] text-center text-sm text-muted-foreground font-medium">
-            Selecciona una sección y fecha para comenzar el control de
-            asistencia.
+          <p className="max-w-[340px] text-center text-xs text-white/30 font-bold leading-loose">
+            Selecciona una sección y fecha para comenzar el registro diario.
           </p>
         </div>
       )}

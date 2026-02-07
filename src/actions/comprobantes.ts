@@ -138,7 +138,16 @@ export const getPendingComprobantesAction = createSafeAction(
         cronograma: {
           include: {
             concepto: true,
-            estudiante: true,
+            estudiante: {
+              include: {
+                nivelAcademico: {
+                  include: {
+                    grado: true,
+                    nivel: true,
+                  },
+                },
+              },
+            },
           },
         },
         padre: true,

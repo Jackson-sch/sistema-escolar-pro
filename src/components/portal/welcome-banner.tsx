@@ -43,7 +43,7 @@ export function WelcomeBanner({ userName }: WelcomeBannerProps) {
 
       {/* Abstract background elements */}
       <div className="absolute -right-24 -top-24 size-80 rounded-full bg-primary/20 blur-[120px]" />
-      <div className="absolute -bottom-24 -left-24 size-64 rounded-full bg-blue-500/10 blur-[100px]" />
+      <div className="absolute -bottom-24 -left-24 size-64 rounded-full bg-institutional/10 blur-[100px]" />
       <IconSchool className="absolute -bottom-8 -right-8 size-56 -rotate-12 text-primary/5 select-none" />
     </div>
   );

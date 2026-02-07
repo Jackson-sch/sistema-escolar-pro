@@ -36,7 +36,7 @@ export async function getStaffAction() {
 /**
  * Obtiene los estados disponibles para usuarios
  */
-export async function getUserStatusessAction() {
+export async function getUserStatusesAction() {
   try {
     const statuses = await prisma.estadoUsuario.findMany({
       where: { activo: true },

@@ -184,7 +184,7 @@ export function ReporteHeader({
   };
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-6 px-6 py-5 bg-muted/5">
+    <div className="flex flex-col justify-between gap-6 px-6 py-5 bg-muted/5">
       <div className="flex items-center gap-4">
         <div className="bg-primary/10 p-2.5 rounded-xl border border-primary/20 shadow-sm shadow-primary/5">
           <IconCalendarMonth className="h-5 w-5 text-primary" />
@@ -205,32 +205,31 @@ export function ReporteHeader({
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+      <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
         {/* Leyenda Técnica */}
-        <div className="flex items-center gap-4 text-[10px] font-medium text-muted-foreground bg-background/40 border border-border/40 rounded-full px-5 py-2 backdrop-blur-md">
+        <div className="flex items-center gap-3 sm:gap-4 text-[10px] font-bold text-muted-foreground bg-background/40 h-10 border border-border/40 rounded-full px-2 backdrop-blur-md shrink-0">
           <div className="flex items-center gap-1.5">
-            <IconCircleFilled className="size-2 text-emerald-500 shadow-sm shadow-emerald-500/20" />{" "}
-            Presente
+            <IconCircleFilled className="size-2 text-emerald-500" />{" "}
+            <span>Presente</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <IconCircleFilled className="size-2 text-red-500 shadow-sm shadow-red-500/20" />{" "}
-            Falta
+            <IconCircleFilled className="size-2 text-red-500" />{" "}
+            <span>Falta</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <IconCircleFilled className="size-2 text-amber-500 shadow-sm shadow-amber-500/20" />{" "}
-            Tarde
+            <IconCircleFilled className="size-2 text-amber-500" />{" "}
+            <span>Tarde</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <IconCircleFilled className="size-2 text-sky-500 shadow-sm shadow-sky-500/20" />{" "}
-            Justif.
+            <IconCircleFilled className="size-2 text-sky-500" />{" "}
+            <span>Justif.</span>
           </div>
         </div>
 
         <Button
-          size="sm"
           onClick={handleExportXLSX}
           disabled={!data || data.length === 0}
-          className="h-9 w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs px-6 shadow-lg shadow-primary/20 transition-all active:scale-95 disabled:opacity-50"
+          className="text-xs px-6 rounded-full shadow-lg shadow-primary/20 transition-all disabled:opacity-50"
         >
           <IconDownload className="mr-2 h-3.5 w-3.5" />
           Exportar Excel

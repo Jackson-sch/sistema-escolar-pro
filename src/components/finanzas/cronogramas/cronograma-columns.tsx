@@ -43,6 +43,7 @@ export type CronogramaTableType = {
   montoPagado: number;
   fechaVencimiento: string;
   pagado: boolean;
+  moraAcumulada: number;
   estudiante: {
     id: string;
     name: string;

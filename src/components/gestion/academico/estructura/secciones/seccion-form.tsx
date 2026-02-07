@@ -24,6 +24,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { upsertSeccionAction } from "@/actions/academic-structure";
 import { TURNO_OPTIONS } from "@/lib/constants";
+import { useEffect } from "react";
+import { useFormModal } from "@/components/modals/form-modal-context";
 
 const formSchema = z.object({
   seccion: z.string().min(1, "La sección es requerida"),
@@ -59,6 +61,7 @@ export function SeccionForm({
   onSuccess,
 }: SeccionFormProps) {
   const [isPending, startTransition] = useTransition();
+  const { setIsDirty } = useFormModal();
 
   const form = useForm<SeccionFormValues>({
     resolver: zodResolver(formSchema),
@@ -85,6 +88,13 @@ export function SeccionForm({
         },
   });
 
+  const { isDirty } = form.formState;
+
+  useEffect(() => {
+    setIsDirty(isDirty);
+    return () => setIsDirty(false);
+  }, [isDirty, setIsDirty]);
+
   const onSubmit = (values: SeccionFormValues) => {
     startTransition(async () => {
       const res = await upsertSeccionAction(
@@ -100,6 +110,7 @@ export function SeccionForm({
 
       if (res.success) {
         toast.success(res.success);
+        setIsDirty(false);
         if (onSuccess) onSuccess();
       }
       if (res.error) toast.error(res.error);
@@ -160,7 +171,12 @@ export function SeccionForm({
               <FormItem>
                 <FormLabel>Año Académico</FormLabel>
                 <FormControl>
-                  <Input type="number" {...field} value={field.value ?? ""} className="rounded-full" />
+                  <Input
+                    type="number"
+                    {...field}
+                    value={field.value ?? ""}
+                    className="rounded-full"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -270,13 +286,28 @@ export function SeccionForm({
           )}
         />
 
-        <Button type="submit" className="w-full rounded-full" disabled={isPending}>
-          {isPending
-            ? "Guardando..."
-            : initialData
-              ? "Guardar Cambios"
-              : "Crear Sección"}
-        </Button>
+        <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-white/5">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onSuccess}
+            className="w-full sm:w-auto rounded-full border-border/40 hover:bg-accent/50"
+            disabled={isPending}
+          >
+            Cancelar
+          </Button>
+          <Button
+            type="submit"
+            className="w-full sm:w-auto rounded-full px-8"
+            disabled={isPending}
+          >
+            {isPending
+              ? "Guardando..."
+              : initialData
+                ? "Guardar Cambios"
+                : "Crear Sección"}
+          </Button>
+        </div>
       </form>
     </Form>
   );

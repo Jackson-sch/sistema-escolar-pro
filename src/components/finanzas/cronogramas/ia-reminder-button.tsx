@@ -10,19 +10,24 @@ import {
   IconRobot,
   IconBrandWhatsapp,
   IconShare,
+  IconCreditCard,
+  IconUser,
+  IconCalendar,
+  IconRefresh,
+  IconSparkles,
 } from "@tabler/icons-react";
 import { getAIReminderAction } from "@/actions/finance";
 import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { cn } from "@/lib/utils";
+import { formatDate } from "@/lib/formats";
 
 interface IAReminderButtonProps {
   cronograma: {
@@ -100,6 +105,8 @@ export function IAReminderButton({ cronograma }: IAReminderButtonProps) {
     }
   };
 
+  const deudaTotal = cronograma.monto - cronograma.montoPagado;
+
   return (
     <>
       <Button
@@ -118,78 +125,136 @@ export function IAReminderButton({ cronograma }: IAReminderButtonProps) {
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-[520px] bg-background/95 backdrop-blur-2xl border-white/10 rounded-[2rem] flex flex-col overflow-hidden">
-          <DialogHeader className="space-y-3 shrink-0">
-            <div className="size-12 rounded-2xl bg-violet-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
-              <IconRobot className="size-6 text-white" />
+        <DialogContent className="sm:max-w-[550px] p-0 bg-background/95 backdrop-blur-3xl border-white/5 rounded-[2.5rem] shadow-2xl overflow-hidden">
+          {/* Header Personalizado */}
+          <div className="p-8 pb-4 relative">
+            <div className="flex items-center gap-4 mb-2">
+              <div className="size-14 rounded-2xl bg-linear-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-xl shadow-violet-500/20">
+                <IconRobot className="size-7 text-white" strokeWidth={1.5} />
+              </div>
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2">
+                  <DialogTitle className="text-lg font-bold uppercase tracking-wider">
+                    Recordatorio Inteligente
+                  </DialogTitle>
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-violet-500/15 border border-violet-500/20 text-violet-400">
+                    <IconSparkles className="size-3" strokeWidth={3} />
+                    <span className="text-[10px] font-black tracking-widest leading-none">
+                      AI
+                    </span>
+                  </div>
+                </div>
+                <DialogDescription className="text-xs text-muted-foreground/70 font-medium">
+                  Generado automáticamente por el asistente
+                </DialogDescription>
+              </div>
             </div>
-            <DialogTitle className="text-xl font-black uppercase tracking-tight">
-              Recordatorio Inteligente
-            </DialogTitle>
-            <DialogDescription className="text-muted-foreground font-medium">
-              He generado este mensaje empático basado en la deuda actual.
-            </DialogDescription>
-          </DialogHeader>
+          </div>
 
-          <div className="relative flex-1 min-h-0">
-            <div className="bg-muted/30 rounded-2xl border border-border/50 overflow-hidden">
-              <div className="max-h-[450px] overflow-y-auto p-5">
-                <div className="prose prose-sm prose-invert max-w-none text-foreground [&>p]:mb-3 [&>ul]:my-2 [&>ol]:my-2 [&>li]:my-0.5 [&>strong]:text-foreground [&>em]:text-muted-foreground">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {reminder || ""}
-                  </ReactMarkdown>
+          <div className="px-8 pb-8 space-y-6">
+            {/* Box de Contexto */}
+            <div className="p-4 rounded-[1.5rem] bg-muted/30 border border-white/5 space-y-3">
+              <span className="text-[10px] font-black tracking-[0.2em] text-muted-foreground/40 block ml-0.5">
+                CONTEXTO:
+              </span>
+              <div className="flex flex-wrap items-center gap-4 text-xs font-semibold">
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-background/50 border border-white/5">
+                  <IconCreditCard className="size-3.5 text-violet-400" />
+                  <span className="text-muted-foreground">Deuda:</span>
+                  <span className="text-foreground">S/ {deudaTotal}</span>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-background/50 border border-white/5">
+                  <IconUser className="size-3.5 text-blue-400" />
+                  <span className="text-muted-foreground">Estudiante:</span>
+                  <span className="text-foreground">
+                    {cronograma.estudiante.name}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-background/50 border border-white/5">
+                  <IconCalendar className="size-3.5 text-amber-400" />
+                  <span className="text-muted-foreground">Vencimiento:</span>
+                  <span className="text-foreground lowercase first-letter:uppercase">
+                    {formatDate(cronograma.fechaVencimiento, "dd MMM")}
+                  </span>
                 </div>
               </div>
             </div>
-            <Button
-              size="icon"
-              variant="secondary"
-              className="absolute top-2 right-2 rounded-xl size-8 z-10"
-              onClick={copyToClipboard}
-            >
-              {copied ? (
-                <IconCheck className="size-4 text-emerald-500" />
-              ) : (
-                <IconCopy className="size-4" />
-              )}
-            </Button>
-          </div>
 
-          <DialogFooter className="gap-2 pt-4 border-t border-border/50 shrink-0 flex-wrap sm:flex-nowrap">
-            <Button
-              variant="outline"
-              onClick={() => setOpen(false)}
-              className="rounded-xl border-border/40 flex-1 sm:flex-none"
-            >
-              Cerrar
-            </Button>
-            <Button
-              variant="outline"
-              onClick={shareNative}
-              className="rounded-xl border-border/40 gap-2 flex-1 sm:flex-none"
-            >
-              <IconShare className="size-4" />
-              Compartir
-            </Button>
-            <Button
-              onClick={shareWhatsApp}
-              className="bg-green-600 hover:bg-green-700 text-white rounded-xl gap-2 px-5 flex-1 sm:flex-none"
-            >
-              <IconBrandWhatsapp className="size-4" />
-              WhatsApp
-            </Button>
-            <Button
-              onClick={copyToClipboard}
-              className="bg-violet-600 hover:bg-violet-700 text-white rounded-xl gap-2 px-5 flex-1 sm:flex-none"
-            >
-              {copied ? (
-                <IconCheck className="size-4" />
-              ) : (
-                <IconCopy className="size-4" />
-              )}
-              {copied ? "Copiado" : "Copiar"}
-            </Button>
-          </DialogFooter>
+            {/* Box de Mensaje */}
+            <div className="relative group">
+              <div className="absolute -top-2 left-6 z-10 px-3 py-1 rounded-full bg-violet-600 text-white text-[9px] font-bold uppercase tracking-widest shadow-lg shadow-violet-500/20">
+                Contenido del mensaje
+              </div>
+              <div className="bg-white/2 border border-white/5 rounded-[2rem] p-6 pt-8 overflow-hidden relative">
+                <div className="max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                  <div className="prose prose-sm prose-invert max-w-none text-foreground/90 leading-relaxed font-medium">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {reminder || ""}
+                    </ReactMarkdown>
+                  </div>
+                </div>
+
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="absolute bottom-4 right-4 rounded-xl size-10 bg-background/50 border border-white/5 backdrop-blur-sm hover:bg-violet-600 hover:text-white transition-all shadow-xl"
+                  onClick={handleGenerate}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <IconLoader2 className="size-5 animate-spin" />
+                  ) : (
+                    <IconRefresh className="size-5" />
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            {/* Footer Buttons */}
+            <div className="flex flex-wrap items-center gap-3 pt-2">
+              <Button
+                variant="outline"
+                className="rounded-full"
+                onClick={() => setOpen(false)}
+              >
+                Cerrar
+              </Button>
+
+              <Button
+                onClick={shareWhatsApp}
+                className="rounded-full bg-emerald-500 hover:bg-emerald-600 text-white"
+              >
+                <IconBrandWhatsapp className="size-5" />
+                WhatsApp
+              </Button>
+
+              <Button
+                variant="outline"
+                size="icon"
+                className="rounded-full text-violet-400"
+                onClick={shareNative}
+              >
+                <IconShare className="size-4" />
+              </Button>
+
+              <Button
+                onClick={copyToClipboard}
+                className={cn(
+                  "rounded-full",
+                  copied
+                    ? "bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/20"
+                    : "bg-violet-600 hover:bg-violet-700 shadow-violet-500/20",
+                )}
+              >
+                {copied ? (
+                  <IconCheck className="size-5" />
+                ) : (
+                  <IconCopy className="size-5" />
+                )}
+                {copied ? "Copiado" : "Copiar"}
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </>

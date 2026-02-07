@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
-import { SectionCards } from "@/components/section-cards";
-import { ChartAreaInteractive } from "@/components/chart-area-interactive";
+import { SectionCards } from "@/components/common/section-cards";
+import { ChartAreaInteractive } from "@/components/common/chart-area-interactive";
 import { AdmissionsTable } from "@/components/dashboard/admissions-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -60,8 +60,8 @@ export default async function DashboardPage() {
           Dashboard Institucional
         </h1>
         <p className="text-xs sm:text-sm text-muted-foreground">
-          Bienvenido al panel de control de {institucion?.nombreInstitucion}. Vista general del
-          periodo {institucion?.cicloEscolarActual}.
+          Bienvenido al panel de control de {institucion?.nombreInstitucion}.
+          Vista general del periodo {institucion?.cicloEscolarActual}.
         </p>
       </div>
 

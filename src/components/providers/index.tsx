@@ -1,9 +1,9 @@
 "use client"
 
-import { ThemeProvider } from "../theme-provider"
-import { AuthProvider } from "./auth-provider"
-import { NuqsProvider } from "./nuqs-provider"
-import { QueryProvider } from "./query-provider"
+import { ThemeProvider } from "@/components/providers/theme-provider"
+import { AuthProvider } from "@/components/providers/auth-provider"
+import { NuqsProvider } from "@/components/providers/nuqs-provider"
+import { QueryProvider } from "@/components/providers/query-provider"
 import { Toaster } from "sonner"
 
 export function Providers({ children }: { children: React.ReactNode }) {

@@ -1,7 +1,7 @@
 "use client"
 
 import { IconCash, IconClock, IconAlertTriangle } from "@tabler/icons-react"
-import StatCard from "../stat-card"
+import StatCard from "@/components/common/stat-card"
 import { formatCurrency } from "@/lib/formats"
 
 interface FinanzasDashboardProps {

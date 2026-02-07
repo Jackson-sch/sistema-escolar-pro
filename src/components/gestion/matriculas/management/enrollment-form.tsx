@@ -58,6 +58,7 @@ import {
 import { getNivelesAcademicosAction } from "@/actions/students";
 import { toast } from "sonner";
 import { ANIO_LECTIVO_OPTIONS } from "@/lib/constants";
+import { useFormModal } from "@/components/modals/form-modal-context";
 
 interface EnrollmentFormProps {
   onSuccess?: () => void;
@@ -69,6 +70,7 @@ export function EnrollmentForm({
   nivelesAcademicos,
 }: EnrollmentFormProps) {
   const [isPending, startTransition] = useTransition();
+  const { setIsDirty } = useFormModal();
   const [students, setStudents] = useState<any[]>([]);
   const [isLoadingStudents, setIsLoadingStudents] = useState(false);
   const [filteredNiveles, setFilteredNiveles] =
@@ -90,6 +92,13 @@ export function EnrollmentForm({
       descuentoBeca: 0,
     },
   });
+
+  const { isDirty } = form.formState;
+
+  useEffect(() => {
+    setIsDirty(isDirty);
+    return () => setIsDirty(false);
+  }, [isDirty, setIsDirty]);
 
   const anio = form.watch("anioAcademico");
   const tipoBeca = form.watch("tipoBeca");
@@ -129,6 +138,7 @@ export function EnrollmentForm({
         if (data.error) toast.error(data.error);
         if (data.success) {
           toast.success(data.success);
+          setIsDirty(false);
           form.reset();
           onSuccess?.();
         }
@@ -141,7 +151,7 @@ export function EnrollmentForm({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           {/* SECCIÓN 1: ESTUDIANTE */}
-          <div className="group relative overflow-hidden rounded-2xl border border-white/5 bg-gradient-to-br from-violet-500/5 via-transparent to-transparent p-6 transition-all hover:border-violet-500/10 ">
+          <div className="group relative overflow-hidden rounded-2xl border border-white/5 bg-linear-to-br from-violet-500/5 via-transparent to-transparent p-6 transition-all hover:border-violet-500/10 ">
             <div className="mb-6 flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10 text-violet-400 ring-1 ring-inset ring-violet-500/20">
                 <IconUser className="h-5 w-5" />
@@ -211,7 +221,7 @@ export function EnrollmentForm({
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 border-white/10 bg-zinc-950/95 backdrop-blur-xl">
+                    <PopoverContent className="w-(--radix-popover-trigger-width) p-0 border-white/10 bg-zinc-950/95 backdrop-blur-xl">
                       <Command className="bg-transparent">
                         <CommandInput placeholder="Buscar por nombre o DNI..." />
                         <CommandList>
@@ -272,7 +282,7 @@ export function EnrollmentForm({
           </div>
 
           {/* SECCIÓN 2: ACADÉMICO */}
-          <div className="group relative overflow-hidden rounded-2xl border border-white/5 bg-gradient-to-br from-blue-500/5 via-transparent to-transparent p-6 transition-all hover:border-blue-500/10">
+          <div className="group relative overflow-hidden rounded-2xl border border-white/5 bg-linear-to-br from-blue-500/5 via-transparent to-transparent p-6 transition-all hover:border-blue-500/10">
             <div className="mb-6 flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400 ring-1 ring-inset ring-blue-500/20">
                 <IconSchool className="h-5 w-5" />
@@ -410,7 +420,7 @@ export function EnrollmentForm({
 
           {/* SECCIÓN 3: CONDICIONES */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="group relative overflow-hidden rounded-2xl border border-white/5 bg-gradient-to-br from-emerald-500/5 via-transparent to-transparent p-6 transition-all hover:border-emerald-500/10">
+            <div className="group relative overflow-hidden rounded-2xl border border-white/5 bg-linear-to-br from-emerald-500/5 via-transparent to-transparent p-6 transition-all hover:border-emerald-500/10">
               <div className="mb-6 flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
                   <IconCheck className="h-5 w-5" />
@@ -492,7 +502,7 @@ export function EnrollmentForm({
               </div>
             </div>
 
-            <div className="group relative overflow-hidden rounded-2xl border border-white/5 bg-gradient-to-br from-pink-500/5 via-transparent to-transparent p-6 transition-all hover:border-pink-500/10">
+            <div className="group relative overflow-hidden rounded-2xl border border-white/5 bg-linear-to-br from-pink-500/5 via-transparent to-transparent p-6 transition-all hover:border-pink-500/10">
               <div className="mb-6 flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-pink-500/10 text-pink-400 ring-1 ring-inset ring-pink-500/20">
                   <IconAlertCircle className="h-5 w-5" />
@@ -626,29 +636,40 @@ export function EnrollmentForm({
             />
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-white/5">
-            <div className="w-full text-xs text-muted-foreground/60 text-center sm:text-left order-2 sm:order-1 flex items-center justify-center sm:justify-start gap-2">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-white/5">
+            <div className="text-xs text-muted-foreground/60 flex items-center gap-2">
               <IconAlertCircle className="h-3 w-3" />
-              Verifique los datos antes de registrar la matrícula.
+              Verifique los datos antes de registrar.
             </div>
-            <Button
-              onClick={form.handleSubmit(onSubmit)}
-              disabled={isPending}
-              variant="default"
-              className="rounded-full"
-            >
-              {isPending ? (
-                <>
-                  <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Procesando...
-                </>
-              ) : (
-                <>
-                  Confirmar Matrícula
-                  <IconArrowRight className="ml-2 h-4 w-4" />
-                </>
-              )}
-            </Button>
+            <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onSuccess}
+                className="w-full sm:w-auto rounded-full border-border/40 hover:bg-accent/50"
+                disabled={isPending}
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={form.handleSubmit(onSubmit)}
+                disabled={isPending}
+                variant="default"
+                className="w-full sm:w-auto rounded-full px-8"
+              >
+                {isPending ? (
+                  <>
+                    <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Procesando...
+                  </>
+                ) : (
+                  <>
+                    Confirmar Matrícula
+                    <IconArrowRight className="ml-2 h-4 w-4" />
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </form>
       </Form>

@@ -4,7 +4,7 @@ import * as React from "react";
 import { Calendar, Wallet, AlertTriangle, TrendingUp } from "lucide-react";
 import { formatCurrency } from "@/lib/formats";
 
-import StatCard from "@/components/stat-card";
+import StatCard from "@/components/common/stat-card";
 import { IngresosMensualesChart } from "./ingresos-mensuales-chart";
 import { TopMorosidadList } from "./top-morosidad-list";
 import { EstadoGeneralChart } from "./estado-general-chart";
@@ -54,7 +54,7 @@ export function FinanzasReportes({ cronograma }: FinanzasReportesProps) {
     });
 
     return Object.values(meses).sort(
-      (a, b) => nombresMeses.indexOf(a.name) - nombresMeses.indexOf(b.name)
+      (a, b) => nombresMeses.indexOf(a.name) - nombresMeses.indexOf(b.name),
     );
   }, [cronograma]);
 
@@ -117,7 +117,7 @@ export function FinanzasReportes({ cronograma }: FinanzasReportesProps) {
   // Calcular totales
   const totalProyectado = ingresosMensuales.reduce(
     (acc, curr) => acc + curr.proyectado,
-    0
+    0,
   );
   const totalReal = ingresosMensuales.reduce((acc, curr) => acc + curr.real, 0);
   const totalDeuda = totalProyectado + totalMoraReporte - totalReal;
@@ -143,12 +143,12 @@ export function FinanzasReportes({ cronograma }: FinanzasReportesProps) {
           <Button
             variant="outline"
             size="sm"
-            className="rounded-xl gap-2"
+            className="rounded-full gap-2"
             onClick={() =>
               exportToExcel(
                 formatCronogramaForExcel(cronograma),
                 "Reporte_Finanzas",
-                "Cronograma"
+                "Cronograma",
               )
             }
           >
@@ -175,7 +175,11 @@ export function FinanzasReportes({ cronograma }: FinanzasReportesProps) {
                 new Date().toISOString().split("T")[0]
               }.pdf`}
             >
-              <Button variant="outline" size="sm" className="rounded-xl gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-full gap-2"
+              >
                 <IconFileText className="size-4 text-red-600" />
                 PDF
               </Button>

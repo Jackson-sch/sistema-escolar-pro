@@ -19,7 +19,7 @@ const ReceiptDownloadButton = dynamic(
     loading: () => (
       <Button
         variant="outline"
-        className="w-full h-11 gap-2 font-medium"
+        className="rounded-full gap-2 font-medium"
         disabled
       >
         <IconFileDownload className="size-4" />
@@ -142,7 +142,7 @@ export function PagoSuccessView({
 
             <Button
               variant="secondary"
-              className="col-span-1 h-11 gap-2 font-medium"
+              className="rounded-full gap-2 font-medium"
               onClick={handlePrint}
             >
               <IconPrinter className="size-4" />
@@ -152,16 +152,14 @@ export function PagoSuccessView({
         ) : (
           <>
             <Button
-              variant="outline"
-              className="w-full h-11 gap-2 font-medium"
+              className="rounded-full "
               disabled
             >
               <IconFileDownload className="size-4" />
               Descargar PDF
             </Button>
             <Button
-              variant="secondary"
-              className="w-full h-11 gap-2 font-medium"
+              className="rounded-full gap-2 font-medium"
               disabled
             >
               <IconPrinter className="size-4" />
@@ -171,7 +169,7 @@ export function PagoSuccessView({
         )}
       </div>
 
-      <Button variant="ghost" className="w-full mt-2" onClick={onClose}>
+      <Button variant="ghost" className="rounded-full mt-2" onClick={onClose}>
         Finalizar y Cerrar
       </Button>
     </div>

@@ -28,29 +28,29 @@ export function AttendanceMetrics({ stats }: AttendanceMetricsProps) {
       label: "Asistencias",
       value: stats.presentes,
       icon: IconUserCheck,
-      color: "text-emerald-500",
-      bgColor: "bg-emerald-500/10",
+      color: "text-success",
+      bgColor: "bg-success/10",
     },
     {
       label: "Tardanzas",
       value: stats.tardanzas,
       icon: IconClock,
-      color: "text-amber-500",
-      bgColor: "bg-amber-500/10",
+      color: "text-warning",
+      bgColor: "bg-warning/10",
     },
     {
       label: "Inasistencias",
       value: stats.faltas,
       icon: IconUserMinus,
-      color: "text-red-500",
-      bgColor: "bg-red-500/10",
+      color: "text-destructive",
+      bgColor: "bg-destructive/10",
     },
     {
       label: "Justificadas",
       value: stats.justificadas,
       icon: IconUserExclamation,
-      color: "text-blue-500",
-      bgColor: "bg-blue-500/10",
+      color: "text-info",
+      bgColor: "bg-info/10",
     },
   ];
 
@@ -67,7 +67,7 @@ export function AttendanceMetrics({ stats }: AttendanceMetricsProps) {
                 className={cn(
                   "flex size-12 items-center justify-center rounded-2xl shadow-inner",
                   item.bgColor,
-                  item.color
+                  item.color,
                 )}
               >
                 <item.icon className="size-6" />

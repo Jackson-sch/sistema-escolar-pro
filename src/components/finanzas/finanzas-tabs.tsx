@@ -19,17 +19,17 @@ export function FinanzasTabs({ children }: FinanzasTabsProps) {
   )
 
   return (
-    <Tabs value={tab} onValueChange={setTab} className="w-full">
-      <TabsList className="flex flex-wrap sm:flex-nowrap h-auto sm:h-12 w-full max-w-lg mb-6 ml-0 sm:ml-2 bg-muted/50 p-1 shadow-inner border justify-start">
-        <TabsTrigger value="cronograma" className="flex-1 sm:flex-initial gap-2 text-xs sm:text-sm px-3 sm:px-6 py-2">
+    <Tabs value={tab} onValueChange={setTab}>
+      <TabsList className="flex flex-wrap sm:flex-nowrap h-auto sm:h-12 max-w-lg mb-6 ml-0 sm:ml-2 bg-muted/50 p-1 shadow-inner border justify-start rounded-full">
+        <TabsTrigger value="cronograma" className="flex-1 sm:flex-initial gap-2 text-xs sm:text-sm px-3 sm:px-6 py-2 rounded-full">
           <IconUsers className="size-4" />
           Cronograma
         </TabsTrigger>
-        <TabsTrigger value="conceptos" className="flex-1 sm:flex-initial gap-2 text-xs sm:text-sm px-3 sm:px-6 py-2">
+        <TabsTrigger value="conceptos" className="flex-1 sm:flex-initial gap-2 text-xs sm:text-sm px-3 sm:px-6 py-2 rounded-full">
           <IconReceipt className="size-4" />
           Conceptos
         </TabsTrigger>
-        <TabsTrigger value="reportes" className="flex-1 sm:flex-initial gap-2 text-xs sm:text-sm px-3 sm:px-6 py-2">
+        <TabsTrigger value="reportes" className="flex-1 sm:flex-initial gap-2 text-xs sm:text-sm px-3 sm:px-6 py-2 rounded-full">
           <IconChartBar className="size-4" />
           Reportes
         </TabsTrigger>

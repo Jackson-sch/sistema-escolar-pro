@@ -20,7 +20,7 @@ export function AddConceptoButton({ institucionId }: AddConceptoButtonProps) {
         <TooltipTrigger asChild>
           <Button
             onClick={() => setOpen(true)}
-            className="h-9 w-9 sm:w-auto sm:px-4 shadow-md bg-primary hover:bg-primary/90 text-primary-foreground"
+            className="rounded-full"
           >
             <IconUsersPlus className="sm:mr-2 h-4 w-4" />
             <span className="hidden sm:inline">Nuevo Concepto</span>

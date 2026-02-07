@@ -35,6 +35,6 @@ export type InstitucionFormValues = z.infer<typeof institucionFormSchema>
 export type InstitucionFormControl = Control<any>
 
 // Estilos compartidos
-export const inputStyles = "bg-muted/5 border-border/40 focus:ring-primary/20"
+export const inputStyles = "bg-muted/5 rounded-full border-border/40 focus:ring-primary/20"
 export const labelStyles = "text-[11px] font-semibold text-muted-foreground uppercase tracking-wider"
 export const selectContentStyles = "bg-background/95 backdrop-blur-xl border-border/40 w-full"

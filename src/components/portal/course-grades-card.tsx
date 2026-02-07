@@ -41,15 +41,15 @@ export function CourseGradesCard({
   const [expanded, setExpanded] = useState(false);
 
   const getNotaColor = (nota: number) => {
-    if (nota < 11) return "text-red-500";
-    if (nota < 14) return "text-amber-500";
-    return "text-green-500";
+    if (nota < 11) return "text-destructive";
+    if (nota < 14) return "text-warning";
+    return "text-success";
   };
 
   const getBgColor = (nota: number) => {
-    if (nota < 11) return "bg-red-500/10 border-red-500/20";
-    if (nota < 14) return "bg-amber-500/10 border-amber-500/20";
-    return "bg-green-500/10 border-green-500/20";
+    if (nota < 11) return "bg-destructive/10 border-destructive/20";
+    if (nota < 14) return "bg-warning/10 border-warning/20";
+    return "bg-success/10 border-success/20";
   };
 
   return (
@@ -76,7 +76,7 @@ export function CourseGradesCard({
             className={cn(
               "px-4 py-1.5 rounded-xl border text-2xl font-black tabular-nums shadow-sm",
               getBgColor(promedio),
-              getNotaColor(promedio)
+              getNotaColor(promedio),
             )}
           >
             {promedio.toFixed(1)}
@@ -137,7 +137,7 @@ export function CourseGradesCard({
                 <span
                   className={cn(
                     "text-lg font-black tabular-nums",
-                    getNotaColor(nota.valor)
+                    getNotaColor(nota.valor),
                   )}
                 >
                   {nota.valor}

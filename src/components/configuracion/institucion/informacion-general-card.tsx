@@ -23,6 +23,7 @@ import {
   labelStyles,
   selectContentStyles
 } from "./types"
+import { MagicCard } from "@/components/ui/magic-card"
 
 interface InformacionGeneralCardProps {
   control: InstitucionFormControl
@@ -30,8 +31,8 @@ interface InformacionGeneralCardProps {
 
 export function InformacionGeneralCard({ control }: InformacionGeneralCardProps) {
   return (
-    <Card className="bg-card/30 border-border/40 shadow-sm">
-      <CardHeader>
+    <MagicCard className="rounded-2xl p-0">
+      <CardHeader className="bg-linear-to-r from-emerald-500/5 to-transparent border-b border-border/30 pt-4 rounded-t-xl">
         <div className="flex items-center gap-3">
           <div className="p-2.5 bg-emerald-500/10 rounded-xl">
             <IconSchool className="size-5 text-emerald-500" />
@@ -44,7 +45,7 @@ export function InformacionGeneralCard({ control }: InformacionGeneralCardProps)
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 p-6">
         <FormField
           control={control}
           name="nombreInstitucion"
@@ -108,7 +109,7 @@ export function InformacionGeneralCard({ control }: InformacionGeneralCardProps)
                 <FormLabel className={labelStyles}>Gestión</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className="w-full rounded-full">
                       <SelectValue placeholder="Tipo" />
                     </SelectTrigger>
                   </FormControl>
@@ -132,7 +133,7 @@ export function InformacionGeneralCard({ control }: InformacionGeneralCardProps)
               <FormLabel className={labelStyles}>Modalidad</FormLabel>
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="w-full rounded-full">
                     <SelectValue placeholder="Tipo" />
                   </SelectTrigger>
                 </FormControl>
@@ -146,6 +147,6 @@ export function InformacionGeneralCard({ control }: InformacionGeneralCardProps)
           )}
         />
       </CardContent>
-    </Card>
+    </MagicCard>
   )
 }

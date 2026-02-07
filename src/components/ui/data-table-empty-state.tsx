@@ -87,17 +87,6 @@ export function DataTableEmptyState({
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-          {hasFilters && onClearFilters && (
-            <Button
-              onClick={onClearFilters}
-              size="lg"
-              className="rounded-full px-8 h-11 bg-primary hover:bg-primary/90 shadow-md shadow-primary/20 transition-all active:scale-95"
-            >
-              <IconFilterOff className="mr-2 size-4" />
-              Limpiar Filtros
-            </Button>
-          )}
-
           {onViewAll && (
             <Button
               variant="outline"

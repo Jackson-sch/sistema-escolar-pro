@@ -1,6 +1,5 @@
 "use client";
 
-import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTransition } from "react";
@@ -33,16 +32,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { upsertCourseAction } from "@/actions/academic";
 import { toast } from "sonner";
-import CardGeneric from "@/components/card-generic";
+import { useEffect } from "react";
+import { useFormModal } from "@/components/modals/form-modal-context";
 
 interface CourseFormProps {
   id?: string;
@@ -62,6 +55,7 @@ export function CourseForm({
   profesores,
 }: CourseFormProps) {
   const [isPending, startTransition] = useTransition();
+  const { setIsDirty } = useFormModal();
 
   const form = useForm<CourseValues>({
     resolver: zodResolver(CourseSchema),
@@ -85,12 +79,20 @@ export function CourseForm({
         },
   });
 
+  const { isDirty } = form.formState;
+
+  useEffect(() => {
+    setIsDirty(isDirty);
+    return () => setIsDirty(false);
+  }, [isDirty, setIsDirty]);
+
   const onSubmit = (values: CourseValues) => {
     startTransition(() => {
       upsertCourseAction(values, id).then((data) => {
         if (data.error) toast.error(data.error);
         if (data.success) {
           toast.success(data.success);
+          setIsDirty(false);
           onSuccess?.();
         }
       });
@@ -99,7 +101,7 @@ export function CourseForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         {/* SECCIÓN 1: INFORMACIÓN GENERAL */}
         <div className="space-y-4">
           <div className="flex items-center gap-3">
@@ -372,19 +374,20 @@ export function CourseForm({
         </div>
 
         {/* FOOTER */}
-        <div className="flex items-center justify-end gap-3 pt-6 border-t border-white/5">
+        <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-white/5">
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             onClick={() => onSuccess?.()}
-            className="text-muted-foreground hover:text-foreground rounded-full"
+            className="w-full sm:w-auto rounded-full border-border/40 hover:bg-accent/50"
+            disabled={isPending}
           >
             Cancelar
           </Button>
           <Button
             disabled={isPending}
             type="submit"
-            className="rounded-full"
+            className="w-full sm:w-auto rounded-full px-8"
           >
             {isPending ? (
               <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />

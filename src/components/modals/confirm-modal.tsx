@@ -47,10 +47,10 @@ export function ConfirmModal({
         <DialogHeader>
           <div className="flex items-center gap-2 mb-2">
             <div
-              className={`p-2 rounded-full ${variant === "danger" ? "bg-red-100" : "bg-primary/10"}`}
+              className={`p-2 rounded-full ${variant === "danger" ? "bg-destructive/10" : "bg-primary/10"}`}
             >
               <IconAlertTriangle
-                className={`size-5 ${variant === "danger" ? "text-red-600" : "text-primary"}`}
+                className={`size-5 ${variant === "danger" ? "text-destructive" : "text-primary"}`}
               />
             </div>
             <DialogTitle className="text-xl font-bold">{title}</DialogTitle>

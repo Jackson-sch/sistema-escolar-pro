@@ -8,12 +8,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { DataTable } from "@/components/ui/data-table";
-import {
-  IconFilter,
-  IconFilterOff,
-  IconReceipt,
-  IconTable,
-} from "@tabler/icons-react";
+import { IconFilter, IconReceipt, IconTable } from "@tabler/icons-react";
 import { exportToExcel, formatCronogramaForExcel } from "@/lib/export-utils";
 
 import { Button } from "@/components/ui/button";
@@ -39,6 +34,98 @@ interface CronogramaTableProps {
   institucion?: any;
 }
 
+interface CronogramaFiltersProps {
+  seccionFilter: string;
+  estadoFilter: string;
+  conceptoFilter: string;
+  seccionesDisponibles: any[];
+  conceptos: any[];
+  filteredData: any[];
+  meta: any;
+}
+
+function CronogramaFilters({
+  seccionFilter,
+  estadoFilter,
+  conceptoFilter,
+  seccionesDisponibles,
+  conceptos,
+  filteredData,
+  meta,
+}: CronogramaFiltersProps) {
+  return (
+    <div className="flex flex-col sm:flex-row gap-3 w-full">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 flex-1">
+        <Select value={seccionFilter} onValueChange={meta.setSeccionFilter}>
+          <SelectTrigger className="w-full rounded-full">
+            <div className="flex items-center gap-2 overflow-hidden">
+              <IconFilter className="size-4 text-muted-foreground shrink-0" />
+              <SelectValue placeholder="Sección" className="truncate" />
+            </div>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas las secciones</SelectItem>
+            {seccionesDisponibles.map(([id, label]) => (
+              <SelectItem key={id} value={id}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={estadoFilter} onValueChange={meta.setEstadoFilter}>
+          <SelectTrigger className="w-full rounded-full">
+            <div className="flex items-center gap-2">
+              <IconFilter className="size-4 text-muted-foreground shrink-0" />
+              <SelectValue placeholder="Estado" />
+            </div>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos los estados</SelectItem>
+            {PAYMENT_STATUS_OPTIONS.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={conceptoFilter} onValueChange={meta.setConceptoFilter}>
+          <SelectTrigger className="rounded-full sm:col-span-2 lg:col-span-1">
+            <div className="flex items-center gap-2">
+              <IconReceipt className="size-4 text-muted-foreground shrink-0" />
+              <SelectValue placeholder="Concepto" />
+            </div>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos los conceptos</SelectItem>
+            {conceptos?.map((c: any) => (
+              <SelectItem key={c.id} value={c.id}>
+                {c.nombre}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <Button
+        variant="outline"
+        size="icon"
+        className="h-10 w-10 shrink-0 border-primary/10 rounded-full"
+        title="Exportar a Excel"
+        onClick={() =>
+          exportToExcel(
+            formatCronogramaForExcel(filteredData),
+            "Reporte_Cobranza",
+            "Pagos",
+          )
+        }
+      >
+        <IconTable className="size-5 text-emerald-600" />
+      </Button>
+    </div>
+  );
+}
+
 export function CronogramaTable({
   data,
   conceptos,
@@ -53,19 +140,19 @@ export function CronogramaTable({
   // Estados para filtros con nuqs (persistidos en URL)
   const [searchQuery, setSearchQuery] = useQueryState(
     "q",
-    parseAsString.withDefault("")
+    parseAsString.withDefault(""),
   );
   const [seccionFilter, setSeccionFilter] = useQueryState(
     "seccion",
-    parseAsString.withDefault("all")
+    parseAsString.withDefault("all"),
   );
   const [estadoFilter, setEstadoFilter] = useQueryState(
     "estado",
-    parseAsString.withDefault("all")
+    parseAsString.withDefault("all"),
   );
   const [conceptoFilter, setConceptoFilter] = useQueryState(
     "concepto",
-    parseAsString.withDefault("all")
+    parseAsString.withDefault("all"),
   );
 
   const columns = React.useMemo(
@@ -77,7 +164,7 @@ export function CronogramaTable({
         setNumeroBoleta,
         setShowPagoDialog,
       }),
-    [institucion]
+    [institucion],
   );
 
   const filteredData = React.useMemo(() => {
@@ -86,7 +173,7 @@ export function CronogramaTable({
     // Filtro por sección
     if (seccionFilter !== "all") {
       result = result.filter(
-        (item) => item.estudiante.nivelAcademicoId === seccionFilter
+        (item) => item.estudiante.nivelAcademicoId === seccionFilter,
       );
     }
 
@@ -99,13 +186,13 @@ export function CronogramaTable({
           (item) =>
             !item.pagado &&
             item.montoPagado === 0 &&
-            !isVencido(item.fechaVencimiento)
+            !isVencido(item.fechaVencimiento),
         );
       if (estadoFilter === "PARTIALLY_PAID")
         result = result.filter((item) => !item.pagado && item.montoPagado > 0);
       if (estadoFilter === "EXPIRED")
         result = result.filter(
-          (item) => !item.pagado && isVencido(item.fechaVencimiento)
+          (item) => !item.pagado && isVencido(item.fechaVencimiento),
         );
     }
 
@@ -116,18 +203,6 @@ export function CronogramaTable({
 
     return result;
   }, [data, seccionFilter, estadoFilter, conceptoFilter]);
-
-  const table = useReactTable({
-    data: filteredData,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    initialState: {
-      pagination: {
-        pageSize: 10,
-      },
-    },
-  });
 
   const seccionesDisponibles = React.useMemo(() => {
     const map = new Map();
@@ -168,75 +243,15 @@ export function CronogramaTable({
         meta={{ institucion }}
       >
         {() => (
-          <div className="flex flex-col sm:flex-row gap-3 w-full">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 flex-1">
-              <Select value={seccionFilter} onValueChange={setSeccionFilter}>
-                <SelectTrigger className="w-full bg-background border-primary/10 h-10">
-                  <div className="flex items-center gap-2 overflow-hidden">
-                    <IconFilter className="size-4 text-muted-foreground shrink-0" />
-                    <SelectValue placeholder="Sección" className="truncate" />
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas las secciones</SelectItem>
-                  {seccionesDisponibles.map(([id, label]) => (
-                    <SelectItem key={id} value={id}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select value={estadoFilter} onValueChange={setEstadoFilter}>
-                <SelectTrigger className="w-full bg-background border-primary/10 h-10">
-                  <div className="flex items-center gap-2">
-                    <IconFilter className="size-4 text-muted-foreground shrink-0" />
-                    <SelectValue placeholder="Estado" />
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos los estados</SelectItem>
-                  {PAYMENT_STATUS_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select value={conceptoFilter} onValueChange={setConceptoFilter}>
-                <SelectTrigger className="w-full bg-background border-primary/10 h-10 sm:col-span-2 lg:col-span-1">
-                  <div className="flex items-center gap-2">
-                    <IconReceipt className="size-4 text-muted-foreground shrink-0" />
-                    <SelectValue placeholder="Concepto" />
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos los conceptos</SelectItem>
-                  {conceptos.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.nombre}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-10 w-10 shrink-0 border-primary/10 rounded-xl"
-              title="Exportar a Excel"
-              onClick={() =>
-                exportToExcel(
-                  formatCronogramaForExcel(filteredData),
-                  "Reporte_Cobranza",
-                  "Pagos"
-                )
-              }
-            >
-              <IconTable className="size-5 text-emerald-600" />
-            </Button>
-          </div>
+          <CronogramaFilters
+            seccionFilter={seccionFilter}
+            estadoFilter={estadoFilter}
+            conceptoFilter={conceptoFilter}
+            seccionesDisponibles={seccionesDisponibles}
+            conceptos={conceptos}
+            filteredData={filteredData}
+            meta={{ setSeccionFilter, setEstadoFilter, setConceptoFilter }}
+          />
         )}
       </DataTable>
 

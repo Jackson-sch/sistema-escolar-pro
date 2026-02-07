@@ -32,7 +32,6 @@ export function AddCourseButton({
         onOpenChange={setOpen}
         title={`Carga Académica ${new Date().getFullYear()}`}
         description="Asigne un docente y un ambiente de aprendizaje a una nueva asignatura de la malla."
-        headerClassName="bg-card/50 backdrop-blur-sm"
         className="sm:max-w-xl"
       >
         <CourseForm

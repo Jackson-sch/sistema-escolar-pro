@@ -72,6 +72,7 @@ interface DataTableProps<TData, TValue> {
   children?: React.ReactNode | ((table: any) => React.ReactNode); // Support for render props
   initialState?: any; // Initial state for the table (column visibility, etc)
   meta?: any; // Extra context for columns
+  stackFilters?: boolean; // Whether search and filters are stacked in two rows
   emptyStateTitle?: string;
   emptyStateDescription?: string;
 }
@@ -88,6 +89,7 @@ export function DataTable<TData, TValue>({
   children,
   initialState,
   meta,
+  stackFilters = false,
   emptyStateTitle,
   emptyStateDescription,
 }: DataTableProps<TData, TValue>) {
@@ -128,13 +130,28 @@ export function DataTable<TData, TValue>({
     meta,
   });
 
+  const isFiltered = table.getState().columnFilters.some((f) => {
+    const value = f.value;
+    if (Array.isArray(value)) return value.length > 0;
+    return value !== "" && value !== null && value !== undefined;
+  });
+
   return (
     <div className="space-y-4">
       {/* TOOLBAR */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 bg-card p-4 rounded-2xl shadow-sm">
-        <div className="flex flex-col sm:flex-row flex-1 items-stretch sm:items-center gap-3 w-full">
+      <div
+        className={cn(
+          "bg-card rounded-2xl shadow-sm border flex flex-col",
+          !stackFilters && "lg:flex-row lg:items-center justify-between",
+          stackFilters ? "p-3.5 sm:p-4 gap-4" : "p-2.5 sm:p-3 gap-3",
+        )}
+      >
+        {/* Superior: Buscador (Ocupa fila completa si stackFilters o si no hay filtros) */}
+        <div
+          className={cn("w-full md:w-[500px]", !stackFilters && "lg:max-w-sm mb-3 lg:mb-0")}
+        >
           {searchKey && (
-            <InputGroup className="flex-1 w-full sm:max-w-xs bg-background rounded-full">
+            <InputGroup className="w-full bg-background rounded-full">
               <InputGroupAddon>
                 <IconSearch className="h-4 w-4 text-muted-foreground" />
               </InputGroupAddon>
@@ -154,74 +171,85 @@ export function DataTable<TData, TValue>({
                   }
                   table.getColumn(searchKey)?.setFilterValue(value);
                 }}
-                className="h-9 w-full text-sm"
+                className="h-10 w-full text-sm"
               />
               <InputGroupAddon
                 align="inline-end"
-                className="text-[10px] uppercase font-bold opacity-50 hidden sm:flex"
+                className="text-[10px] uppercase font-black opacity-30 hidden sm:flex border-l border-primary/5 pl-3 ml-2 shrink-0"
               >
-                {table.getFilteredRowModel().rows.length} res
+                {table.getFilteredRowModel().rows.length} registros
               </InputGroupAddon>
             </InputGroup>
           )}
-          <div className="flex items-center gap-2">
-            {typeof children === "function" ? children(table) : children}
-            {(table.getState().columnFilters.length > 0 ||
-              hasActiveFilters) && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => {
-                  table.resetColumnFilters();
-                  onClearFilters?.();
-                }}
-                className="shrink-0"
-                title="Limpiar filtros"
-              >
-                <IconFilterOff className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="ml-auto hidden rounded-full lg:flex"
-              >
-                <IconAdjustmentsHorizontal className="mr-2 h-4 w-4" />
-                Columnas
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[150px]">
-              <DropdownMenuLabel>Alternar columnas</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {table
-                .getAllColumns()
-                .filter(
-                  (column) =>
-                    typeof column.accessorFn !== "undefined" &&
-                    column.getCanHide(),
-                )
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
+        {/* Eje: Filtros + Acciones (En la misma fila si !stackFilters) */}
+        <div
+          className={cn(
+            "flex flex-row flex-wrap items-center justify-between gap-3 min-h-[40px]",
+            !stackFilters && "flex-1",
+          )}
+        >
+          <div className="flex-1">
+            {typeof children === "function" ? children(table) : children}
+          </div>
+
+          {(isFiltered || (onClearFilters && hasActiveFilters)) && (
+            <Button
+              variant="ghost"
+              onClick={() => {
+                table.resetColumnFilters();
+                onClearFilters?.();
+              }}
+              className="h-10 px-3 hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-colors rounded-full shrink-0 gap-2 border border-transparent hover:border-destructive/20"
+              title="Limpiar filtros"
+            >
+              <IconFilterOff className="h-4 w-4" />
+              {stackFilters && (
+                <span className="text-xs font-semibold">Limpiar</span>
+              )}
+            </Button>
+          )}
+
+          <div className="flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="ml-auto hidden rounded-full lg:flex h-10 px-4"
+                >
+                  <IconAdjustmentsHorizontal className="mr-2 h-4 w-4" />
+                  Columnas
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-[150px]">
+                <DropdownMenuLabel>Alternar columnas</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {table
+                  .getAllColumns()
+                  .filter(
+                    (column) =>
+                      typeof column.accessorFn !== "undefined" &&
+                      column.getCanHide(),
+                  )
+                  .map((column) => {
+                    return (
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        className="capitalize"
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(value) =>
+                          column.toggleVisibility(!!value)
+                        }
+                      >
+                        {column.id}
+                      </DropdownMenuCheckboxItem>
+                    );
+                  })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </div>
 
@@ -334,7 +362,7 @@ export function DataTable<TData, TValue>({
                 table.setPageSize(Number(value));
               }}
             >
-              <SelectTrigger className="h-8 w-[70px] border-primary/10 rounded-full">
+              <SelectTrigger className="h-8 w-[70px] rounded-full">
                 <SelectValue
                   placeholder={table.getState().pagination.pageSize}
                 />
@@ -355,7 +383,7 @@ export function DataTable<TData, TValue>({
           <div className="flex items-center space-x-2">
             <Button
               variant="outline"
-              className="hidden h-8 w-8 p-0 lg:flex border-primary/10 rounded-full"
+              className="hidden h-8 w-8 p-0 lg:flex rounded-full"
               onClick={() => table.setPageIndex(0)}
               disabled={!table.getCanPreviousPage()}
             >
@@ -364,7 +392,7 @@ export function DataTable<TData, TValue>({
             </Button>
             <Button
               variant="outline"
-              className="h-8 w-8 p-0 border-primary/10 rounded-full"
+              className="h-8 w-8 p-0 rounded-full"
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
             >
@@ -373,7 +401,7 @@ export function DataTable<TData, TValue>({
             </Button>
             <Button
               variant="outline"
-              className="h-8 w-8 p-0 border-primary/10 rounded-full"
+              className="h-8 w-8 p-0 rounded-full"
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
             >
@@ -382,7 +410,7 @@ export function DataTable<TData, TValue>({
             </Button>
             <Button
               variant="outline"
-              className="hidden h-8 w-8 p-0 lg:flex border-primary/10 rounded-full"
+              className="hidden h-8 w-8 p-0 lg:flex rounded-full"
               onClick={() => table.setPageIndex(table.getPageCount() - 1)}
               disabled={!table.getCanNextPage()}
             >

@@ -15,6 +15,7 @@ import {
   inputStyles,
   labelStyles
 } from "./types"
+import { MagicCard } from "@/components/ui/magic-card"
 
 interface UbicacionContactoCardProps {
   control: InstitucionFormControl
@@ -22,8 +23,8 @@ interface UbicacionContactoCardProps {
 
 export function UbicacionContactoCard({ control }: UbicacionContactoCardProps) {
   return (
-    <Card className="bg-card/30 border-border/40 shadow-sm">
-      <CardHeader className="bg-linear-to-r from-violet-500/5 to-transparent border-b border-border/30">
+    <MagicCard className="rounded-2xl p-0">
+      <CardHeader className="bg-linear-to-r from-violet-500/5 to-transparent border-b border-border/30 pt-4 rounded-t-xl">
         <div className="flex items-center gap-3">
           <div className="p-2.5 bg-blue-500/10 rounded-xl">
             <IconMapPin className="size-5 text-blue-500" />
@@ -36,7 +37,7 @@ export function UbicacionContactoCard({ control }: UbicacionContactoCardProps) {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="pt-6 space-y-4">
+      <CardContent className="pt-6 space-y-4 p-6">
         <FormField
           control={control}
           name="direccion"
@@ -126,6 +127,6 @@ export function UbicacionContactoCard({ control }: UbicacionContactoCardProps) {
           />
         </div>
       </CardContent>
-    </Card>
+    </MagicCard>
   )
 }

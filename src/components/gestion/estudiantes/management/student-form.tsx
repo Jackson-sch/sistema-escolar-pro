@@ -11,7 +11,6 @@ import {
   IconMapPin,
   IconLoader2,
   IconUsers,
-  IconSchool,
   IconDeviceFloppy,
 } from "@tabler/icons-react";
 
@@ -49,8 +48,9 @@ import { toast } from "sonner";
 import { useEffect } from "react";
 import { Separator } from "@/components/ui/separator";
 import { formatDate } from "@/lib/formats";
-import CardGeneric from "@/components/card-generic";
+import CardGeneric from "@/components/common/card-generic";
 import { SEXO_OPTIONS, PARENTESCO_OPTIONS } from "@/lib/constants";
+import { useFormModal } from "@/components/modals/form-modal-context";
 
 interface StudentFormProps {
   id?: string;
@@ -68,6 +68,7 @@ export function StudentForm({
   estados,
 }: StudentFormProps) {
   const [isPending, startTransition] = useTransition();
+  const { setIsDirty } = useFormModal();
 
   const form = useForm<StudentValues>({
     resolver: zodResolver(StudentSchema),
@@ -128,6 +129,13 @@ export function StudentForm({
         },
   });
 
+  const { isDirty } = form.formState;
+
+  useEffect(() => {
+    setIsDirty(isDirty);
+    return () => setIsDirty(false);
+  }, [isDirty, setIsDirty]);
+
   // Observar cambios en el DNI del apoderado para auto-completar
   const dniApoderado = form.watch("dniApoderado");
 
@@ -146,7 +154,7 @@ export function StudentForm({
               shouldDirty: true,
             });
             toast.success(
-              "Apoderado encontrado, datos cargados automáticamente."
+              "Apoderado encontrado, datos cargados automáticamente.",
             );
           }
         } catch (error) {
@@ -167,6 +175,7 @@ export function StudentForm({
         if (data.error) toast.error(data.error);
         if (data.success) {
           toast.success(data.success);
+          setIsDirty(false);
           if (!id) form.reset();
           onSuccess?.();
         }
@@ -288,7 +297,7 @@ export function StudentForm({
                           variant={"outline"}
                           className={cn(
                             "w-full pl-3 text-left font-normal rounded-full border-border/40 hover:bg-muted/50 transition-all",
-                            !field.value && "text-muted-foreground"
+                            !field.value && "text-muted-foreground",
                           )}
                         >
                           {field.value ? (
@@ -624,12 +633,22 @@ export function StudentForm({
           </div>
         </CardGeneric>
 
-        <div className="border-t border-border/40 pt-6 flex justify-end gap-3">
+        <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-6 border-t border-border/40">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onSuccess}
+            className="w-full sm:w-auto rounded-full border-border/40 hover:bg-accent/50"
+            disabled={isPending}
+            size="lg"
+          >
+            Cancelar
+          </Button>
           <Button
             disabled={isPending}
             type="submit"
             size="lg"
-            className="rounded-full"
+            className="w-full sm:w-auto rounded-full px-8"
           >
             {isPending ? (
               <>

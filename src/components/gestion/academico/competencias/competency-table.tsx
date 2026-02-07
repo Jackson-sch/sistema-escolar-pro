@@ -2,9 +2,7 @@
 
 import { useEffect } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import {
-  IconBook,
-} from "@tabler/icons-react";
+import { IconBook } from "@tabler/icons-react";
 import { useQueryState, parseAsString } from "nuqs";
 
 import { DataTable } from "@/components/ui/data-table";
@@ -23,6 +21,42 @@ import {
 interface CompetencyTableProps {
   data: CompetencyTableType[];
   areas: { id: string; nombre: string }[];
+}
+
+interface CompetencyFiltersProps {
+  table: any;
+  areaId: string | null;
+  meta: any;
+}
+
+function CompetencyFilters({ table, areaId, meta }: CompetencyFiltersProps) {
+  useEffect(() => {
+    table.getColumn("areaCurricularId")?.setFilterValue(areaId);
+  }, [areaId, table]);
+
+  return (
+    <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+      <Select
+        value={areaId || "all"}
+        onValueChange={(v) => meta.setAreaId(v === "all" ? null : v)}
+      >
+        <SelectTrigger className="w-full sm:w-[220px] h-9 bg-background text-xs shadow-sm rounded-full">
+          <div className="flex items-center gap-2 truncate">
+            <IconBook className="size-3.5 opacity-60 shrink-0 text-violet-500" />
+            <SelectValue placeholder="Filtrar por Área" />
+          </div>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">Todas las Áreas</SelectItem>
+          {meta?.areas?.map((area: any) => (
+            <SelectItem key={area.id} value={area.id}>
+              {area.nombre}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
 }
 
 export function CompetencyTable({ data, areas }: CompetencyTableProps) {
@@ -61,42 +95,20 @@ export function CompetencyTable({ data, areas }: CompetencyTableProps) {
       onSearchChange={setSearchQuery}
       onClearFilters={clearFilters}
       hasActiveFilters={hasActiveFilters}
+      meta={{ ...areas }}
       initialState={{
         columnVisibility: {
           areaCurricularId: false,
         },
       }}
     >
-      {(table: any) => {
-        // Link nuqs state to table filters
-        useEffect(() => {
-          table.getColumn("areaCurricularId")?.setFilterValue(areaId);
-        }, [areaId, table]);
-
-        return (
-          <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-            <Select
-              value={areaId || "all"}
-              onValueChange={(v) => setAreaId(v === "all" ? null : v)}
-            >
-              <SelectTrigger className="w-full sm:w-[220px] h-9 bg-background text-xs shadow-sm rounded-full">
-                <div className="flex items-center gap-2 truncate">
-                  <IconBook className="size-3.5 opacity-60 shrink-0 text-violet-500" />
-                  <SelectValue placeholder="Filtrar por Área" />
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas las Áreas</SelectItem>
-                {areas.map((area) => (
-                  <SelectItem key={area.id} value={area.id}>
-                    {area.nombre}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        );
-      }}
+      {(table: any) => (
+        <CompetencyFilters
+          table={table}
+          areaId={areaId}
+          meta={{ areas, setAreaId }}
+        />
+      )}
     </DataTable>
   );
 }

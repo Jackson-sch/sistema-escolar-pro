@@ -118,7 +118,7 @@ export function PortalSidebar({ user }: PortalSidebarProps) {
           </div>
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
-            className="size-8 rounded-lg flex items-center justify-center hover:bg-red-500/10 text-muted-foreground hover:text-red-500 transition-colors group-data-[collapsible=icon]:hidden"
+            className="size-8 rounded-lg flex items-center justify-center hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors group-data-[collapsible=icon]:hidden"
             title="Cerrar sesión"
           >
             <IconLogout className="size-4" />
