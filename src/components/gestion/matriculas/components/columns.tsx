@@ -36,6 +36,7 @@ export type EnrollmentTableType = {
     seccion: string;
     grado: { nombre: string };
     nivel: { nombre: string };
+    sede: { nombre: string } | null;
   };
 };
 
@@ -90,9 +91,19 @@ export const columns: ColumnDef<EnrollmentTableType>[] = [
       const { nivelAcademico } = row.original;
       return (
         <div className="flex flex-col gap-1.5 py-1">
-          <span className="text-sm font-semibold text-foreground">
-            {nivelAcademico.grado.nombre} - {nivelAcademico.seccion}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-foreground">
+              {nivelAcademico.grado.nombre} - {nivelAcademico.seccion}
+            </span>
+            {nivelAcademico.sede && (
+              <Badge
+                variant="outline"
+                className="text-[10px] py-0 px-2 bg-blue-50/50 text-blue-600 border-blue-200"
+              >
+                {nivelAcademico.sede.nombre}
+              </Badge>
+            )}
+          </div>
           <Badge
             variant="secondary"
             className="w-fit text-xs font-medium bg-secondary/20 text-secondary-foreground border-secondary/30"

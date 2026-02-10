@@ -4,6 +4,7 @@ import {
   getTutoresAction,
 } from "@/actions/academic-structure";
 import { getInstitucionesAction } from "@/actions/academic";
+import { getSedesAction } from "@/actions/sedes";
 import { SeccionTable } from "@/components/gestion/academico/estructura/secciones/seccion-table";
 import { AddSeccionButton } from "@/components/gestion/academico/estructura/secciones/add-seccion-button";
 
@@ -16,10 +17,12 @@ export default async function SeccionesPage() {
     { data: secciones = [] },
     { data: grados = [] },
     { data: tutores = [] },
+    { data: sedes = [] },
   ] = await Promise.all([
     getSeccionesAction({ anioAcademico: currentAnio }),
     getGradosAction(),
     getTutoresAction(),
+    getSedesAction(),
   ]);
 
   return (
@@ -31,12 +34,13 @@ export default async function SeccionesPage() {
         <AddSeccionButton
           grados={grados}
           tutores={tutores}
+          sedes={sedes}
           institucionId={institucionId}
         />
       </div>
       <SeccionTable
         data={secciones}
-        meta={{ grados, tutores, institucionId }}
+        meta={{ grados, tutores, sedes, institucionId }}
       />
     </div>
   );

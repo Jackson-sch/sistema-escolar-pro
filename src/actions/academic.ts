@@ -91,27 +91,94 @@ export async function upsertAreaAction(values: any, id?: string) {
 }
 
 /**
- * Crea o actualiza un curso (Carga Horaria)
+ * Crea o actualiza cursos (Carga Horaria)
+ * Soporta creación múltiple para varias secciones
  */
 export async function upsertCourseAction(values: any, id?: string) {
   try {
+    const { nivelAcademicoIds, ...courseData } = values;
+
     if (id) {
+      // Si hay ID, es una actualización individual (usualmente desde la tabla)
+      const updateData: any = {
+        ...courseData,
+        areaCurricular: { connect: { id: values.areaCurricularId } },
+        nivelAcademico: { connect: { id: nivelAcademicoIds?.[0] || values.nivelAcademicoId } },
+      };
+
+      if (values.profesorId) {
+        updateData.profesor = { connect: { id: values.profesorId } };
+      } else {
+        updateData.profesor = { disconnect: true };
+      }
+
       const course = await prisma.curso.update({
         where: { id },
-        data: values
+        data: updateData
       })
       revalidatePath("/gestion/academico/carga-horaria")
-      return { success: "Curso/Asignación actualizado", data: JSON.parse(JSON.stringify(course)) }
+      return { success: "Curso actualizado", data: JSON.parse(JSON.stringify(course)) }
     } else {
-      const course = await prisma.curso.create({
-        data: values
-      })
+      // Creación múltiple
+      const createdCourses = [];
+      const levels = await prisma.nivelAcademico.findMany({
+        where: { id: { in: nivelAcademicoIds } }
+      });
+
+      for (const nivelId of nivelAcademicoIds) {
+        const nivel = levels.find(l => l.id === nivelId);
+        if (!nivel) continue;
+
+        const createData: any = {
+          nombre: courseData.nombre,
+          codigo: courseData.codigo,
+          descripcion: courseData.descripcion,
+          anioAcademico: courseData.anioAcademico,
+          horasSemanales: courseData.horasSemanales,
+          creditos: courseData.creditos,
+          activo: courseData.activo ?? true,
+          areaCurricularId: values.areaCurricularId,
+          nivelAcademicoId: nivelId,
+          nivelId: nivel.nivelId,
+          gradoId: nivel.gradoId,
+          institucionId: nivel.institucionId,
+          profesorId: values.profesorId || null,
+        };
+
+        const course = await prisma.curso.create({
+          data: createData
+        });
+        createdCourses.push(course);
+      }
+
       revalidatePath("/gestion/academico/carga-horaria")
-      return { success: "Docente asignado correctamente", data: JSON.parse(JSON.stringify(course)) }
+      return { 
+        success: `${createdCourses.length} asignaciones creadas correctamente`, 
+        data: JSON.parse(JSON.stringify(createdCourses)) 
+      }
     }
-  } catch (error) {
-    console.error("Error upserting course:", error)
+  } catch (error: any) {
+    if (error.code === 'P2002') {
+      return { error: `Ya existe un curso con el código "${values.codigo}" en una de las secciones seleccionadas para el año ${values.anioAcademico}.` }
+    }
     return { error: "No se pudo procesar la asignación del curso" }
+  }
+}
+
+/**
+ * Asigna un profesor a un curso específico
+ */
+export async function assignTeacherAction(courseId: string, profesorId: string) {
+  try {
+    const course = await prisma.curso.update({
+      where: { id: courseId },
+      data: { profesorId }
+    })
+    revalidatePath("/gestion/academico/carga-horaria")
+    return { success: "Profesor asignado correctamente", data: JSON.parse(JSON.stringify(course)) }
+  } catch (error) {
+    console.error("Error assigning teacher:", error)
+    return { error: "No se pudo asignar el profesor" }
   }
 }
 

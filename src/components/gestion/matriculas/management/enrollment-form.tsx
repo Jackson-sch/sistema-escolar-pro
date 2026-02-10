@@ -368,9 +368,16 @@ export function EnrollmentForm({
                                 className="py-3 focus:bg-blue-500/10 focus:text-blue-400"
                               >
                                 <div className="flex items-center justify-between w-full gap-4">
-                                  <span className="font-bold">
-                                    {n.grado.nombre} "{n.seccion}"
-                                  </span>
+                                  <div className="flex flex-col">
+                                    <span className="font-bold">
+                                      {n.grado.nombre} "{n.seccion}"
+                                    </span>
+                                    {n.sede && (
+                                      <span className="text-[10px] text-blue-500 font-medium">
+                                        Sede: {n.sede.nombre}
+                                      </span>
+                                    )}
+                                  </div>
                                   <span className="rounded-md bg-white/5 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
                                     {n.nivel.nombre}
                                   </span>

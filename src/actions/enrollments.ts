@@ -24,7 +24,8 @@ export async function getEnrollmentsAction() {
         nivelAcademico: {
           include: {
             grado: true,
-            nivel: true
+            nivel: true,
+            sede: true
           }
         }
       },

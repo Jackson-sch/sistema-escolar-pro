@@ -182,7 +182,7 @@ export function FamilyMemberForm({
                     <Input
                       {...field}
                       placeholder="00000000"
-                      className="pl-10 bg-muted/5 border-border/40 rounded-xl"
+                      className="pl-10 bg-muted/5 border-border/40 rounded-full"
                       maxLength={8}
                       disabled={!!initialData}
                     />
@@ -206,7 +206,7 @@ export function FamilyMemberForm({
                   defaultValue={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger className="bg-muted/5 border-border/40 rounded-xl w-full">
+                    <SelectTrigger className="bg-muted/5 border-border/40 rounded-full w-full">
                       <SelectValue placeholder="Seleccionar" />
                     </SelectTrigger>
                   </FormControl>
@@ -237,7 +237,7 @@ export function FamilyMemberForm({
                   <Input
                     {...field}
                     placeholder="Nombres"
-                    className="bg-muted/5 border-border/40 rounded-xl"
+                    className="bg-muted/5 border-border/40 rounded-full"
                   />
                 </FormControl>
                 <FormMessage />
@@ -256,7 +256,7 @@ export function FamilyMemberForm({
                   <Input
                     {...field}
                     placeholder="Paterno"
-                    className="bg-muted/5 border-border/40 rounded-xl"
+                    className="bg-muted/5 border-border/40 rounded-full"
                   />
                 </FormControl>
                 <FormMessage />
@@ -275,7 +275,7 @@ export function FamilyMemberForm({
                   <Input
                     {...field}
                     placeholder="Materno"
-                    className="bg-muted/5 border-border/40 rounded-xl"
+                    className="bg-muted/5 border-border/40 rounded-full"
                   />
                 </FormControl>
                 <FormMessage />
@@ -299,7 +299,7 @@ export function FamilyMemberForm({
                     <Input
                       {...field}
                       placeholder="999000111"
-                      className="pl-10 bg-muted/5 border-border/40 rounded-xl"
+                      className="pl-10 bg-muted/5 border-border/40 rounded-full"
                     />
                   </div>
                 </FormControl>
@@ -322,7 +322,7 @@ export function FamilyMemberForm({
                       {...field}
                       type="email"
                       placeholder="correo@ejemplo.com"
-                      className="pl-10 bg-muted/5 border-border/40 rounded-xl"
+                      className="pl-10 bg-muted/5 border-border/40 rounded-full"
                     />
                   </div>
                 </FormControl>
@@ -361,7 +361,7 @@ export function FamilyMemberForm({
               control={form.control}
               name="autorizadoRecoger"
               render={({ field }) => (
-                <FormItem className="flex items-center justify-between rounded-xl border border-border/40 p-3 bg-muted/5">
+                <FormItem className="flex items-center justify-between rounded-full border border-border/40 p-3 bg-muted/5">
                   <FormLabel className="text-xs font-bold">
                     Autorizado a Recoger
                   </FormLabel>
@@ -378,7 +378,7 @@ export function FamilyMemberForm({
               control={form.control}
               name="viveCon"
               render={({ field }) => (
-                <FormItem className="flex items-center justify-between rounded-xl border border-border/40 p-3 bg-muted/5">
+                <FormItem className="flex items-center justify-between rounded-full border border-border/40 p-3 bg-muted/5">
                   <FormLabel className="text-xs font-bold">
                     Vive con el Alumno
                   </FormLabel>

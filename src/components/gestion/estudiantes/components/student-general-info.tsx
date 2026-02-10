@@ -8,13 +8,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { StudentTableType } from "@/components/gestion/estudiantes/components/columns";
 import { formatDate } from "@/lib/formats";
+import { MagicCard } from "@/components/ui/magic-card";
 
 interface StudentGeneralInfoProps {
   student: StudentTableType;
 }
 
 export function StudentGeneralInfo({ student }: StudentGeneralInfoProps) {
-  console.log("🚀 ~ StudentGeneralInfo ~ student:", student);
   return (
     <div className="space-y-6 animate-in fade-in-0 duration-500">
       {/* Formación Académica */}
@@ -26,8 +26,13 @@ export function StudentGeneralInfo({ student }: StudentGeneralInfoProps) {
           </h3>
         </div>
 
-        <Card className="relative overflow-hidden border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
-          <CardContent className="p-0 flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x divide-primary/10">
+        <MagicCard
+          gradientFrom={student.nivelAcademico ? "#3b82f6" : "#ef4444"}
+          gradientTo={student.nivelAcademico ? "#60a5fa" : "#f87171"}
+          gradientColor={student.nivelAcademico ? "#3b83f622" : "#f8717122"}
+          className="relative overflow-hidden bg-gradient-to-br from-primary/5 to-transparent rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-0"
+        >
+          <div className="p-0 flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x divide-primary/10 bg-primary/5">
             {student.nivelAcademico ? (
               <>
                 <div className="p-3 flex-1 flex flex-col gap-2">
@@ -48,13 +53,29 @@ export function StudentGeneralInfo({ student }: StudentGeneralInfoProps) {
                   <span className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground">
                     Nivel Académico
                   </span>
-                  <Badge variant="secondary" className="w-fit">
+                  <Badge
+                    variant="outline"
+                    className="w-fit bg-primary/10 text-primary"
+                  >
                     {student.nivelAcademico.nivel?.nombre || "N/A"}
                   </Badge>
                 </div>
+                {student.nivelAcademico.sede && (
+                  <div className="p-3 flex-1 flex flex-col gap-2 border-l border-primary/10">
+                    <span className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground">
+                      Sede / Local
+                    </span>
+                    <Badge
+                      variant="outline"
+                      className="w-fit bg-blue-500/10 text-blue-500 border-blue-500/20 font-bold"
+                    >
+                      {student.nivelAcademico.sede.nombre}
+                    </Badge>
+                  </div>
+                )}
               </>
             ) : (
-              <div className="p-6 w-full flex items-center gap-4 bg-destructive/5 border-l-4 border-destructive">
+              <div className="p-6 w-full flex items-center gap-4 bg-gradient-to-br from-destructive/5 to-transparent">
                 <div className="size-10 rounded-lg bg-destructive/10 flex items-center justify-center shrink-0">
                   <IconAlertCircle className="size-5 text-destructive" />
                 </div>
@@ -68,8 +89,8 @@ export function StudentGeneralInfo({ student }: StudentGeneralInfoProps) {
                 </div>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </MagicCard>
       </section>
 
       {/* Localización */}
@@ -81,8 +102,13 @@ export function StudentGeneralInfo({ student }: StudentGeneralInfoProps) {
           </h3>
         </div>
 
-        <Card className="relative overflow-hidden border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
-          <CardContent className="p-6 flex flex-col gap-3">
+        <MagicCard
+          gradientFrom="#3b82f6"
+          gradientTo="#60a5fa"
+          gradientColor="#3b83f622"
+          className="relative overflow-hidden bg-gradient-to-br from-primary/5 to-transparent rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-0"
+        >
+          <div className="p-3 flex flex-col gap-3 bg-primary/5">
             <div className="flex gap-3 items-start">
               <div className="p-2.5 bg-primary/10 rounded-lg shrink-0 mt-0.5">
                 <IconMapPin className="size-4 text-primary" />
@@ -110,8 +136,8 @@ export function StudentGeneralInfo({ student }: StudentGeneralInfoProps) {
                 </span>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </MagicCard>
       </section>
 
       {/* Registro */}
@@ -125,8 +151,13 @@ export function StudentGeneralInfo({ student }: StudentGeneralInfoProps) {
 
         <div className="grid grid-cols-2 gap-4">
           {/* Fecha Ingreso */}
-          <Card className="border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
-            <CardContent className="p-3 flex flex-col gap-3">
+          <MagicCard
+            gradientFrom="#3b82f6"
+            gradientTo="#60a5fa"
+            gradientColor="#3b83f622"
+            className="relative overflow-hidden bg-gradient-to-br from-primary/5 to-transparent rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-0"
+          >
+            <div className="p-3 flex flex-col gap-3 bg-primary/5">
               <span className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground">
                 Fecha Ingreso
               </span>
@@ -140,12 +171,17 @@ export function StudentGeneralInfo({ student }: StudentGeneralInfoProps) {
                     : "---"}
                 </span>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </MagicCard>
 
           {/* Nacionalidad */}
-          <Card className="border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
-            <CardContent className="p-3 flex flex-col gap-3">
+          <MagicCard
+            gradientFrom="#3b82f6"
+            gradientTo="#60a5fa"
+            gradientColor="#3b83f622"
+            className="relative overflow-hidden bg-gradient-to-br from-primary/5 to-transparent rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-0"
+          >
+            <div className="p-3 flex flex-col gap-3 pb-5 bg-primary/5">
               <span className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground">
                 Nacionalidad
               </span>
@@ -157,8 +193,8 @@ export function StudentGeneralInfo({ student }: StudentGeneralInfoProps) {
                   {student.nacionalidad}
                 </span>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </MagicCard>
         </div>
       </section>
     </div>

@@ -15,13 +15,13 @@ export const CurricularAreaSchema = z.object({
 export const CourseSchema = z.object({
   nombre: z.string().min(1, "El nombre del curso es requerido"),
   codigo: z.string().min(1, "El código del curso es requerido"),
-  descripcion: z.string(),
+  descripcion: z.string().nullish(),
   anioAcademico: z.number().int().min(2024).max(2100),
   horasSemanales: z.number().int().min(1, "Mínimo 1 hora semanal"),
   creditos: z.number().int(),
   areaCurricularId: z.string().min(1, "El área curricular es requerida"),
-  nivelAcademicoId: z.string().min(1, "La sección es requerida"),
-  profesorId: z.string().min(1, "El profesor es requerido"),
+  nivelAcademicoIds: z.array(z.string()).min(1, "Debe seleccionar al menos una sección"),
+  profesorId: z.string().nullish(),
   activo: z.boolean(),
 })
 

@@ -74,14 +74,24 @@ export function StudentForm({
     resolver: zodResolver(StudentSchema),
     defaultValues: initialData
       ? {
-          ...initialData,
+          name: initialData.name || "",
+          apellidoPaterno: initialData.apellidoPaterno || "",
+          apellidoMaterno: initialData.apellidoMaterno || "",
+          dni: initialData.dni || "",
           email: initialData.email || "",
+          sexo: initialData.sexo || "MASCULINO",
+          nacionalidad: initialData.nacionalidad || "PERUANA",
+          direccion: initialData.direccion || "",
+          departamento: initialData.departamento || "LA LIBERTAD",
+          provincia: initialData.provincia || "TRUJILLO",
+          distrito: initialData.distrito || "TRUJILLO",
           ubigeo: initialData.ubigeo || "",
           codigoEstudiante: initialData.codigoEstudiante || "",
           codigoSiagie: initialData.codigoSiagie || "",
-          tipoSangre: initialData.tipoSangre || "",
-          alergias: initialData.alergias || "",
-          condicionesMedicas: initialData.condicionesMedicas || "",
+          institucionId:
+            initialData.institucionId || instituciones[0]?.id || "",
+          estadoId: initialData.estadoId || estados[0]?.id || "",
+
           fechaNacimiento: initialData.fechaNacimiento
             ? new Date(initialData.fechaNacimiento)
             : undefined,
@@ -114,9 +124,7 @@ export function StudentForm({
           ubigeo: "",
           codigoEstudiante: "",
           codigoSiagie: "",
-          tipoSangre: "",
-          alergias: "",
-          condicionesMedicas: "",
+
           institucionId: instituciones[0]?.id || "",
           estadoId:
             estados.find((e) => e.nombre === "Activo")?.id ||
@@ -261,7 +269,7 @@ export function StudentForm({
               control={form.control}
               name="dni"
               render={({ field }) => (
-                <FormItem className="md:col-span-6">
+                <FormItem className="md:col-span-4">
                   <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">
                     DNI / Documento de Identidad
                   </FormLabel>
@@ -286,7 +294,7 @@ export function StudentForm({
               control={form.control}
               name="fechaNacimiento"
               render={({ field }) => (
-                <FormItem className="md:col-span-6">
+                <FormItem className="md:col-span-4">
                   <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">
                     Fecha de Nacimiento
                   </FormLabel>
@@ -328,7 +336,6 @@ export function StudentForm({
               )}
             />
 
-            {/* Sexo (ancho 4) */}
             <FormField
               control={form.control}
               name="sexo"
@@ -358,13 +365,32 @@ export function StudentForm({
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="nacionalidad"
+              render={({ field }) => (
+                <FormItem className="md:col-span-3">
+                  <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">
+                    Nacionalidad
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="PERUANA"
+                      className="bg-muted/5 border-border/40 focus:ring-primary/20 transition-all rounded-full"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             {/* Email (ancho 8) */}
             <FormField
               control={form.control}
               name="email"
               render={({ field }) => (
-                <FormItem className="md:col-span-8">
+                <FormItem className="md:col-span-6">
                   <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">
                     Correo Electrónico (Opcional)
                   </FormLabel>
@@ -384,45 +410,12 @@ export function StudentForm({
               )}
             />
 
-            <Separator className="md:col-span-12 my-1" />
-
-            {/* Institución (ancho 6) */}
-            <FormField
-              control={form.control}
-              name="institucionId"
-              render={({ field }) => (
-                <FormItem className="md:col-span-6">
-                  <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">
-                    Institución
-                  </FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="w-full rounded-full bg-muted/5 border-border/40 focus:ring-primary/20 transition-all">
-                        <SelectValue placeholder="Seleccionar institución" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {instituciones.map((inst) => (
-                        <SelectItem key={inst.id} value={inst.id}>
-                          {inst.nombreInstitucion}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Estado (ancho 6) */}
+            {/* Estado (ancho 6 si hay institucion, sino full) */}
             <FormField
               control={form.control}
               name="estadoId"
               render={({ field }) => (
-                <FormItem className="md:col-span-6">
+                <FormItem className="md:col-span-3">
                   <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">
                     Estado de Alumno
                   </FormLabel>
@@ -447,6 +440,43 @@ export function StudentForm({
                 </FormItem>
               )}
             />
+
+            <Separator
+              className={cn("md:col-span-12 my-1", instituciones.length === 1 && "hidden")}
+            />
+
+            {/* Institución and Estado */}
+            {instituciones.length > 1 && (
+              <FormField
+                control={form.control}
+                name="institucionId"
+                render={({ field }) => (
+                  <FormItem className="md:col-span-12">
+                    <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">
+                      Institución
+                    </FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full rounded-full bg-muted/5 border-border/40 focus:ring-primary/20 transition-all">
+                          <SelectValue placeholder="Seleccionar institución" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {instituciones.map((inst) => (
+                          <SelectItem key={inst.id} value={inst.id}>
+                            {inst.nombreInstitucion}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
           </div>
         </CardGeneric>
 

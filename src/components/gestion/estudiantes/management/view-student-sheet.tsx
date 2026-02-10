@@ -9,6 +9,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { StudentTableType } from "@/components/gestion/estudiantes/components/columns";
 import { FamilyManagementTab } from "@/components/gestion/estudiantes/features/familia/family-management-tab";
+import { HealthManagementTab } from "@/components/gestion/estudiantes/features/salud/health-management-tab";
 import { DisciplineTab } from "@/components/gestion/estudiantes/features/disciplina/discipline-tab";
 import { AchievementsTab } from "@/components/gestion/estudiantes/features/logros/achievements-tab";
 import { StudentProfileHeader } from "@/components/gestion/estudiantes/components/student-profile-header";
@@ -39,6 +40,7 @@ export function ViewStudentSheet({
   const TABS = [
     { id: "general", label: "General" },
     { id: "familia", label: "Familia" },
+    { id: "salud", label: "Salud" },
     { id: "disciplina", label: "Disciplina" },
     { id: "asistencia", label: "Logros" },
   ];
@@ -90,6 +92,10 @@ export function ViewStudentSheet({
 
                   {activeTab === "asistencia" && (
                     <AchievementsTab studentId={student.id} />
+                  )}
+
+                  {activeTab === "salud" && (
+                    <HealthManagementTab student={student} />
                   )}
                 </motion.div>
               </AnimatePresence>

@@ -26,9 +26,26 @@ export type StudentTableType = {
   fechaIngreso: Date | string | null;
   codigoEstudiante: string;
   codigoSiagie: string;
-  tipoSangre: string;
-  alergias: string;
-  condicionesMedicas: string;
+  tipoSangre: string | null;
+  alergias: string | null;
+  condicionesMedicas: string | null;
+  medicamentos: string | null;
+  seguroMedico: string | null;
+  discapacidades: string | null;
+  carnetConadis: string | null;
+  restriccionesAlimenticias: string | null;
+  centroSaludPreferido: string | null;
+  peso: number | null;
+  talla: number | null;
+  parentescoContactoEmergencia: string | null;
+  nombreContactoEmergencia2: string | null;
+  telefonoContactoEmergencia2: string | null;
+  parentescoContactoEmergencia2: string | null;
+  paisNacimiento: string | null;
+  lugarNacimiento: string | null;
+  lenguaMaterna: string | null;
+  religion: string | null;
+  numeroHermanos: number | null;
   institucionId: string;
   estadoId: string;
   image: string | null;
@@ -40,6 +57,7 @@ export type StudentTableType = {
     seccion: string;
     grado: { nombre: string };
     nivel: { nombre: string };
+    sede: { nombre: string } | null;
   } | null;
   padresTutores: {
     padreTutor: {
@@ -110,9 +128,19 @@ export const columns: ColumnDef<StudentTableType>[] = [
 
       return (
         <div className="flex flex-col">
-          <span className="text-[13px] font-semibold text-foreground/80">
-            {info.grado.nombre} - {info.seccion}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-[13px] font-semibold text-foreground/80">
+              {info.grado.nombre} - {info.seccion}
+            </span>
+            {info.sede && (
+              <Badge
+                variant="outline"
+                className="text-[9px] font-bold px-1.5 py-0 h-4 bg-blue-500/5 text-blue-500 border-blue-500/20"
+              >
+                {info.sede.nombre}
+              </Badge>
+            )}
+          </div>
           <span className="text-[10px] text-muted-foreground/60 font-semibold tracking-wide mt-0.5">
             {info.nivel.nombre}
           </span>

@@ -317,7 +317,24 @@ exports.Prisma.UserScalarFieldEnum = {
   institucionId: 'institucionId',
   mustChangePassword: 'mustChangePassword',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  medicamentos: 'medicamentos',
+  seguroMedico: 'seguroMedico',
+  discapacidades: 'discapacidades',
+  carnetConadis: 'carnetConadis',
+  restriccionesAlimenticias: 'restriccionesAlimenticias',
+  centroSaludPreferido: 'centroSaludPreferido',
+  peso: 'peso',
+  talla: 'talla',
+  parentescoContactoEmergencia: 'parentescoContactoEmergencia',
+  nombreContactoEmergencia2: 'nombreContactoEmergencia2',
+  telefonoContactoEmergencia2: 'telefonoContactoEmergencia2',
+  parentescoContactoEmergencia2: 'parentescoContactoEmergencia2',
+  paisNacimiento: 'paisNacimiento',
+  lugarNacimiento: 'lugarNacimiento',
+  lenguaMaterna: 'lenguaMaterna',
+  religion: 'religion',
+  numeroHermanos: 'numeroHermanos'
 };
 
 exports.Prisma.RelacionFamiliarScalarFieldEnum = {
@@ -393,9 +410,24 @@ exports.Prisma.NivelAcademicoScalarFieldEnum = {
   gradoId: 'gradoId',
   tutorId: 'tutorId',
   institucionId: 'institucionId',
+  sedeId: 'sedeId',
   anioAcademico: 'anioAcademico',
   activo: 'activo',
   turno: 'turno',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.SedeScalarFieldEnum = {
+  id: 'id',
+  nombre: 'nombre',
+  codigoIdentifier: 'codigoIdentifier',
+  direccion: 'direccion',
+  telefono: 'telefono',
+  email: 'email',
+  director: 'director',
+  institucionId: 'institucionId',
+  activo: 'activo',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -864,6 +896,7 @@ exports.Prisma.ModelName = {
   Nivel: 'Nivel',
   Grado: 'Grado',
   NivelAcademico: 'NivelAcademico',
+  Sede: 'Sede',
   PeriodoAcademico: 'PeriodoAcademico',
   AreaCurricular: 'AreaCurricular',
   Curso: 'Curso',

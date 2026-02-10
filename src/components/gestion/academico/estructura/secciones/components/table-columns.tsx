@@ -37,9 +37,11 @@ function SeccionCell({
         <span className="font-semibold text-foreground">
           {gradoNombre} "{seccion}"
         </span>
-        <span className="text-xs text-muted-foreground">
-          {nivelNombre} • {anioAcademico}
-        </span>
+        <div className="flex items-center gap-1 text-[10px] text-muted-foreground uppercase tracking-tight">
+          <span>{nivelNombre}</span>
+          <span className="text-muted-foreground/30">•</span>
+          <span>{anioAcademico}</span>
+        </div>
       </div>
     </div>
   );
@@ -171,6 +173,32 @@ export const getSeccionColumns = ({
     id: "tutor",
     header: "Tutor",
     cell: ({ row }) => <TutorCell tutor={row.original.tutor} />,
+  },
+  {
+    id: "sede",
+    header: "Sede",
+    accessorFn: (row) => row.sede?.nombre || "Sin Sede",
+    filterFn: (row, id, value) => {
+      return value === "ALL" || row.getValue(id) === value;
+    },
+    cell: ({ row }) => {
+      const sede = row.original.sede;
+      return (
+        <div className="flex items-center gap-1.5">
+          <Badge
+            variant="outline"
+            className={cn(
+              "font-semibold text-[10px] py-0 px-2 rounded-full",
+              sede
+                ? "bg-blue-50/50 text-blue-700 border-blue-200"
+                : "bg-slate-50 text-slate-500 border-slate-200",
+            )}
+          >
+            {sede?.nombre || "Sin Sede"}
+          </Badge>
+        </div>
+      );
+    },
   },
   {
     accessorKey: "turno",

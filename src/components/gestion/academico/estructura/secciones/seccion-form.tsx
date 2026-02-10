@@ -31,6 +31,7 @@ const formSchema = z.object({
   seccion: z.string().min(1, "La sección es requerida"),
   gradoId: z.string().min(1, "El grado es requerido"),
   tutorId: z.string().optional().nullable().or(z.literal("")),
+  sedeId: z.string().optional().nullable().or(z.literal("")),
   capacidad: z.string().min(1, "La capacidad es requerida"),
   aulaAsignada: z.string().optional().nullable().or(z.literal("")),
   turno: z.enum(["MANANA", "TARDE", "NOCHE"]),
@@ -49,6 +50,10 @@ interface SeccionFormProps {
     apellidoPaterno: string;
     apellidoMaterno: string;
   }[];
+  sedes: {
+    id: string;
+    nombre: string;
+  }[];
   institucionId: string;
   onSuccess?: () => void;
 }
@@ -57,6 +62,7 @@ export function SeccionForm({
   initialData,
   grados,
   tutores,
+  sedes,
   institucionId,
   onSuccess,
 }: SeccionFormProps) {
@@ -70,6 +76,7 @@ export function SeccionForm({
           seccion: initialData.seccion,
           gradoId: initialData.gradoId,
           tutorId: initialData.tutorId || "",
+          sedeId: initialData.sedeId || "",
           capacidad: String(initialData.capacidad),
           aulaAsignada: initialData.aulaAsignada || "",
           turno: initialData.turno,
@@ -80,6 +87,7 @@ export function SeccionForm({
           seccion: "",
           gradoId: "",
           tutorId: "",
+          sedeId: "",
           capacidad: "30",
           aulaAsignada: "",
           turno: "MANANA",
@@ -101,6 +109,7 @@ export function SeccionForm({
         {
           ...values,
           tutorId: values.tutorId === "none" ? null : values.tutorId || null,
+          sedeId: values.sedeId === "none" ? null : values.sedeId || null,
           aulaAsignada: values.aulaAsignada || null,
           capacidad: parseInt(values.capacidad, 10),
           anioAcademico: parseInt(values.anioAcademico, 10),
@@ -120,30 +129,64 @@ export function SeccionForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField<SeccionFormValues>
-          control={form.control}
-          name="gradoId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Grado</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value ?? ""}>
-                <FormControl>
-                  <SelectTrigger className="w-full rounded-full">
-                    <SelectValue placeholder="Seleccionar grado" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {grados.map((grado) => (
-                    <SelectItem key={grado.id} value={grado.id}>
-                      {grado.nivel.nombre} - {grado.nombre}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="grid grid-cols-2 gap-4">
+          <FormField<SeccionFormValues>
+            control={form.control}
+            name="gradoId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Grado</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value ?? ""}
+                >
+                  <FormControl>
+                    <SelectTrigger className="w-full rounded-full">
+                      <SelectValue placeholder="Grado" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {grados.map((grado) => (
+                      <SelectItem key={grado.id} value={grado.id}>
+                        {grado.nivel.nombre} - {grado.nombre}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField<SeccionFormValues>
+            control={form.control}
+            name="sedeId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Sede (Institución)</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value || "none"}
+                >
+                  <FormControl>
+                    <SelectTrigger className="w-full rounded-full">
+                      <SelectValue placeholder="Sede" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="none">Sin sede específica</SelectItem>
+                    {sedes.map((sede) => (
+                      <SelectItem key={sede.id} value={sede.id}>
+                        {sede.nombre}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <div className="grid grid-cols-2 gap-4">
           <FormField<SeccionFormValues>

@@ -48,7 +48,7 @@ export function AddStudentButton({
         description={`Gestión de alta para el periodo académico ${periodoAcademico}.`}
         isOpen={open}
         onOpenChange={setOpen}
-        className="sm:max-w-4xl"
+        className="sm:max-w-3xl"
       >
         <StudentForm
           onSuccess={() => setOpen(false)}

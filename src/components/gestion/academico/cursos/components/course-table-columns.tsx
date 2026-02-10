@@ -91,11 +91,18 @@ export const columns: ColumnDef<CourseTableType>[] = [
   {
     id: "profesor",
     header: "Docente Asignado",
-    accessorFn: (row) => `${row.profesor.name} ${row.profesor.apellidoPaterno}`,
+    accessorFn: (row) =>
+      `${row.profesor?.name || "N/A"} ${row.profesor?.apellidoPaterno || ""}`.trim(),
     cell: ({ row }) => {
       const { profesor } = row.original;
-      const fullName = `${profesor.name} ${profesor.apellidoPaterno} ${profesor.apellidoMaterno}`;
-      const initials = `${profesor.name[0]}${profesor.apellidoPaterno[0]}`;
+
+      const firstName = profesor?.name || "N/A";
+      const lastName = profesor?.apellidoPaterno || "";
+      const secondLastName = profesor?.apellidoMaterno || "";
+
+      const fullName = `${firstName} ${lastName} ${secondLastName}`.trim();
+      const initials =
+        `${firstName[0] || ""}${lastName[0] || ""}`.toUpperCase();
 
       return (
         <div className="flex items-center gap-3">

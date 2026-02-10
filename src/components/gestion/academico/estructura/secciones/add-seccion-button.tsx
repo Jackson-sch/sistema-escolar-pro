@@ -1,25 +1,36 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { IconUsers } from "@tabler/icons-react"
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import { IconUsers } from "@tabler/icons-react";
+import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
-import { FormModal } from "@/components/modals/form-modal"
-import { SeccionForm } from "./seccion-form"
+} from "@/components/ui/tooltip";
+import { FormModal } from "@/components/modals/form-modal";
+import { SeccionForm } from "./seccion-form";
 
 interface AddSeccionButtonProps {
-  grados: { id: string; nombre: string; nivel: { nombre: string } }[]
-  tutores: { id: string; name: string; apellidoPaterno: string; apellidoMaterno: string }[]
-  institucionId: string
+  grados: { id: string; nombre: string; nivel: { nombre: string } }[];
+  tutores: {
+    id: string;
+    name: string;
+    apellidoPaterno: string;
+    apellidoMaterno: string;
+  }[];
+  sedes: { id: string; nombre: string }[];
+  institucionId: string;
 }
 
-export function AddSeccionButton({ grados, tutores, institucionId }: AddSeccionButtonProps) {
-  const [open, setOpen] = useState(false)
+export function AddSeccionButton({
+  grados,
+  tutores,
+  sedes,
+  institucionId,
+}: AddSeccionButtonProps) {
+  const [open, setOpen] = useState(false);
 
   return (
     <>
@@ -50,10 +61,11 @@ export function AddSeccionButton({ grados, tutores, institucionId }: AddSeccionB
         <SeccionForm
           grados={grados}
           tutores={tutores}
+          sedes={sedes}
           institucionId={institucionId}
           onSuccess={() => setOpen(false)}
         />
       </FormModal>
     </>
-  )
+  );
 }

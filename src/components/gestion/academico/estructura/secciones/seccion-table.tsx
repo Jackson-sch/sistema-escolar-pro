@@ -39,6 +39,8 @@ export type SeccionTableType = {
     apellidoPaterno: string;
     apellidoMaterno: string;
   } | null;
+  sedeId: string | null;
+  sede: { nombre: string } | null;
   _count: { students: number; matriculas: number };
 };
 
@@ -47,6 +49,7 @@ interface SeccionTableProps {
   meta: {
     grados: any[];
     tutores: any[];
+    sedes: any[];
     institucionId: string;
   };
 }
@@ -54,22 +57,28 @@ interface SeccionTableProps {
 // Internal Toolbar Component
 interface SeccionTableToolbarProps {
   grados: any[];
+  sedes: any[];
   nivelFilter: string;
   setNivelFilter: (val: string) => void;
   gradoFilter: string;
   setGradoFilter: (val: string) => void;
   turnoFilter: string;
   setTurnoFilter: (val: string) => void;
+  sedeFilter: string;
+  setSedeFilter: (val: string) => void;
 }
 
 function SeccionTableToolbar({
   grados,
+  sedes,
   nivelFilter,
   setNivelFilter,
   gradoFilter,
   setGradoFilter,
   turnoFilter,
   setTurnoFilter,
+  sedeFilter,
+  setSedeFilter,
 }: SeccionTableToolbarProps) {
   const niveles = Array.from(new Set(grados.map((g) => g.nivel.nombre)));
   const isLevelSelected = nivelFilter !== "ALL";
@@ -156,6 +165,27 @@ function SeccionTableToolbar({
           </SelectItem>
         </SelectContent>
       </Select>
+
+      {/* Sede Filter */}
+      <Select value={sedeFilter} onValueChange={setSedeFilter}>
+        <SelectTrigger className="w-[140px] h-9 bg-muted/5 border-border/40 text-[11px] font-medium transition-all focus:ring-primary/20 rounded-full">
+          <SelectValue placeholder="Sede" />
+        </SelectTrigger>
+        <SelectContent className="border-border/40 bg-background/95 backdrop-blur-xl">
+          <SelectItem value="ALL" className="text-[11px] font-medium">
+            Todas las sedes
+          </SelectItem>
+          {sedes.map((s) => (
+            <SelectItem
+              key={s.id}
+              value={s.nombre}
+              className="text-[11px] font-medium"
+            >
+              {s.nombre}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }
@@ -184,18 +214,24 @@ export function SeccionTable({ data, meta }: SeccionTableProps) {
     "turno",
     parseAsString.withDefault("ALL"),
   );
+  const [sedeFilter, setSedeFilter] = useQueryState(
+    "sede",
+    parseAsString.withDefault("ALL"),
+  );
 
   const hasActiveFilters =
     searchQuery !== "" ||
     nivelFilter !== "ALL" ||
     gradoFilter !== "ALL" ||
-    turnoFilter !== "ALL";
+    turnoFilter !== "ALL" ||
+    sedeFilter !== "ALL";
 
   const onClearFilters = () => {
     setSearchQuery("");
     setNivelFilter("ALL");
     setGradoFilter("ALL");
     setTurnoFilter("ALL");
+    setSedeFilter("ALL");
   };
 
   const onEdit = (seccion: SeccionTableType) => {
@@ -262,15 +298,24 @@ export function SeccionTable({ data, meta }: SeccionTableProps) {
               ?.setFilterValue(turnoFilter === "ALL" ? "" : turnoFilter);
           }, [turnoFilter, table]);
 
+          useEffect(() => {
+            table
+              .getColumn("sede")
+              ?.setFilterValue(sedeFilter === "ALL" ? "" : sedeFilter);
+          }, [sedeFilter, table]);
+
           return (
             <SeccionTableToolbar
               grados={meta.grados}
+              sedes={meta.sedes}
               nivelFilter={nivelFilter}
               setNivelFilter={setNivelFilter}
               gradoFilter={gradoFilter}
               setGradoFilter={setGradoFilter}
               turnoFilter={turnoFilter}
               setTurnoFilter={setTurnoFilter}
+              sedeFilter={sedeFilter}
+              setSedeFilter={setSedeFilter}
             />
           );
         }}
@@ -297,6 +342,7 @@ export function SeccionTable({ data, meta }: SeccionTableProps) {
           initialData={selectedSeccion}
           grados={meta.grados}
           tutores={meta.tutores}
+          sedes={meta.sedes}
           institucionId={meta.institucionId}
           onSuccess={() => {
             setShowEditDialog(false);

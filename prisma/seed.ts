@@ -77,13 +77,13 @@ async function main() {
       nombreComercial: "EduPeru Pro",
       tipoGestion: "PRIVADA",
       modalidad: "PRESENCIAL",
-      ugel: "UGEL 03",
-      dre: "DRE LIMA",
-      ubigeo: "150101",
+      ugel: "UGEL 01",
+      dre: "DRE LA LIBERTAD",
+      ubigeo: "130101",
       direccion: "Av. La Educación 123",
-      distrito: "Lima",
-      provincia: "Lima",
-      departamento: "Lima",
+      distrito: "Trujillo",
+      provincia: "Trujillo",
+      departamento: "La Libertad",
       email: "contacto@eduperu.pro",
       fechaInicioClases: new Date("2025-03-01"),
       fechaFinClases: new Date("2025-12-20"),
@@ -178,12 +178,237 @@ async function main() {
     { nombre: "Seguimiento", descripcion: "Continuación de casos previos" },
   ]
 
-  for (const c of categoriasIncidente) {
-    await prisma.categoriaIncidente.upsert({
-      where: { nombre: c.nombre },
-      update: {},
-      create: c,
+  // 8. Áreas Curriculares y Competencias (Malla Curricular)
+  console.log("- Sembrando Malla Curricular (Áreas y Competencias)...")
+  const mallaCurricular = [
+    {
+      nombre: "Matemática",
+      codigo: "MAT",
+      color: "#3b82f6",
+      competencias: [
+        "Resuelve problemas de cantidad",
+        "Resuelve problemas de regularidad, equivalencia y cambio",
+        "Resuelve problemas de forma, movimiento y localización",
+        "Resuelve problemas de gestión de datos e incertidumbre"
+      ]
+    },
+    {
+      nombre: "Comunicación",
+      codigo: "COM",
+      color: "#ef4444",
+      competencias: [
+        "Se comunica oralmente en su lengua materna",
+        "Lee diversos tipos de textos escritos en su lengua materna",
+        "Escribe diversos tipos de textos en su lengua materna"
+      ]
+    },
+    {
+      nombre: "Ciencia y Tecnología",
+      codigo: "CYT",
+      color: "#10b981",
+      competencias: [
+        "Indaga mediante métodos científicos para construir sus conocimientos",
+        "Explica el mundo físico basándose en conocimientos sobre los seres vivos, materia y energía, biodiversidad, Tierra y universo",
+        "Diseña y construye soluciones tecnológicas para resolver problemas de su entorno"
+      ]
+    },
+    {
+      nombre: "Personal Social",
+      codigo: "PS",
+      color: "#f59e0b",
+      competencias: [
+        "Construye su identidad",
+        "Convive y participa democráticamente en la búsqueda del bien común",
+        "Gestiona responsablemente el espacio y el ambiente",
+        "Gestiona responsablemente los recursos económicos",
+        "Interpreta críticamente fuentes diversas"
+      ]
+    },
+    {
+      nombre: "Inglés",
+      codigo: "ING",
+      color: "#6366f1",
+      competencias: [
+        "Se comunica oralmente en inglés como lengua extranjera",
+        "Lee diversos tipos de textos en inglés como lengua extranjera",
+        "Escribe diversos tipos de textos en inglés como lengua extranjera"
+      ]
+    },
+    {
+      nombre: "Educación Religiosa",
+      codigo: "REL",
+      color: "#8b5cf6",
+      competencias: [
+        "Construye su identidad como persona humana, amada por Dios, digna, libre y trascendente",
+        "Asume la experiencia del encuentro personal y comunitario con Dios en su proyecto de vida en coherencia con su creencia religiosa"
+      ]
+    },
+    {
+      nombre: "Computación",
+      codigo: "COMP",
+      color: "#06b6d4",
+      competencias: [
+        "Se desenvuelve en los entornos virtuales generados por las TIC",
+        "Gestiona su aprendizaje de manera autónoma"
+      ]
+    }
+  ]
+
+  for (const a of mallaCurricular) {
+    const area = await prisma.areaCurricular.upsert({
+      where: { codigo_institucionId: { codigo: a.codigo, institucionId: institucion.id } },
+      update: {
+        nombre: a.nombre,
+        color: a.color,
+      },
+      create: {
+        nombre: a.nombre,
+        codigo: a.codigo,
+        color: a.color,
+        institucionId: institucion.id,
+      },
     })
+
+    for (const comp of a.competencias) {
+      await prisma.competencia.create({
+        data: {
+          nombre: comp,
+          areaCurricularId: area.id,
+        },
+      })
+    }
+  }
+
+  // 9. Sedes y Secciones (Nivel Académico)
+  console.log("- Sembrando Sedes y Secciones...")
+  const sedeCentral = await prisma.sede.upsert({
+    where: { institucionId_nombre: { institucionId: institucion.id, nombre: "Sede Central" } },
+    update: {},
+    create: {
+      nombre: "Sede Central",
+      direccion: "Av. Principal 456",
+      institucionId: institucion.id,
+    },
+  })
+
+  // Obtener grados para primaria
+  const nivelPrimaria = await prisma.nivel.findFirst({
+    where: { nombre: "PRIMARIA", institucionId: institucion.id }
+  })
+
+  const gradosPrimaria = await prisma.grado.findMany({
+    where: { nivelId: nivelPrimaria?.id }
+  })
+
+  const secciones = []
+  for (const grado of gradosPrimaria) {
+    const seccion = await prisma.nivelAcademico.upsert({
+      where: {
+        nivelId_gradoId_seccion_anioAcademico_institucionId: {
+          nivelId: nivelPrimaria!.id,
+          gradoId: grado.id,
+          seccion: "A",
+          anioAcademico: 2026,
+          institucionId: institucion.id,
+        }
+      },
+      update: {},
+      create: {
+        seccion: "A",
+        nivelId: nivelPrimaria!.id,
+        gradoId: grado.id,
+        institucionId: institucion.id,
+        sedeId: sedeCentral.id,
+        anioAcademico: 2026,
+        turno: "MANANA",
+      }
+    })
+    secciones.push(seccion)
+  }
+
+  // 10. Docentes (Teachers)
+  console.log("- Sembrando Docentes de Prueba...")
+  const docenteCargo = await prisma.cargo.findUnique({ where: { codigo: "DOCENTE" } })
+  const docentesData = [
+    { name: "Ana", apellidoPaterno: "Garcia", apellidoMaterno: "Lopez", email: "ana.garcia@eduperu.pro", dni: "11111111" },
+    { name: "Carlos", apellidoPaterno: "Mendoza", apellidoMaterno: "Ruiz", email: "carlos.mendoza@eduperu.pro", dni: "22222222" },
+    { name: "Elena", apellidoPaterno: "Ruiz", apellidoMaterno: "Bravo", email: "elena.ruiz@eduperu.pro", dni: "33333333" },
+  ]
+
+  const docentes = []
+  for (const d of docentesData) {
+    const docente = await prisma.user.upsert({
+      where: { email: d.email },
+      update: {
+        name: d.name,
+        apellidoPaterno: d.apellidoPaterno,
+        apellidoMaterno: d.apellidoMaterno,
+      },
+      create: {
+        name: d.name,
+        apellidoPaterno: d.apellidoPaterno,
+        apellidoMaterno: d.apellidoMaterno,
+        email: d.email,
+        dni: d.dni,
+        password: hashedPassword,
+        role: "profesor",
+        cargoId: docenteCargo?.id,
+        estadoId: estadoActivo.id,
+        institucionId: institucion.id,
+      }
+    })
+    docentes.push(docente)
+  }
+
+  // 11. Cursos (Courses)
+  console.log("- Sembrando Cursos y asignando a Docentes...")
+  const cursoList = [
+    { nombre: "Matematica", codigo: "MAT-PRI", area: "MAT" },
+    { nombre: "Razonamiento Matematico", codigo: "RMA-PRI", area: "MAT" },
+    { nombre: "Desafios", codigo: "DES-PRI", area: "MAT" },
+    { nombre: "Comunicacion", codigo: "COM-PRI", area: "COM" },
+    { nombre: "Razonamiento Verbal", codigo: "RVE-PRI", area: "COM" },
+    { nombre: "Dictado", codigo: "DIC-PRI", area: "COM" },
+    { nombre: "Ciencia Tecnologia y Ambiente", codigo: "CTA-PRI", area: "CYT" },
+    { nombre: "Personal Social", codigo: "PSO-PRI", area: "PS" },
+    { nombre: "Ingles", codigo: "ING-PRI", area: "ING" },
+    { nombre: "Religion", codigo: "REL-PRI", area: "REL" },
+    { nombre: "Computacion", codigo: "CMP-PRI", area: "COMP" },
+  ]
+
+  // Asignar cursos al primer grado de primaria (1ero A) para demostración
+  const primeraSeccion = secciones[0]
+  if (primeraSeccion) {
+    for (let i = 0; i < cursoList.length; i++) {
+      const c = cursoList[i]
+      const area = await prisma.areaCurricular.findUnique({
+        where: { codigo_institucionId: { codigo: c.area, institucionId: institucion.id } }
+      })
+
+      if (area) {
+        await prisma.curso.upsert({
+          where: {
+            codigo_anioAcademico_nivelAcademicoId: {
+              codigo: `${c.codigo}-1A`,
+              anioAcademico: 2026,
+              nivelAcademicoId: primeraSeccion.id
+            }
+          },
+          update: {},
+          create: {
+            nombre: c.nombre,
+            codigo: `${c.codigo}-1A`,
+            anioAcademico: 2026,
+            areaCurricularId: area.id,
+            nivelAcademicoId: primeraSeccion.id,
+            gradoId: primeraSeccion.gradoId,
+            profesorId: docentes[i % docentes.length].id, // Rotar entre los 3 docentes
+            institucionId: institucion.id,
+            nivelId: primeraSeccion.nivelId,
+          }
+        })
+      }
+    }
   }
 
   console.log("✅ Proceso de siembra finalizado con éxito.")

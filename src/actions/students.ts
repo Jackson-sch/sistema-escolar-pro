@@ -44,7 +44,8 @@ export async function getStudentsAction() {
             nivelAcademico: {
               include: {
                 grado: true,
-                nivel: true
+                nivel: true,
+                sede: true
               }
             }
           }
@@ -119,7 +120,8 @@ export async function getNivelesAcademicosAction(anio?: number) {
       },
       include: {
         grado: true,
-        nivel: true
+        nivel: true,
+        sede: true,
       },
       orderBy: [
         { nivel: { nombre: "asc" } },

@@ -161,6 +161,7 @@ export async function getSeccionesAction(filters?: { gradoId?: string; anioAcade
         nivel: { select: { nombre: true } },
         grado: { select: { nombre: true, codigo: true } },
         tutor: { select: { name: true, apellidoPaterno: true, image: true } },
+        sede: { select: { nombre: true } },
       },
       orderBy: [
         { nivel: { nombre: "asc" } },

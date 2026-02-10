@@ -213,6 +213,7 @@ model InstitucionEducativa {
   tiposDocumento     TipoDocumento[]
   tiposEvaluacion    TipoEvaluacion[]
   users              User[]
+  sedes              Sede[]
 }
 
 model User {
@@ -305,6 +306,29 @@ model User {
   usuarioPermisos         UsuarioPermiso[]
   comprobantesEnviados    ComprobantePago[]        @relation("ComprobantesPadre")
   comprobantesVerificados ComprobantePago[]        @relation("ComprobantesVerificados")
+
+  // Salud y condiciones
+  medicamentos              String?
+  seguroMedico              String?
+  discapacidades            String?
+  carnetConadis             String?
+  restriccionesAlimenticias String?
+  centroSaludPreferido      String?
+  peso                      Float?
+  talla                     Float?
+
+  // Contacto de Emergencia Adicional
+  parentescoContactoEmergencia  String?
+  nombreContactoEmergencia2     String?
+  telefonoContactoEmergencia2   String?
+  parentescoContactoEmergencia2 String?
+
+  // Información Administrativa Adicional
+  paisNacimiento  String?
+  lugarNacimiento String?
+  lenguaMaterna   String?
+  religion        String?
+  numeroHermanos  Int?
 
   @@index([cargoId])
   @@index([estadoId])
@@ -410,6 +434,7 @@ model NivelAcademico {
   gradoId         String
   tutorId         String?
   institucionId   String
+  sedeId          String?
   anioAcademico   Int                  @default(2025)
   activo          Boolean              @default(true)
   turno           Turno                @default(MANANA)
@@ -420,10 +445,30 @@ model NivelAcademico {
   grado           Grado                @relation(fields: [gradoId], references: [id], onDelete: Cascade)
   institucion     InstitucionEducativa @relation(fields: [institucionId], references: [id])
   nivel           Nivel                @relation(fields: [nivelId], references: [id], onDelete: Cascade)
+  sede            Sede?                @relation(fields: [sedeId], references: [id])
   tutor           User?                @relation("TutorCursos", fields: [tutorId], references: [id])
   students        User[]               @relation("StudentNivelAcademico")
 
   @@unique([nivelId, gradoId, seccion, anioAcademico, institucionId])
+}
+
+model Sede {
+  id                String               @id @default(cuid())
+  nombre            String
+  codigoIdentifier  String? // Codigo interno o modular diferenciado
+  direccion         String?
+  telefono          String?
+  email             String?
+  director          String? // Nombre del encargado de la sede
+  institucionId     String
+  activo            Boolean              @default(true)
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  institucion       InstitucionEducativa @relation(fields: [institucionId], references: [id])
+  nivelesAcademicos NivelAcademico[]
+
+  @@unique([institucionId, nombre])
+  @@index([institucionId])
 }
 
 model PeriodoAcademico {
@@ -476,7 +521,7 @@ model Curso {
   areaCurricularId String
   nivelAcademicoId String
   gradoId          String?
-  profesorId       String
+  profesorId       String?
   activo           Boolean               @default(true)
   createdAt        DateTime              @default(now())
   updatedAt        DateTime              @updatedAt
@@ -489,16 +534,13 @@ model Curso {
   institucion      InstitucionEducativa? @relation(fields: [institucionId], references: [id])
   nivelAcademico   NivelAcademico        @relation(fields: [nivelAcademicoId], references: [id])
   nivel            Nivel?                @relation(fields: [nivelId], references: [id])
-  profesor         User                  @relation("ProfesorCursos", fields: [profesorId], references: [id])
+  profesor         User?                 @relation("ProfesorCursos", fields: [profesorId], references: [id])
   evaluaciones     Evaluacion[]
   horarios         Horario[]
   estudiantes      MatriculaCurso[]
   notas            Nota[]
 
   @@unique([codigo, anioAcademico, nivelAcademicoId])
-  @@unique([codigo, anioAcademico, gradoId])
-  @@unique([codigo, anioAcademico, institucionId])
-  @@unique([codigo, anioAcademico, nivelId])
 }
 
 model Horario {

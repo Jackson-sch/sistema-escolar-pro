@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 interface ConfiguracionTabsProps {
   children: {
     datos: React.ReactNode;
+    sedes: React.ReactNode;
     variables: React.ReactNode;
   };
 }
@@ -13,7 +14,7 @@ interface ConfiguracionTabsProps {
 export function ConfiguracionTabs({ children }: ConfiguracionTabsProps) {
   const [tab, setTab] = useQueryState(
     "tab",
-    parseAsString.withDefault("datos")
+    parseAsString.withDefault("datos"),
   );
 
   return (
@@ -26,6 +27,12 @@ export function ConfiguracionTabs({ children }: ConfiguracionTabsProps) {
           Datos Institucionales
         </TabsTrigger>
         <TabsTrigger
+          value="sedes"
+          className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white"
+        >
+          Sedes
+        </TabsTrigger>
+        <TabsTrigger
           value="variables"
           className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white"
         >
@@ -35,6 +42,10 @@ export function ConfiguracionTabs({ children }: ConfiguracionTabsProps) {
 
       <TabsContent value="datos" className="mt-0 outline-none">
         <div className="animate-in fade-in duration-500">{children.datos}</div>
+      </TabsContent>
+
+      <TabsContent value="sedes" className="mt-0 outline-none">
+        <div className="animate-in fade-in duration-500">{children.sedes}</div>
       </TabsContent>
 
       <TabsContent value="variables" className="mt-0 outline-none">
