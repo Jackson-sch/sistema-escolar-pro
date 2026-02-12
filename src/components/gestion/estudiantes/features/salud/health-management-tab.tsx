@@ -56,14 +56,14 @@ export function HealthManagementTab({ student }: HealthManagementTabProps) {
       <div className="grid grid-cols-1 gap-6">
         {/* Card: Salud */}
         <MagicCard gradientColor={theme === "dark" ? "#4FCF8033" : "#D9D9D955"} gradientFrom="#4FCF8033" gradientTo="#D9D9D955" className="relative overflow-hidden border border-border/40 bg-linear-to-br from-emerald-500/5 to-transparent rounded-2xl shadow-sm hover:shadow-md transition-all duration-300">
-          <CardHeader className="border-b border-emerald-500/10 bg-emerald-500/5">
-            <CardTitle className="text-sm font-bold uppercase tracking-widest text-emerald-600 flex items-center gap-2 py-4">
+          <div className="p-0 border-b border-emerald-500/10 bg-emerald-500/5">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-emerald-600 flex items-center gap-2 py-4 px-6">
               <IconHeartbeat className="h-4 w-4" />
               Estado de Salud
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 text-sm">
+            </h3>
+          </div>
+          <div className="px-0 py-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 text-sm px-4">
               <div className="p-4 border-b md:border-b-0 md:border-r border-border/40">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
@@ -112,7 +112,7 @@ export function HealthManagementTab({ student }: HealthManagementTabProps) {
                 </div>
               </div>
             </div>
-            <div className="p-4 border-t border-border/40 bg-muted/5">
+            <div className="px-8 py-4 border-t border-border/40 bg-muted/5">
               <div className="space-y-1">
                 <span className="text-[10px] uppercase font-bold text-muted-foreground/60 tracking-wider flex items-center gap-1.5">
                   <IconPill className="h-3 w-3" />
@@ -123,18 +123,18 @@ export function HealthManagementTab({ student }: HealthManagementTabProps) {
                 </p>
               </div>
             </div>
-          </CardContent>
+          </div>
         </MagicCard>
 
         {/* Card: Datos Complementarios */}
         <MagicCard className="relative overflow-hidden border border-border/40 bg-linear-to-br from-blue-500/5 to-transparent rounded-2xl shadow-sm hover:shadow-md transition-all duration-300">
-          <CardHeader className="pb-2 border-b border-blue-500/10 bg-blue-500/5">
-            <CardTitle className="text-sm font-bold uppercase tracking-widest text-blue-600 flex items-center gap-2">
+          <div className="p-0 border-b border-blue-500/10 bg-blue-500/5">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-blue-600 flex items-center gap-2 py-4 px-6">
               <IconFileDescription className="h-4 w-4" />
               Datos Personales y Origen
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 grid grid-cols-2 gap-4 text-sm">
+            </h3>
+          </div>
+          <div className="px-8 py-4 grid grid-cols-2 gap-4 text-sm">
             <div className="space-y-1">
               <span className="text-[10px] uppercase font-bold text-muted-foreground/60 tracking-wider flex items-center gap-1.5">
                 <IconWorld className="h-3 w-3" />
@@ -166,7 +166,7 @@ export function HealthManagementTab({ student }: HealthManagementTabProps) {
               </span>
               <p className="font-semibold">{student.numeroHermanos || "0"}</p>
             </div>
-          </CardContent>
+          </div>
           {/* Section Emergencia Secundaria */}
           {(student.nombreContactoEmergencia2 ||
             student.telefonoContactoEmergencia2) && (

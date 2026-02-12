@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { IconAlertTriangle } from "@tabler/icons-react";
+import { ShineBorder } from "../ui/shine-border";
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -44,6 +45,7 @@ export function ConfirmModal({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
+        <ShineBorder shineColor={["#ff000099", "#ff000033", "#ff000066"]} />
         <DialogHeader>
           <div className="flex items-center gap-2 mb-2">
             <div

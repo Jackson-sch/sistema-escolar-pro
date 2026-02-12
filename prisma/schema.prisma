@@ -460,7 +460,11 @@ model Sede {
   telefono          String?
   email             String?
   director          String? // Nombre del encargado de la sede
+  logo              String?
   institucionId     String
+  esPrincipal       Boolean              @default(false)
+  lat               Float?
+  lng               Float?
   activo            Boolean              @default(true)
   createdAt         DateTime             @default(now())
   updatedAt         DateTime             @updatedAt

@@ -54,10 +54,48 @@ export async function updateInstitucionAction(id: string, values: any) {
       data
     })
 
+    // Sincronizar con la Sede Principal
+    // Buscamos si ya existe una sede principal para esta institución
+    const sedePrincipal = await prisma.sede.findFirst({
+      where: {
+        institucionId: id,
+        esPrincipal: true
+      }
+    })
+
+    if (sedePrincipal) {
+      // Actualizar sede principal existente
+      await prisma.sede.update({
+        where: { id: sedePrincipal.id },
+        data: {
+          nombre: values.nombreInstitucion,
+          direccion: values.direccion,
+          telefono: values.telefono,
+          email: values.email,
+          logo: typeof values.logo === 'string' ? values.logo : undefined,
+          activo: true
+        }
+      })
+    } else {
+      // Crear sede principal si no existe
+      await prisma.sede.create({
+        data: {
+          nombre: values.nombreInstitucion,
+          direccion: values.direccion,
+          telefono: values.telefono,
+          email: values.email,
+          logo: typeof values.logo === 'string' ? values.logo : undefined,
+          esPrincipal: true,
+          institucionId: id,
+          activo: true
+        }
+      })
+    }
+
     revalidatePath(REVALIDATE_PATH)
     revalidatePath("/finanzas")
 
-    return { success: "Datos de la institución actualizados correctamente" }
+    return { success: "Datos de la institución y sede principal actualizados correctamente" }
   } catch (error: any) {
     console.error("Error updating institucion:", error)
     return { error: `No se pudieron actualizar los datos: ${error.message}` }

@@ -63,10 +63,7 @@ export function AnnouncementCard({
   return (
     <>
       <article onClick={() => setShowDetail(true)}>
-        <MagicCard
-          gradientColor={theme === "dark" ? "#262626" : "#D9D9D955"}
-          className="group relative bg-card rounded-2xl overflow-hidden border border-border/50 shadow-sm transition-all hover:-translate-y-1 cursor-pointer flex flex-col h-full"
-        >
+        <MagicCard className="group relative bg-card rounded-2xl overflow-hidden border border-border/50 shadow-sm transition-all hover:-translate-y-1 cursor-pointer flex flex-col h-full">
           <div className="relative h-56 overflow-hidden bg-zinc-100 dark:bg-zinc-900 focus-within:ring-2 focus-within:ring-primary">
             {hasImage ? (
               <>

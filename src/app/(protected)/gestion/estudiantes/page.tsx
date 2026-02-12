@@ -52,7 +52,7 @@ export default async function EstudiantesPage() {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="outline" size="sm" className="rounded-full">
+                <Button variant="outline" className="rounded-full">
                   <IconCloudDownload className="mr-2 h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                   <span className="hidden sm:inline font-semibold">
                     Descargar Padrón

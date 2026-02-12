@@ -426,7 +426,11 @@ exports.Prisma.SedeScalarFieldEnum = {
   telefono: 'telefono',
   email: 'email',
   director: 'director',
+  logo: 'logo',
   institucionId: 'institucionId',
+  esPrincipal: 'esPrincipal',
+  lat: 'lat',
+  lng: 'lng',
   activo: 'activo',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

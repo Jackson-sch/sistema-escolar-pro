@@ -116,6 +116,7 @@
   --success: oklch(0.627 0.194 149.214);
   --warning: oklch(0.646 0.222 41.116);
   --info: oklch(0.553 0.195 240);
+  --magic-card-gradient: rgba(120, 120, 120, 0.20);
 }
 
 .dark {
@@ -168,6 +169,7 @@
   --success: oklch(0.627 0.15 149.214);
   --warning: oklch(0.646 0.18 41.116);
   --info: oklch(0.553 0.15 240);
+  --magic-card-gradient: rgba(255, 255, 255, 0.20);
 }
 
 @layer base {
@@ -179,7 +181,44 @@
   }
 }
 
-::view-transition-old(root), ::view-transition-new(root) {
-    animation: none;
-    mix-blend-mode: normal;
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+@layer utilities {
+  .glass {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .light .glass {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+  }
+
+  .map-marker-glow {
+    box-shadow: 0 0 20px rgba(37, 99, 235, 0.6);
+  }
+
+  .active-card {
+    border: 1px solid rgba(37, 99, 235, 0.5);
+    background: rgba(37, 99, 235, 0.05);
+  }
 }

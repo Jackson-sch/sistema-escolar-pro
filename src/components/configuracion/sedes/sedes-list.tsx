@@ -1,44 +1,55 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  CardFooter,
-} from "@/components/ui/card";
 import { SedeDialog } from "./sede-dialog";
 import {
-  IconBuilding,
-  IconMapPin,
-  IconPhone,
-  IconMail,
-  IconUser,
   IconPlus,
-  IconPencil,
+  IconSearch,
+  IconFilter,
+  IconSettings,
+  IconChevronRight,
+  IconMapPin,
+  IconMail,
+  IconPhone,
+  IconBuilding,
+  IconStar,
+  IconEdit,
   IconTrash,
 } from "@tabler/icons-react";
 import { deleteSedeAction } from "@/actions/sedes";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { SedeMap } from "./sede-map";
+import { cn } from "@/lib/utils";
 
 interface SedesListProps {
   initialData: any[];
 }
 
 export function SedesList({ initialData }: SedesListProps) {
-  const [sedes, setSedes] = useState(initialData);
   const [open, setOpen] = useState(false);
   const [selectedSede, setSelectedSede] = useState<any>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeSedeId, setActiveSedeId] = useState<string | undefined>(
+    initialData.find((s) => s.esPrincipal)?.id || initialData[0]?.id,
+  );
   const router = useRouter();
 
-  // Sync with initialData if it changes (e.g. after server revalidate)
-  // Actually, router.refresh() updates the prop passed from page.
-  // So we should use initialData directly or sync state.
-  // If we just use initialData, we don't need local state for data.
+  const handleSedeClick = useCallback((id: string) => {
+    setActiveSedeId(id);
+  }, []);
+
+  // Client-side mount guard for the map
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => setIsClient(true), []);
+
+  const filteredSedes = initialData.filter(
+    (sede) =>
+      sede.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      sede.direccion?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      sede.codigoIdentifier?.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
 
   const handleDelete = async (id: string, nombre: string) => {
     if (
@@ -57,141 +68,195 @@ export function SedesList({ initialData }: SedesListProps) {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-semibold">Sedes Institucionales</h2>
-          <p className="text-sm text-muted-foreground">
-            Gestione las diferentes sedes o locales de la institución.
-          </p>
-        </div>
-        <Button
-          onClick={() => {
-            setSelectedSede(null);
-            setOpen(true);
-          }}
-        >
-          <IconPlus className="mr-2 h-4 w-4" />
-          Nueva Sede
-        </Button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {initialData.map((sede) => (
-          <Card
-            key={sede.id}
-            className="relative overflow-hidden group hover:shadow-lg transition-all duration-300 border-primary/10"
-          >
-            <div
-              className={`absolute top-0 left-0 w-1 h-full ${sede.activo ? "bg-green-500" : "bg-gray-300"}`}
-            />
-            <CardHeader className="pb-2">
-              <div className="flex justify-between items-start">
-                <CardTitle className="text-xl font-bold flex items-center gap-2">
-                  <IconBuilding className="h-5 w-5 text-primary" />
-                  {sede.nombre}
-                </CardTitle>
-                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => {
-                      setSelectedSede(sede);
-                      setOpen(true);
-                    }}
-                  >
-                    <IconPencil className="h-4 w-4 text-blue-500" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 hover:text-red-600"
-                    onClick={() => handleDelete(sede.id, sede.nombre)}
-                  >
-                    <IconTrash className="h-4 w-4 text-red-500" />
-                  </Button>
-                </div>
-              </div>
-              <CardDescription className="flex items-center gap-1">
-                {sede.codigoIdentifier ? (
-                  <span className="text-xs bg-muted px-2 py-0.5 rounded">
-                    Cod: {sede.codigoIdentifier}
-                  </span>
-                ) : null}
-                {!sede.activo && (
-                  <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded">
-                    Inactiva
-                  </span>
-                )}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm text-muted-foreground">
-              {sede.direccion && (
-                <div className="flex items-start gap-2">
-                  <IconMapPin className="h-4 w-4 mt-0.5 text-primary/70 shrink-0" />
-                  <span>{sede.direccion}</span>
-                </div>
-              )}
-              {(sede.telefono || sede.email) && (
-                <div className="flex flex-col gap-1">
-                  {sede.telefono && (
-                    <div className="flex items-center gap-2">
-                      <IconPhone className="h-4 w-4 text-primary/70 shrink-0" />
-                      <span>{sede.telefono}</span>
-                    </div>
-                  )}
-                  {sede.email && (
-                    <div className="flex items-center gap-2">
-                      <IconMail className="h-4 w-4 text-primary/70 shrink-0" />
-                      <span>{sede.email}</span>
-                    </div>
-                  )}
-                </div>
-              )}
-              {sede.director && (
-                <div className="flex items-center gap-2 pt-2 border-t mt-2">
-                  <IconUser className="h-4 w-4 text-primary/70 shrink-0" />
-                  <span className="font-medium text-foreground">
-                    {sede.director}
-                  </span>
-                  <span className="text-xs">(Director)</span>
-                </div>
-              )}
-            </CardContent>
-            {/* <CardFooter className="bg-muted/20 px-6 py-3 text-xs text-muted-foreground flex justify-between">
-              <span>Creado: {new Date(sede.createdAt).toLocaleDateString()}</span>
-              <span>Niveles: {sede._count?.nivelesAcademicos || 0}</span>
-            </CardFooter> */}
-            <CardFooter className="bg-muted/10 px-6 py-2 text-xs text-muted-foreground flex justify-between items-center border-t">
-              <span>
-                Niveles asociados: {sede._count?.nivelesAcademicos || 0}
-              </span>
-            </CardFooter>
-          </Card>
-        ))}
-
-        {initialData.length === 0 && (
-          <div className="col-span-full text-center py-12 border-2 border-dashed rounded-lg bg-muted/10">
-            <IconBuilding className="h-12 w-12 mx-auto text-muted-foreground/50 mb-3" />
-            <h3 className="text-lg font-medium text-muted-foreground">
-              No hay sedes registradas
-            </h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Comience agregando una nueva sede para su institución.
-            </p>
+    <div className="flex flex-col lg:flex-row h-auto lg:h-[calc(100vh-200px)] lg:min-h-[600px] lg:max-h-[850px] border border-border/40 rounded-3xl lg:overflow-hidden bg-background/50 backdrop-blur-sm shadow-2xl">
+      {/* Sidebar List (40%) */}
+      <aside className="w-full lg:w-[40%] flex flex-col border-b lg:border-b-0 lg:border-r-0 border-border/40 bg-card/20 z-10 transition-all duration-300">
+        <div className="p-6 space-y-4 border-b border-border/40 bg-background/30">
+          <div className="flex items-center justify-between pt-2">
+            <h2 className="text-xl font-bold tracking-tight">
+              Sedes Institucionales
+            </h2>
             <Button
+              size="sm"
+              className="bg-primary hover:bg-primary/90 text-white rounded-full text-xs font-semibold flex items-center gap-2 transition-all shadow-lg shadow-primary/20"
               onClick={() => {
                 setSelectedSede(null);
                 setOpen(true);
               }}
             >
-              <IconPlus className="mr-2 h-4 w-4" />
-              Crear Primera Sede
+              <IconPlus className="h-3.5 w-3.5" strokeWidth={3} />
+              Nueva Sede
             </Button>
           </div>
+
+          <div className="flex items-center gap-3">
+            <div className="flex-1 glass h-11 rounded-2xl flex items-center px-4 gap-3 focus-within:ring-2 ring-primary/40 transition-all">
+              <IconSearch className="h-4 w-4 text-muted-foreground" />
+              <input
+                className="bg-transparent border-none outline-none focus:ring-0 text-sm w-full placeholder:text-muted-foreground/60"
+                placeholder="Buscar por nombre, código..."
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <div className="flex items-center gap-2 glass h-11 px-4 rounded-2xl cursor-pointer hover:bg-white/5 transition-colors">
+              <IconFilter className="h-4 w-4 text-muted-foreground" />
+            </div>
+          </div>
+        </div>
+
+        {/* Scrollable List */}
+        <div className="flex-1 lg:overflow-y-auto custom-scrollbar p-5 space-y-4 min-h-[400px]">
+          {filteredSedes.map((sede) => (
+            <div
+              key={sede.id}
+              onClick={() => setActiveSedeId(sede.id)}
+              className={cn(
+                "glass p-4 rounded-2xl cursor-pointer transition-all duration-300 group hover:scale-[1.01] border-l-4",
+                activeSedeId === sede.id
+                  ? "active-card border-l-primary scale-[1.01]"
+                  : "border-l-transparent hover:border-l-primary/30",
+                !sede.activo && "opacity-60",
+              )}
+            >
+              <div className="flex gap-4">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden shrink-0 relative border border-border/20">
+                  {sede.logo ? (
+                    <img
+                      alt={sede.nombre}
+                      className="w-full h-full object-cover"
+                      src={sede.logo}
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-primary/5 flex items-center justify-center">
+                      <IconBuilding className="h-8 w-8 text-primary/30" />
+                    </div>
+                  )}
+                  {sede.esPrincipal && (
+                    <div className="absolute inset-0 bg-primary/5"></div>
+                  )}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-start gap-2">
+                    <div className="min-w-0">
+                      <h3 className="font-bold text-base sm:text-lg flex items-center gap-2 truncate">
+                        <IconBuilding className="h-4 w-4 text-primary shrink-0" />
+                        <span className="truncate">{sede.nombre}</span>
+                        {sede.esPrincipal && (
+                          <IconStar className="h-3.5 w-3.5 text-amber-500 fill-amber-500 shrink-0" />
+                        )}
+                      </h3>
+                      {sede.codigoIdentifier && (
+                        <span className="text-[10px] px-2 py-0.5 rounded bg-foreground/5 text-muted-foreground font-mono uppercase">
+                          Cod: {sede.codigoIdentifier}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedSede(sede);
+                          setOpen(true);
+                        }}
+                        className="p-1.5 hover:bg-primary/10 rounded-lg text-blue-500 transition-colors"
+                      >
+                        <IconEdit className="h-4 w-4" />
+                      </button>
+                      <button
+                        disabled={sede.esPrincipal}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(sede.id, sede.nombre);
+                        }}
+                        className={cn(
+                          "p-1.5 rounded-lg transition-colors",
+                          sede.esPrincipal
+                            ? "text-muted-foreground/30"
+                            : "hover:bg-red-500/10 text-red-500",
+                        )}
+                      >
+                        <IconTrash className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 space-y-1.5 text-xs text-muted-foreground">
+                    {sede.direccion && (
+                      <div className="flex items-center gap-2 truncate">
+                        <IconMapPin className="h-3 w-3 shrink-0" />
+                        <span className="truncate">{sede.direccion}</span>
+                      </div>
+                    )}
+                    {sede.email && (
+                      <div className="flex items-center gap-2 truncate">
+                        <IconMail className="h-3 w-3 shrink-0" />
+                        <span className="truncate">{sede.email}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 pt-3 border-t border-border/20 flex justify-between items-center text-[11px] text-muted-foreground/60">
+                <div className="flex flex-col gap-1">
+                  <span className="font-medium">
+                    Niveles asociados: {sede.nivelesAcademicos?.length || 0}
+                  </span>
+                  {sede.nivelesAcademicos?.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {Array.from(
+                        new Set(
+                          sede.nivelesAcademicos.map(
+                            (na: any) => na.nivel?.nombre,
+                          ),
+                        ),
+                      )
+                        .filter(Boolean)
+                        .map((nombre: any) => (
+                          <span
+                            key={nombre}
+                            className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/5 text-primary/70 border border-primary/10"
+                          >
+                            {nombre}
+                          </span>
+                        ))}
+                    </div>
+                  )}
+                </div>
+                <span className="text-primary font-bold flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  Ver detalles{" "}
+                  <IconChevronRight className="h-3 w-3" strokeWidth={3} />
+                </span>
+              </div>
+            </div>
+          ))}
+
+          {filteredSedes.length === 0 && (
+            <div className="h-full flex flex-col items-center justify-center py-20 text-center">
+              <IconBuilding className="h-12 w-12 text-muted-foreground/20 mb-4" />
+              <p className="text-sm text-muted-foreground">
+                No se encontraron sedes
+              </p>
+            </div>
+          )}
+        </div>
+      </aside>
+
+      {/* Main Map View (60%) */}
+      <main className="hidden lg:block lg:flex-1 relative rounded-r-3xl bg-card/20 select-none">
+        {isClient ? (
+          <SedeMap
+            sedes={initialData}
+            activeSedeId={activeSedeId}
+            onSedeClick={handleSedeClick}
+          />
+        ) : (
+          <div className="w-full h-full bg-muted/10 animate-pulse rounded-3xl" />
         )}
-      </div>
+      </main>
 
       <SedeDialog
         open={open}
