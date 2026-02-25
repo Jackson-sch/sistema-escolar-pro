@@ -5,7 +5,7 @@ import {
 } from "@/actions/academic-structure";
 import { getInstitucionesAction } from "@/actions/academic";
 import { getSedesAction } from "@/actions/sedes";
-import { SeccionTable } from "@/components/gestion/academico/estructura/secciones/seccion-table";
+import { SeccionViewSwitcher } from "@/components/gestion/academico/estructura/secciones/seccion-view-switcher";
 import { AddSeccionButton } from "@/components/gestion/academico/estructura/secciones/add-seccion-button";
 
 export default async function SeccionesPage() {
@@ -36,11 +36,13 @@ export default async function SeccionesPage() {
           tutores={tutores}
           sedes={sedes}
           institucionId={institucionId}
+          currentAnio={currentAnio}
         />
       </div>
-      <SeccionTable
+      <SeccionViewSwitcher
         data={secciones}
         meta={{ grados, tutores, sedes, institucionId }}
+        currentAnio={currentAnio}
       />
     </div>
   );

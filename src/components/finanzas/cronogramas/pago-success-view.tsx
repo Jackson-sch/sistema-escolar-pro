@@ -6,13 +6,15 @@ import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { CronogramaTableType } from "@/components/finanzas/cronogramas/cronograma-columns";
 import { ComprobanteHtml } from "@/components/finanzas/cronogramas/comprobante-html";
+import { ComprobanteTicketHtml } from "@/components/finanzas/cronogramas/comprobante-ticket-html";
 import { createPortal } from "react-dom";
 import { useEffect, useState } from "react";
+import type { FormatoComprobante } from "@/lib/comprobante-constants";
 
 const ReceiptDownloadButton = dynamic(
   () =>
     import("@/components/finanzas/cronogramas/receipt-download-button").then(
-      (mod) => mod.ReceiptDownloadButton
+      (mod) => mod.ReceiptDownloadButton,
     ),
   {
     ssr: false,
@@ -26,7 +28,7 @@ const ReceiptDownloadButton = dynamic(
         Cargando...
       </Button>
     ),
-  }
+  },
 );
 
 interface PagoSuccessViewProps {
@@ -46,6 +48,7 @@ interface PagoSuccessViewProps {
     telefono?: string;
     codigoModular?: string;
   };
+  formatoComprobante?: FormatoComprobante;
   onClose: () => void;
 }
 
@@ -53,6 +56,7 @@ export function PagoSuccessView({
   paymentData,
   cronograma,
   institucion,
+  formatoComprobante = "A4",
   onClose,
 }: PagoSuccessViewProps) {
   const [mounted, setMounted] = useState(false);
@@ -66,24 +70,60 @@ export function PagoSuccessView({
     window.print();
   };
 
+  const isTicket = formatoComprobante === "TICKET";
+
+  const estudianteData = {
+    ...cronograma.estudiante,
+    codigoEstudiante: cronograma.estudiante.codigoEstudiante ?? undefined,
+  };
+
+  const institucionData = {
+    nombre: institucion?.nombreInstitucion || "SISTEMA ESCOLAR PRO",
+    direccion: institucion?.direccion,
+    telefono: institucion?.telefono,
+    ruc: institucion?.codigoModular,
+  };
+
+  // Print CSS: for ticket, constrain width to 80mm
+  const printCss = isTicket
+    ? `
+      @media print {
+        body > * {
+          display: none !important;
+        }
+        #print-portal-root {
+          display: block !important;
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 80mm;
+        }
+        @page {
+          size: 80mm auto;
+          margin: 0;
+        }
+      }
+    `
+    : `
+      @media print {
+        body > * {
+          display: none !important;
+        }
+        #print-portal-root {
+          display: block !important;
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+        }
+      }
+    `;
+
   return (
     <div className="flex flex-col items-center py-10 px-6 space-y-6 animate-in fade-in zoom-in duration-300">
       <style
         dangerouslySetInnerHTML={{
-          __html: `
-        @media print {
-          body > * {
-            display: none !important;
-          }
-          #print-portal-root {
-            display: block !important;
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-          }
-        }
-      `,
+          __html: printCss,
         }}
       />
 
@@ -91,22 +131,21 @@ export function PagoSuccessView({
       {mounted &&
         createPortal(
           <div id="print-portal-root" className="hidden">
-            <ComprobanteHtml
-              pago={paymentData}
-              estudiante={{
-                ...cronograma.estudiante,
-                codigoEstudiante:
-                  cronograma.estudiante.codigoEstudiante ?? undefined,
-              }}
-              institucion={{
-                nombre: institucion?.nombreInstitucion || "SISTEMA ESCOLAR PRO",
-                direccion: institucion?.direccion,
-                telefono: institucion?.telefono,
-                ruc: institucion?.codigoModular,
-              }}
-            />
+            {isTicket ? (
+              <ComprobanteTicketHtml
+                pago={paymentData}
+                estudiante={estudianteData}
+                institucion={institucionData}
+              />
+            ) : (
+              <ComprobanteHtml
+                pago={paymentData}
+                estudiante={estudianteData}
+                institucion={institucionData}
+              />
+            )}
           </div>,
-          document.body
+          document.body,
         )}
 
       <div className="relative">
@@ -127,17 +166,9 @@ export function PagoSuccessView({
           <>
             <ReceiptDownloadButton
               paymentData={paymentData}
-              estudiante={{
-                ...cronograma.estudiante,
-                codigoEstudiante:
-                  cronograma.estudiante.codigoEstudiante ?? undefined,
-              }}
-              institucion={{
-                nombre: institucion?.nombreInstitucion || "SISTEMA ESCOLAR PRO",
-                direccion: institucion?.direccion,
-                telefono: institucion?.telefono,
-                ruc: institucion?.codigoModular,
-              }}
+              estudiante={estudianteData}
+              institucion={institucionData}
+              formato={formatoComprobante}
             />
 
             <Button
@@ -151,17 +182,11 @@ export function PagoSuccessView({
           </>
         ) : (
           <>
-            <Button
-              className="rounded-full "
-              disabled
-            >
+            <Button className="rounded-full " disabled>
               <IconFileDownload className="size-4" />
               Descargar PDF
             </Button>
-            <Button
-              className="rounded-full gap-2 font-medium"
-              disabled
-            >
+            <Button className="rounded-full gap-2 font-medium" disabled>
               <IconPrinter className="size-4" />
               Imprimir
             </Button>

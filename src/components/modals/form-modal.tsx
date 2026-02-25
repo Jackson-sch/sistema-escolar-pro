@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -11,8 +12,8 @@ import { cn } from "@/lib/utils";
 import { ShineBorder } from "../ui/shine-border";
 import { FormModalProvider, useFormModal } from "./form-modal-context";
 import { toast } from "sonner";
-import { useState } from "react";
 import { SafeCloseDialog } from "./safe-close-dialog";
+import { useFormShortcuts } from "@/hooks/use-form-shortcuts";
 
 interface FormModalProps {
   title: string;
@@ -45,8 +46,13 @@ function FormModalInner({
   className,
   headerClassName,
 }: FormModalProps) {
-  const { isDirty, setIsDirty } = useFormModal();
+  const { isDirty, setIsDirty, triggerSubmit } = useFormModal();
   const [showConfirm, setShowConfirm] = useState(false);
+
+  useFormShortcuts({
+    onSubmit: triggerSubmit,
+    isLoading: false, // El modal no sabe si está cargando, pero el submit handler del form hijo sí
+  });
 
   const handleOpenChange = (open: boolean) => {
     if (!open && isDirty) {
@@ -96,9 +102,8 @@ function FormModalInner({
             </DialogDescription>
           )}
         </DialogHeader>
-
-        <div className="flex-1 overflow-y-auto p-6 pt-4 text-pretty">
-          {children}
+        <div className="flex-1 overflow-y-auto custom-scrollbar min-h-0">
+          <div className="p-6 pt-4 text-pretty">{children}</div>
         </div>
       </DialogContent>
 

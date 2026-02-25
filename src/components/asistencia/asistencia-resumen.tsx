@@ -1,4 +1,3 @@
-import React from "react";
 import {
   IconUsers,
   IconCheck,
@@ -7,7 +6,6 @@ import {
   IconChartBar,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
-import { Card, CardContent } from "@/components/ui/card";
 
 interface AlumnoAsistencia {
   id: string;

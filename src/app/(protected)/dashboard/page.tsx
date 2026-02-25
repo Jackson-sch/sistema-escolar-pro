@@ -6,11 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   getDashboardStatsAction,
   getRecentAdmissionsAction,
-  getTeacherDashboardAction,
 } from "@/actions/dashboard";
 import { TeacherDashboard } from "@/components/dashboard/teacher-dashboard";
 import { redirect } from "next/navigation";
 import { getInstitucionAction } from "@/actions/institucion";
+import { CapacityGauge } from "@/components/dashboard/capacity-gauge";
+import { RecentActivity } from "@/components/dashboard/recent-activity";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -23,6 +24,8 @@ export default async function DashboardPage() {
 
   // Renderizado condicional basado en el rol
   if (userRole === "profesor") {
+    // Note: getTeacherDashboardAction is imported from actions/dashboard but we need to call it
+    const { getTeacherDashboardAction } = await import("@/actions/dashboard");
     const teacherData = await getTeacherDashboardAction({});
 
     return (
@@ -68,10 +71,23 @@ export default async function DashboardPage() {
       <SectionCards stats={stats} />
 
       <div className="grid gap-6 px-2 lg:grid-cols-12">
+        {/* Fila 1: Gráfico y Ocupación */}
         <div className="lg:col-span-8">
           <ChartAreaInteractive data={stats?.chartData} />
         </div>
         <div className="lg:col-span-4">
+          <CapacityGauge
+            occupied={stats?.capacityStats?.occupied || 0}
+            total={stats?.capacityStats?.total || 0}
+            percentage={stats?.capacityStats?.percentage || 0}
+          />
+        </div>
+
+        {/* Fila 2: Actividad Reciente y Admisiones */}
+        <div className="lg:col-span-7">
+          <RecentActivity activities={stats?.recentActivity || []} />
+        </div>
+        <div className="lg:col-span-5">
           <Card className="h-full">
             <CardHeader className="border-b">
               <CardTitle className="text-lg">Admisiones Recientes</CardTitle>

@@ -8,6 +8,7 @@ import {
   IconCheck,
   IconFileDownload,
   IconReceipt,
+  IconX,
 } from "@tabler/icons-react";
 import { formatCurrency, formatDate } from "@/lib/formats";
 import dynamic from "next/dynamic";
@@ -19,7 +20,7 @@ import { IAReminderButton } from "./ia-reminder-button";
 const DownloadWrapper = dynamic(
   () =>
     import("@/components/finanzas/cronogramas/download-wrapper").then(
-      (mod) => mod.DownloadWrapper
+      (mod) => mod.DownloadWrapper,
     ),
   {
     ssr: false,
@@ -34,7 +35,7 @@ const DownloadWrapper = dynamic(
         ...
       </Button>
     ),
-  }
+  },
 );
 
 export type CronogramaTableType = {
@@ -83,6 +84,8 @@ export const getCronogramaColumns = (meta: {
   setMontoPago: (val: string) => void;
   setNumeroBoleta: (val: string) => void;
   setShowPagoDialog: (val: boolean) => void;
+  setSelectedPago: (val: any | null) => void;
+  setShowVoidDialog: (val: boolean) => void;
 }): ColumnDef<CronogramaTableType>[] => [
   {
     id: "estudiante",
@@ -228,35 +231,57 @@ export const getCronogramaColumns = (meta: {
     id: "actions",
     header: "",
     cell: ({ row }) => {
-      if (row.original.pagado) {
+      if (
+        row.original.pagado ||
+        (row.original.pagos && row.original.pagos.length > 0)
+      ) {
         const ultimoPago = row.original.pagos?.[0];
         if (!ultimoPago) return null;
 
         return (
-          <DownloadWrapper
-            pago={{
-              numeroBoleta: ultimoPago.numeroBoleta,
-              fechaPago: new Date(ultimoPago.fechaPago),
-              monto: Number(ultimoPago.monto),
-              metodoPago: ultimoPago.metodoPago,
-              referenciaPago: ultimoPago.referenciaPago,
-              concepto: row.original.concepto.nombre,
-              observaciones: ultimoPago.observaciones,
-            }}
-            estudiante={{
-              ...row.original.estudiante,
-              codigoEstudiante:
-                row.original.estudiante.codigoEstudiante ?? undefined,
-            }}
-            institucion={{
-              nombre:
-                meta.institucion?.nombreInstitucion || "SISTEMA ESCOLAR PRO",
-              direccion: meta.institucion?.direccion,
-              telefono: meta.institucion?.telefono,
-              ruc: meta.institucion?.codigoModular,
-            }}
-            fileName={`Recibo-${ultimoPago.numeroBoleta}.pdf`}
-          />
+          <div className="flex items-center gap-2">
+            <DownloadWrapper
+              pago={{
+                numeroBoleta: ultimoPago.numeroBoleta,
+                fechaPago: new Date(ultimoPago.fechaPago),
+                monto: Number(ultimoPago.monto),
+                metodoPago: ultimoPago.metodoPago,
+                referenciaPago: ultimoPago.referenciaPago,
+                concepto: row.original.concepto.nombre,
+                observaciones: ultimoPago.observaciones,
+              }}
+              estudiante={{
+                ...row.original.estudiante,
+                codigoEstudiante:
+                  row.original.estudiante.codigoEstudiante ?? undefined,
+              }}
+              institucion={{
+                nombre:
+                  meta.institucion?.nombreInstitucion || "SISTEMA ESCOLAR PRO",
+                direccion: meta.institucion?.direccion,
+                telefono: meta.institucion?.telefono,
+                ruc: meta.institucion?.codigoModular,
+              }}
+              fileName={`Recibo-${ultimoPago.numeroBoleta}.pdf`}
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 w-8 p-0 rounded-full border-destructive/20 text-destructive hover:bg-destructive hover:text-white hover:border-destructive transition-all"
+              onClick={() => {
+                meta.setSelectedPago({
+                  id: ultimoPago.id,
+                  numeroBoleta: ultimoPago.numeroBoleta,
+                  monto: Number(ultimoPago.monto),
+                  concepto: row.original.concepto.nombre,
+                });
+                meta.setShowVoidDialog(true);
+              }}
+              title="Anular Pago"
+            >
+              <IconX className="size-4" />
+            </Button>
+          </div>
         );
       }
 
@@ -271,7 +296,7 @@ export const getCronogramaColumns = (meta: {
               meta.setMontoPago(
                 (
                   Number(row.original.monto) - Number(row.original.montoPagado)
-                ).toFixed(2)
+                ).toFixed(2),
               );
 
               const nextBoleta = await getNextComprobanteAction({});

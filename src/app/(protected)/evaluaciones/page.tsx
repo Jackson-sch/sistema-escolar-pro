@@ -13,7 +13,19 @@ import { AddPeriodoButton } from "@/components/evaluaciones/management/add-perio
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { EvaluacionesTabs } from "@/components/evaluaciones/evaluaciones-tabs";
 
+import { auth } from "@/auth";
+
 export default async function EvaluacionesPage() {
+  const session = await auth();
+  const isProfessor = session?.user?.role === "profesor";
+  const profesorId = isProfessor ? session?.user?.id : undefined;
+
+  // Obtener año actual desde la institución o fecha
+  const initialInstituciones = await getInstitucionesAction();
+  const currentYear =
+    initialInstituciones.data?.[0]?.cicloEscolarActual ||
+    new Date().getFullYear();
+
   const [
     { data: evaluaciones = [] },
     { data: tipos = [] },
@@ -21,11 +33,11 @@ export default async function EvaluacionesPage() {
     { data: cursos = [] },
     { data: instituciones = [] },
   ] = await Promise.all([
-    getEvaluacionesAction(),
+    getEvaluacionesAction({ profesorId }),
     getTiposEvaluacionAction(),
-    getPeriodosAction(),
-    getCoursesAction(),
-    getInstitucionesAction(),
+    getPeriodosAction(currentYear),
+    getCoursesAction({ anioAcademico: currentYear, profesorId }),
+    Promise.resolve(initialInstituciones),
   ]);
 
   const institucionId = instituciones[0]?.id || "";

@@ -70,7 +70,7 @@ const CATEGORY_CONFIG: Record<
 
 export function AchievementsTab({ studentId }: AchievementsTabProps) {
   const role = useCurrentRole();
-  const isProfessor = role === "profesor" || role === "administrativo";
+  const isProfessor = role === "profesor";
 
   const [achievements, setAchievements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -129,7 +129,7 @@ export function AchievementsTab({ studentId }: AchievementsTabProps) {
             Historial de éxitos, premios y menciones destacadas.
           </p>
         </div>
-        {isProfessor && (
+        {!isProfessor && (
           <Button
             size="sm"
             onClick={() => setShowAddModal(true)}
@@ -186,7 +186,7 @@ export function AchievementsTab({ studentId }: AchievementsTabProps) {
                         </h4>
                       </div>
 
-                      {isProfessor && (
+                      {!isProfessor && (
                         <Button
                           variant="ghost"
                           size="icon"

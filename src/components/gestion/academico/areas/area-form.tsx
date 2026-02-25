@@ -55,7 +55,7 @@ export function AreaForm({
   institucionId,
 }: AreaFormProps) {
   const [isPending, startTransition] = useTransition();
-  const { setIsDirty } = useFormModal();
+  const { setIsDirty, setOnSubmit } = useFormModal();
 
   const form = useForm<CurricularAreaValues>({
     resolver: zodResolver(CurricularAreaSchema),
@@ -83,11 +83,6 @@ export function AreaForm({
 
   const { isDirty } = form.formState;
 
-  useEffect(() => {
-    setIsDirty(isDirty);
-    return () => setIsDirty(false);
-  }, [isDirty, setIsDirty]);
-
   const onSubmit = (values: CurricularAreaValues) => {
     startTransition(() => {
       upsertAreaAction(values, id).then((data) => {
@@ -101,7 +96,10 @@ export function AreaForm({
     });
   };
 
-
+  useEffect(() => {
+    setOnSubmit(() => form.handleSubmit(onSubmit)());
+    return () => setOnSubmit(undefined);
+  }, [form, onSubmit, setOnSubmit]);
 
   return (
     <Form {...form}>
@@ -223,27 +221,26 @@ export function AreaForm({
               </FormItem>
             )}
           />
-
         </div>
         {/* Descripción */}
         <div className="pt-6 border-b border-muted pb-6">
-        <FormField
-          control={form.control}
-          name="descripcion"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descripción / Propósito Pedagógico</FormLabel>
-              <FormControl>
-                <Textarea
-                  {...field}
-                  placeholder="Describe los objetivos y el alcance de esta área curricular..."
-                  className="resize-none min-h-[60px]"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="descripcion"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Descripción / Propósito Pedagógico</FormLabel>
+                <FormControl>
+                  <Textarea
+                    {...field}
+                    placeholder="Describe los objetivos y el alcance de esta área curricular..."
+                    className="resize-none min-h-[60px]"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4">

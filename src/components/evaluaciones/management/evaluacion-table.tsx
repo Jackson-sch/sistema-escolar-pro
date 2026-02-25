@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { DataTable } from "@/components/ui/data-table";
 import { ConfirmModal } from "@/components/modals/confirm-modal";
 import { deleteEvaluacionAction } from "@/actions/evaluations";
-import { useQueryState, parseAsString } from "nuqs";
+import { useQueryState, parseAsString, parseAsInteger } from "nuqs";
 import {
   Select,
   SelectContent,
@@ -142,7 +142,6 @@ function EvaluacionFilters({
   );
 }
 
-
 export function EvaluacionTable({ data, meta }: EvaluacionTableProps) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedEvaluacion, setSelectedEvaluacion] =
@@ -158,6 +157,13 @@ export function EvaluacionTable({ data, meta }: EvaluacionTableProps) {
     parseAsString.withDefault(""),
   );
 
+  // Pagination states with nuqs
+  const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
+  const [limit, setLimit] = useQueryState(
+    "limit",
+    parseAsInteger.withDefault(10),
+  );
+
   const hasActiveFilters =
     !!cursoId || !!tipoId || !!periodoId || !!searchQuery;
 
@@ -166,6 +172,7 @@ export function EvaluacionTable({ data, meta }: EvaluacionTableProps) {
     setTipoId(null);
     setPeriodoId(null);
     setSearchQuery("");
+    setPage(1);
   };
 
   const columns = React.useMemo(
@@ -202,10 +209,19 @@ export function EvaluacionTable({ data, meta }: EvaluacionTableProps) {
         searchPlaceholder="Buscar por nombre..."
         stackFilters={true}
         searchValue={searchQuery}
-        onSearchChange={setSearchQuery}
+        onSearchChange={(value) => {
+          setSearchQuery(value);
+          setPage(1);
+        }}
         onClearFilters={clearFilters}
         hasActiveFilters={hasActiveFilters}
         meta={meta}
+        // Controlled pagination
+        pageIndex={page - 1}
+        pageSize={limit}
+        onPageIndexChange={(index) => setPage(index + 1)}
+        onPageSizeChange={setLimit}
+        showColumnVisibility={false}
         initialState={{
           columnVisibility: {
             tipoId: false,

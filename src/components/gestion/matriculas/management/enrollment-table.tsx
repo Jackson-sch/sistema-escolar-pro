@@ -100,6 +100,13 @@ export function EnrollmentTable<TData, TValue>({
     parseAsString.withDefault("ALL"),
   );
 
+  // Pagination states with nuqs
+  const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
+  const [limit, setLimit] = useQueryState(
+    "limit",
+    parseAsInteger.withDefault(10),
+  );
+
   const hasActiveFilters =
     searchQuery !== "" || anioFilter !== currentYear || estadoFilter !== "ALL";
 
@@ -107,6 +114,7 @@ export function EnrollmentTable<TData, TValue>({
     setSearchQuery("");
     setAnioFilter(currentYear);
     setEstadoFilter("ALL");
+    setPage(1);
   };
 
   return (
@@ -116,10 +124,19 @@ export function EnrollmentTable<TData, TValue>({
       searchKey="estudiante"
       searchPlaceholder="Buscar por DNI o nombre..."
       searchValue={searchQuery}
-      onSearchChange={setSearchQuery}
+      onSearchChange={(value) => {
+        setSearchQuery(value);
+        setPage(1);
+      }}
       onClearFilters={clearFilters}
       hasActiveFilters={hasActiveFilters}
       meta={meta}
+      // Controlled pagination
+      pageIndex={page - 1}
+      pageSize={limit}
+      onPageIndexChange={(index) => setPage(index + 1)}
+      onPageSizeChange={setLimit}
+      showColumnVisibility={false}
     >
       {(table: any) => (
         <EnrollmentFilters

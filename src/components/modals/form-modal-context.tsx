@@ -1,10 +1,18 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useRef,
+} from "react";
 
 interface FormModalContextType {
   isDirty: boolean;
   setIsDirty: (dirty: boolean) => void;
+  setOnSubmit: (submit?: () => void) => void;
+  triggerSubmit: () => void;
 }
 
 const FormModalContext = createContext<FormModalContextType | undefined>(
@@ -13,9 +21,22 @@ const FormModalContext = createContext<FormModalContextType | undefined>(
 
 export function FormModalProvider({ children }: { children: React.ReactNode }) {
   const [isDirty, setIsDirty] = useState(false);
+  const onSubmitRef = useRef<(() => void) | undefined>(undefined);
+
+  const setOnSubmit = useCallback((submit?: () => void) => {
+    onSubmitRef.current = submit;
+  }, []);
+
+  const triggerSubmit = useCallback(() => {
+    if (onSubmitRef.current) {
+      onSubmitRef.current();
+    }
+  }, []);
 
   return (
-    <FormModalContext.Provider value={{ isDirty, setIsDirty }}>
+    <FormModalContext.Provider
+      value={{ isDirty, setIsDirty, setOnSubmit, triggerSubmit }}
+    >
       {children}
     </FormModalContext.Provider>
   );

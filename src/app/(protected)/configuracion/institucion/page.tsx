@@ -2,7 +2,7 @@ import { getInstitucionAction } from "@/actions/institucion";
 import { getVariablesAction } from "@/actions/variables";
 import { getSedesAction } from "@/actions/sedes";
 import { InstitucionForm } from "@/components/configuracion/institucion-form";
-import { VariablesPanel } from "@/components/configuracion/variables-panel";
+import { VariablesPanel } from "@/components/configuracion/variables/variables-panel";
 import { SedesList } from "@/components/configuracion/sedes/sedes-list";
 import { ConfiguracionTabs } from "@/components/configuracion/configuracion-tabs";
 import { IconSettings } from "@tabler/icons-react";

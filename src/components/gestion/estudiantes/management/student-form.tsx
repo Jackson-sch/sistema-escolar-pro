@@ -2,7 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTransition } from "react";
+import { useTransition, useState, useEffect } from "react";
 import {
   IconUser,
   IconId,
@@ -45,12 +45,12 @@ import {
   getGuardianByDniAction,
 } from "@/actions/students";
 import { toast } from "sonner";
-import { useEffect } from "react";
 import { Separator } from "@/components/ui/separator";
 import { formatDate } from "@/lib/formats";
 import CardGeneric from "@/components/common/card-generic";
 import { SEXO_OPTIONS, PARENTESCO_OPTIONS } from "@/lib/constants";
 import { useFormModal } from "@/components/modals/form-modal-context";
+import { ImageUpload } from "@/components/ui/image-upload";
 
 interface StudentFormProps {
   id?: string;
@@ -68,7 +68,7 @@ export function StudentForm({
   estados,
 }: StudentFormProps) {
   const [isPending, startTransition] = useTransition();
-  const { setIsDirty } = useFormModal();
+  const { setIsDirty, setOnSubmit } = useFormModal();
 
   const form = useForm<StudentValues>({
     resolver: zodResolver(StudentSchema),
@@ -91,6 +91,7 @@ export function StudentForm({
           institucionId:
             initialData.institucionId || instituciones[0]?.id || "",
           estadoId: initialData.estadoId || estados[0]?.id || "",
+          image: initialData.image || "",
 
           fechaNacimiento: initialData.fechaNacimiento
             ? new Date(initialData.fechaNacimiento)
@@ -130,6 +131,7 @@ export function StudentForm({
             estados.find((e) => e.nombre === "Activo")?.id ||
             estados[0]?.id ||
             "",
+          image: "",
           nombreApoderado: "",
           dniApoderado: "",
           telefonoApoderado: "",
@@ -137,12 +139,47 @@ export function StudentForm({
         },
   });
 
+  const [calendarMonth, setCalendarMonth] = useState<Date>(
+    form.getValues("fechaNacimiento") || new Date(),
+  );
+
   const { isDirty } = form.formState;
 
   useEffect(() => {
     setIsDirty(isDirty);
     return () => setIsDirty(false);
   }, [isDirty, setIsDirty]);
+
+  const onSubmit = (values: StudentValues) => {
+    // Asegurar que la fecha sea un objeto Date válido antes de enviar
+    const formattedValues = {
+      ...values,
+      fechaNacimiento: values.fechaNacimiento
+        ? new Date(values.fechaNacimiento)
+        : undefined,
+    };
+
+    startTransition(() => {
+      const action = id
+        ? updateStudentAction(id, formattedValues)
+        : createStudentAction(formattedValues);
+
+      action.then((data) => {
+        if (data.error) toast.error(data.error);
+        if (data.success) {
+          toast.success(data.success);
+          setIsDirty(false);
+          if (!id) form.reset();
+          onSuccess?.();
+        }
+      });
+    });
+  };
+
+  useEffect(() => {
+    setOnSubmit(() => form.handleSubmit(onSubmit)());
+    return () => setOnSubmit(undefined);
+  }, [form, onSubmit, setOnSubmit]);
 
   // Observar cambios en el DNI del apoderado para auto-completar
   const dniApoderado = form.watch("dniApoderado");
@@ -173,24 +210,6 @@ export function StudentForm({
     }
   }, [dniApoderado, form]);
 
-  const onSubmit = (values: StudentValues) => {
-    startTransition(() => {
-      const action = id
-        ? updateStudentAction(id, values)
-        : createStudentAction(values);
-
-      action.then((data) => {
-        if (data.error) toast.error(data.error);
-        if (data.success) {
-          toast.success(data.success);
-          setIsDirty(false);
-          if (!id) form.reset();
-          onSuccess?.();
-        }
-      });
-    });
-  };
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -200,6 +219,25 @@ export function StudentForm({
           description="Datos básicos de identificación del estudiante."
           icon={<IconUser className="h-4 w-4" />}
         >
+          <div className="flex flex-col items-center justify-center pb-6">
+            <FormField
+              control={form.control}
+              name="image"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <ImageUpload
+                      value={field.value}
+                      onChange={field.onChange}
+                      onRemove={() => field.onChange("")}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
             {/* Nombre (ancho 4) */}
             <FormField
@@ -321,12 +359,17 @@ export function StudentForm({
                       <Calendar
                         mode="single"
                         selected={field.value}
-                        onSelect={field.onChange}
+                        onSelect={(date) => {
+                          field.onChange(date);
+                          if (date) setCalendarMonth(date);
+                        }}
+                        month={calendarMonth}
+                        onMonthChange={setCalendarMonth}
                         disabled={(date) =>
                           date > new Date() || date < new Date("1900-01-01")
                         }
-                        fromYear={1900}
-                        toYear={new Date().getFullYear()}
+                        startMonth={new Date(1900, 0)}
+                        endMonth={new Date()}
                         initialFocus
                       />
                     </PopoverContent>
@@ -442,7 +485,10 @@ export function StudentForm({
             />
 
             <Separator
-              className={cn("md:col-span-12 my-1", instituciones.length === 1 && "hidden")}
+              className={cn(
+                "md:col-span-12 my-1",
+                instituciones.length === 1 && "hidden",
+              )}
             />
 
             {/* Institución and Estado */}

@@ -52,10 +52,7 @@ export function BulkActionsButton({
         <Tooltip>
           <TooltipTrigger asChild>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                className="w-full rounded-full sm:w-auto sm:px-4"
-              >
+              <Button variant="outline" className="rounded-full">
                 <IconSettings className="sm:mr-2 h-4 w-4" />
                 <span className="hidden sm:inline">Gestión</span>
               </Button>

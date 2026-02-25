@@ -6,9 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-} from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
 import { updateInstitucionAction } from "@/actions/institucion";
 
 import {
@@ -21,6 +19,9 @@ import {
 import { LogoInstitucionalCard } from "./institucion/logo-institucional-card";
 import { ResumenInstitucionalCard } from "./institucion/resumen-institucional-card";
 import { IconLoader2, IconDeviceFloppy } from "@tabler/icons-react";
+
+import { useFormShortcuts } from "@/hooks/use-form-shortcuts";
+import { useEffect } from "react";
 
 interface InstitucionFormProps {
   initialData: any;
@@ -82,6 +83,11 @@ export function InstitucionForm({ initialData }: InstitucionFormProps) {
       setIsPending(false);
     }
   };
+
+  useFormShortcuts({
+    onSubmit: form.handleSubmit(onSubmit as any),
+    isLoading: isPending,
+  });
 
   return (
     <Form {...form}>

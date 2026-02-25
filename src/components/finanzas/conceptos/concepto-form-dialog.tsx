@@ -111,7 +111,7 @@ function ConceptoFormContent({
         },
       });
       if (res.success) {
-        toast.success(res.success);
+        toast.success(res.success as string);
         form.reset();
         setIsDirty(false);
         onSuccess();

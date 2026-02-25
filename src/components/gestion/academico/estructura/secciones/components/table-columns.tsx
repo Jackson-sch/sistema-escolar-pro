@@ -190,8 +190,8 @@ export const getSeccionColumns = ({
             className={cn(
               "font-semibold text-[10px] py-0 px-2 rounded-full",
               sede
-                ? "bg-blue-50/50 text-blue-700 border-blue-200"
-                : "bg-slate-50 text-slate-500 border-slate-200",
+                ? "text-blue-700 border-blue-200"
+                : "text-slate-500 border-slate-200",
             )}
           >
             {sede?.nombre || "Sin Sede"}

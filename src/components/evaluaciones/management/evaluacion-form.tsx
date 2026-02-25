@@ -55,7 +55,7 @@ export function EvaluacionForm({
   const [isPending, startTransition] = useTransition();
   const [capacidades, setCapacidades] = useState<any[]>([]);
   const [loadingCapacidades, setLoadingCapacidades] = useState(false);
-  const { setIsDirty } = useFormModal();
+  const { setIsDirty, setOnSubmit } = useFormModal();
 
   const form = useForm({
     defaultValues: {
@@ -66,20 +66,13 @@ export function EvaluacionForm({
       periodoId: initialData?.periodoId || periodos[0]?.id || "",
       fecha: initialData?.fecha ? new Date(initialData.fecha) : new Date(),
       peso: initialData?.peso || 20,
-      notaMinima: initialData?.notaMinima || 10.5,
+      notaMinima: initialData?.notaMinima || 11,
       escalaCalificacion: initialData?.escalaCalificacion || "VIGESIMAL",
       capacidadId: initialData?.capacidadId || "",
       activa: initialData?.activa ?? true,
       recuperable: initialData?.recuperable ?? false,
     },
   });
-
-  const { isDirty } = form.formState;
-
-  useEffect(() => {
-    setIsDirty(isDirty);
-    return () => setIsDirty(false);
-  }, [isDirty, setIsDirty]);
 
   const selectedCursoId = form.watch("cursoId");
 
@@ -108,10 +101,22 @@ export function EvaluacionForm({
     });
   };
 
+  useEffect(() => {
+    setOnSubmit(() => form.handleSubmit(onSubmit)());
+    return () => setOnSubmit(undefined);
+  }, [form, onSubmit, setOnSubmit]);
+
+  const { isDirty } = form.formState;
+
+  useEffect(() => {
+    setIsDirty(isDirty);
+    return () => setIsDirty(false);
+  }, [isDirty, setIsDirty]);
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-2 gap-y-2 sm:gap-y-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-3">
           <FormField
             control={form.control}
             name="nombre"
@@ -317,7 +322,7 @@ export function EvaluacionForm({
             )}
           />
 
-          <div className="grid grid-cols-2 gap-3 col-span-1 sm:col-span-1">
+          <div className="grid grid-cols-2 gap-3 col-span-1 sm:col-span-1 pt-1.5">
             <FormField
               control={form.control}
               name="peso"

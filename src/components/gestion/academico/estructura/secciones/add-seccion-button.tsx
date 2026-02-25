@@ -10,7 +10,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { FormModal } from "@/components/modals/form-modal";
-import { SeccionForm } from "./seccion-form";
+import { SeccionForm } from "@/components/gestion/academico/estructura/secciones/seccion-form";
 
 interface AddSeccionButtonProps {
   grados: { id: string; nombre: string; nivel: { nombre: string } }[];
@@ -22,6 +22,7 @@ interface AddSeccionButtonProps {
   }[];
   sedes: { id: string; nombre: string }[];
   institucionId: string;
+  currentAnio: number;
 }
 
 export function AddSeccionButton({
@@ -29,6 +30,7 @@ export function AddSeccionButton({
   tutores,
   sedes,
   institucionId,
+  currentAnio,
 }: AddSeccionButtonProps) {
   const [open, setOpen] = useState(false);
 
@@ -56,13 +58,14 @@ export function AddSeccionButton({
         description="Crea una sección (A, B, C...) para un grado específico."
         isOpen={open}
         onOpenChange={setOpen}
-        className="sm:max-w-md"
+        className="sm:max-w-xl"
       >
         <SeccionForm
           grados={grados}
           tutores={tutores}
           sedes={sedes}
           institucionId={institucionId}
+          currentAnio={currentAnio}
           onSuccess={() => setOpen(false)}
         />
       </FormModal>

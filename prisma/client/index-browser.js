@@ -406,6 +406,7 @@ exports.Prisma.NivelAcademicoScalarFieldEnum = {
   capacidad: 'capacidad',
   capacidadMaxima: 'capacidadMaxima',
   aulaAsignada: 'aulaAsignada',
+  color: 'color',
   nivelId: 'nivelId',
   gradoId: 'gradoId',
   tutorId: 'tutorId',
@@ -794,6 +795,20 @@ exports.Prisma.ComprobantePagoScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.PoliticaAsistenciaScalarFieldEnum = {
+  id: 'id',
+  nombre: 'nombre',
+  nivelId: 'nivelId',
+  turno: 'turno',
+  horaEntrada: 'horaEntrada',
+  horaSalida: 'horaSalida',
+  tolerancia: 'tolerancia',
+  activo: 'activo',
+  institucionId: 'institucionId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -924,7 +939,8 @@ exports.Prisma.ModelName = {
   ConceptoPago: 'ConceptoPago',
   CronogramaPago: 'CronogramaPago',
   VariableSistema: 'VariableSistema',
-  ComprobantePago: 'ComprobantePago'
+  ComprobantePago: 'ComprobantePago',
+  PoliticaAsistencia: 'PoliticaAsistencia'
 };
 
 /**

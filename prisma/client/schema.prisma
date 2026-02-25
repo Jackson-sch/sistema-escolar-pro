@@ -174,46 +174,47 @@ model CargoPermiso {
 }
 
 model InstitucionEducativa {
-  id                 String             @id @default(cuid())
-  codigoModular      String             @unique
-  nombreInstitucion  String
-  nombreComercial    String?
-  tipoGestion        TipoGestion
-  modalidad          Modalidad
-  ugel               String
-  dre                String
-  ubigeo             String
-  direccion          String
-  distrito           String
-  provincia          String
-  departamento       String
-  telefono           String?
-  email              String?
-  sitioWeb           String?
-  resolucionCreacion String?
-  fechaCreacion      DateTime?
-  resolucionActual   String?
-  logo               String?
-  directorId         String?            @unique
-  cicloEscolarActual Int                @default(2025)
-  fechaInicioClases  DateTime
-  fechaFinClases     DateTime
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
-  areasCurriculares  AreaCurricular[]
-  cargos             Cargo[]
-  conceptosPago      ConceptoPago[]
-  cursos             Curso[]
-  estadosUsuario     EstadoUsuario[]
-  director           User?              @relation("DirectorInstitucion", fields: [directorId], references: [id])
-  niveles            Nivel[]
-  nivelesAcademicos  NivelAcademico[]
-  periodos           PeriodoAcademico[]
-  prospectos         Prospecto[]
-  tiposDocumento     TipoDocumento[]
-  tiposEvaluacion    TipoEvaluacion[]
-  users              User[]
-  sedes              Sede[]
+  id                  String               @id @default(cuid())
+  codigoModular       String               @unique
+  nombreInstitucion   String
+  nombreComercial     String?
+  tipoGestion         TipoGestion
+  modalidad           Modalidad
+  ugel                String
+  dre                 String
+  ubigeo              String
+  direccion           String
+  distrito            String
+  provincia           String
+  departamento        String
+  telefono            String?
+  email               String?
+  sitioWeb            String?
+  resolucionCreacion  String?
+  fechaCreacion       DateTime?
+  resolucionActual    String?
+  logo                String?
+  directorId          String?              @unique
+  cicloEscolarActual  Int                  @default(2025)
+  fechaInicioClases   DateTime
+  fechaFinClases      DateTime
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  areasCurriculares   AreaCurricular[]
+  cargos              Cargo[]
+  conceptosPago       ConceptoPago[]
+  cursos              Curso[]
+  estadosUsuario      EstadoUsuario[]
+  director            User?                @relation("DirectorInstitucion", fields: [directorId], references: [id])
+  niveles             Nivel[]
+  nivelesAcademicos   NivelAcademico[]
+  periodos            PeriodoAcademico[]
+  prospectos          Prospecto[]
+  tiposDocumento      TipoDocumento[]
+  tiposEvaluacion     TipoEvaluacion[]
+  users               User[]
+  sedes               Sede[]
+  politicasAsistencia PoliticaAsistencia[]
 }
 
 model User {
@@ -385,20 +386,21 @@ model PasswordResetToken {
 }
 
 model Nivel {
-  id                String               @id @default(cuid())
-  nombre            String               @unique
-  descripcion       String?
-  institucionId     String
-  activo            Boolean              @default(true)
-  createdAt         DateTime             @default(now())
-  updatedAt         DateTime             @updatedAt
-  areasCurriculares AreaCurricular[]
-  cursos            Curso[]
-  grados            Grado[]
-  institucion       InstitucionEducativa @relation(fields: [institucionId], references: [id])
-  nivelesAcademicos NivelAcademico[]
-  anuncios          Anuncio[]            @relation("AnuncioToNivel")
-  eventos           Evento[]             @relation("EventoToNivel")
+  id                  String               @id @default(cuid())
+  nombre              String               @unique
+  descripcion         String?
+  institucionId       String
+  activo              Boolean              @default(true)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  areasCurriculares   AreaCurricular[]
+  cursos              Curso[]
+  grados              Grado[]
+  institucion         InstitucionEducativa @relation(fields: [institucionId], references: [id])
+  nivelesAcademicos   NivelAcademico[]
+  anuncios            Anuncio[]            @relation("AnuncioToNivel")
+  eventos             Evento[]             @relation("EventoToNivel")
+  politicasAsistencia PoliticaAsistencia[]
 
   @@unique([institucionId, nombre])
 }
@@ -430,6 +432,7 @@ model NivelAcademico {
   capacidad       Int                  @default(30)
   capacidadMaxima Int?
   aulaAsignada    String?
+  color           String?
   nivelId         String
   gradoId         String
   tutorId         String?
@@ -1022,4 +1025,23 @@ enum EstadoComprobante {
   EN_REVISION
   APROBADO
   RECHAZADO
+}
+
+model PoliticaAsistencia {
+  id            String               @id @default(cuid())
+  nombre        String
+  nivelId       String?
+  turno         Turno?
+  horaEntrada   String               @default("08:00")
+  horaSalida    String               @default("13:00")
+  tolerancia    Int                  @default(0)
+  activo        Boolean              @default(true)
+  institucionId String
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  institucion   InstitucionEducativa @relation(fields: [institucionId], references: [id])
+  nivel         Nivel?               @relation(fields: [nivelId], references: [id])
+
+  @@index([institucionId])
+  @@index([nivelId])
 }

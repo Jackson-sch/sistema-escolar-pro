@@ -49,7 +49,7 @@ export function AddEvaluacionButton({
         description="Planifica una nueva actividad académica definiendo su peso y fecha para el registro de calificaciones."
         isOpen={open}
         onOpenChange={setOpen}
-        className="sm:max-w-[600px]"
+        className="sm:max-w-md"
       >
         <EvaluacionForm
           tipos={tipos}

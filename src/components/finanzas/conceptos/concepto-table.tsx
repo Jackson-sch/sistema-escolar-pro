@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useQueryState, parseAsString } from "nuqs";
+import { useQueryState, parseAsString, parseAsInteger } from "nuqs";
 import { useState } from "react";
 import { DataTable } from "@/components/ui/data-table";
 import { toast } from "sonner";
@@ -63,8 +63,16 @@ export function ConceptoTable({ data, meta }: ConceptoTableProps) {
     parseAsString.withDefault(""),
   );
 
+  // Pagination states with nuqs
+  const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
+  const [limit, setLimit] = useQueryState(
+    "limit",
+    parseAsInteger.withDefault(10),
+  );
+
   const clearFilters = () => {
     setSearchQuery("");
+    setPage(1);
   };
 
   return (
@@ -72,13 +80,21 @@ export function ConceptoTable({ data, meta }: ConceptoTableProps) {
       <DataTable
         columns={columns}
         data={data}
-        searchKey="nombre"
         searchPlaceholder="Buscar concepto..."
         searchValue={searchQuery}
-        onSearchChange={setSearchQuery}
+        onSearchChange={(value) => {
+          setSearchQuery(value);
+          setPage(1);
+        }}
         onClearFilters={clearFilters}
         hasActiveFilters={searchQuery !== ""}
         meta={meta}
+        // Controlled pagination
+        pageIndex={page - 1}
+        pageSize={limit}
+        onPageIndexChange={(index) => setPage(index + 1)}
+        onPageSizeChange={setLimit}
+        showColumnVisibility={false}
       />
 
       {/* Modal de Confirmación de Eliminación */}

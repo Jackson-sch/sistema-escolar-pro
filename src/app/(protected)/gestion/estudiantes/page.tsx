@@ -10,6 +10,7 @@ import { columns } from "@/components/gestion/estudiantes/components/columns";
 import { StudentTable } from "@/components/gestion/estudiantes/management/student-table";
 import { AddStudentButton } from "@/components/gestion/estudiantes/components/add-student-button";
 import { Button } from "@/components/ui/button";
+import { auth } from "@/auth";
 import {
   Tooltip,
   TooltipContent,
@@ -35,6 +36,8 @@ export default async function EstudiantesPage() {
   ]);
 
   const periodoAcademico = institucion?.cicloEscolarActual;
+  const session = await auth();
+  const isProfessor = session?.user?.role === "profesor";
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-0 sm:p-4 pt-0 @container/main">
@@ -49,21 +52,26 @@ export default async function EstudiantesPage() {
           </p>
         </div>
         <div className="flex flex-row gap-3 items-center">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="outline" className="rounded-full">
-                  <IconCloudDownload className="mr-2 h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                  <span className="hidden sm:inline font-semibold">
-                    Descargar Padrón
-                  </span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="text-[11px] font-medium">
-                Exportar base de datos de alumnos
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          {!isProfessor && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="outline" className="rounded-full">
+                    <IconCloudDownload className="mr-2 h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                    <span className="hidden sm:inline font-semibold">
+                      Descargar Padrón
+                    </span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="bottom"
+                  className="text-[11px] font-medium"
+                >
+                  Exportar base de datos de alumnos
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
 
           <AddStudentButton
             instituciones={instituciones as any}

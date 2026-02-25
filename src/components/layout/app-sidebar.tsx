@@ -5,12 +5,10 @@ import {
   IconDashboard,
   IconUsers,
   IconSchool,
-  IconBook,
   IconCreditCard,
   IconSettings,
   IconUsersGroup,
   IconClock,
-  IconHierarchy,
   IconClipboardCheck,
   IconMessage2,
   IconUserPlus,
@@ -185,6 +183,8 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   userApellidoMaterno?: string;
   userEmail?: string;
   pendingComprobantes?: number;
+  institucionName?: string;
+  institucionLogo?: string | null;
 }
 
 export function AppSidebar({
@@ -194,11 +194,15 @@ export function AppSidebar({
   userApellidoMaterno,
   userEmail,
   pendingComprobantes = 0,
+  institucionName,
+  institucionLogo,
   ...props
 }: AppSidebarProps) {
   const isPadre = userRole === "padre";
   const homeUrl = isPadre ? "/portal" : "/dashboard";
-  const portalTitle = isPadre ? "Portal Padres" : "EduPeru Pro";
+  const portalTitle = isPadre
+    ? "Portal Padres"
+    : institucionName || "EduPeru Pro";
 
   // Actualizar el badge en Verificar Pagos si hay pendientes y filtrar por rol
   let navItems = isPadre ? padreNavItems : adminNavItems;
@@ -237,15 +241,27 @@ export function AppSidebar({
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href={homeUrl}>
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <IconSchool className="size-4" />
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground overflow-hidden">
+                  {!isPadre && institucionLogo ? (
+                    <img
+                      src={institucionLogo}
+                      alt={portalTitle}
+                      className="size-full object-cover"
+                    />
+                  ) : (
+                    <IconSchool className="size-4" />
+                  )}
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold text-primary">
                     {portalTitle}
                   </span>
                   <span className="truncate text-xs text-muted-foreground">
-                    {isPadre ? "Área de Padres" : "Sistema Escolar"}
+                    {isPadre
+                      ? "Área de Padres"
+                      : institucionName
+                        ? "Sistema Escolar"
+                        : "EduPeru Pro"}
                   </span>
                 </div>
               </Link>

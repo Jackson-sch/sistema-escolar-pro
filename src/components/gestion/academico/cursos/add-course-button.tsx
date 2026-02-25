@@ -6,6 +6,7 @@ import { IconPlus } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { FormModal } from "@/components/modals/form-modal";
 import { CourseForm } from "./course-form";
+import { useComponentShortcuts } from "@/hooks/use-component-shortcuts";
 
 interface AddCourseButtonProps {
   areas: any[];
@@ -19,6 +20,10 @@ export function AddCourseButton({
   profesores,
 }: AddCourseButtonProps) {
   const [open, setOpen] = useState(false);
+
+  useComponentShortcuts({
+    onNew: () => setOpen(true),
+  });
 
   return (
     <>

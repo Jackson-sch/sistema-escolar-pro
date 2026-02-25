@@ -1,7 +1,7 @@
 "use client"
 
 import { IconSchool } from "@tabler/icons-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   FormControl,
   FormField,
@@ -46,7 +46,9 @@ export function InformacionGeneralCard({ control }: InformacionGeneralCardProps)
         </div>
       </CardHeader>
       <CardContent className="space-y-4 p-6">
-        <FormField
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <FormField
           control={control}
           name="nombreInstitucion"
           render={({ field }) => (
@@ -59,7 +61,6 @@ export function InformacionGeneralCard({ control }: InformacionGeneralCardProps)
             </FormItem>
           )}
         />
-        <div className="grid grid-cols-2 gap-4">
           <FormField
             control={control}
             name="codigoModular"
@@ -87,7 +88,7 @@ export function InformacionGeneralCard({ control }: InformacionGeneralCardProps)
             )}
           />
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <FormField
             control={control}
             name="dre"
@@ -124,7 +125,6 @@ export function InformacionGeneralCard({ control }: InformacionGeneralCardProps)
               </FormItem>
             )}
           />
-        </div>
         <FormField
           control={control}
           name="modalidad"
@@ -146,6 +146,7 @@ export function InformacionGeneralCard({ control }: InformacionGeneralCardProps)
             </FormItem>
           )}
         />
+        </div>
       </CardContent>
     </MagicCard>
   )

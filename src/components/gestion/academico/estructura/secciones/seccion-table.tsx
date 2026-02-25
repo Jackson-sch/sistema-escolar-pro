@@ -1,7 +1,6 @@
 "use client";
 
-import * as React from "react";
-import { useQueryState, parseAsString } from "nuqs";
+import { useQueryState, parseAsString, parseAsInteger } from "nuqs";
 import { toast } from "sonner";
 import { DataTable } from "@/components/ui/data-table";
 import { deleteSeccionAction } from "@/actions/academic-structure";
@@ -219,6 +218,13 @@ export function SeccionTable({ data, meta }: SeccionTableProps) {
     parseAsString.withDefault("ALL"),
   );
 
+  // Pagination states with nuqs
+  const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
+  const [limit, setLimit] = useQueryState(
+    "limit",
+    parseAsInteger.withDefault(10),
+  );
+
   const hasActiveFilters =
     searchQuery !== "" ||
     nivelFilter !== "ALL" ||
@@ -232,6 +238,7 @@ export function SeccionTable({ data, meta }: SeccionTableProps) {
     setGradoFilter("ALL");
     setTurnoFilter("ALL");
     setSedeFilter("ALL");
+    setPage(1);
   };
 
   const onEdit = (seccion: SeccionTableType) => {
@@ -268,9 +275,18 @@ export function SeccionTable({ data, meta }: SeccionTableProps) {
         searchKey="seccion"
         searchPlaceholder="Buscar sección..."
         searchValue={searchQuery}
-        onSearchChange={setSearchQuery}
+        onSearchChange={(value) => {
+          setSearchQuery(value);
+          setPage(1);
+        }}
         hasActiveFilters={hasActiveFilters}
         onClearFilters={onClearFilters}
+        // Controlled pagination
+        pageIndex={page - 1}
+        pageSize={limit}
+        onPageIndexChange={(index) => setPage(index + 1)}
+        onPageSizeChange={setLimit}
+        showColumnVisibility={false}
         initialState={{
           columnVisibility: {
             nivel: false,

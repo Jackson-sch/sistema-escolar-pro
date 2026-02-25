@@ -1,11 +1,11 @@
-"use server"
+"use server";
 
-import prisma from "@/lib/prisma"
-import { revalidatePath } from "next/cache"
-import { createSafeAction } from "@/lib/safe-action"
-import { z } from "zod"
+import prisma from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
+import { createSafeAction } from "@/lib/safe-action";
+import { z } from "zod";
 
-const REVALIDATE_PATH = "/finanzas"
+const REVALIDATE_PATH = "/finanzas";
 
 /**
  * Registra un pago parcial o total
@@ -20,32 +20,35 @@ export const registrarPagoAction = createSafeAction(
     observaciones: z.string().optional(),
   }),
   async (values, session) => {
-    const institucionId = session.user.institucionId
+    const institucionId = session.user.institucionId;
 
     const result = await prisma.$transaction(async (tx) => {
       const cronograma = await tx.cronogramaPago.findFirst({
-        where: { 
+        where: {
           id: values.cronogramaId,
-          estudiante: { institucionId } 
+          estudiante: { institucionId },
         },
-        include: { concepto: true }
-      })
+        include: { concepto: true },
+      });
 
       if (!cronograma) {
-        throw new Error("Cronograma no encontrado o no pertenece a su institución.")
+        throw new Error(
+          "Cronograma no encontrado o no pertenece a su institución.",
+        );
       }
 
-      const nuevoMontoPagado = Number(cronograma.montoPagado) + Number(values.monto)
-      const estaPagado = nuevoMontoPagado >= Number(cronograma.monto)
+      const nuevoMontoPagado =
+        Number(cronograma.montoPagado) + Number(values.monto);
+      const estaPagado = nuevoMontoPagado >= Number(cronograma.monto);
 
       await tx.cronogramaPago.update({
         where: { id: values.cronogramaId },
         data: {
           montoPagado: nuevoMontoPagado,
           pagado: estaPagado,
-          updatedAt: new Date()
-        }
-      })
+          updatedAt: new Date(),
+        },
+      });
 
       await tx.pago.create({
         data: {
@@ -59,22 +62,25 @@ export const registrarPagoAction = createSafeAction(
           fechaVencimiento: cronograma.fechaVencimiento,
           fechaPago: new Date(),
           estado: "completado",
-          observaciones: values.observaciones
-        }
-      })
+          observaciones: values.observaciones,
+        },
+      });
 
-      return { estaPagado, saldoPendiente: Number(cronograma.monto) - nuevoMontoPagado }
-    })
+      return {
+        estaPagado,
+        saldoPendiente: Number(cronograma.monto) - nuevoMontoPagado,
+      };
+    });
 
-    revalidatePath(REVALIDATE_PATH)
+    revalidatePath(REVALIDATE_PATH);
     return {
       success: result.estaPagado
         ? "Pago registrado y completado exitosamente"
-        : `Pago parcial registrado. Saldo pendiente: S/ ${result.saldoPendiente.toFixed(2)}`
-    }
+        : `Pago parcial registrado. Saldo pendiente: S/ ${result.saldoPendiente.toFixed(2)}`,
+    };
   },
-  { roles: ["administrativo"] }
-)
+  { roles: ["administrativo"] },
+);
 
 /**
  * Obtiene el resumen de deudas por estudiante
@@ -82,29 +88,32 @@ export const registrarPagoAction = createSafeAction(
 export const getResumenDeudaAction = createSafeAction(
   z.object({ estudianteId: z.string() }),
   async ({ estudianteId }, session) => {
-    const institucionId = session.user.institucionId
+    const institucionId = session.user.institucionId;
 
     const deudas = await prisma.cronogramaPago.findMany({
-      where: { 
-        estudianteId, 
+      where: {
+        estudianteId,
         pagado: false,
-        estudiante: { institucionId }
+        estudiante: { institucionId },
       },
-      include: { concepto: true }
-    })
+      include: { concepto: true },
+    });
 
-    const totalDeuda = deudas.reduce((acc, d) => acc + (d.monto - d.montoPagado), 0)
-    const cuotasPendientes = deudas.length
+    const totalDeuda = deudas.reduce(
+      (acc, d) => acc + (d.monto - d.montoPagado),
+      0,
+    );
+    const cuotasPendientes = deudas.length;
 
     return {
       success: {
         deudas: JSON.parse(JSON.stringify(deudas)),
         totalDeuda,
-        cuotasPendientes
-      }
-    }
-  }
-)
+        cuotasPendientes,
+      },
+    };
+  },
+);
 
 /**
  * Obtiene el siguiente número de comprobante autoincremental
@@ -112,31 +121,103 @@ export const getResumenDeudaAction = createSafeAction(
 export const getNextComprobanteAction = createSafeAction(
   z.object({}).optional(),
   async (_, session) => {
-    const institucionId = session.user.institucionId
+    const institucionId = session.user.institucionId;
 
     const ultimoPago = await prisma.pago.findFirst({
       where: {
         numeroBoleta: {
-          startsWith: "B001-"
+          startsWith: "B001-",
         },
-        estudiante: { institucionId }
+        estudiante: { institucionId },
       },
       orderBy: {
-        numeroBoleta: "desc"
+        numeroBoleta: "desc",
       },
       select: {
-        numeroBoleta: true
-      }
-    })
+        numeroBoleta: true,
+      },
+    });
 
     if (!ultimoPago || !ultimoPago.numeroBoleta) {
-      return { success: "B001-000001" }
+      return { success: "B001-000001" };
     }
 
-    const currentNumber = parseInt(ultimoPago.numeroBoleta.split("-")[1])
-    const nextNumber = currentNumber + 1
-    const formattedNumber = nextNumber.toString().padStart(6, "0")
+    const currentNumber = parseInt(ultimoPago.numeroBoleta.split("-")[1]);
+    const nextNumber = currentNumber + 1;
+    const formattedNumber = nextNumber.toString().padStart(6, "0");
 
-    return { success: `B001-${formattedNumber}` }
-  }
-)
+    return { success: `B001-${formattedNumber}` };
+  },
+);
+
+/**
+ * Anula un pago realizado
+ */
+export const anularPagoAction = createSafeAction(
+  z.object({ pagoId: z.string() }),
+  async ({ pagoId }, session) => {
+    const institucionId = session.user.institucionId;
+
+    try {
+      const result = await prisma.$transaction(async (tx) => {
+        const pago = await tx.pago.findUnique({
+          where: { id: pagoId },
+          include: {
+            cronogramaPago: true,
+            estudiante: true,
+          },
+        });
+
+        if (!pago || pago.estudiante.institucionId !== institucionId) {
+          throw new Error("Pago no encontrado o no autorizado.");
+        }
+
+        if (pago.estado === "anulado") {
+          throw new Error("Este pago ya ha sido anulado.");
+        }
+
+        if (!pago.cronogramaPagoId) {
+          throw new Error(
+            "Este pago no está vinculado a un cronograma y no puede ser anulado mediante este proceso.",
+          );
+        }
+
+        // 1. Marcar el pago como anulado
+        await tx.pago.update({
+          where: { id: pagoId },
+          data: {
+            estado: "anulado",
+            updatedAt: new Date(),
+          },
+        });
+
+        // 2. Revertir montos en el cronograma
+        const cronograma = pago.cronogramaPago!;
+        const nuevoMontoPagado = Math.max(
+          0,
+          Number(cronograma.montoPagado) - Number(pago.monto),
+        );
+
+        await tx.cronogramaPago.update({
+          where: { id: pago.cronogramaPagoId },
+          data: {
+            montoPagado: nuevoMontoPagado,
+            pagado: false, // Siempre false si quitamos un pago
+            updatedAt: new Date(),
+          },
+        });
+
+        return { success: true };
+      });
+
+      revalidatePath(REVALIDATE_PATH);
+      return {
+        success: "Pago anulado correctamente. El saldo ha sido revertido.",
+      };
+    } catch (error: any) {
+      console.error("Error anulando pago:", error);
+      return { error: error.message || "No se pudo anular el pago." };
+    }
+  },
+  { roles: ["administrativo"] },
+);

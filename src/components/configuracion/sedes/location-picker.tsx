@@ -7,6 +7,12 @@ import {
   IconLoader2,
   IconX,
 } from "@tabler/icons-react";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import { Button } from "@/components/ui/button";
 
 interface LocationPickerProps {
   value: { lat: number; lng: number } | null;
@@ -275,31 +281,35 @@ export function LocationPicker({
     <div className="space-y-2">
       {/* Search bar */}
       <div className="relative" ref={suggestionsRef}>
-        <div className="flex items-center gap-2 h-9 rounded-md border border-input bg-transparent px-3 text-sm shadow-sm focus-within:ring-1 focus-within:ring-ring">
-          {isSearching ? (
-            <IconLoader2 className="h-4 w-4 text-muted-foreground animate-spin shrink-0" />
-          ) : (
-            <IconSearch className="h-4 w-4 text-muted-foreground shrink-0" />
-          )}
-          <input
+        <InputGroup className="rounded-full transition-all px-2">
+          <InputGroupAddon>
+            {isSearching ? (
+              <IconLoader2 className="h-4 w-4 text-muted-foreground animate-spin shrink-0" />
+            ) : (
+              <IconSearch className="h-4 w-4 text-muted-foreground shrink-0" />
+            )}
+          </InputGroupAddon>
+          <InputGroupInput
             type="text"
             placeholder="Buscar dirección..."
-            className="flex-1 bg-transparent border-none outline-none text-sm placeholder:text-muted-foreground"
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
             onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
             disabled={disabled}
           />
-          {value && (
-            <button
-              type="button"
-              onClick={clearLocation}
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <IconX className="h-3.5 w-3.5" />
-            </button>
-          )}
-        </div>
+          <InputGroupAddon align="inline-end">
+            {value && (
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={clearLocation}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <IconX className="h-3.5 w-3.5" />
+              </Button>
+            )}
+          </InputGroupAddon>
+        </InputGroup>
 
         {/* Suggestions dropdown */}
         {showSuggestions && (

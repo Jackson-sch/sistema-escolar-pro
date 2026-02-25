@@ -172,7 +172,15 @@ export function AnnouncementCard({
                     {(anuncio.autor?.apellidoPaterno || "").toUpperCase()}
                   </p>
                   <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mt-1.5">
-                    {anuncio.categoria || "ADMINISTRACIÓN"}
+                    {anuncio.autor?.role === "profesor"
+                      ? "Docente"
+                      : anuncio.autor?.role === "administrativo"
+                        ? "Administración"
+                        : anuncio.autor?.role === "estudiante"
+                          ? "Estudiante"
+                          : anuncio.autor?.role === "padre"
+                            ? "Padre de Familia"
+                            : "Sistema"}
                   </p>
                 </div>
               </div>

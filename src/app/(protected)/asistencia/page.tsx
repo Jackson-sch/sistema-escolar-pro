@@ -3,22 +3,38 @@ import {
   getSeccionesAction,
   getAniosAcademicosAction,
 } from "@/actions/academic-structure";
+import { getInstitucionByIdAction } from "@/actions/institucion";
 import { AsistenciaTabs } from "@/components/asistencia/asistencia-tabs";
 import { AsistenciaClient } from "@/components/asistencia/asistencia-client";
 import { AsistenciaReportes } from "@/components/asistencia/asistencia-reportes";
+import { QRScannerDashboard } from "@/components/asistencia/scanner-qr/qr-scanner-dashboard";
+import { PoliticasAsistenciaClient } from "@/components/asistencia/politicas/politicas-asistencia-client";
+
+import { auth } from "@/auth";
 
 export default async function AsistenciaPage() {
+  const session = await auth();
+  const isProfessor = session?.user?.role === "profesor";
+  const profesorId = isProfessor ? session?.user?.id : undefined;
+
   const currentYear = new Date().getFullYear();
-  const [seccionesRes, aniosRes] = await Promise.all([
-    getSeccionesAction({ anioAcademico: currentYear }),
+  const [seccionesRes, aniosRes, institucionRes] = await Promise.all([
+    getSeccionesAction({
+      anioAcademico: currentYear,
+      profesorId,
+    }),
     getAniosAcademicosAction(),
+    getInstitucionByIdAction(session?.user?.institucionId || undefined),
   ]);
+
+  const institucion = institucionRes.success;
+  const dbYear = institucion?.cicloEscolarActual || currentYear;
 
   const secciones = seccionesRes.data || [];
   const anios = aniosRes.data || [];
 
-  // Asegurarnos que el año actual esté en la lista si no hay datos
-  const finalAnios = anios.length > 0 ? anios : [currentYear];
+  // Asegurarnos que el año actual/db esté en la lista si no hay datos
+  const finalAnios = anios.length > 0 ? anios : [dbYear];
 
   return (
     <div className="flex flex-1 flex-col gap-4 sm:gap-6 p-0 sm:p-4 pt-0 @container/main">
@@ -47,7 +63,8 @@ export default async function AsistenciaPage() {
                 <AsistenciaClient
                   initialSecciones={secciones}
                   aniosAcademicos={finalAnios}
-                  defaultYear={currentYear}
+                  defaultYear={dbYear}
+                  profesorId={profesorId}
                 />
               </Suspense>
             ),
@@ -56,8 +73,19 @@ export default async function AsistenciaPage() {
                 <AsistenciaReportes
                   initialSecciones={secciones}
                   aniosAcademicos={finalAnios}
-                  defaultYear={currentYear}
+                  defaultYear={dbYear}
+                  profesorId={profesorId}
                 />
+              </Suspense>
+            ),
+            scanner: (
+              <Suspense fallback={<div>Cargando scanner...</div>}>
+                <QRScannerDashboard />
+              </Suspense>
+            ),
+            politicas: (
+              <Suspense fallback={<div>Cargando políticas...</div>}>
+                <PoliticasAsistenciaClient anioAcademico={dbYear} />
               </Suspense>
             ),
           }}

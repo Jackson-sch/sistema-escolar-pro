@@ -1,9 +1,9 @@
-import * as z from "zod"
+import * as z from "zod";
 
 export const StaffSchema = z.object({
   name: z.string().min(1, "El nombre es requerido"),
   apellidoPaterno: z.string().min(1, "El apellido paterno es requerido"),
-  apellidoMaterno: z.string().min(1, "El apellido materno es requerido"),
+  apellidoMaterno: z.string().optional().or(z.literal("")),
   dni: z.string().length(8, "El DNI debe tener 8 dígitos"),
   email: z.string().email("Correo inválido").min(1, "El correo es requerido"),
   sexo: z.string().min(1, "El sexo es requerido"),
@@ -26,6 +26,6 @@ export const StaffSchema = z.object({
   // Profesional (Solo para docentes)
   colegioProfesor: z.string().optional().or(z.literal("")),
   escalaMagisterial: z.string().optional().or(z.literal("")),
-})
+});
 
-export type StaffValues = z.infer<typeof StaffSchema>
+export type StaffValues = z.infer<typeof StaffSchema>;

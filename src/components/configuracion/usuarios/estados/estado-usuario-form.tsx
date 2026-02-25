@@ -44,7 +44,7 @@ export function EstadoUsuarioForm({
   onSuccess,
 }: EstadoUsuarioFormProps) {
   const [loading, setLoading] = useState(false);
-  const { setIsDirty } = useFormModal();
+  const { setIsDirty, setOnSubmit } = useFormModal();
 
   const form = useForm<EstadoUsuarioFormValues>({
     resolver: zodResolver(formSchema),
@@ -58,13 +58,6 @@ export function EstadoUsuarioForm({
       orden: Number(initialData?.orden ?? 0),
     },
   });
-
-  const { isDirty } = form.formState;
-
-  useEffect(() => {
-    setIsDirty(isDirty);
-    return () => setIsDirty(false);
-  }, [isDirty, setIsDirty]);
 
   async function onSubmit(values: EstadoUsuarioFormValues) {
     setLoading(true);
@@ -83,6 +76,18 @@ export function EstadoUsuarioForm({
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    setOnSubmit(() => form.handleSubmit(onSubmit)());
+    return () => setOnSubmit(undefined);
+  }, [form, onSubmit, setOnSubmit]);
+
+  const { isDirty } = form.formState;
+
+  useEffect(() => {
+    setIsDirty(isDirty);
+    return () => setIsDirty(false);
+  }, [isDirty, setIsDirty]);
 
   return (
     <Form {...form}>

@@ -69,7 +69,7 @@ export function FamilyMemberForm({
   onSuccess,
 }: FamilyMemberFormProps) {
   const [isPending, startTransition] = useTransition();
-  const { setIsDirty } = useFormModal();
+  const { setIsDirty, setOnSubmit } = useFormModal();
 
   const form = useForm<FamilyValues>({
     resolver: zodResolver(familySchema),
@@ -100,58 +100,6 @@ export function FamilyMemberForm({
         },
   });
 
-  const { isDirty } = form.formState;
-
-  useEffect(() => {
-    setIsDirty(isDirty);
-    return () => setIsDirty(false);
-  }, [isDirty, setIsDirty]);
-
-  const dni = form.watch("dni");
-
-  useEffect(() => {
-    if (dni && dni.length === 8 && !initialData) {
-      const searchGuardian = async () => {
-        try {
-          const res = await getGuardianByDniAction(dni);
-          if (res?.data) {
-            let n = res.data.name || "";
-            let ap = res.data.apellidoPaterno || "";
-            let am = res.data.apellidoMaterno || "";
-
-            // Si los apellidos están vacíos pero el nombre tiene varias palabras,
-            // intentamos dividirlo para el usuario (UX helper)
-            if (!ap && !am && n.trim().split(/\s+/).length >= 2) {
-              const parts = n.trim().split(/\s+/);
-              if (parts.length === 2) {
-                n = parts[0];
-                ap = parts[1];
-              } else if (parts.length >= 3) {
-                am = parts.pop() || "";
-                ap = parts.pop() || "";
-                n = parts.join(" ");
-              }
-            }
-
-            form.setValue("name", n, { shouldValidate: true });
-            form.setValue("apellidoPaterno", ap, { shouldValidate: true });
-            form.setValue("apellidoMaterno", am, { shouldValidate: true });
-            form.setValue("telefono", res.data.telefono || "", {
-              shouldValidate: true,
-            });
-            form.setValue("email", res.data.email || "", {
-              shouldValidate: true,
-            });
-            toast.success("Usuario encontrado, datos cargados.");
-          }
-        } catch (error) {
-          console.error("Error searching guardian:", error);
-        }
-      };
-      searchGuardian();
-    }
-  }, [dni, form, initialData]);
-
   const onSubmit = (values: FamilyValues) => {
     startTransition(async () => {
       const res = await upsertFamilyMemberAction(studentId, values, relationId);
@@ -163,6 +111,18 @@ export function FamilyMemberForm({
       }
     });
   };
+
+  useEffect(() => {
+    setOnSubmit(() => form.handleSubmit(onSubmit)());
+    return () => setOnSubmit(undefined);
+  }, [form, onSubmit, setOnSubmit]);
+
+  const { isDirty } = form.formState;
+
+  useEffect(() => {
+    setIsDirty(isDirty);
+    return () => setIsDirty(false);
+  }, [isDirty, setIsDirty]);
 
   return (
     <Form {...form}>

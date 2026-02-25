@@ -43,7 +43,7 @@ export type EnrollmentTableType = {
 export const columns: ColumnDef<EnrollmentTableType>[] = [
   {
     id: "estudiante",
-    header: ({ column }) => (
+    header: () => (
       <div className="flex items-center gap-2">
         <IconUser className="size-4" />
         <span className="font-semibold">Estudiante</span>
@@ -79,7 +79,7 @@ export const columns: ColumnDef<EnrollmentTableType>[] = [
   },
   {
     id: "nivel",
-    header: ({ column }) => (
+    header: () => (
       <div className="flex items-center gap-2">
         <IconCalendarEvent className="size-4" />
         <span className="font-semibold">Grado y Sección</span>
@@ -98,7 +98,7 @@ export const columns: ColumnDef<EnrollmentTableType>[] = [
             {nivelAcademico.sede && (
               <Badge
                 variant="outline"
-                className="text-[10px] py-0 px-2 bg-blue-50/50 text-blue-600 border-blue-200"
+                className="text-[10px] py-0 px-2 text-blue-600"
               >
                 {nivelAcademico.sede.nombre}
               </Badge>

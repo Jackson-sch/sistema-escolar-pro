@@ -7,11 +7,9 @@ import {
   IconPlus,
   IconSearch,
   IconFilter,
-  IconSettings,
   IconChevronRight,
   IconMapPin,
   IconMail,
-  IconPhone,
   IconBuilding,
   IconStar,
   IconEdit,
@@ -22,6 +20,12 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { SedeMap } from "./sede-map";
 import { cn } from "@/lib/utils";
+import { ConfirmModal } from "@/components/modals/confirm-modal";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 
 interface SedesListProps {
   initialData: any[];
@@ -34,6 +38,11 @@ export function SedesList({ initialData }: SedesListProps) {
   const [activeSedeId, setActiveSedeId] = useState<string | undefined>(
     initialData.find((s) => s.esPrincipal)?.id || initialData[0]?.id,
   );
+  const [confirmDelete, setConfirmDelete] = useState<{
+    id: string;
+    nombre: string;
+  } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
 
   const handleSedeClick = useCallback((id: string) => {
@@ -51,20 +60,22 @@ export function SedesList({ initialData }: SedesListProps) {
       sede.codigoIdentifier?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const handleDelete = async (id: string, nombre: string) => {
-    if (
-      confirm(
-        `¿Está seguro de eliminar la sede "${nombre}"? Esta acción no se puede deshacer.`,
-      )
-    ) {
-      const res = await deleteSedeAction(id);
-      if (res.error) {
-        toast.error(res.error);
-      } else {
-        toast.success("Sede eliminada correctamente");
-        router.refresh();
-      }
+  const handleDelete = (id: string, nombre: string) => {
+    setConfirmDelete({ id, nombre });
+  };
+
+  const executeDelete = async () => {
+    if (!confirmDelete) return;
+    setIsDeleting(true);
+    const res = await deleteSedeAction(confirmDelete.id);
+    if (res.error) {
+      toast.error(res.error);
+    } else {
+      toast.success("Sede eliminada correctamente");
+      router.refresh();
     }
+    setIsDeleting(false);
+    setConfirmDelete(null);
   };
 
   return (
@@ -90,19 +101,17 @@ export function SedesList({ initialData }: SedesListProps) {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="flex-1 glass h-11 rounded-2xl flex items-center px-4 gap-3 focus-within:ring-2 ring-primary/40 transition-all">
-              <IconSearch className="h-4 w-4 text-muted-foreground" />
-              <input
-                className="bg-transparent border-none outline-none focus:ring-0 text-sm w-full placeholder:text-muted-foreground/60"
+            <InputGroup className="flex-1 glass rounded-full flex items-center px-2 gap-2 focus-within:ring-2 ring-primary/40 transition-all">
+              <InputGroupAddon>
+                <IconSearch className="h-4 w-4 text-muted-foreground" />
+              </InputGroupAddon>
+              <InputGroupInput
                 placeholder="Buscar por nombre, código..."
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-            </div>
-            <div className="flex items-center gap-2 glass h-11 px-4 rounded-2xl cursor-pointer hover:bg-white/5 transition-colors">
-              <IconFilter className="h-4 w-4 text-muted-foreground" />
-            </div>
+            </InputGroup>
           </div>
         </div>
 
@@ -265,6 +274,16 @@ export function SedesList({ initialData }: SedesListProps) {
           if (!isOpen) setSelectedSede(null);
         }}
         sede={selectedSede}
+      />
+
+      <ConfirmModal
+        isOpen={!!confirmDelete}
+        onClose={() => setConfirmDelete(null)}
+        onConfirm={executeDelete}
+        title="Eliminar Sede"
+        description={`¿Está seguro de eliminar la sede "${confirmDelete?.nombre}"? Esta acción no se puede deshacer.`}
+        loading={isDeleting}
+        variant="danger"
       />
     </div>
   );

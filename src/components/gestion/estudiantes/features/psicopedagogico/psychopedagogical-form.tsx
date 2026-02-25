@@ -51,6 +51,8 @@ import {
 } from "@/actions/discipline";
 import { Switch } from "@/components/ui/switch";
 
+import { useFormModal } from "@/components/modals/form-modal-context";
+
 const psychSchema = z.object({
   estudianteId: z.string().min(1, "Estudiante es requerido"),
   categoriaId: z.string().min(1, "Seleccione una categoría"),
@@ -76,6 +78,7 @@ export function PsychopedagogicalForm({
 }: PsychopedagogicalFormProps) {
   const [isPending, startTransition] = useTransition();
   const [categories, setCategories] = useState<any[]>([]);
+  const { setIsDirty, setOnSubmit } = useFormModal();
 
   const form = useForm<PsychValues>({
     resolver: zodResolver(psychSchema),
@@ -104,10 +107,23 @@ export function PsychopedagogicalForm({
       if (res.error) toast.error(res.error);
       if (res.success) {
         toast.success(res.success);
+        setIsDirty(false);
         onSuccess?.();
       }
     });
   };
+
+  useEffect(() => {
+    setOnSubmit(() => form.handleSubmit(onSubmit)());
+    return () => setOnSubmit(undefined);
+  }, [form, onSubmit, setOnSubmit]);
+
+  const { isDirty } = form.formState;
+
+  useEffect(() => {
+    setIsDirty(isDirty);
+    return () => setIsDirty(false);
+  }, [isDirty, setIsDirty]);
 
   return (
     <Form {...form}>
@@ -128,7 +144,7 @@ export function PsychopedagogicalForm({
                         variant={"outline"}
                         className={cn(
                           "w-full pl-3 text-left font-normal bg-muted/5 border-border/40 rounded-xl",
-                          !field.value && "text-muted-foreground"
+                          !field.value && "text-muted-foreground",
                         )}
                       >
                         {field.value ? (

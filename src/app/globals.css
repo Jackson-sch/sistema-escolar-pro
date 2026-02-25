@@ -116,7 +116,7 @@
   --success: oklch(0.627 0.194 149.214);
   --warning: oklch(0.646 0.222 41.116);
   --info: oklch(0.553 0.195 240);
-  --magic-card-gradient: rgba(120, 120, 120, 0.20);
+  --magic-card-gradient: rgba(120, 120, 120, 0.2);
 }
 
 .dark {
@@ -169,7 +169,7 @@
   --success: oklch(0.627 0.15 149.214);
   --warning: oklch(0.646 0.18 41.116);
   --info: oklch(0.553 0.15 240);
-  --magic-card-gradient: rgba(255, 255, 255, 0.20);
+  --magic-card-gradient: rgba(255, 255, 255, 0.2);
 }
 
 @layer base {
@@ -200,6 +200,11 @@
     border: 1px solid rgba(0, 0, 0, 0.05);
   }
 
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+  }
+
   .custom-scrollbar::-webkit-scrollbar {
     width: 4px;
   }
@@ -211,6 +216,11 @@
   .custom-scrollbar::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 10px;
+    transition: background 0.2s ease;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
   }
 
   .map-marker-glow {
@@ -221,4 +231,39 @@
     border: 1px solid rgba(37, 99, 235, 0.5);
     background: rgba(37, 99, 235, 0.05);
   }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0) ease-in-out;
+  }
+  50% {
+    transform: translateY(-20px) ease-in-out;
+  }
+}
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes spin-slow-reverse {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+.animate-spin-slow {
+  animation: spin-slow 20s linear infinite;
+}
+.animate-spin-slow-reverse {
+  animation: spin-slow-reverse 25s linear infinite;
 }

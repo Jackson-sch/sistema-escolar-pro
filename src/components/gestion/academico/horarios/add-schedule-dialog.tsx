@@ -178,8 +178,8 @@ export function AddScheduleDialog({
                           <span className="font-bold">{course.nombre}</span>
                           <span className="text-[10px] opacity-50 flex items-center gap-1 uppercase">
                             <IconUser className="size-3" />{" "}
-                            {course.profesor.name}{" "}
-                            {course.profesor.apellidoPaterno}
+                            {course.profesor?.name ?? "Sin docente"}{" "}
+                            {course.profesor?.apellidoPaterno ?? ""}
                           </span>
                         </div>
                       </SelectItem>

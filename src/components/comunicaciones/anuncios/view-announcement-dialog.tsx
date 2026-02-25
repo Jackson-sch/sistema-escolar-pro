@@ -108,7 +108,15 @@ export function ViewAnnouncementDialog({
                   {anuncio.autor?.name} {anuncio.autor?.apellidoPaterno}
                 </span>
                 <span className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest leading-none mt-1">
-                  Autor de la publicación
+                  {anuncio.autor?.role === "profesor"
+                    ? "Docente"
+                    : anuncio.autor?.role === "administrativo"
+                      ? "Administración"
+                      : anuncio.autor?.role === "estudiante"
+                        ? "Estudiante"
+                        : anuncio.autor?.role === "padre"
+                          ? "Padre de Familia"
+                          : "Autor de la publicación"}
                 </span>
               </div>
             </div>

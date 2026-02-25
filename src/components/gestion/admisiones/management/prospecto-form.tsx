@@ -55,7 +55,7 @@ export function ProspectoForm({
   id,
 }: ProspectoFormProps) {
   const [loading, setLoading] = useState(false);
-  const { setIsDirty } = useFormModal();
+  const { setIsDirty, setOnSubmit } = useFormModal();
 
   const form = useForm<z.infer<typeof prospectoSchema>>({
     resolver: zodResolver(prospectoSchema),
@@ -74,13 +74,6 @@ export function ProspectoForm({
     },
   });
 
-  const { isDirty } = form.formState;
-
-  useEffect(() => {
-    setIsDirty(isDirty);
-    return () => setIsDirty(false);
-  }, [isDirty, setIsDirty]);
-
   const onSubmit = async (values: z.infer<typeof prospectoSchema>) => {
     setLoading(true);
     try {
@@ -96,6 +89,18 @@ export function ProspectoForm({
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    setOnSubmit(() => form.handleSubmit(onSubmit)());
+    return () => setOnSubmit(undefined);
+  }, [form, onSubmit, setOnSubmit]);
+
+  const { isDirty } = form.formState;
+
+  useEffect(() => {
+    setIsDirty(isDirty);
+    return () => setIsDirty(false);
+  }, [isDirty, setIsDirty]);
 
   const handleOCRComplete = (data: any) => {
     if (data.dni) form.setValue("dni", data.dni);

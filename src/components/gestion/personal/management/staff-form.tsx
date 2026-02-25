@@ -46,7 +46,7 @@ import {
   STAFF_ROLE_OPTIONS,
   ESCALA_MAGISTERIAL_OPTIONS,
 } from "@/lib/constants";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useFormModal } from "@/components/modals/form-modal-context";
 
 interface StaffFormProps {
@@ -55,8 +55,33 @@ interface StaffFormProps {
   onSuccess?: () => void;
   instituciones: { id: string; nombreInstitucion: string }[];
   estados: { id: string; nombre: string }[];
-  cargos: { id: string; nombre: string }[];
+  cargos: { id: string; nombre: string; codigo: string }[];
 }
+
+const ROLE_CARGOS_MAPPING: Record<string, string[]> = {
+  profesor: [
+    "DOCENTE",
+    "AUXILIAR",
+    "COORD_ACAD",
+    "COORD_NIVEL",
+    "ADMIN_GLOBAL",
+    "DIRECTOR",
+    "SUBDIRECTOR",
+  ],
+  administrativo: [
+    "ADMIN_GLOBAL",
+    "DIRECTOR",
+    "SUBDIRECTOR",
+    "TESORERO",
+    "SECRETARIA",
+    "PSICOLOGO",
+    "ENFERMERIA",
+    "SISTEMAS",
+    "BIBLIOTECARIO",
+    "MANTENIMIENTO",
+    "VIGILANCIA",
+  ],
+};
 
 export function StaffForm({
   id,
@@ -67,11 +92,9 @@ export function StaffForm({
   cargos,
 }: StaffFormProps) {
   const [isPending, startTransition] = useTransition();
-  const { setIsDirty } = useFormModal();
+  const { setIsDirty, setOnSubmit } = useFormModal();
 
-  const isAdminGlobal =
-    initialData?.email === "admin@colegio.edu.pe" ||
-    initialData?.cargo?.codigo === "ADMIN_GLOBAL";
+  const isRootAdmin = initialData?.email === "admin@colegio.edu.pe";
 
   const form = useForm<StaffValues>({
     resolver: zodResolver(StaffSchema),
@@ -83,6 +106,9 @@ export function StaffForm({
           apellidoMaterno: initialData.apellidoMaterno || "",
           dni: initialData.dni || "",
           email: initialData.email || "",
+          sexo: initialData.sexo || "MASCULINO",
+          role: initialData.role || "profesor",
+          cargoId: initialData.cargoId || "",
           area: initialData.area || "",
           telefono: initialData.telefono || "",
           direccion: initialData.direccion || "",
@@ -94,6 +120,13 @@ export function StaffForm({
           fechaIngreso: initialData.fechaIngreso
             ? new Date(initialData.fechaIngreso)
             : undefined,
+          estadoId:
+            initialData.estadoId ||
+            estados.find((e) => e.nombre === "Activo")?.id ||
+            estados[0]?.id ||
+            "",
+          institucionId:
+            initialData.institucionId || instituciones[0]?.id || "",
         }
       : {
           name: "",
@@ -121,18 +154,35 @@ export function StaffForm({
         },
   });
 
-  const { isDirty } = form.formState;
-
-  useEffect(() => {
-    setIsDirty(isDirty);
-    return () => setIsDirty(false);
-  }, [isDirty, setIsDirty]);
-
   const onSubmit = (values: StaffValues) => {
     startTransition(() => {
+      // Sanitizar valores para enviar solo lo que el schema permite
+      // Esto evita errores de Prisma por argumentos desconocidos (como objetos anidados)
+      const sanitizedValues = {
+        name: values.name,
+        apellidoPaterno: values.apellidoPaterno,
+        apellidoMaterno: values.apellidoMaterno || "",
+        dni: values.dni,
+        email: values.email,
+        sexo: values.sexo,
+        telefono: values.telefono || "",
+        direccion: values.direccion || "",
+        role: values.role,
+        cargoId: values.cargoId,
+        area: values.area,
+        especialidad: values.especialidad || "",
+        titulo: values.titulo || "",
+        numeroContrato: values.numeroContrato || "",
+        fechaIngreso: values.fechaIngreso,
+        estadoId: values.estadoId,
+        institucionId: values.institucionId,
+        colegioProfesor: values.colegioProfesor || "",
+        escalaMagisterial: values.escalaMagisterial || "",
+      };
+
       const action = id
-        ? updateStaffAction(id, values)
-        : createStaffAction(values);
+        ? updateStaffAction(id, sanitizedValues)
+        : createStaffAction(sanitizedValues);
 
       action.then((data) => {
         if (data.error) toast.error(data.error);
@@ -145,13 +195,61 @@ export function StaffForm({
     });
   };
 
+  useEffect(() => {
+    setOnSubmit(() => form.handleSubmit(onSubmit)());
+    return () => setOnSubmit(undefined);
+  }, [form, onSubmit, setOnSubmit]);
+
+  const { isDirty } = form.formState;
+
+  useEffect(() => {
+    setIsDirty(isDirty);
+    return () => setIsDirty(false);
+  }, [isDirty, setIsDirty]);
+
+  const onError = (errors: any) => {
+    console.error("StaffForm Validation Errors:", errors);
+    const errorMessages = Object.values(errors)
+      .map((error: any) => error.message)
+      .filter(Boolean);
+
+    if (errorMessages.length > 0) {
+      toast.error(
+        "Por favor, revise los siguientes errores: " + errorMessages.join(", "),
+      );
+    } else {
+      toast.error(
+        "Error de validación en el formulario. Por favor, verifique todos los campos.",
+      );
+    }
+  };
+
   const selectedRole = form.watch("role");
+
+  const filteredCargos = useMemo(() => {
+    const allowedCodes = ROLE_CARGOS_MAPPING[selectedRole] || [];
+    return cargos.filter((c) => allowedCodes.includes(c.codigo));
+  }, [cargos, selectedRole]);
+
+  // Reset cargo if it's not in the filtered list
+  useEffect(() => {
+    const currentCargoId = form.getValues("cargoId");
+    if (
+      currentCargoId &&
+      !filteredCargos.some((c) => c.id === currentCargoId)
+    ) {
+      form.setValue("cargoId", filteredCargos[0]?.id || "");
+    }
+  }, [selectedRole, filteredCargos, form]);
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form
+        onSubmit={form.handleSubmit(onSubmit, onError)}
+        className="space-y-3"
+      >
         {/* SECCIÓN 1: DATOS PERSONALES */}
-        <div className="space-y-4">
+        <div className="p-6 rounded-[2rem] border space-y-4">
           <div className="flex items-center gap-3 pb-2 border-b border-white/5">
             <div className="p-2 rounded-xl bg-primary/10 text-primary">
               <IconUser className="size-5" />
@@ -161,7 +259,11 @@ export function StaffForm({
                 Información Personal
               </h3>
               <p className="text-[10px] text-muted-foreground font-medium">
-                Datos básicos de identificación del colaborador
+                Datos básicos de identificación del colaborador.
+                <span className="text-primary/80 ml-1">
+                  (El acceso al sistema será con su email y su DNI como
+                  contraseña)
+                </span>
               </p>
             </div>
           </div>
@@ -178,7 +280,7 @@ export function StaffForm({
                   <FormControl>
                     <Input
                       {...field}
-                      disabled={isAdminGlobal}
+                      disabled={isRootAdmin}
                       placeholder="Ejem: Juan Alberto"
                       className="rounded-full transition-all px-5"
                     />
@@ -198,7 +300,7 @@ export function StaffForm({
                   <FormControl>
                     <Input
                       {...field}
-                      disabled={isAdminGlobal}
+                      disabled={isRootAdmin}
                       placeholder="Pérez"
                       className="rounded-full transition-all px-5"
                     />
@@ -218,7 +320,7 @@ export function StaffForm({
                   <FormControl>
                     <Input
                       {...field}
-                      disabled={isAdminGlobal}
+                      disabled={isRootAdmin}
                       placeholder="García"
                       className="rounded-full transition-all px-5"
                     />
@@ -241,7 +343,7 @@ export function StaffForm({
                       <IconId className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
                       <Input
                         {...field}
-                        disabled={isAdminGlobal}
+                        disabled={isRootAdmin}
                         placeholder="00000000"
                         maxLength={8}
                         className="rounded-full transition-all pl-10 pr-5"
@@ -265,7 +367,7 @@ export function StaffForm({
                       <IconMail className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
                       <Input
                         {...field}
-                        disabled={isAdminGlobal}
+                        disabled={isRootAdmin}
                         type="email"
                         placeholder="nombre@colegio.edu.pe"
                         className="rounded-full transition-all pl-10 pr-5"
@@ -307,7 +409,7 @@ export function StaffForm({
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
-                    disabled={isAdminGlobal}
+                    disabled={isRootAdmin}
                   >
                     <FormControl>
                       <SelectTrigger className="w-full rounded-full transition-all px-5">
@@ -341,7 +443,7 @@ export function StaffForm({
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
-                    disabled={isAdminGlobal}
+                    disabled={isRootAdmin}
                   >
                     <FormControl>
                       <SelectTrigger className="w-full rounded-full transition-all px-5">
@@ -349,7 +451,7 @@ export function StaffForm({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent className="rounded-xl">
-                      {cargos.map((cargo) => (
+                      {filteredCargos.map((cargo) => (
                         <SelectItem
                           key={cargo.id}
                           value={cargo.id}
@@ -375,7 +477,7 @@ export function StaffForm({
                   <FormControl>
                     <Input
                       {...field}
-                      disabled={isAdminGlobal}
+                      disabled={isRootAdmin}
                       placeholder="Ejem: Académica, Administración"
                       className="rounded-full transition-all px-5"
                     />
@@ -396,7 +498,7 @@ export function StaffForm({
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
-                          disabled={isAdminGlobal || isPending}
+                          disabled={isRootAdmin || isPending}
                           variant={"outline"}
                           className={cn(
                             "w-full rounded-full transition-all px-5 text-left font-normal",
@@ -433,7 +535,7 @@ export function StaffForm({
 
         {/* SECCIÓN 3: PERFIL PROFESIONAL (Solo si es profesor) */}
         {selectedRole === "profesor" && (
-          <div className="p-6 rounded-[2rem] bg-primary/2 border border-primary/10 space-y-4">
+          <div className="p-6 rounded-[2rem] border space-y-4">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500">
                 <IconCertificate className="size-5" />
@@ -460,7 +562,7 @@ export function StaffForm({
                     <FormControl>
                       <Input
                         {...field}
-                        disabled={isAdminGlobal}
+                        disabled={isRootAdmin}
                         placeholder="Ejem: Matemática y Física"
                         className="rounded-full transition-all px-5"
                       />
@@ -480,7 +582,7 @@ export function StaffForm({
                     <FormControl>
                       <Input
                         {...field}
-                        disabled={isAdminGlobal}
+                        disabled={isRootAdmin}
                         placeholder="Licenciado en Educación"
                         className="rounded-full transition-all px-5"
                       />
@@ -500,7 +602,7 @@ export function StaffForm({
                     <FormControl>
                       <Input
                         {...field}
-                        disabled={isAdminGlobal}
+                        disabled={isRootAdmin}
                         placeholder="000000"
                         className="rounded-full transition-all px-5"
                       />
@@ -524,7 +626,7 @@ export function StaffForm({
                       <FormControl>
                         <SelectTrigger
                           className="w-full rounded-full transition-all px-5"
-                          disabled={isAdminGlobal}
+                          disabled={isRootAdmin}
                         >
                           <SelectValue placeholder="Seleccionar" />
                         </SelectTrigger>
@@ -550,7 +652,7 @@ export function StaffForm({
         )}
 
         <div className="pt-4 flex flex-col gap-3">
-          {!isAdminGlobal && (
+          {!isRootAdmin && (
             <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-white/5">
               <Button
                 type="button"

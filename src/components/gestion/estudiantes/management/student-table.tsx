@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useQueryState, parseAsString } from "nuqs";
+import { useQueryState, parseAsString, parseAsInteger } from "nuqs";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/ui/data-table";
 import {
@@ -13,12 +13,6 @@ import {
 } from "@/components/ui/select";
 
 interface StudentTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
-  meta?: any;
-}
-
-interface EnrollmentTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   meta?: any;
@@ -115,6 +109,13 @@ export function StudentTable<TData, TValue>({
     parseAsString.withDefault("ALL"),
   );
 
+  // Pagination states with nuqs
+  const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
+  const [limit, setLimit] = useQueryState(
+    "limit",
+    parseAsInteger.withDefault(10),
+  );
+
   const hasActiveFilters =
     searchQuery !== "" || estadoFilter !== "ALL" || nivelFilter !== "ALL";
 
@@ -122,6 +123,7 @@ export function StudentTable<TData, TValue>({
     setSearchQuery("");
     setEstadoFilter("ALL");
     setNivelFilter("ALL");
+    setPage(1);
   };
 
   return (
@@ -131,10 +133,19 @@ export function StudentTable<TData, TValue>({
       searchKey="estudiante"
       searchPlaceholder="Buscar por DNI o nombre..."
       searchValue={searchQuery}
-      onSearchChange={setSearchQuery}
+      onSearchChange={(value) => {
+        setSearchQuery(value);
+        setPage(1); // Reset to first page on search
+      }}
       onClearFilters={clearFilters}
       hasActiveFilters={hasActiveFilters}
       meta={meta}
+      // Controlled pagination
+      pageIndex={page - 1} // 0-indexed for table
+      pageSize={limit}
+      onPageIndexChange={(index) => setPage(index + 1)} // 1-indexed for URL
+      onPageSizeChange={setLimit}
+      showColumnVisibility={false}
     >
       {(table: any) => (
         <StudentFilters

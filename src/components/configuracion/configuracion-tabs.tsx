@@ -2,6 +2,7 @@
 
 import { useQueryState, parseAsString } from "nuqs";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AnimatedTabs } from "../ui/animated-tabs";
 
 interface ConfiguracionTabsProps {
   children: {
@@ -17,28 +18,20 @@ export function ConfiguracionTabs({ children }: ConfiguracionTabsProps) {
     parseAsString.withDefault("datos"),
   );
 
+  const TABS = [
+    { id: "datos", label: "Datos Institucionales" },
+    { id: "sedes", label: "Sedes" },
+    { id: "variables", label: "Variables de Sistema" },
+  ];
+
   return (
     <Tabs value={tab} onValueChange={setTab} className="w-full">
-      <TabsList className="mb-4 bg-primary/5 p-1 rounded-xl">
-        <TabsTrigger
-          value="datos"
-          className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white"
-        >
-          Datos Institucionales
-        </TabsTrigger>
-        <TabsTrigger
-          value="sedes"
-          className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white"
-        >
-          Sedes
-        </TabsTrigger>
-        <TabsTrigger
-          value="variables"
-          className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white"
-        >
-          Variables de Sistema
-        </TabsTrigger>
-      </TabsList>
+      <AnimatedTabs
+        tabs={TABS}
+        activeTab={tab}
+        onTabChange={setTab}
+        className="mb-4"
+      />
 
       <TabsContent value="datos" className="mt-0 outline-none">
         <div className="animate-in fade-in duration-500">{children.datos}</div>

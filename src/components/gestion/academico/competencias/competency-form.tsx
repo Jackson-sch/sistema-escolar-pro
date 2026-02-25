@@ -44,7 +44,7 @@ export function CompetencyForm({
 }: CompetencyFormProps) {
   const [isPending, startTransition] = useTransition();
   const [areas, setAreas] = useState<any[]>([]);
-  const { setIsDirty } = useFormModal();
+  const { setIsDirty, setOnSubmit } = useFormModal();
 
   useEffect(() => {
     getCurricularAreasAction().then((res) => {
@@ -67,13 +67,6 @@ export function CompetencyForm({
         },
   });
 
-  const { isDirty } = form.formState;
-
-  useEffect(() => {
-    setIsDirty(isDirty);
-    return () => setIsDirty(false);
-  }, [isDirty, setIsDirty]);
-
   const onSubmit = (values: CompetencyValues) => {
     startTransition(() => {
       upsertCompetencyAction(values, id).then((data) => {
@@ -86,6 +79,18 @@ export function CompetencyForm({
       });
     });
   };
+
+  const { isDirty } = form.formState;
+
+  useEffect(() => {
+    setIsDirty(isDirty);
+    return () => setIsDirty(false);
+  }, [isDirty, setIsDirty]);
+
+  useEffect(() => {
+    setOnSubmit(() => form.handleSubmit(onSubmit)());
+    return () => setOnSubmit(undefined);
+  }, [form, onSubmit, setOnSubmit]);
 
   return (
     <Form {...form}>

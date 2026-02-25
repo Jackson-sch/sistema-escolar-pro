@@ -1,28 +1,46 @@
-import { LoginForm } from "@/components/auth/login-form"
-import { IconSchool, IconCheck } from "@tabler/icons-react"
-import Image from "next/image"
+import { LoginForm } from "@/components/auth/login-form";
+import { IconSchool, IconCheck } from "@tabler/icons-react";
+import SVGAnimado from "@/components/common/svg-animado";
+import { getInstitucionAction } from "@/actions/institucion";
+import Image from "next/image";
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const { data } = await getInstitucionAction();
+  console.log("🚀 ~ LoginPage ~ institucion:", data);
+
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
       {/* Left Side: Branding & Info */}
       <div className="hidden lg:flex flex-col justify-between p-12 bg-zinc-950 text-white relative overflow-hidden">
         {/* Background mesh/gradients */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] -mr-64 -mt-64" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] -ml-64 -mb-64" />
+        {/* Brillo de fondo sutil */}
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/5 rounded-full blur-[120px] pointer-events-none"></div>
+
+        {/* PROPUESTA DE SVG ANIMADO */}
+        <div className="absolute top-10 right-0 lg:right-10 w-64 h-64 lg:w-96 lg:h-96 opacity-60 pointer-events-none animate-float">
+          <SVGAnimado />
+        </div>
 
         <div className="relative z-10 flex items-center gap-2 font-semibold text-xl">
+          <Image
+            src={data?.logo}
+            alt={data?.nombreInstitucion || "Logo de la institución"}
+            width={32}
+            height={32}
+          />
           <IconSchool className="h-8 w-8 text-primary" />
-          <span>EduPeru Pro</span>
+          <span>{data?.nombreInstitucion}</span>
         </div>
 
         <div className="relative z-10 space-y-8">
           <div className="space-y-4">
-            <h2 className="text-5xl font-bold tracking-tight leading-[1.1]">
+            <h2 className="text-5xl font-extrabold leading-tight">
               La plataforma definitiva para la gestión académica
             </h2>
             <p className="text-xl text-zinc-400 max-w-lg leading-relaxed">
-              Optimiza procesos, mejora la comunicación y potencia el aprendizaje con nuestra suite integral 100% adaptada al CNEB.
+              Optimiza procesos, mejora la comunicación y potencia el
+              aprendizaje con nuestra suite integral 100% adaptada al CNEB.
             </p>
           </div>
 
@@ -59,9 +77,12 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-2 text-center lg:text-left">
-            <h1 className="text-3xl font-bold tracking-tight">Iniciar Sesión</h1>
+            <h1 className="text-3xl font-bold tracking-tight">
+              Iniciar Sesión
+            </h1>
             <p className="text-muted-foreground text-balanced">
-              Ingresa tus credenciales para acceder al panel administrativo de la institución.
+              Ingresa tus credenciales para acceder al panel administrativo de
+              la institución.
             </p>
           </div>
 
@@ -74,5 +95,5 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

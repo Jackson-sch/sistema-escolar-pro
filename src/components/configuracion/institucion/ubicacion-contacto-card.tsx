@@ -1,24 +1,26 @@
-"use client"
+"use client";
 
-import { IconMapPin, IconPhone, IconMail } from "@tabler/icons-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { IconMapPin, IconPhone, IconMail } from "@tabler/icons-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import {
-  type InstitucionFormControl,
-  inputStyles,
-  labelStyles
-} from "./types"
-import { MagicCard } from "@/components/ui/magic-card"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { type InstitucionFormControl, inputStyles, labelStyles } from "./types";
+import { MagicCard } from "@/components/ui/magic-card";
 
 interface UbicacionContactoCardProps {
-  control: InstitucionFormControl
+  control: InstitucionFormControl;
 }
 
 export function UbicacionContactoCard({ control }: UbicacionContactoCardProps) {
@@ -30,7 +32,9 @@ export function UbicacionContactoCard({ control }: UbicacionContactoCardProps) {
             <IconMapPin className="size-5 text-blue-500" />
           </div>
           <div>
-            <CardTitle className="text-base font-bold text-foreground">Ubicación y Contacto</CardTitle>
+            <CardTitle className="text-base font-bold text-foreground">
+              Ubicación y Contacto
+            </CardTitle>
             <CardDescription className="text-[11px] text-muted-foreground/70 font-medium">
               Donde encontrarte y como contactarte
             </CardDescription>
@@ -45,13 +49,17 @@ export function UbicacionContactoCard({ control }: UbicacionContactoCardProps) {
             <FormItem>
               <FormLabel className={labelStyles}>Dirección</FormLabel>
               <FormControl>
-                <Input placeholder="Av. Los Tulipanes 123" className={inputStyles} {...field} />
+                <Input
+                  placeholder="Av. Los Tulipanes 123"
+                  className={inputStyles}
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <FormField
             control={control}
             name="departamento"
@@ -92,7 +100,7 @@ export function UbicacionContactoCard({ control }: UbicacionContactoCardProps) {
             )}
           />
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <FormField
             control={control}
             name="telefono"
@@ -128,5 +136,5 @@ export function UbicacionContactoCard({ control }: UbicacionContactoCardProps) {
         </div>
       </CardContent>
     </MagicCard>
-  )
+  );
 }

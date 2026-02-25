@@ -16,7 +16,7 @@ import { FormModal } from "@/components/modals/form-modal";
 interface AddStaffButtonProps {
   instituciones: { id: string; nombreInstitucion: string }[];
   estados: { id: string; nombre: string }[];
-  cargos: { id: string; nombre: string }[];
+  cargos: { id: string; nombre: string; codigo: string }[];
 }
 
 export function AddStaffButton({
@@ -50,6 +50,7 @@ export function AddStaffButton({
         description="Gestión de alta para docentes, administrativos y directivos."
         isOpen={open}
         onOpenChange={setOpen}
+        className="sm:max-w-2xl"
       >
         <StaffForm
           onSuccess={() => setOpen(false)}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useQueryState, parseAsString } from "nuqs";
+import { useQueryState, parseAsString, parseAsInteger } from "nuqs";
 import { ColumnDef } from "@tanstack/react-table";
 import { IconSchool, IconTrash } from "@tabler/icons-react";
 import { toast } from "sonner";
@@ -32,6 +32,13 @@ export function NivelTable({ data, meta }: NivelTableProps) {
   const [searchQuery, setSearchQuery] = useQueryState(
     "q",
     parseAsString.withDefault(""),
+  );
+
+  // Pagination states with nuqs
+  const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
+  const [limit, setLimit] = useQueryState(
+    "limit",
+    parseAsInteger.withDefault(10),
   );
 
   const columns: ColumnDef<NivelTableType>[] = [
@@ -103,6 +110,7 @@ export function NivelTable({ data, meta }: NivelTableProps) {
 
   const clearFilters = () => {
     setSearchQuery("");
+    setPage(1);
   };
 
   return (
@@ -110,13 +118,21 @@ export function NivelTable({ data, meta }: NivelTableProps) {
       <DataTable
         columns={columns}
         data={data}
-        searchKey="nombre"
         searchPlaceholder="Buscar nivel..."
         searchValue={searchQuery}
-        onSearchChange={setSearchQuery}
+        onSearchChange={(value) => {
+          setSearchQuery(value);
+          setPage(1);
+        }}
         onClearFilters={clearFilters}
         hasActiveFilters={searchQuery !== ""}
         meta={meta}
+        // Controlled pagination
+        pageIndex={page - 1}
+        pageSize={limit}
+        onPageIndexChange={(index) => setPage(index + 1)}
+        onPageSizeChange={setLimit}
+        showColumnVisibility={false}
       />
 
       <ConfirmModal

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useEffect } from "react";
-import { useQueryState, parseAsString } from "nuqs";
+import { useQueryState, parseAsString, parseAsInteger } from "nuqs";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/ui/data-table";
 import {
@@ -168,6 +168,13 @@ export function CourseTable<TData, TValue>({
     parseAsString.withDefault("ALL"),
   );
 
+  // Pagination states with nuqs
+  const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
+  const [limit, setLimit] = useQueryState(
+    "limit",
+    parseAsInteger.withDefault(10),
+  );
+
   const hasActiveFilters =
     searchQuery !== "" ||
     aulaFilter !== "ALL" ||
@@ -181,6 +188,7 @@ export function CourseTable<TData, TValue>({
     setDocenteFilter("ALL");
     setAreaFilter("ALL");
     setPeriodoFilter("ALL");
+    setPage(1);
   };
 
   return (
@@ -190,10 +198,19 @@ export function CourseTable<TData, TValue>({
       searchKey="nombre"
       searchPlaceholder="Buscar curso..."
       searchValue={searchQuery}
-      onSearchChange={setSearchQuery}
+      onSearchChange={(value) => {
+        setSearchQuery(value);
+        setPage(1);
+      }}
       onClearFilters={clearFilters}
       hasActiveFilters={hasActiveFilters}
       meta={meta}
+      // Controlled pagination
+      pageIndex={page - 1}
+      pageSize={limit}
+      onPageIndexChange={(index) => setPage(index + 1)}
+      onPageSizeChange={setLimit}
+      showColumnVisibility={false}
     >
       {(table: any) => (
         <CourseFilters

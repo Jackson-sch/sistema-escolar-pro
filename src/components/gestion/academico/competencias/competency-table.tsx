@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { IconBook } from "@tabler/icons-react";
-import { useQueryState, parseAsString } from "nuqs";
+import { useQueryState, parseAsString, parseAsInteger } from "nuqs";
 
 import { DataTable } from "@/components/ui/data-table";
 import {
@@ -66,11 +66,19 @@ export function CompetencyTable({ data, areas }: CompetencyTableProps) {
     parseAsString.withDefault(""),
   );
 
+  // Pagination states with nuqs
+  const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
+  const [limit, setLimit] = useQueryState(
+    "limit",
+    parseAsInteger.withDefault(10),
+  );
+
   const hasActiveFilters = !!areaId || !!searchQuery;
 
   const clearFilters = () => {
     setAreaId(null);
     setSearchQuery("");
+    setPage(1);
   };
 
   // Extended columns to include hidden filterable areaId
@@ -92,10 +100,19 @@ export function CompetencyTable({ data, areas }: CompetencyTableProps) {
       searchKey="nombre"
       searchPlaceholder="Buscar competencias..."
       searchValue={searchQuery}
-      onSearchChange={setSearchQuery}
+      onSearchChange={(value) => {
+        setSearchQuery(value);
+        setPage(1);
+      }}
       onClearFilters={clearFilters}
       hasActiveFilters={hasActiveFilters}
       meta={{ ...areas }}
+      // Controlled pagination
+      pageIndex={page - 1}
+      pageSize={limit}
+      onPageIndexChange={(index) => setPage(index + 1)}
+      onPageSizeChange={setLimit}
+      showColumnVisibility={false}
       initialState={{
         columnVisibility: {
           areaCurricularId: false,

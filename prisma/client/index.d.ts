@@ -228,6 +228,11 @@ export type VariableSistema = $Result.DefaultSelection<Prisma.$VariableSistemaPa
  * 
  */
 export type ComprobantePago = $Result.DefaultSelection<Prisma.$ComprobantePagoPayload>
+/**
+ * Model PoliticaAsistencia
+ * 
+ */
+export type PoliticaAsistencia = $Result.DefaultSelection<Prisma.$PoliticaAsistenciaPayload>
 
 /**
  * Enums
@@ -937,6 +942,16 @@ export class PrismaClient<
     * ```
     */
   get comprobantePago(): Prisma.ComprobantePagoDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.politicaAsistencia`: Exposes CRUD operations for the **PoliticaAsistencia** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PoliticaAsistencias
+    * const politicaAsistencias = await prisma.politicaAsistencia.findMany()
+    * ```
+    */
+  get politicaAsistencia(): Prisma.PoliticaAsistenciaDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -1413,7 +1428,8 @@ export namespace Prisma {
     ConceptoPago: 'ConceptoPago',
     CronogramaPago: 'CronogramaPago',
     VariableSistema: 'VariableSistema',
-    ComprobantePago: 'ComprobantePago'
+    ComprobantePago: 'ComprobantePago',
+    PoliticaAsistencia: 'PoliticaAsistencia'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1429,7 +1445,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "cargo" | "estadoUsuario" | "tipoDocumento" | "tipoEvaluacion" | "historialEstadoUsuario" | "permiso" | "rolPermiso" | "usuarioPermiso" | "cargoPermiso" | "institucionEducativa" | "user" | "relacionFamiliar" | "account" | "verificationToken" | "passwordResetToken" | "nivel" | "grado" | "nivelAcademico" | "sede" | "periodoAcademico" | "areaCurricular" | "curso" | "horario" | "matricula" | "matriculaCurso" | "evaluacion" | "nota" | "asistencia" | "documento" | "pago" | "anuncio" | "evento" | "competencia" | "capacidad" | "prospecto" | "admision" | "fichaPsicopedagogica" | "logro" | "categoriaIncidente" | "conceptoPago" | "cronogramaPago" | "variableSistema" | "comprobantePago"
+      modelProps: "cargo" | "estadoUsuario" | "tipoDocumento" | "tipoEvaluacion" | "historialEstadoUsuario" | "permiso" | "rolPermiso" | "usuarioPermiso" | "cargoPermiso" | "institucionEducativa" | "user" | "relacionFamiliar" | "account" | "verificationToken" | "passwordResetToken" | "nivel" | "grado" | "nivelAcademico" | "sede" | "periodoAcademico" | "areaCurricular" | "curso" | "horario" | "matricula" | "matriculaCurso" | "evaluacion" | "nota" | "asistencia" | "documento" | "pago" | "anuncio" | "evento" | "competencia" | "capacidad" | "prospecto" | "admision" | "fichaPsicopedagogica" | "logro" | "categoriaIncidente" | "conceptoPago" | "cronogramaPago" | "variableSistema" | "comprobantePago" | "politicaAsistencia"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -4615,6 +4631,80 @@ export namespace Prisma {
           }
         }
       }
+      PoliticaAsistencia: {
+        payload: Prisma.$PoliticaAsistenciaPayload<ExtArgs>
+        fields: Prisma.PoliticaAsistenciaFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PoliticaAsistenciaFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PoliticaAsistenciaPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PoliticaAsistenciaFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PoliticaAsistenciaPayload>
+          }
+          findFirst: {
+            args: Prisma.PoliticaAsistenciaFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PoliticaAsistenciaPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PoliticaAsistenciaFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PoliticaAsistenciaPayload>
+          }
+          findMany: {
+            args: Prisma.PoliticaAsistenciaFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PoliticaAsistenciaPayload>[]
+          }
+          create: {
+            args: Prisma.PoliticaAsistenciaCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PoliticaAsistenciaPayload>
+          }
+          createMany: {
+            args: Prisma.PoliticaAsistenciaCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PoliticaAsistenciaCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PoliticaAsistenciaPayload>[]
+          }
+          delete: {
+            args: Prisma.PoliticaAsistenciaDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PoliticaAsistenciaPayload>
+          }
+          update: {
+            args: Prisma.PoliticaAsistenciaUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PoliticaAsistenciaPayload>
+          }
+          deleteMany: {
+            args: Prisma.PoliticaAsistenciaDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PoliticaAsistenciaUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.PoliticaAsistenciaUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PoliticaAsistenciaPayload>[]
+          }
+          upsert: {
+            args: Prisma.PoliticaAsistenciaUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PoliticaAsistenciaPayload>
+          }
+          aggregate: {
+            args: Prisma.PoliticaAsistenciaAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePoliticaAsistencia>
+          }
+          groupBy: {
+            args: Prisma.PoliticaAsistenciaGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PoliticaAsistenciaGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PoliticaAsistenciaCountArgs<ExtArgs>
+            result: $Utils.Optional<PoliticaAsistenciaCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -4766,6 +4856,7 @@ export namespace Prisma {
     cronogramaPago?: CronogramaPagoOmit
     variableSistema?: VariableSistemaOmit
     comprobantePago?: ComprobantePagoOmit
+    politicaAsistencia?: PoliticaAsistenciaOmit
   }
 
   /* Types for Logging */
@@ -5059,6 +5150,7 @@ export namespace Prisma {
     tiposEvaluacion: number
     users: number
     sedes: number
+    politicasAsistencia: number
   }
 
   export type InstitucionEducativaCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5075,6 +5167,7 @@ export namespace Prisma {
     tiposEvaluacion?: boolean | InstitucionEducativaCountOutputTypeCountTiposEvaluacionArgs
     users?: boolean | InstitucionEducativaCountOutputTypeCountUsersArgs
     sedes?: boolean | InstitucionEducativaCountOutputTypeCountSedesArgs
+    politicasAsistencia?: boolean | InstitucionEducativaCountOutputTypeCountPoliticasAsistenciaArgs
   }
 
   // Custom InputTypes
@@ -5177,6 +5270,13 @@ export namespace Prisma {
    */
   export type InstitucionEducativaCountOutputTypeCountSedesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: SedeWhereInput
+  }
+
+  /**
+   * InstitucionEducativaCountOutputType without action
+   */
+  export type InstitucionEducativaCountOutputTypeCountPoliticasAsistenciaArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PoliticaAsistenciaWhereInput
   }
 
 
@@ -5438,6 +5538,7 @@ export namespace Prisma {
     nivelesAcademicos: number
     anuncios: number
     eventos: number
+    politicasAsistencia: number
   }
 
   export type NivelCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5447,6 +5548,7 @@ export namespace Prisma {
     nivelesAcademicos?: boolean | NivelCountOutputTypeCountNivelesAcademicosArgs
     anuncios?: boolean | NivelCountOutputTypeCountAnunciosArgs
     eventos?: boolean | NivelCountOutputTypeCountEventosArgs
+    politicasAsistencia?: boolean | NivelCountOutputTypeCountPoliticasAsistenciaArgs
   }
 
   // Custom InputTypes
@@ -5500,6 +5602,13 @@ export namespace Prisma {
    */
   export type NivelCountOutputTypeCountEventosArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: EventoWhereInput
+  }
+
+  /**
+   * NivelCountOutputType without action
+   */
+  export type NivelCountOutputTypeCountPoliticasAsistenciaArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PoliticaAsistenciaWhereInput
   }
 
 
@@ -17041,6 +17150,7 @@ export namespace Prisma {
     tiposEvaluacion?: boolean | InstitucionEducativa$tiposEvaluacionArgs<ExtArgs>
     users?: boolean | InstitucionEducativa$usersArgs<ExtArgs>
     sedes?: boolean | InstitucionEducativa$sedesArgs<ExtArgs>
+    politicasAsistencia?: boolean | InstitucionEducativa$politicasAsistenciaArgs<ExtArgs>
     _count?: boolean | InstitucionEducativaCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["institucionEducativa"]>
 
@@ -17149,6 +17259,7 @@ export namespace Prisma {
     tiposEvaluacion?: boolean | InstitucionEducativa$tiposEvaluacionArgs<ExtArgs>
     users?: boolean | InstitucionEducativa$usersArgs<ExtArgs>
     sedes?: boolean | InstitucionEducativa$sedesArgs<ExtArgs>
+    politicasAsistencia?: boolean | InstitucionEducativa$politicasAsistenciaArgs<ExtArgs>
     _count?: boolean | InstitucionEducativaCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type InstitucionEducativaIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -17175,6 +17286,7 @@ export namespace Prisma {
       tiposEvaluacion: Prisma.$TipoEvaluacionPayload<ExtArgs>[]
       users: Prisma.$UserPayload<ExtArgs>[]
       sedes: Prisma.$SedePayload<ExtArgs>[]
+      politicasAsistencia: Prisma.$PoliticaAsistenciaPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -17611,6 +17723,7 @@ export namespace Prisma {
     tiposEvaluacion<T extends InstitucionEducativa$tiposEvaluacionArgs<ExtArgs> = {}>(args?: Subset<T, InstitucionEducativa$tiposEvaluacionArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TipoEvaluacionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     users<T extends InstitucionEducativa$usersArgs<ExtArgs> = {}>(args?: Subset<T, InstitucionEducativa$usersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     sedes<T extends InstitucionEducativa$sedesArgs<ExtArgs> = {}>(args?: Subset<T, InstitucionEducativa$sedesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SedePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    politicasAsistencia<T extends InstitucionEducativa$politicasAsistenciaArgs<ExtArgs> = {}>(args?: Subset<T, InstitucionEducativa$politicasAsistenciaArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PoliticaAsistenciaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -18390,6 +18503,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: SedeScalarFieldEnum | SedeScalarFieldEnum[]
+  }
+
+  /**
+   * InstitucionEducativa.politicasAsistencia
+   */
+  export type InstitucionEducativa$politicasAsistenciaArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoliticaAsistencia
+     */
+    select?: PoliticaAsistenciaSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoliticaAsistencia
+     */
+    omit?: PoliticaAsistenciaOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoliticaAsistenciaInclude<ExtArgs> | null
+    where?: PoliticaAsistenciaWhereInput
+    orderBy?: PoliticaAsistenciaOrderByWithRelationInput | PoliticaAsistenciaOrderByWithRelationInput[]
+    cursor?: PoliticaAsistenciaWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PoliticaAsistenciaScalarFieldEnum | PoliticaAsistenciaScalarFieldEnum[]
   }
 
   /**
@@ -25786,6 +25923,7 @@ export namespace Prisma {
     nivelesAcademicos?: boolean | Nivel$nivelesAcademicosArgs<ExtArgs>
     anuncios?: boolean | Nivel$anunciosArgs<ExtArgs>
     eventos?: boolean | Nivel$eventosArgs<ExtArgs>
+    politicasAsistencia?: boolean | Nivel$politicasAsistenciaArgs<ExtArgs>
     _count?: boolean | NivelCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["nivel"]>
 
@@ -25830,6 +25968,7 @@ export namespace Prisma {
     nivelesAcademicos?: boolean | Nivel$nivelesAcademicosArgs<ExtArgs>
     anuncios?: boolean | Nivel$anunciosArgs<ExtArgs>
     eventos?: boolean | Nivel$eventosArgs<ExtArgs>
+    politicasAsistencia?: boolean | Nivel$politicasAsistenciaArgs<ExtArgs>
     _count?: boolean | NivelCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type NivelIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -25849,6 +25988,7 @@ export namespace Prisma {
       nivelesAcademicos: Prisma.$NivelAcademicoPayload<ExtArgs>[]
       anuncios: Prisma.$AnuncioPayload<ExtArgs>[]
       eventos: Prisma.$EventoPayload<ExtArgs>[]
+      politicasAsistencia: Prisma.$PoliticaAsistenciaPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -26259,6 +26399,7 @@ export namespace Prisma {
     nivelesAcademicos<T extends Nivel$nivelesAcademicosArgs<ExtArgs> = {}>(args?: Subset<T, Nivel$nivelesAcademicosArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NivelAcademicoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     anuncios<T extends Nivel$anunciosArgs<ExtArgs> = {}>(args?: Subset<T, Nivel$anunciosArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AnuncioPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     eventos<T extends Nivel$eventosArgs<ExtArgs> = {}>(args?: Subset<T, Nivel$eventosArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EventoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    politicasAsistencia<T extends Nivel$politicasAsistenciaArgs<ExtArgs> = {}>(args?: Subset<T, Nivel$politicasAsistenciaArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PoliticaAsistenciaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -26832,6 +26973,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: EventoScalarFieldEnum | EventoScalarFieldEnum[]
+  }
+
+  /**
+   * Nivel.politicasAsistencia
+   */
+  export type Nivel$politicasAsistenciaArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoliticaAsistencia
+     */
+    select?: PoliticaAsistenciaSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoliticaAsistencia
+     */
+    omit?: PoliticaAsistenciaOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoliticaAsistenciaInclude<ExtArgs> | null
+    where?: PoliticaAsistenciaWhereInput
+    orderBy?: PoliticaAsistenciaOrderByWithRelationInput | PoliticaAsistenciaOrderByWithRelationInput[]
+    cursor?: PoliticaAsistenciaWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PoliticaAsistenciaScalarFieldEnum | PoliticaAsistenciaScalarFieldEnum[]
   }
 
   /**
@@ -28142,6 +28307,7 @@ export namespace Prisma {
     capacidad: number | null
     capacidadMaxima: number | null
     aulaAsignada: string | null
+    color: string | null
     nivelId: string | null
     gradoId: string | null
     tutorId: string | null
@@ -28161,6 +28327,7 @@ export namespace Prisma {
     capacidad: number | null
     capacidadMaxima: number | null
     aulaAsignada: string | null
+    color: string | null
     nivelId: string | null
     gradoId: string | null
     tutorId: string | null
@@ -28180,6 +28347,7 @@ export namespace Prisma {
     capacidad: number
     capacidadMaxima: number
     aulaAsignada: number
+    color: number
     nivelId: number
     gradoId: number
     tutorId: number
@@ -28213,6 +28381,7 @@ export namespace Prisma {
     capacidad?: true
     capacidadMaxima?: true
     aulaAsignada?: true
+    color?: true
     nivelId?: true
     gradoId?: true
     tutorId?: true
@@ -28232,6 +28401,7 @@ export namespace Prisma {
     capacidad?: true
     capacidadMaxima?: true
     aulaAsignada?: true
+    color?: true
     nivelId?: true
     gradoId?: true
     tutorId?: true
@@ -28251,6 +28421,7 @@ export namespace Prisma {
     capacidad?: true
     capacidadMaxima?: true
     aulaAsignada?: true
+    color?: true
     nivelId?: true
     gradoId?: true
     tutorId?: true
@@ -28357,6 +28528,7 @@ export namespace Prisma {
     capacidad: number
     capacidadMaxima: number | null
     aulaAsignada: string | null
+    color: string | null
     nivelId: string
     gradoId: string
     tutorId: string | null
@@ -28395,6 +28567,7 @@ export namespace Prisma {
     capacidad?: boolean
     capacidadMaxima?: boolean
     aulaAsignada?: boolean
+    color?: boolean
     nivelId?: boolean
     gradoId?: boolean
     tutorId?: boolean
@@ -28423,6 +28596,7 @@ export namespace Prisma {
     capacidad?: boolean
     capacidadMaxima?: boolean
     aulaAsignada?: boolean
+    color?: boolean
     nivelId?: boolean
     gradoId?: boolean
     tutorId?: boolean
@@ -28447,6 +28621,7 @@ export namespace Prisma {
     capacidad?: boolean
     capacidadMaxima?: boolean
     aulaAsignada?: boolean
+    color?: boolean
     nivelId?: boolean
     gradoId?: boolean
     tutorId?: boolean
@@ -28471,6 +28646,7 @@ export namespace Prisma {
     capacidad?: boolean
     capacidadMaxima?: boolean
     aulaAsignada?: boolean
+    color?: boolean
     nivelId?: boolean
     gradoId?: boolean
     tutorId?: boolean
@@ -28483,7 +28659,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type NivelAcademicoOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "seccion" | "descripcion" | "capacidad" | "capacidadMaxima" | "aulaAsignada" | "nivelId" | "gradoId" | "tutorId" | "institucionId" | "sedeId" | "anioAcademico" | "activo" | "turno" | "createdAt" | "updatedAt", ExtArgs["result"]["nivelAcademico"]>
+  export type NivelAcademicoOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "seccion" | "descripcion" | "capacidad" | "capacidadMaxima" | "aulaAsignada" | "color" | "nivelId" | "gradoId" | "tutorId" | "institucionId" | "sedeId" | "anioAcademico" | "activo" | "turno" | "createdAt" | "updatedAt", ExtArgs["result"]["nivelAcademico"]>
   export type NivelAcademicoInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     cursos?: boolean | NivelAcademico$cursosArgs<ExtArgs>
     matriculas?: boolean | NivelAcademico$matriculasArgs<ExtArgs>
@@ -28529,6 +28705,7 @@ export namespace Prisma {
       capacidad: number
       capacidadMaxima: number | null
       aulaAsignada: string | null
+      color: string | null
       nivelId: string
       gradoId: string
       tutorId: string | null
@@ -28976,6 +29153,7 @@ export namespace Prisma {
     readonly capacidad: FieldRef<"NivelAcademico", 'Int'>
     readonly capacidadMaxima: FieldRef<"NivelAcademico", 'Int'>
     readonly aulaAsignada: FieldRef<"NivelAcademico", 'String'>
+    readonly color: FieldRef<"NivelAcademico", 'String'>
     readonly nivelId: FieldRef<"NivelAcademico", 'String'>
     readonly gradoId: FieldRef<"NivelAcademico", 'String'>
     readonly tutorId: FieldRef<"NivelAcademico", 'String'>
@@ -59842,6 +60020,1203 @@ export namespace Prisma {
 
 
   /**
+   * Model PoliticaAsistencia
+   */
+
+  export type AggregatePoliticaAsistencia = {
+    _count: PoliticaAsistenciaCountAggregateOutputType | null
+    _avg: PoliticaAsistenciaAvgAggregateOutputType | null
+    _sum: PoliticaAsistenciaSumAggregateOutputType | null
+    _min: PoliticaAsistenciaMinAggregateOutputType | null
+    _max: PoliticaAsistenciaMaxAggregateOutputType | null
+  }
+
+  export type PoliticaAsistenciaAvgAggregateOutputType = {
+    tolerancia: number | null
+  }
+
+  export type PoliticaAsistenciaSumAggregateOutputType = {
+    tolerancia: number | null
+  }
+
+  export type PoliticaAsistenciaMinAggregateOutputType = {
+    id: string | null
+    nombre: string | null
+    nivelId: string | null
+    turno: $Enums.Turno | null
+    horaEntrada: string | null
+    horaSalida: string | null
+    tolerancia: number | null
+    activo: boolean | null
+    institucionId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type PoliticaAsistenciaMaxAggregateOutputType = {
+    id: string | null
+    nombre: string | null
+    nivelId: string | null
+    turno: $Enums.Turno | null
+    horaEntrada: string | null
+    horaSalida: string | null
+    tolerancia: number | null
+    activo: boolean | null
+    institucionId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type PoliticaAsistenciaCountAggregateOutputType = {
+    id: number
+    nombre: number
+    nivelId: number
+    turno: number
+    horaEntrada: number
+    horaSalida: number
+    tolerancia: number
+    activo: number
+    institucionId: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type PoliticaAsistenciaAvgAggregateInputType = {
+    tolerancia?: true
+  }
+
+  export type PoliticaAsistenciaSumAggregateInputType = {
+    tolerancia?: true
+  }
+
+  export type PoliticaAsistenciaMinAggregateInputType = {
+    id?: true
+    nombre?: true
+    nivelId?: true
+    turno?: true
+    horaEntrada?: true
+    horaSalida?: true
+    tolerancia?: true
+    activo?: true
+    institucionId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type PoliticaAsistenciaMaxAggregateInputType = {
+    id?: true
+    nombre?: true
+    nivelId?: true
+    turno?: true
+    horaEntrada?: true
+    horaSalida?: true
+    tolerancia?: true
+    activo?: true
+    institucionId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type PoliticaAsistenciaCountAggregateInputType = {
+    id?: true
+    nombre?: true
+    nivelId?: true
+    turno?: true
+    horaEntrada?: true
+    horaSalida?: true
+    tolerancia?: true
+    activo?: true
+    institucionId?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type PoliticaAsistenciaAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PoliticaAsistencia to aggregate.
+     */
+    where?: PoliticaAsistenciaWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PoliticaAsistencias to fetch.
+     */
+    orderBy?: PoliticaAsistenciaOrderByWithRelationInput | PoliticaAsistenciaOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PoliticaAsistenciaWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PoliticaAsistencias from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PoliticaAsistencias.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PoliticaAsistencias
+    **/
+    _count?: true | PoliticaAsistenciaCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PoliticaAsistenciaAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PoliticaAsistenciaSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PoliticaAsistenciaMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PoliticaAsistenciaMaxAggregateInputType
+  }
+
+  export type GetPoliticaAsistenciaAggregateType<T extends PoliticaAsistenciaAggregateArgs> = {
+        [P in keyof T & keyof AggregatePoliticaAsistencia]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePoliticaAsistencia[P]>
+      : GetScalarType<T[P], AggregatePoliticaAsistencia[P]>
+  }
+
+
+
+
+  export type PoliticaAsistenciaGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PoliticaAsistenciaWhereInput
+    orderBy?: PoliticaAsistenciaOrderByWithAggregationInput | PoliticaAsistenciaOrderByWithAggregationInput[]
+    by: PoliticaAsistenciaScalarFieldEnum[] | PoliticaAsistenciaScalarFieldEnum
+    having?: PoliticaAsistenciaScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PoliticaAsistenciaCountAggregateInputType | true
+    _avg?: PoliticaAsistenciaAvgAggregateInputType
+    _sum?: PoliticaAsistenciaSumAggregateInputType
+    _min?: PoliticaAsistenciaMinAggregateInputType
+    _max?: PoliticaAsistenciaMaxAggregateInputType
+  }
+
+  export type PoliticaAsistenciaGroupByOutputType = {
+    id: string
+    nombre: string
+    nivelId: string | null
+    turno: $Enums.Turno | null
+    horaEntrada: string
+    horaSalida: string
+    tolerancia: number
+    activo: boolean
+    institucionId: string
+    createdAt: Date
+    updatedAt: Date
+    _count: PoliticaAsistenciaCountAggregateOutputType | null
+    _avg: PoliticaAsistenciaAvgAggregateOutputType | null
+    _sum: PoliticaAsistenciaSumAggregateOutputType | null
+    _min: PoliticaAsistenciaMinAggregateOutputType | null
+    _max: PoliticaAsistenciaMaxAggregateOutputType | null
+  }
+
+  type GetPoliticaAsistenciaGroupByPayload<T extends PoliticaAsistenciaGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PoliticaAsistenciaGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PoliticaAsistenciaGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PoliticaAsistenciaGroupByOutputType[P]>
+            : GetScalarType<T[P], PoliticaAsistenciaGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PoliticaAsistenciaSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    nombre?: boolean
+    nivelId?: boolean
+    turno?: boolean
+    horaEntrada?: boolean
+    horaSalida?: boolean
+    tolerancia?: boolean
+    activo?: boolean
+    institucionId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    institucion?: boolean | InstitucionEducativaDefaultArgs<ExtArgs>
+    nivel?: boolean | PoliticaAsistencia$nivelArgs<ExtArgs>
+  }, ExtArgs["result"]["politicaAsistencia"]>
+
+  export type PoliticaAsistenciaSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    nombre?: boolean
+    nivelId?: boolean
+    turno?: boolean
+    horaEntrada?: boolean
+    horaSalida?: boolean
+    tolerancia?: boolean
+    activo?: boolean
+    institucionId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    institucion?: boolean | InstitucionEducativaDefaultArgs<ExtArgs>
+    nivel?: boolean | PoliticaAsistencia$nivelArgs<ExtArgs>
+  }, ExtArgs["result"]["politicaAsistencia"]>
+
+  export type PoliticaAsistenciaSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    nombre?: boolean
+    nivelId?: boolean
+    turno?: boolean
+    horaEntrada?: boolean
+    horaSalida?: boolean
+    tolerancia?: boolean
+    activo?: boolean
+    institucionId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    institucion?: boolean | InstitucionEducativaDefaultArgs<ExtArgs>
+    nivel?: boolean | PoliticaAsistencia$nivelArgs<ExtArgs>
+  }, ExtArgs["result"]["politicaAsistencia"]>
+
+  export type PoliticaAsistenciaSelectScalar = {
+    id?: boolean
+    nombre?: boolean
+    nivelId?: boolean
+    turno?: boolean
+    horaEntrada?: boolean
+    horaSalida?: boolean
+    tolerancia?: boolean
+    activo?: boolean
+    institucionId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type PoliticaAsistenciaOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "nombre" | "nivelId" | "turno" | "horaEntrada" | "horaSalida" | "tolerancia" | "activo" | "institucionId" | "createdAt" | "updatedAt", ExtArgs["result"]["politicaAsistencia"]>
+  export type PoliticaAsistenciaInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    institucion?: boolean | InstitucionEducativaDefaultArgs<ExtArgs>
+    nivel?: boolean | PoliticaAsistencia$nivelArgs<ExtArgs>
+  }
+  export type PoliticaAsistenciaIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    institucion?: boolean | InstitucionEducativaDefaultArgs<ExtArgs>
+    nivel?: boolean | PoliticaAsistencia$nivelArgs<ExtArgs>
+  }
+  export type PoliticaAsistenciaIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    institucion?: boolean | InstitucionEducativaDefaultArgs<ExtArgs>
+    nivel?: boolean | PoliticaAsistencia$nivelArgs<ExtArgs>
+  }
+
+  export type $PoliticaAsistenciaPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PoliticaAsistencia"
+    objects: {
+      institucion: Prisma.$InstitucionEducativaPayload<ExtArgs>
+      nivel: Prisma.$NivelPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      nombre: string
+      nivelId: string | null
+      turno: $Enums.Turno | null
+      horaEntrada: string
+      horaSalida: string
+      tolerancia: number
+      activo: boolean
+      institucionId: string
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["politicaAsistencia"]>
+    composites: {}
+  }
+
+  type PoliticaAsistenciaGetPayload<S extends boolean | null | undefined | PoliticaAsistenciaDefaultArgs> = $Result.GetResult<Prisma.$PoliticaAsistenciaPayload, S>
+
+  type PoliticaAsistenciaCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<PoliticaAsistenciaFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: PoliticaAsistenciaCountAggregateInputType | true
+    }
+
+  export interface PoliticaAsistenciaDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PoliticaAsistencia'], meta: { name: 'PoliticaAsistencia' } }
+    /**
+     * Find zero or one PoliticaAsistencia that matches the filter.
+     * @param {PoliticaAsistenciaFindUniqueArgs} args - Arguments to find a PoliticaAsistencia
+     * @example
+     * // Get one PoliticaAsistencia
+     * const politicaAsistencia = await prisma.politicaAsistencia.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PoliticaAsistenciaFindUniqueArgs>(args: SelectSubset<T, PoliticaAsistenciaFindUniqueArgs<ExtArgs>>): Prisma__PoliticaAsistenciaClient<$Result.GetResult<Prisma.$PoliticaAsistenciaPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one PoliticaAsistencia that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {PoliticaAsistenciaFindUniqueOrThrowArgs} args - Arguments to find a PoliticaAsistencia
+     * @example
+     * // Get one PoliticaAsistencia
+     * const politicaAsistencia = await prisma.politicaAsistencia.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PoliticaAsistenciaFindUniqueOrThrowArgs>(args: SelectSubset<T, PoliticaAsistenciaFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PoliticaAsistenciaClient<$Result.GetResult<Prisma.$PoliticaAsistenciaPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PoliticaAsistencia that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PoliticaAsistenciaFindFirstArgs} args - Arguments to find a PoliticaAsistencia
+     * @example
+     * // Get one PoliticaAsistencia
+     * const politicaAsistencia = await prisma.politicaAsistencia.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PoliticaAsistenciaFindFirstArgs>(args?: SelectSubset<T, PoliticaAsistenciaFindFirstArgs<ExtArgs>>): Prisma__PoliticaAsistenciaClient<$Result.GetResult<Prisma.$PoliticaAsistenciaPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first PoliticaAsistencia that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PoliticaAsistenciaFindFirstOrThrowArgs} args - Arguments to find a PoliticaAsistencia
+     * @example
+     * // Get one PoliticaAsistencia
+     * const politicaAsistencia = await prisma.politicaAsistencia.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PoliticaAsistenciaFindFirstOrThrowArgs>(args?: SelectSubset<T, PoliticaAsistenciaFindFirstOrThrowArgs<ExtArgs>>): Prisma__PoliticaAsistenciaClient<$Result.GetResult<Prisma.$PoliticaAsistenciaPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more PoliticaAsistencias that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PoliticaAsistenciaFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PoliticaAsistencias
+     * const politicaAsistencias = await prisma.politicaAsistencia.findMany()
+     * 
+     * // Get first 10 PoliticaAsistencias
+     * const politicaAsistencias = await prisma.politicaAsistencia.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const politicaAsistenciaWithIdOnly = await prisma.politicaAsistencia.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PoliticaAsistenciaFindManyArgs>(args?: SelectSubset<T, PoliticaAsistenciaFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PoliticaAsistenciaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a PoliticaAsistencia.
+     * @param {PoliticaAsistenciaCreateArgs} args - Arguments to create a PoliticaAsistencia.
+     * @example
+     * // Create one PoliticaAsistencia
+     * const PoliticaAsistencia = await prisma.politicaAsistencia.create({
+     *   data: {
+     *     // ... data to create a PoliticaAsistencia
+     *   }
+     * })
+     * 
+     */
+    create<T extends PoliticaAsistenciaCreateArgs>(args: SelectSubset<T, PoliticaAsistenciaCreateArgs<ExtArgs>>): Prisma__PoliticaAsistenciaClient<$Result.GetResult<Prisma.$PoliticaAsistenciaPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many PoliticaAsistencias.
+     * @param {PoliticaAsistenciaCreateManyArgs} args - Arguments to create many PoliticaAsistencias.
+     * @example
+     * // Create many PoliticaAsistencias
+     * const politicaAsistencia = await prisma.politicaAsistencia.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PoliticaAsistenciaCreateManyArgs>(args?: SelectSubset<T, PoliticaAsistenciaCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PoliticaAsistencias and returns the data saved in the database.
+     * @param {PoliticaAsistenciaCreateManyAndReturnArgs} args - Arguments to create many PoliticaAsistencias.
+     * @example
+     * // Create many PoliticaAsistencias
+     * const politicaAsistencia = await prisma.politicaAsistencia.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PoliticaAsistencias and only return the `id`
+     * const politicaAsistenciaWithIdOnly = await prisma.politicaAsistencia.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PoliticaAsistenciaCreateManyAndReturnArgs>(args?: SelectSubset<T, PoliticaAsistenciaCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PoliticaAsistenciaPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a PoliticaAsistencia.
+     * @param {PoliticaAsistenciaDeleteArgs} args - Arguments to delete one PoliticaAsistencia.
+     * @example
+     * // Delete one PoliticaAsistencia
+     * const PoliticaAsistencia = await prisma.politicaAsistencia.delete({
+     *   where: {
+     *     // ... filter to delete one PoliticaAsistencia
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PoliticaAsistenciaDeleteArgs>(args: SelectSubset<T, PoliticaAsistenciaDeleteArgs<ExtArgs>>): Prisma__PoliticaAsistenciaClient<$Result.GetResult<Prisma.$PoliticaAsistenciaPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one PoliticaAsistencia.
+     * @param {PoliticaAsistenciaUpdateArgs} args - Arguments to update one PoliticaAsistencia.
+     * @example
+     * // Update one PoliticaAsistencia
+     * const politicaAsistencia = await prisma.politicaAsistencia.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PoliticaAsistenciaUpdateArgs>(args: SelectSubset<T, PoliticaAsistenciaUpdateArgs<ExtArgs>>): Prisma__PoliticaAsistenciaClient<$Result.GetResult<Prisma.$PoliticaAsistenciaPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more PoliticaAsistencias.
+     * @param {PoliticaAsistenciaDeleteManyArgs} args - Arguments to filter PoliticaAsistencias to delete.
+     * @example
+     * // Delete a few PoliticaAsistencias
+     * const { count } = await prisma.politicaAsistencia.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PoliticaAsistenciaDeleteManyArgs>(args?: SelectSubset<T, PoliticaAsistenciaDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PoliticaAsistencias.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PoliticaAsistenciaUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PoliticaAsistencias
+     * const politicaAsistencia = await prisma.politicaAsistencia.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PoliticaAsistenciaUpdateManyArgs>(args: SelectSubset<T, PoliticaAsistenciaUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PoliticaAsistencias and returns the data updated in the database.
+     * @param {PoliticaAsistenciaUpdateManyAndReturnArgs} args - Arguments to update many PoliticaAsistencias.
+     * @example
+     * // Update many PoliticaAsistencias
+     * const politicaAsistencia = await prisma.politicaAsistencia.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more PoliticaAsistencias and only return the `id`
+     * const politicaAsistenciaWithIdOnly = await prisma.politicaAsistencia.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PoliticaAsistenciaUpdateManyAndReturnArgs>(args: SelectSubset<T, PoliticaAsistenciaUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PoliticaAsistenciaPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one PoliticaAsistencia.
+     * @param {PoliticaAsistenciaUpsertArgs} args - Arguments to update or create a PoliticaAsistencia.
+     * @example
+     * // Update or create a PoliticaAsistencia
+     * const politicaAsistencia = await prisma.politicaAsistencia.upsert({
+     *   create: {
+     *     // ... data to create a PoliticaAsistencia
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PoliticaAsistencia we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PoliticaAsistenciaUpsertArgs>(args: SelectSubset<T, PoliticaAsistenciaUpsertArgs<ExtArgs>>): Prisma__PoliticaAsistenciaClient<$Result.GetResult<Prisma.$PoliticaAsistenciaPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of PoliticaAsistencias.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PoliticaAsistenciaCountArgs} args - Arguments to filter PoliticaAsistencias to count.
+     * @example
+     * // Count the number of PoliticaAsistencias
+     * const count = await prisma.politicaAsistencia.count({
+     *   where: {
+     *     // ... the filter for the PoliticaAsistencias we want to count
+     *   }
+     * })
+    **/
+    count<T extends PoliticaAsistenciaCountArgs>(
+      args?: Subset<T, PoliticaAsistenciaCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PoliticaAsistenciaCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PoliticaAsistencia.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PoliticaAsistenciaAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PoliticaAsistenciaAggregateArgs>(args: Subset<T, PoliticaAsistenciaAggregateArgs>): Prisma.PrismaPromise<GetPoliticaAsistenciaAggregateType<T>>
+
+    /**
+     * Group by PoliticaAsistencia.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PoliticaAsistenciaGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PoliticaAsistenciaGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PoliticaAsistenciaGroupByArgs['orderBy'] }
+        : { orderBy?: PoliticaAsistenciaGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PoliticaAsistenciaGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPoliticaAsistenciaGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PoliticaAsistencia model
+   */
+  readonly fields: PoliticaAsistenciaFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PoliticaAsistencia.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PoliticaAsistenciaClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    institucion<T extends InstitucionEducativaDefaultArgs<ExtArgs> = {}>(args?: Subset<T, InstitucionEducativaDefaultArgs<ExtArgs>>): Prisma__InstitucionEducativaClient<$Result.GetResult<Prisma.$InstitucionEducativaPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    nivel<T extends PoliticaAsistencia$nivelArgs<ExtArgs> = {}>(args?: Subset<T, PoliticaAsistencia$nivelArgs<ExtArgs>>): Prisma__NivelClient<$Result.GetResult<Prisma.$NivelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PoliticaAsistencia model
+   */
+  interface PoliticaAsistenciaFieldRefs {
+    readonly id: FieldRef<"PoliticaAsistencia", 'String'>
+    readonly nombre: FieldRef<"PoliticaAsistencia", 'String'>
+    readonly nivelId: FieldRef<"PoliticaAsistencia", 'String'>
+    readonly turno: FieldRef<"PoliticaAsistencia", 'Turno'>
+    readonly horaEntrada: FieldRef<"PoliticaAsistencia", 'String'>
+    readonly horaSalida: FieldRef<"PoliticaAsistencia", 'String'>
+    readonly tolerancia: FieldRef<"PoliticaAsistencia", 'Int'>
+    readonly activo: FieldRef<"PoliticaAsistencia", 'Boolean'>
+    readonly institucionId: FieldRef<"PoliticaAsistencia", 'String'>
+    readonly createdAt: FieldRef<"PoliticaAsistencia", 'DateTime'>
+    readonly updatedAt: FieldRef<"PoliticaAsistencia", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PoliticaAsistencia findUnique
+   */
+  export type PoliticaAsistenciaFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoliticaAsistencia
+     */
+    select?: PoliticaAsistenciaSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoliticaAsistencia
+     */
+    omit?: PoliticaAsistenciaOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoliticaAsistenciaInclude<ExtArgs> | null
+    /**
+     * Filter, which PoliticaAsistencia to fetch.
+     */
+    where: PoliticaAsistenciaWhereUniqueInput
+  }
+
+  /**
+   * PoliticaAsistencia findUniqueOrThrow
+   */
+  export type PoliticaAsistenciaFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoliticaAsistencia
+     */
+    select?: PoliticaAsistenciaSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoliticaAsistencia
+     */
+    omit?: PoliticaAsistenciaOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoliticaAsistenciaInclude<ExtArgs> | null
+    /**
+     * Filter, which PoliticaAsistencia to fetch.
+     */
+    where: PoliticaAsistenciaWhereUniqueInput
+  }
+
+  /**
+   * PoliticaAsistencia findFirst
+   */
+  export type PoliticaAsistenciaFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoliticaAsistencia
+     */
+    select?: PoliticaAsistenciaSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoliticaAsistencia
+     */
+    omit?: PoliticaAsistenciaOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoliticaAsistenciaInclude<ExtArgs> | null
+    /**
+     * Filter, which PoliticaAsistencia to fetch.
+     */
+    where?: PoliticaAsistenciaWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PoliticaAsistencias to fetch.
+     */
+    orderBy?: PoliticaAsistenciaOrderByWithRelationInput | PoliticaAsistenciaOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PoliticaAsistencias.
+     */
+    cursor?: PoliticaAsistenciaWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PoliticaAsistencias from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PoliticaAsistencias.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PoliticaAsistencias.
+     */
+    distinct?: PoliticaAsistenciaScalarFieldEnum | PoliticaAsistenciaScalarFieldEnum[]
+  }
+
+  /**
+   * PoliticaAsistencia findFirstOrThrow
+   */
+  export type PoliticaAsistenciaFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoliticaAsistencia
+     */
+    select?: PoliticaAsistenciaSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoliticaAsistencia
+     */
+    omit?: PoliticaAsistenciaOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoliticaAsistenciaInclude<ExtArgs> | null
+    /**
+     * Filter, which PoliticaAsistencia to fetch.
+     */
+    where?: PoliticaAsistenciaWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PoliticaAsistencias to fetch.
+     */
+    orderBy?: PoliticaAsistenciaOrderByWithRelationInput | PoliticaAsistenciaOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PoliticaAsistencias.
+     */
+    cursor?: PoliticaAsistenciaWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PoliticaAsistencias from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PoliticaAsistencias.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PoliticaAsistencias.
+     */
+    distinct?: PoliticaAsistenciaScalarFieldEnum | PoliticaAsistenciaScalarFieldEnum[]
+  }
+
+  /**
+   * PoliticaAsistencia findMany
+   */
+  export type PoliticaAsistenciaFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoliticaAsistencia
+     */
+    select?: PoliticaAsistenciaSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoliticaAsistencia
+     */
+    omit?: PoliticaAsistenciaOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoliticaAsistenciaInclude<ExtArgs> | null
+    /**
+     * Filter, which PoliticaAsistencias to fetch.
+     */
+    where?: PoliticaAsistenciaWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PoliticaAsistencias to fetch.
+     */
+    orderBy?: PoliticaAsistenciaOrderByWithRelationInput | PoliticaAsistenciaOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PoliticaAsistencias.
+     */
+    cursor?: PoliticaAsistenciaWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PoliticaAsistencias from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PoliticaAsistencias.
+     */
+    skip?: number
+    distinct?: PoliticaAsistenciaScalarFieldEnum | PoliticaAsistenciaScalarFieldEnum[]
+  }
+
+  /**
+   * PoliticaAsistencia create
+   */
+  export type PoliticaAsistenciaCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoliticaAsistencia
+     */
+    select?: PoliticaAsistenciaSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoliticaAsistencia
+     */
+    omit?: PoliticaAsistenciaOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoliticaAsistenciaInclude<ExtArgs> | null
+    /**
+     * The data needed to create a PoliticaAsistencia.
+     */
+    data: XOR<PoliticaAsistenciaCreateInput, PoliticaAsistenciaUncheckedCreateInput>
+  }
+
+  /**
+   * PoliticaAsistencia createMany
+   */
+  export type PoliticaAsistenciaCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PoliticaAsistencias.
+     */
+    data: PoliticaAsistenciaCreateManyInput | PoliticaAsistenciaCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PoliticaAsistencia createManyAndReturn
+   */
+  export type PoliticaAsistenciaCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoliticaAsistencia
+     */
+    select?: PoliticaAsistenciaSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoliticaAsistencia
+     */
+    omit?: PoliticaAsistenciaOmit<ExtArgs> | null
+    /**
+     * The data used to create many PoliticaAsistencias.
+     */
+    data: PoliticaAsistenciaCreateManyInput | PoliticaAsistenciaCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoliticaAsistenciaIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PoliticaAsistencia update
+   */
+  export type PoliticaAsistenciaUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoliticaAsistencia
+     */
+    select?: PoliticaAsistenciaSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoliticaAsistencia
+     */
+    omit?: PoliticaAsistenciaOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoliticaAsistenciaInclude<ExtArgs> | null
+    /**
+     * The data needed to update a PoliticaAsistencia.
+     */
+    data: XOR<PoliticaAsistenciaUpdateInput, PoliticaAsistenciaUncheckedUpdateInput>
+    /**
+     * Choose, which PoliticaAsistencia to update.
+     */
+    where: PoliticaAsistenciaWhereUniqueInput
+  }
+
+  /**
+   * PoliticaAsistencia updateMany
+   */
+  export type PoliticaAsistenciaUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PoliticaAsistencias.
+     */
+    data: XOR<PoliticaAsistenciaUpdateManyMutationInput, PoliticaAsistenciaUncheckedUpdateManyInput>
+    /**
+     * Filter which PoliticaAsistencias to update
+     */
+    where?: PoliticaAsistenciaWhereInput
+    /**
+     * Limit how many PoliticaAsistencias to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * PoliticaAsistencia updateManyAndReturn
+   */
+  export type PoliticaAsistenciaUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoliticaAsistencia
+     */
+    select?: PoliticaAsistenciaSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoliticaAsistencia
+     */
+    omit?: PoliticaAsistenciaOmit<ExtArgs> | null
+    /**
+     * The data used to update PoliticaAsistencias.
+     */
+    data: XOR<PoliticaAsistenciaUpdateManyMutationInput, PoliticaAsistenciaUncheckedUpdateManyInput>
+    /**
+     * Filter which PoliticaAsistencias to update
+     */
+    where?: PoliticaAsistenciaWhereInput
+    /**
+     * Limit how many PoliticaAsistencias to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoliticaAsistenciaIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * PoliticaAsistencia upsert
+   */
+  export type PoliticaAsistenciaUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoliticaAsistencia
+     */
+    select?: PoliticaAsistenciaSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoliticaAsistencia
+     */
+    omit?: PoliticaAsistenciaOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoliticaAsistenciaInclude<ExtArgs> | null
+    /**
+     * The filter to search for the PoliticaAsistencia to update in case it exists.
+     */
+    where: PoliticaAsistenciaWhereUniqueInput
+    /**
+     * In case the PoliticaAsistencia found by the `where` argument doesn't exist, create a new PoliticaAsistencia with this data.
+     */
+    create: XOR<PoliticaAsistenciaCreateInput, PoliticaAsistenciaUncheckedCreateInput>
+    /**
+     * In case the PoliticaAsistencia was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PoliticaAsistenciaUpdateInput, PoliticaAsistenciaUncheckedUpdateInput>
+  }
+
+  /**
+   * PoliticaAsistencia delete
+   */
+  export type PoliticaAsistenciaDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoliticaAsistencia
+     */
+    select?: PoliticaAsistenciaSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoliticaAsistencia
+     */
+    omit?: PoliticaAsistenciaOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoliticaAsistenciaInclude<ExtArgs> | null
+    /**
+     * Filter which PoliticaAsistencia to delete.
+     */
+    where: PoliticaAsistenciaWhereUniqueInput
+  }
+
+  /**
+   * PoliticaAsistencia deleteMany
+   */
+  export type PoliticaAsistenciaDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PoliticaAsistencias to delete
+     */
+    where?: PoliticaAsistenciaWhereInput
+    /**
+     * Limit how many PoliticaAsistencias to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * PoliticaAsistencia.nivel
+   */
+  export type PoliticaAsistencia$nivelArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Nivel
+     */
+    select?: NivelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Nivel
+     */
+    omit?: NivelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NivelInclude<ExtArgs> | null
+    where?: NivelWhereInput
+  }
+
+  /**
+   * PoliticaAsistencia without action
+   */
+  export type PoliticaAsistenciaDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PoliticaAsistencia
+     */
+    select?: PoliticaAsistenciaSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the PoliticaAsistencia
+     */
+    omit?: PoliticaAsistenciaOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PoliticaAsistenciaInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -60192,6 +61567,7 @@ export namespace Prisma {
     capacidad: 'capacidad',
     capacidadMaxima: 'capacidadMaxima',
     aulaAsignada: 'aulaAsignada',
+    color: 'color',
     nivelId: 'nivelId',
     gradoId: 'gradoId',
     tutorId: 'tutorId',
@@ -60656,6 +62032,23 @@ export namespace Prisma {
   };
 
   export type ComprobantePagoScalarFieldEnum = (typeof ComprobantePagoScalarFieldEnum)[keyof typeof ComprobantePagoScalarFieldEnum]
+
+
+  export const PoliticaAsistenciaScalarFieldEnum: {
+    id: 'id',
+    nombre: 'nombre',
+    nivelId: 'nivelId',
+    turno: 'turno',
+    horaEntrada: 'horaEntrada',
+    horaSalida: 'horaSalida',
+    tolerancia: 'tolerancia',
+    activo: 'activo',
+    institucionId: 'institucionId',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type PoliticaAsistenciaScalarFieldEnum = (typeof PoliticaAsistenciaScalarFieldEnum)[keyof typeof PoliticaAsistenciaScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -61696,6 +63089,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionListRelationFilter
     users?: UserListRelationFilter
     sedes?: SedeListRelationFilter
+    politicasAsistencia?: PoliticaAsistenciaListRelationFilter
   }
 
   export type InstitucionEducativaOrderByWithRelationInput = {
@@ -61739,6 +63133,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionOrderByRelationAggregateInput
     users?: UserOrderByRelationAggregateInput
     sedes?: SedeOrderByRelationAggregateInput
+    politicasAsistencia?: PoliticaAsistenciaOrderByRelationAggregateInput
   }
 
   export type InstitucionEducativaWhereUniqueInput = Prisma.AtLeast<{
@@ -61785,6 +63180,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionListRelationFilter
     users?: UserListRelationFilter
     sedes?: SedeListRelationFilter
+    politicasAsistencia?: PoliticaAsistenciaListRelationFilter
   }, "id" | "codigoModular" | "directorId">
 
   export type InstitucionEducativaOrderByWithAggregationInput = {
@@ -62635,6 +64031,7 @@ export namespace Prisma {
     nivelesAcademicos?: NivelAcademicoListRelationFilter
     anuncios?: AnuncioListRelationFilter
     eventos?: EventoListRelationFilter
+    politicasAsistencia?: PoliticaAsistenciaListRelationFilter
   }
 
   export type NivelOrderByWithRelationInput = {
@@ -62652,6 +64049,7 @@ export namespace Prisma {
     nivelesAcademicos?: NivelAcademicoOrderByRelationAggregateInput
     anuncios?: AnuncioOrderByRelationAggregateInput
     eventos?: EventoOrderByRelationAggregateInput
+    politicasAsistencia?: PoliticaAsistenciaOrderByRelationAggregateInput
   }
 
   export type NivelWhereUniqueInput = Prisma.AtLeast<{
@@ -62673,6 +64071,7 @@ export namespace Prisma {
     nivelesAcademicos?: NivelAcademicoListRelationFilter
     anuncios?: AnuncioListRelationFilter
     eventos?: EventoListRelationFilter
+    politicasAsistencia?: PoliticaAsistenciaListRelationFilter
   }, "id" | "nombre" | "institucionId_nombre">
 
   export type NivelOrderByWithAggregationInput = {
@@ -62802,6 +64201,7 @@ export namespace Prisma {
     capacidad?: IntFilter<"NivelAcademico"> | number
     capacidadMaxima?: IntNullableFilter<"NivelAcademico"> | number | null
     aulaAsignada?: StringNullableFilter<"NivelAcademico"> | string | null
+    color?: StringNullableFilter<"NivelAcademico"> | string | null
     nivelId?: StringFilter<"NivelAcademico"> | string
     gradoId?: StringFilter<"NivelAcademico"> | string
     tutorId?: StringNullableFilter<"NivelAcademico"> | string | null
@@ -62829,6 +64229,7 @@ export namespace Prisma {
     capacidad?: SortOrder
     capacidadMaxima?: SortOrderInput | SortOrder
     aulaAsignada?: SortOrderInput | SortOrder
+    color?: SortOrderInput | SortOrder
     nivelId?: SortOrder
     gradoId?: SortOrder
     tutorId?: SortOrderInput | SortOrder
@@ -62860,6 +64261,7 @@ export namespace Prisma {
     capacidad?: IntFilter<"NivelAcademico"> | number
     capacidadMaxima?: IntNullableFilter<"NivelAcademico"> | number | null
     aulaAsignada?: StringNullableFilter<"NivelAcademico"> | string | null
+    color?: StringNullableFilter<"NivelAcademico"> | string | null
     nivelId?: StringFilter<"NivelAcademico"> | string
     gradoId?: StringFilter<"NivelAcademico"> | string
     tutorId?: StringNullableFilter<"NivelAcademico"> | string | null
@@ -62887,6 +64289,7 @@ export namespace Prisma {
     capacidad?: SortOrder
     capacidadMaxima?: SortOrderInput | SortOrder
     aulaAsignada?: SortOrderInput | SortOrder
+    color?: SortOrderInput | SortOrder
     nivelId?: SortOrder
     gradoId?: SortOrder
     tutorId?: SortOrderInput | SortOrder
@@ -62914,6 +64317,7 @@ export namespace Prisma {
     capacidad?: IntWithAggregatesFilter<"NivelAcademico"> | number
     capacidadMaxima?: IntNullableWithAggregatesFilter<"NivelAcademico"> | number | null
     aulaAsignada?: StringNullableWithAggregatesFilter<"NivelAcademico"> | string | null
+    color?: StringNullableWithAggregatesFilter<"NivelAcademico"> | string | null
     nivelId?: StringWithAggregatesFilter<"NivelAcademico"> | string
     gradoId?: StringWithAggregatesFilter<"NivelAcademico"> | string
     tutorId?: StringNullableWithAggregatesFilter<"NivelAcademico"> | string | null
@@ -65361,6 +66765,96 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"ComprobantePago"> | Date | string
   }
 
+  export type PoliticaAsistenciaWhereInput = {
+    AND?: PoliticaAsistenciaWhereInput | PoliticaAsistenciaWhereInput[]
+    OR?: PoliticaAsistenciaWhereInput[]
+    NOT?: PoliticaAsistenciaWhereInput | PoliticaAsistenciaWhereInput[]
+    id?: StringFilter<"PoliticaAsistencia"> | string
+    nombre?: StringFilter<"PoliticaAsistencia"> | string
+    nivelId?: StringNullableFilter<"PoliticaAsistencia"> | string | null
+    turno?: EnumTurnoNullableFilter<"PoliticaAsistencia"> | $Enums.Turno | null
+    horaEntrada?: StringFilter<"PoliticaAsistencia"> | string
+    horaSalida?: StringFilter<"PoliticaAsistencia"> | string
+    tolerancia?: IntFilter<"PoliticaAsistencia"> | number
+    activo?: BoolFilter<"PoliticaAsistencia"> | boolean
+    institucionId?: StringFilter<"PoliticaAsistencia"> | string
+    createdAt?: DateTimeFilter<"PoliticaAsistencia"> | Date | string
+    updatedAt?: DateTimeFilter<"PoliticaAsistencia"> | Date | string
+    institucion?: XOR<InstitucionEducativaScalarRelationFilter, InstitucionEducativaWhereInput>
+    nivel?: XOR<NivelNullableScalarRelationFilter, NivelWhereInput> | null
+  }
+
+  export type PoliticaAsistenciaOrderByWithRelationInput = {
+    id?: SortOrder
+    nombre?: SortOrder
+    nivelId?: SortOrderInput | SortOrder
+    turno?: SortOrderInput | SortOrder
+    horaEntrada?: SortOrder
+    horaSalida?: SortOrder
+    tolerancia?: SortOrder
+    activo?: SortOrder
+    institucionId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    institucion?: InstitucionEducativaOrderByWithRelationInput
+    nivel?: NivelOrderByWithRelationInput
+  }
+
+  export type PoliticaAsistenciaWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: PoliticaAsistenciaWhereInput | PoliticaAsistenciaWhereInput[]
+    OR?: PoliticaAsistenciaWhereInput[]
+    NOT?: PoliticaAsistenciaWhereInput | PoliticaAsistenciaWhereInput[]
+    nombre?: StringFilter<"PoliticaAsistencia"> | string
+    nivelId?: StringNullableFilter<"PoliticaAsistencia"> | string | null
+    turno?: EnumTurnoNullableFilter<"PoliticaAsistencia"> | $Enums.Turno | null
+    horaEntrada?: StringFilter<"PoliticaAsistencia"> | string
+    horaSalida?: StringFilter<"PoliticaAsistencia"> | string
+    tolerancia?: IntFilter<"PoliticaAsistencia"> | number
+    activo?: BoolFilter<"PoliticaAsistencia"> | boolean
+    institucionId?: StringFilter<"PoliticaAsistencia"> | string
+    createdAt?: DateTimeFilter<"PoliticaAsistencia"> | Date | string
+    updatedAt?: DateTimeFilter<"PoliticaAsistencia"> | Date | string
+    institucion?: XOR<InstitucionEducativaScalarRelationFilter, InstitucionEducativaWhereInput>
+    nivel?: XOR<NivelNullableScalarRelationFilter, NivelWhereInput> | null
+  }, "id">
+
+  export type PoliticaAsistenciaOrderByWithAggregationInput = {
+    id?: SortOrder
+    nombre?: SortOrder
+    nivelId?: SortOrderInput | SortOrder
+    turno?: SortOrderInput | SortOrder
+    horaEntrada?: SortOrder
+    horaSalida?: SortOrder
+    tolerancia?: SortOrder
+    activo?: SortOrder
+    institucionId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: PoliticaAsistenciaCountOrderByAggregateInput
+    _avg?: PoliticaAsistenciaAvgOrderByAggregateInput
+    _max?: PoliticaAsistenciaMaxOrderByAggregateInput
+    _min?: PoliticaAsistenciaMinOrderByAggregateInput
+    _sum?: PoliticaAsistenciaSumOrderByAggregateInput
+  }
+
+  export type PoliticaAsistenciaScalarWhereWithAggregatesInput = {
+    AND?: PoliticaAsistenciaScalarWhereWithAggregatesInput | PoliticaAsistenciaScalarWhereWithAggregatesInput[]
+    OR?: PoliticaAsistenciaScalarWhereWithAggregatesInput[]
+    NOT?: PoliticaAsistenciaScalarWhereWithAggregatesInput | PoliticaAsistenciaScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"PoliticaAsistencia"> | string
+    nombre?: StringWithAggregatesFilter<"PoliticaAsistencia"> | string
+    nivelId?: StringNullableWithAggregatesFilter<"PoliticaAsistencia"> | string | null
+    turno?: EnumTurnoNullableWithAggregatesFilter<"PoliticaAsistencia"> | $Enums.Turno | null
+    horaEntrada?: StringWithAggregatesFilter<"PoliticaAsistencia"> | string
+    horaSalida?: StringWithAggregatesFilter<"PoliticaAsistencia"> | string
+    tolerancia?: IntWithAggregatesFilter<"PoliticaAsistencia"> | number
+    activo?: BoolWithAggregatesFilter<"PoliticaAsistencia"> | boolean
+    institucionId?: StringWithAggregatesFilter<"PoliticaAsistencia"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"PoliticaAsistencia"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"PoliticaAsistencia"> | Date | string
+  }
+
   export type CargoCreateInput = {
     id?: string
     codigo: string
@@ -66198,6 +67692,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionCreateNestedManyWithoutInstitucionInput
     users?: UserCreateNestedManyWithoutInstitucionInput
     sedes?: SedeCreateNestedManyWithoutInstitucionInput
+    politicasAsistencia?: PoliticaAsistenciaCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUncheckedCreateInput = {
@@ -66240,6 +67735,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUncheckedCreateNestedManyWithoutInstitucionInput
     users?: UserUncheckedCreateNestedManyWithoutInstitucionInput
     sedes?: SedeUncheckedCreateNestedManyWithoutInstitucionInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUpdateInput = {
@@ -66282,6 +67778,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUpdateManyWithoutInstitucionNestedInput
     users?: UserUpdateManyWithoutInstitucionNestedInput
     sedes?: SedeUpdateManyWithoutInstitucionNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaUncheckedUpdateInput = {
@@ -66324,6 +67821,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUncheckedUpdateManyWithoutInstitucionNestedInput
     users?: UserUncheckedUpdateManyWithoutInstitucionNestedInput
     sedes?: SedeUncheckedUpdateManyWithoutInstitucionNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaCreateManyInput = {
@@ -67352,6 +68850,7 @@ export namespace Prisma {
     nivelesAcademicos?: NivelAcademicoCreateNestedManyWithoutNivelInput
     anuncios?: AnuncioCreateNestedManyWithoutNivelesInput
     eventos?: EventoCreateNestedManyWithoutNivelesInput
+    politicasAsistencia?: PoliticaAsistenciaCreateNestedManyWithoutNivelInput
   }
 
   export type NivelUncheckedCreateInput = {
@@ -67368,6 +68867,7 @@ export namespace Prisma {
     nivelesAcademicos?: NivelAcademicoUncheckedCreateNestedManyWithoutNivelInput
     anuncios?: AnuncioUncheckedCreateNestedManyWithoutNivelesInput
     eventos?: EventoUncheckedCreateNestedManyWithoutNivelesInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedCreateNestedManyWithoutNivelInput
   }
 
   export type NivelUpdateInput = {
@@ -67384,6 +68884,7 @@ export namespace Prisma {
     nivelesAcademicos?: NivelAcademicoUpdateManyWithoutNivelNestedInput
     anuncios?: AnuncioUpdateManyWithoutNivelesNestedInput
     eventos?: EventoUpdateManyWithoutNivelesNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUpdateManyWithoutNivelNestedInput
   }
 
   export type NivelUncheckedUpdateInput = {
@@ -67400,6 +68901,7 @@ export namespace Prisma {
     nivelesAcademicos?: NivelAcademicoUncheckedUpdateManyWithoutNivelNestedInput
     anuncios?: AnuncioUncheckedUpdateManyWithoutNivelesNestedInput
     eventos?: EventoUncheckedUpdateManyWithoutNivelesNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedUpdateManyWithoutNivelNestedInput
   }
 
   export type NivelCreateManyInput = {
@@ -67537,6 +69039,7 @@ export namespace Prisma {
     capacidad?: number
     capacidadMaxima?: number | null
     aulaAsignada?: string | null
+    color?: string | null
     anioAcademico?: number
     activo?: boolean
     turno?: $Enums.Turno
@@ -67559,6 +69062,7 @@ export namespace Prisma {
     capacidad?: number
     capacidadMaxima?: number | null
     aulaAsignada?: string | null
+    color?: string | null
     nivelId: string
     gradoId: string
     tutorId?: string | null
@@ -67581,6 +69085,7 @@ export namespace Prisma {
     capacidad?: IntFieldUpdateOperationsInput | number
     capacidadMaxima?: NullableIntFieldUpdateOperationsInput | number | null
     aulaAsignada?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     anioAcademico?: IntFieldUpdateOperationsInput | number
     activo?: BoolFieldUpdateOperationsInput | boolean
     turno?: EnumTurnoFieldUpdateOperationsInput | $Enums.Turno
@@ -67603,6 +69108,7 @@ export namespace Prisma {
     capacidad?: IntFieldUpdateOperationsInput | number
     capacidadMaxima?: NullableIntFieldUpdateOperationsInput | number | null
     aulaAsignada?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     nivelId?: StringFieldUpdateOperationsInput | string
     gradoId?: StringFieldUpdateOperationsInput | string
     tutorId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -67625,6 +69131,7 @@ export namespace Prisma {
     capacidad?: number
     capacidadMaxima?: number | null
     aulaAsignada?: string | null
+    color?: string | null
     nivelId: string
     gradoId: string
     tutorId?: string | null
@@ -67644,6 +69151,7 @@ export namespace Prisma {
     capacidad?: IntFieldUpdateOperationsInput | number
     capacidadMaxima?: NullableIntFieldUpdateOperationsInput | number | null
     aulaAsignada?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     anioAcademico?: IntFieldUpdateOperationsInput | number
     activo?: BoolFieldUpdateOperationsInput | boolean
     turno?: EnumTurnoFieldUpdateOperationsInput | $Enums.Turno
@@ -67658,6 +69166,7 @@ export namespace Prisma {
     capacidad?: IntFieldUpdateOperationsInput | number
     capacidadMaxima?: NullableIntFieldUpdateOperationsInput | number | null
     aulaAsignada?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     nivelId?: StringFieldUpdateOperationsInput | string
     gradoId?: StringFieldUpdateOperationsInput | string
     tutorId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -70345,6 +71854,102 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type PoliticaAsistenciaCreateInput = {
+    id?: string
+    nombre: string
+    turno?: $Enums.Turno | null
+    horaEntrada?: string
+    horaSalida?: string
+    tolerancia?: number
+    activo?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    institucion: InstitucionEducativaCreateNestedOneWithoutPoliticasAsistenciaInput
+    nivel?: NivelCreateNestedOneWithoutPoliticasAsistenciaInput
+  }
+
+  export type PoliticaAsistenciaUncheckedCreateInput = {
+    id?: string
+    nombre: string
+    nivelId?: string | null
+    turno?: $Enums.Turno | null
+    horaEntrada?: string
+    horaSalida?: string
+    tolerancia?: number
+    activo?: boolean
+    institucionId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PoliticaAsistenciaUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    nombre?: StringFieldUpdateOperationsInput | string
+    turno?: NullableEnumTurnoFieldUpdateOperationsInput | $Enums.Turno | null
+    horaEntrada?: StringFieldUpdateOperationsInput | string
+    horaSalida?: StringFieldUpdateOperationsInput | string
+    tolerancia?: IntFieldUpdateOperationsInput | number
+    activo?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    institucion?: InstitucionEducativaUpdateOneRequiredWithoutPoliticasAsistenciaNestedInput
+    nivel?: NivelUpdateOneWithoutPoliticasAsistenciaNestedInput
+  }
+
+  export type PoliticaAsistenciaUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    nombre?: StringFieldUpdateOperationsInput | string
+    nivelId?: NullableStringFieldUpdateOperationsInput | string | null
+    turno?: NullableEnumTurnoFieldUpdateOperationsInput | $Enums.Turno | null
+    horaEntrada?: StringFieldUpdateOperationsInput | string
+    horaSalida?: StringFieldUpdateOperationsInput | string
+    tolerancia?: IntFieldUpdateOperationsInput | number
+    activo?: BoolFieldUpdateOperationsInput | boolean
+    institucionId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PoliticaAsistenciaCreateManyInput = {
+    id?: string
+    nombre: string
+    nivelId?: string | null
+    turno?: $Enums.Turno | null
+    horaEntrada?: string
+    horaSalida?: string
+    tolerancia?: number
+    activo?: boolean
+    institucionId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PoliticaAsistenciaUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    nombre?: StringFieldUpdateOperationsInput | string
+    turno?: NullableEnumTurnoFieldUpdateOperationsInput | $Enums.Turno | null
+    horaEntrada?: StringFieldUpdateOperationsInput | string
+    horaSalida?: StringFieldUpdateOperationsInput | string
+    tolerancia?: IntFieldUpdateOperationsInput | number
+    activo?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PoliticaAsistenciaUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    nombre?: StringFieldUpdateOperationsInput | string
+    nivelId?: NullableStringFieldUpdateOperationsInput | string | null
+    turno?: NullableEnumTurnoFieldUpdateOperationsInput | $Enums.Turno | null
+    horaEntrada?: StringFieldUpdateOperationsInput | string
+    horaSalida?: StringFieldUpdateOperationsInput | string
+    tolerancia?: IntFieldUpdateOperationsInput | number
+    activo?: BoolFieldUpdateOperationsInput | boolean
+    institucionId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -71159,6 +72764,12 @@ export namespace Prisma {
     none?: SedeWhereInput
   }
 
+  export type PoliticaAsistenciaListRelationFilter = {
+    every?: PoliticaAsistenciaWhereInput
+    some?: PoliticaAsistenciaWhereInput
+    none?: PoliticaAsistenciaWhereInput
+  }
+
   export type AreaCurricularOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -71204,6 +72815,10 @@ export namespace Prisma {
   }
 
   export type SedeOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type PoliticaAsistenciaOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -72061,6 +73676,7 @@ export namespace Prisma {
     capacidad?: SortOrder
     capacidadMaxima?: SortOrder
     aulaAsignada?: SortOrder
+    color?: SortOrder
     nivelId?: SortOrder
     gradoId?: SortOrder
     tutorId?: SortOrder
@@ -72086,6 +73702,7 @@ export namespace Prisma {
     capacidad?: SortOrder
     capacidadMaxima?: SortOrder
     aulaAsignada?: SortOrder
+    color?: SortOrder
     nivelId?: SortOrder
     gradoId?: SortOrder
     tutorId?: SortOrder
@@ -72105,6 +73722,7 @@ export namespace Prisma {
     capacidad?: SortOrder
     capacidadMaxima?: SortOrder
     aulaAsignada?: SortOrder
+    color?: SortOrder
     nivelId?: SortOrder
     gradoId?: SortOrder
     tutorId?: SortOrder
@@ -73739,6 +75357,56 @@ export namespace Prisma {
     _max?: NestedEnumEstadoComprobanteFilter<$PrismaModel>
   }
 
+  export type PoliticaAsistenciaCountOrderByAggregateInput = {
+    id?: SortOrder
+    nombre?: SortOrder
+    nivelId?: SortOrder
+    turno?: SortOrder
+    horaEntrada?: SortOrder
+    horaSalida?: SortOrder
+    tolerancia?: SortOrder
+    activo?: SortOrder
+    institucionId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PoliticaAsistenciaAvgOrderByAggregateInput = {
+    tolerancia?: SortOrder
+  }
+
+  export type PoliticaAsistenciaMaxOrderByAggregateInput = {
+    id?: SortOrder
+    nombre?: SortOrder
+    nivelId?: SortOrder
+    turno?: SortOrder
+    horaEntrada?: SortOrder
+    horaSalida?: SortOrder
+    tolerancia?: SortOrder
+    activo?: SortOrder
+    institucionId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PoliticaAsistenciaMinOrderByAggregateInput = {
+    id?: SortOrder
+    nombre?: SortOrder
+    nivelId?: SortOrder
+    turno?: SortOrder
+    horaEntrada?: SortOrder
+    horaSalida?: SortOrder
+    tolerancia?: SortOrder
+    activo?: SortOrder
+    institucionId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type PoliticaAsistenciaSumOrderByAggregateInput = {
+    tolerancia?: SortOrder
+  }
+
   export type InstitucionEducativaCreateNestedOneWithoutCargosInput = {
     create?: XOR<InstitucionEducativaCreateWithoutCargosInput, InstitucionEducativaUncheckedCreateWithoutCargosInput>
     connectOrCreate?: InstitucionEducativaCreateOrConnectWithoutCargosInput
@@ -74497,6 +76165,13 @@ export namespace Prisma {
     connect?: SedeWhereUniqueInput | SedeWhereUniqueInput[]
   }
 
+  export type PoliticaAsistenciaCreateNestedManyWithoutInstitucionInput = {
+    create?: XOR<PoliticaAsistenciaCreateWithoutInstitucionInput, PoliticaAsistenciaUncheckedCreateWithoutInstitucionInput> | PoliticaAsistenciaCreateWithoutInstitucionInput[] | PoliticaAsistenciaUncheckedCreateWithoutInstitucionInput[]
+    connectOrCreate?: PoliticaAsistenciaCreateOrConnectWithoutInstitucionInput | PoliticaAsistenciaCreateOrConnectWithoutInstitucionInput[]
+    createMany?: PoliticaAsistenciaCreateManyInstitucionInputEnvelope
+    connect?: PoliticaAsistenciaWhereUniqueInput | PoliticaAsistenciaWhereUniqueInput[]
+  }
+
   export type AreaCurricularUncheckedCreateNestedManyWithoutInstitucionInput = {
     create?: XOR<AreaCurricularCreateWithoutInstitucionInput, AreaCurricularUncheckedCreateWithoutInstitucionInput> | AreaCurricularCreateWithoutInstitucionInput[] | AreaCurricularUncheckedCreateWithoutInstitucionInput[]
     connectOrCreate?: AreaCurricularCreateOrConnectWithoutInstitucionInput | AreaCurricularCreateOrConnectWithoutInstitucionInput[]
@@ -74586,6 +76261,13 @@ export namespace Prisma {
     connectOrCreate?: SedeCreateOrConnectWithoutInstitucionInput | SedeCreateOrConnectWithoutInstitucionInput[]
     createMany?: SedeCreateManyInstitucionInputEnvelope
     connect?: SedeWhereUniqueInput | SedeWhereUniqueInput[]
+  }
+
+  export type PoliticaAsistenciaUncheckedCreateNestedManyWithoutInstitucionInput = {
+    create?: XOR<PoliticaAsistenciaCreateWithoutInstitucionInput, PoliticaAsistenciaUncheckedCreateWithoutInstitucionInput> | PoliticaAsistenciaCreateWithoutInstitucionInput[] | PoliticaAsistenciaUncheckedCreateWithoutInstitucionInput[]
+    connectOrCreate?: PoliticaAsistenciaCreateOrConnectWithoutInstitucionInput | PoliticaAsistenciaCreateOrConnectWithoutInstitucionInput[]
+    createMany?: PoliticaAsistenciaCreateManyInstitucionInputEnvelope
+    connect?: PoliticaAsistenciaWhereUniqueInput | PoliticaAsistenciaWhereUniqueInput[]
   }
 
   export type EnumTipoGestionFieldUpdateOperationsInput = {
@@ -74796,6 +76478,20 @@ export namespace Prisma {
     deleteMany?: SedeScalarWhereInput | SedeScalarWhereInput[]
   }
 
+  export type PoliticaAsistenciaUpdateManyWithoutInstitucionNestedInput = {
+    create?: XOR<PoliticaAsistenciaCreateWithoutInstitucionInput, PoliticaAsistenciaUncheckedCreateWithoutInstitucionInput> | PoliticaAsistenciaCreateWithoutInstitucionInput[] | PoliticaAsistenciaUncheckedCreateWithoutInstitucionInput[]
+    connectOrCreate?: PoliticaAsistenciaCreateOrConnectWithoutInstitucionInput | PoliticaAsistenciaCreateOrConnectWithoutInstitucionInput[]
+    upsert?: PoliticaAsistenciaUpsertWithWhereUniqueWithoutInstitucionInput | PoliticaAsistenciaUpsertWithWhereUniqueWithoutInstitucionInput[]
+    createMany?: PoliticaAsistenciaCreateManyInstitucionInputEnvelope
+    set?: PoliticaAsistenciaWhereUniqueInput | PoliticaAsistenciaWhereUniqueInput[]
+    disconnect?: PoliticaAsistenciaWhereUniqueInput | PoliticaAsistenciaWhereUniqueInput[]
+    delete?: PoliticaAsistenciaWhereUniqueInput | PoliticaAsistenciaWhereUniqueInput[]
+    connect?: PoliticaAsistenciaWhereUniqueInput | PoliticaAsistenciaWhereUniqueInput[]
+    update?: PoliticaAsistenciaUpdateWithWhereUniqueWithoutInstitucionInput | PoliticaAsistenciaUpdateWithWhereUniqueWithoutInstitucionInput[]
+    updateMany?: PoliticaAsistenciaUpdateManyWithWhereWithoutInstitucionInput | PoliticaAsistenciaUpdateManyWithWhereWithoutInstitucionInput[]
+    deleteMany?: PoliticaAsistenciaScalarWhereInput | PoliticaAsistenciaScalarWhereInput[]
+  }
+
   export type AreaCurricularUncheckedUpdateManyWithoutInstitucionNestedInput = {
     create?: XOR<AreaCurricularCreateWithoutInstitucionInput, AreaCurricularUncheckedCreateWithoutInstitucionInput> | AreaCurricularCreateWithoutInstitucionInput[] | AreaCurricularUncheckedCreateWithoutInstitucionInput[]
     connectOrCreate?: AreaCurricularCreateOrConnectWithoutInstitucionInput | AreaCurricularCreateOrConnectWithoutInstitucionInput[]
@@ -74976,6 +76672,20 @@ export namespace Prisma {
     update?: SedeUpdateWithWhereUniqueWithoutInstitucionInput | SedeUpdateWithWhereUniqueWithoutInstitucionInput[]
     updateMany?: SedeUpdateManyWithWhereWithoutInstitucionInput | SedeUpdateManyWithWhereWithoutInstitucionInput[]
     deleteMany?: SedeScalarWhereInput | SedeScalarWhereInput[]
+  }
+
+  export type PoliticaAsistenciaUncheckedUpdateManyWithoutInstitucionNestedInput = {
+    create?: XOR<PoliticaAsistenciaCreateWithoutInstitucionInput, PoliticaAsistenciaUncheckedCreateWithoutInstitucionInput> | PoliticaAsistenciaCreateWithoutInstitucionInput[] | PoliticaAsistenciaUncheckedCreateWithoutInstitucionInput[]
+    connectOrCreate?: PoliticaAsistenciaCreateOrConnectWithoutInstitucionInput | PoliticaAsistenciaCreateOrConnectWithoutInstitucionInput[]
+    upsert?: PoliticaAsistenciaUpsertWithWhereUniqueWithoutInstitucionInput | PoliticaAsistenciaUpsertWithWhereUniqueWithoutInstitucionInput[]
+    createMany?: PoliticaAsistenciaCreateManyInstitucionInputEnvelope
+    set?: PoliticaAsistenciaWhereUniqueInput | PoliticaAsistenciaWhereUniqueInput[]
+    disconnect?: PoliticaAsistenciaWhereUniqueInput | PoliticaAsistenciaWhereUniqueInput[]
+    delete?: PoliticaAsistenciaWhereUniqueInput | PoliticaAsistenciaWhereUniqueInput[]
+    connect?: PoliticaAsistenciaWhereUniqueInput | PoliticaAsistenciaWhereUniqueInput[]
+    update?: PoliticaAsistenciaUpdateWithWhereUniqueWithoutInstitucionInput | PoliticaAsistenciaUpdateWithWhereUniqueWithoutInstitucionInput[]
+    updateMany?: PoliticaAsistenciaUpdateManyWithWhereWithoutInstitucionInput | PoliticaAsistenciaUpdateManyWithWhereWithoutInstitucionInput[]
+    deleteMany?: PoliticaAsistenciaScalarWhereInput | PoliticaAsistenciaScalarWhereInput[]
   }
 
   export type AccountCreateNestedManyWithoutUserInput = {
@@ -76264,6 +77974,13 @@ export namespace Prisma {
     connect?: EventoWhereUniqueInput | EventoWhereUniqueInput[]
   }
 
+  export type PoliticaAsistenciaCreateNestedManyWithoutNivelInput = {
+    create?: XOR<PoliticaAsistenciaCreateWithoutNivelInput, PoliticaAsistenciaUncheckedCreateWithoutNivelInput> | PoliticaAsistenciaCreateWithoutNivelInput[] | PoliticaAsistenciaUncheckedCreateWithoutNivelInput[]
+    connectOrCreate?: PoliticaAsistenciaCreateOrConnectWithoutNivelInput | PoliticaAsistenciaCreateOrConnectWithoutNivelInput[]
+    createMany?: PoliticaAsistenciaCreateManyNivelInputEnvelope
+    connect?: PoliticaAsistenciaWhereUniqueInput | PoliticaAsistenciaWhereUniqueInput[]
+  }
+
   export type AreaCurricularUncheckedCreateNestedManyWithoutNivelInput = {
     create?: XOR<AreaCurricularCreateWithoutNivelInput, AreaCurricularUncheckedCreateWithoutNivelInput> | AreaCurricularCreateWithoutNivelInput[] | AreaCurricularUncheckedCreateWithoutNivelInput[]
     connectOrCreate?: AreaCurricularCreateOrConnectWithoutNivelInput | AreaCurricularCreateOrConnectWithoutNivelInput[]
@@ -76302,6 +78019,13 @@ export namespace Prisma {
     create?: XOR<EventoCreateWithoutNivelesInput, EventoUncheckedCreateWithoutNivelesInput> | EventoCreateWithoutNivelesInput[] | EventoUncheckedCreateWithoutNivelesInput[]
     connectOrCreate?: EventoCreateOrConnectWithoutNivelesInput | EventoCreateOrConnectWithoutNivelesInput[]
     connect?: EventoWhereUniqueInput | EventoWhereUniqueInput[]
+  }
+
+  export type PoliticaAsistenciaUncheckedCreateNestedManyWithoutNivelInput = {
+    create?: XOR<PoliticaAsistenciaCreateWithoutNivelInput, PoliticaAsistenciaUncheckedCreateWithoutNivelInput> | PoliticaAsistenciaCreateWithoutNivelInput[] | PoliticaAsistenciaUncheckedCreateWithoutNivelInput[]
+    connectOrCreate?: PoliticaAsistenciaCreateOrConnectWithoutNivelInput | PoliticaAsistenciaCreateOrConnectWithoutNivelInput[]
+    createMany?: PoliticaAsistenciaCreateManyNivelInputEnvelope
+    connect?: PoliticaAsistenciaWhereUniqueInput | PoliticaAsistenciaWhereUniqueInput[]
   }
 
   export type AreaCurricularUpdateManyWithoutNivelNestedInput = {
@@ -76394,6 +78118,20 @@ export namespace Prisma {
     deleteMany?: EventoScalarWhereInput | EventoScalarWhereInput[]
   }
 
+  export type PoliticaAsistenciaUpdateManyWithoutNivelNestedInput = {
+    create?: XOR<PoliticaAsistenciaCreateWithoutNivelInput, PoliticaAsistenciaUncheckedCreateWithoutNivelInput> | PoliticaAsistenciaCreateWithoutNivelInput[] | PoliticaAsistenciaUncheckedCreateWithoutNivelInput[]
+    connectOrCreate?: PoliticaAsistenciaCreateOrConnectWithoutNivelInput | PoliticaAsistenciaCreateOrConnectWithoutNivelInput[]
+    upsert?: PoliticaAsistenciaUpsertWithWhereUniqueWithoutNivelInput | PoliticaAsistenciaUpsertWithWhereUniqueWithoutNivelInput[]
+    createMany?: PoliticaAsistenciaCreateManyNivelInputEnvelope
+    set?: PoliticaAsistenciaWhereUniqueInput | PoliticaAsistenciaWhereUniqueInput[]
+    disconnect?: PoliticaAsistenciaWhereUniqueInput | PoliticaAsistenciaWhereUniqueInput[]
+    delete?: PoliticaAsistenciaWhereUniqueInput | PoliticaAsistenciaWhereUniqueInput[]
+    connect?: PoliticaAsistenciaWhereUniqueInput | PoliticaAsistenciaWhereUniqueInput[]
+    update?: PoliticaAsistenciaUpdateWithWhereUniqueWithoutNivelInput | PoliticaAsistenciaUpdateWithWhereUniqueWithoutNivelInput[]
+    updateMany?: PoliticaAsistenciaUpdateManyWithWhereWithoutNivelInput | PoliticaAsistenciaUpdateManyWithWhereWithoutNivelInput[]
+    deleteMany?: PoliticaAsistenciaScalarWhereInput | PoliticaAsistenciaScalarWhereInput[]
+  }
+
   export type AreaCurricularUncheckedUpdateManyWithoutNivelNestedInput = {
     create?: XOR<AreaCurricularCreateWithoutNivelInput, AreaCurricularUncheckedCreateWithoutNivelInput> | AreaCurricularCreateWithoutNivelInput[] | AreaCurricularUncheckedCreateWithoutNivelInput[]
     connectOrCreate?: AreaCurricularCreateOrConnectWithoutNivelInput | AreaCurricularCreateOrConnectWithoutNivelInput[]
@@ -76474,6 +78212,20 @@ export namespace Prisma {
     update?: EventoUpdateWithWhereUniqueWithoutNivelesInput | EventoUpdateWithWhereUniqueWithoutNivelesInput[]
     updateMany?: EventoUpdateManyWithWhereWithoutNivelesInput | EventoUpdateManyWithWhereWithoutNivelesInput[]
     deleteMany?: EventoScalarWhereInput | EventoScalarWhereInput[]
+  }
+
+  export type PoliticaAsistenciaUncheckedUpdateManyWithoutNivelNestedInput = {
+    create?: XOR<PoliticaAsistenciaCreateWithoutNivelInput, PoliticaAsistenciaUncheckedCreateWithoutNivelInput> | PoliticaAsistenciaCreateWithoutNivelInput[] | PoliticaAsistenciaUncheckedCreateWithoutNivelInput[]
+    connectOrCreate?: PoliticaAsistenciaCreateOrConnectWithoutNivelInput | PoliticaAsistenciaCreateOrConnectWithoutNivelInput[]
+    upsert?: PoliticaAsistenciaUpsertWithWhereUniqueWithoutNivelInput | PoliticaAsistenciaUpsertWithWhereUniqueWithoutNivelInput[]
+    createMany?: PoliticaAsistenciaCreateManyNivelInputEnvelope
+    set?: PoliticaAsistenciaWhereUniqueInput | PoliticaAsistenciaWhereUniqueInput[]
+    disconnect?: PoliticaAsistenciaWhereUniqueInput | PoliticaAsistenciaWhereUniqueInput[]
+    delete?: PoliticaAsistenciaWhereUniqueInput | PoliticaAsistenciaWhereUniqueInput[]
+    connect?: PoliticaAsistenciaWhereUniqueInput | PoliticaAsistenciaWhereUniqueInput[]
+    update?: PoliticaAsistenciaUpdateWithWhereUniqueWithoutNivelInput | PoliticaAsistenciaUpdateWithWhereUniqueWithoutNivelInput[]
+    updateMany?: PoliticaAsistenciaUpdateManyWithWhereWithoutNivelInput | PoliticaAsistenciaUpdateManyWithWhereWithoutNivelInput[]
+    deleteMany?: PoliticaAsistenciaScalarWhereInput | PoliticaAsistenciaScalarWhereInput[]
   }
 
   export type CursoCreateNestedManyWithoutGradoInput = {
@@ -78534,6 +80286,36 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutComprobantesVerificadosInput, UserUpdateWithoutComprobantesVerificadosInput>, UserUncheckedUpdateWithoutComprobantesVerificadosInput>
   }
 
+  export type InstitucionEducativaCreateNestedOneWithoutPoliticasAsistenciaInput = {
+    create?: XOR<InstitucionEducativaCreateWithoutPoliticasAsistenciaInput, InstitucionEducativaUncheckedCreateWithoutPoliticasAsistenciaInput>
+    connectOrCreate?: InstitucionEducativaCreateOrConnectWithoutPoliticasAsistenciaInput
+    connect?: InstitucionEducativaWhereUniqueInput
+  }
+
+  export type NivelCreateNestedOneWithoutPoliticasAsistenciaInput = {
+    create?: XOR<NivelCreateWithoutPoliticasAsistenciaInput, NivelUncheckedCreateWithoutPoliticasAsistenciaInput>
+    connectOrCreate?: NivelCreateOrConnectWithoutPoliticasAsistenciaInput
+    connect?: NivelWhereUniqueInput
+  }
+
+  export type InstitucionEducativaUpdateOneRequiredWithoutPoliticasAsistenciaNestedInput = {
+    create?: XOR<InstitucionEducativaCreateWithoutPoliticasAsistenciaInput, InstitucionEducativaUncheckedCreateWithoutPoliticasAsistenciaInput>
+    connectOrCreate?: InstitucionEducativaCreateOrConnectWithoutPoliticasAsistenciaInput
+    upsert?: InstitucionEducativaUpsertWithoutPoliticasAsistenciaInput
+    connect?: InstitucionEducativaWhereUniqueInput
+    update?: XOR<XOR<InstitucionEducativaUpdateToOneWithWhereWithoutPoliticasAsistenciaInput, InstitucionEducativaUpdateWithoutPoliticasAsistenciaInput>, InstitucionEducativaUncheckedUpdateWithoutPoliticasAsistenciaInput>
+  }
+
+  export type NivelUpdateOneWithoutPoliticasAsistenciaNestedInput = {
+    create?: XOR<NivelCreateWithoutPoliticasAsistenciaInput, NivelUncheckedCreateWithoutPoliticasAsistenciaInput>
+    connectOrCreate?: NivelCreateOrConnectWithoutPoliticasAsistenciaInput
+    upsert?: NivelUpsertWithoutPoliticasAsistenciaInput
+    disconnect?: NivelWhereInput | boolean
+    delete?: NivelWhereInput | boolean
+    connect?: NivelWhereUniqueInput
+    update?: XOR<XOR<NivelUpdateToOneWithWhereWithoutPoliticasAsistenciaInput, NivelUpdateWithoutPoliticasAsistenciaInput>, NivelUncheckedUpdateWithoutPoliticasAsistenciaInput>
+  }
+
   export type NestedStringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -79012,6 +80794,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionCreateNestedManyWithoutInstitucionInput
     users?: UserCreateNestedManyWithoutInstitucionInput
     sedes?: SedeCreateNestedManyWithoutInstitucionInput
+    politicasAsistencia?: PoliticaAsistenciaCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUncheckedCreateWithoutCargosInput = {
@@ -79053,6 +80836,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUncheckedCreateNestedManyWithoutInstitucionInput
     users?: UserUncheckedCreateNestedManyWithoutInstitucionInput
     sedes?: SedeUncheckedCreateNestedManyWithoutInstitucionInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaCreateOrConnectWithoutCargosInput = {
@@ -79350,6 +81134,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUpdateManyWithoutInstitucionNestedInput
     users?: UserUpdateManyWithoutInstitucionNestedInput
     sedes?: SedeUpdateManyWithoutInstitucionNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaUncheckedUpdateWithoutCargosInput = {
@@ -79391,6 +81176,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUncheckedUpdateManyWithoutInstitucionNestedInput
     users?: UserUncheckedUpdateManyWithoutInstitucionNestedInput
     sedes?: SedeUncheckedUpdateManyWithoutInstitucionNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedUpdateManyWithoutInstitucionNestedInput
   }
 
   export type CargoPermisoUpsertWithWhereUniqueWithoutCargoInput = {
@@ -79555,6 +81341,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionCreateNestedManyWithoutInstitucionInput
     users?: UserCreateNestedManyWithoutInstitucionInput
     sedes?: SedeCreateNestedManyWithoutInstitucionInput
+    politicasAsistencia?: PoliticaAsistenciaCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUncheckedCreateWithoutEstadosUsuarioInput = {
@@ -79596,6 +81383,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUncheckedCreateNestedManyWithoutInstitucionInput
     users?: UserUncheckedCreateNestedManyWithoutInstitucionInput
     sedes?: SedeUncheckedCreateNestedManyWithoutInstitucionInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaCreateOrConnectWithoutEstadosUsuarioInput = {
@@ -79931,6 +81719,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUpdateManyWithoutInstitucionNestedInput
     users?: UserUpdateManyWithoutInstitucionNestedInput
     sedes?: SedeUpdateManyWithoutInstitucionNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaUncheckedUpdateWithoutEstadosUsuarioInput = {
@@ -79972,6 +81761,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUncheckedUpdateManyWithoutInstitucionNestedInput
     users?: UserUncheckedUpdateManyWithoutInstitucionNestedInput
     sedes?: SedeUncheckedUpdateManyWithoutInstitucionNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedUpdateManyWithoutInstitucionNestedInput
   }
 
   export type HistorialEstadoUsuarioUpsertWithWhereUniqueWithoutEstadoAnteriorInput = {
@@ -80129,6 +81919,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionCreateNestedManyWithoutInstitucionInput
     users?: UserCreateNestedManyWithoutInstitucionInput
     sedes?: SedeCreateNestedManyWithoutInstitucionInput
+    politicasAsistencia?: PoliticaAsistenciaCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUncheckedCreateWithoutTiposDocumentoInput = {
@@ -80170,6 +81961,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUncheckedCreateNestedManyWithoutInstitucionInput
     users?: UserUncheckedCreateNestedManyWithoutInstitucionInput
     sedes?: SedeUncheckedCreateNestedManyWithoutInstitucionInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaCreateOrConnectWithoutTiposDocumentoInput = {
@@ -80269,6 +82061,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUpdateManyWithoutInstitucionNestedInput
     users?: UserUpdateManyWithoutInstitucionNestedInput
     sedes?: SedeUpdateManyWithoutInstitucionNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaUncheckedUpdateWithoutTiposDocumentoInput = {
@@ -80310,6 +82103,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUncheckedUpdateManyWithoutInstitucionNestedInput
     users?: UserUncheckedUpdateManyWithoutInstitucionNestedInput
     sedes?: SedeUncheckedUpdateManyWithoutInstitucionNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedUpdateManyWithoutInstitucionNestedInput
   }
 
   export type EvaluacionCreateWithoutTipoEvaluacionInput = {
@@ -80399,6 +82193,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoCreateNestedManyWithoutInstitucionInput
     users?: UserCreateNestedManyWithoutInstitucionInput
     sedes?: SedeCreateNestedManyWithoutInstitucionInput
+    politicasAsistencia?: PoliticaAsistenciaCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUncheckedCreateWithoutTiposEvaluacionInput = {
@@ -80440,6 +82235,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedCreateNestedManyWithoutInstitucionInput
     users?: UserUncheckedCreateNestedManyWithoutInstitucionInput
     sedes?: SedeUncheckedCreateNestedManyWithoutInstitucionInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaCreateOrConnectWithoutTiposEvaluacionInput = {
@@ -80535,6 +82331,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUpdateManyWithoutInstitucionNestedInput
     users?: UserUpdateManyWithoutInstitucionNestedInput
     sedes?: SedeUpdateManyWithoutInstitucionNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaUncheckedUpdateWithoutTiposEvaluacionInput = {
@@ -80576,6 +82373,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedUpdateManyWithoutInstitucionNestedInput
     users?: UserUncheckedUpdateManyWithoutInstitucionNestedInput
     sedes?: SedeUncheckedUpdateManyWithoutInstitucionNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedUpdateManyWithoutInstitucionNestedInput
   }
 
   export type UserCreateWithoutCambiosEstadoRealizadosInput = {
@@ -82908,6 +84706,7 @@ export namespace Prisma {
     nivelesAcademicos?: NivelAcademicoCreateNestedManyWithoutNivelInput
     anuncios?: AnuncioCreateNestedManyWithoutNivelesInput
     eventos?: EventoCreateNestedManyWithoutNivelesInput
+    politicasAsistencia?: PoliticaAsistenciaCreateNestedManyWithoutNivelInput
   }
 
   export type NivelUncheckedCreateWithoutInstitucionInput = {
@@ -82923,6 +84722,7 @@ export namespace Prisma {
     nivelesAcademicos?: NivelAcademicoUncheckedCreateNestedManyWithoutNivelInput
     anuncios?: AnuncioUncheckedCreateNestedManyWithoutNivelesInput
     eventos?: EventoUncheckedCreateNestedManyWithoutNivelesInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedCreateNestedManyWithoutNivelInput
   }
 
   export type NivelCreateOrConnectWithoutInstitucionInput = {
@@ -82942,6 +84742,7 @@ export namespace Prisma {
     capacidad?: number
     capacidadMaxima?: number | null
     aulaAsignada?: string | null
+    color?: string | null
     anioAcademico?: number
     activo?: boolean
     turno?: $Enums.Turno
@@ -82963,6 +84764,7 @@ export namespace Prisma {
     capacidad?: number
     capacidadMaxima?: number | null
     aulaAsignada?: string | null
+    color?: string | null
     nivelId: string
     gradoId: string
     tutorId?: string | null
@@ -83423,6 +85225,42 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type PoliticaAsistenciaCreateWithoutInstitucionInput = {
+    id?: string
+    nombre: string
+    turno?: $Enums.Turno | null
+    horaEntrada?: string
+    horaSalida?: string
+    tolerancia?: number
+    activo?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    nivel?: NivelCreateNestedOneWithoutPoliticasAsistenciaInput
+  }
+
+  export type PoliticaAsistenciaUncheckedCreateWithoutInstitucionInput = {
+    id?: string
+    nombre: string
+    nivelId?: string | null
+    turno?: $Enums.Turno | null
+    horaEntrada?: string
+    horaSalida?: string
+    tolerancia?: number
+    activo?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PoliticaAsistenciaCreateOrConnectWithoutInstitucionInput = {
+    where: PoliticaAsistenciaWhereUniqueInput
+    create: XOR<PoliticaAsistenciaCreateWithoutInstitucionInput, PoliticaAsistenciaUncheckedCreateWithoutInstitucionInput>
+  }
+
+  export type PoliticaAsistenciaCreateManyInstitucionInputEnvelope = {
+    data: PoliticaAsistenciaCreateManyInstitucionInput | PoliticaAsistenciaCreateManyInstitucionInput[]
+    skipDuplicates?: boolean
+  }
+
   export type AreaCurricularUpsertWithWhereUniqueWithoutInstitucionInput = {
     where: AreaCurricularWhereUniqueInput
     update: XOR<AreaCurricularUpdateWithoutInstitucionInput, AreaCurricularUncheckedUpdateWithoutInstitucionInput>
@@ -83866,6 +85704,7 @@ export namespace Prisma {
     capacidad?: IntFilter<"NivelAcademico"> | number
     capacidadMaxima?: IntNullableFilter<"NivelAcademico"> | number | null
     aulaAsignada?: StringNullableFilter<"NivelAcademico"> | string | null
+    color?: StringNullableFilter<"NivelAcademico"> | string | null
     nivelId?: StringFilter<"NivelAcademico"> | string
     gradoId?: StringFilter<"NivelAcademico"> | string
     tutorId?: StringNullableFilter<"NivelAcademico"> | string | null
@@ -84071,6 +85910,39 @@ export namespace Prisma {
     activo?: BoolFilter<"Sede"> | boolean
     createdAt?: DateTimeFilter<"Sede"> | Date | string
     updatedAt?: DateTimeFilter<"Sede"> | Date | string
+  }
+
+  export type PoliticaAsistenciaUpsertWithWhereUniqueWithoutInstitucionInput = {
+    where: PoliticaAsistenciaWhereUniqueInput
+    update: XOR<PoliticaAsistenciaUpdateWithoutInstitucionInput, PoliticaAsistenciaUncheckedUpdateWithoutInstitucionInput>
+    create: XOR<PoliticaAsistenciaCreateWithoutInstitucionInput, PoliticaAsistenciaUncheckedCreateWithoutInstitucionInput>
+  }
+
+  export type PoliticaAsistenciaUpdateWithWhereUniqueWithoutInstitucionInput = {
+    where: PoliticaAsistenciaWhereUniqueInput
+    data: XOR<PoliticaAsistenciaUpdateWithoutInstitucionInput, PoliticaAsistenciaUncheckedUpdateWithoutInstitucionInput>
+  }
+
+  export type PoliticaAsistenciaUpdateManyWithWhereWithoutInstitucionInput = {
+    where: PoliticaAsistenciaScalarWhereInput
+    data: XOR<PoliticaAsistenciaUpdateManyMutationInput, PoliticaAsistenciaUncheckedUpdateManyWithoutInstitucionInput>
+  }
+
+  export type PoliticaAsistenciaScalarWhereInput = {
+    AND?: PoliticaAsistenciaScalarWhereInput | PoliticaAsistenciaScalarWhereInput[]
+    OR?: PoliticaAsistenciaScalarWhereInput[]
+    NOT?: PoliticaAsistenciaScalarWhereInput | PoliticaAsistenciaScalarWhereInput[]
+    id?: StringFilter<"PoliticaAsistencia"> | string
+    nombre?: StringFilter<"PoliticaAsistencia"> | string
+    nivelId?: StringNullableFilter<"PoliticaAsistencia"> | string | null
+    turno?: EnumTurnoNullableFilter<"PoliticaAsistencia"> | $Enums.Turno | null
+    horaEntrada?: StringFilter<"PoliticaAsistencia"> | string
+    horaSalida?: StringFilter<"PoliticaAsistencia"> | string
+    tolerancia?: IntFilter<"PoliticaAsistencia"> | number
+    activo?: BoolFilter<"PoliticaAsistencia"> | boolean
+    institucionId?: StringFilter<"PoliticaAsistencia"> | string
+    createdAt?: DateTimeFilter<"PoliticaAsistencia"> | Date | string
+    updatedAt?: DateTimeFilter<"PoliticaAsistencia"> | Date | string
   }
 
   export type AccountCreateWithoutUserInput = {
@@ -84742,6 +86614,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionCreateNestedManyWithoutInstitucionInput
     users?: UserCreateNestedManyWithoutInstitucionInput
     sedes?: SedeCreateNestedManyWithoutInstitucionInput
+    politicasAsistencia?: PoliticaAsistenciaCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUncheckedCreateWithoutDirectorInput = {
@@ -84783,6 +86656,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUncheckedCreateNestedManyWithoutInstitucionInput
     users?: UserUncheckedCreateNestedManyWithoutInstitucionInput
     sedes?: SedeUncheckedCreateNestedManyWithoutInstitucionInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaCreateOrConnectWithoutDirectorInput = {
@@ -84865,6 +86739,7 @@ export namespace Prisma {
     capacidad?: number
     capacidadMaxima?: number | null
     aulaAsignada?: string | null
+    color?: string | null
     anioAcademico?: number
     activo?: boolean
     turno?: $Enums.Turno
@@ -84886,6 +86761,7 @@ export namespace Prisma {
     capacidad?: number
     capacidadMaxima?: number | null
     aulaAsignada?: string | null
+    color?: string | null
     nivelId: string
     gradoId: string
     institucionId: string
@@ -85202,6 +87078,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionCreateNestedManyWithoutInstitucionInput
     sedes?: SedeCreateNestedManyWithoutInstitucionInput
+    politicasAsistencia?: PoliticaAsistenciaCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUncheckedCreateWithoutUsersInput = {
@@ -85243,6 +87120,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionUncheckedCreateNestedManyWithoutInstitucionInput
     sedes?: SedeUncheckedCreateNestedManyWithoutInstitucionInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaCreateOrConnectWithoutUsersInput = {
@@ -85257,6 +87135,7 @@ export namespace Prisma {
     capacidad?: number
     capacidadMaxima?: number | null
     aulaAsignada?: string | null
+    color?: string | null
     anioAcademico?: number
     activo?: boolean
     turno?: $Enums.Turno
@@ -85278,6 +87157,7 @@ export namespace Prisma {
     capacidad?: number
     capacidadMaxima?: number | null
     aulaAsignada?: string | null
+    color?: string | null
     nivelId: string
     gradoId: string
     tutorId?: string | null
@@ -85848,6 +87728,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUpdateManyWithoutInstitucionNestedInput
     users?: UserUpdateManyWithoutInstitucionNestedInput
     sedes?: SedeUpdateManyWithoutInstitucionNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaUncheckedUpdateWithoutDirectorInput = {
@@ -85889,6 +87770,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUncheckedUpdateManyWithoutInstitucionNestedInput
     users?: UserUncheckedUpdateManyWithoutInstitucionNestedInput
     sedes?: SedeUncheckedUpdateManyWithoutInstitucionNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedUpdateManyWithoutInstitucionNestedInput
   }
 
   export type MatriculaUpsertWithWhereUniqueWithoutEstudianteInput = {
@@ -86257,6 +88139,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUpdateManyWithoutInstitucionNestedInput
     sedes?: SedeUpdateManyWithoutInstitucionNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaUncheckedUpdateWithoutUsersInput = {
@@ -86298,6 +88181,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUncheckedUpdateManyWithoutInstitucionNestedInput
     sedes?: SedeUncheckedUpdateManyWithoutInstitucionNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedUpdateManyWithoutInstitucionNestedInput
   }
 
   export type NivelAcademicoUpsertWithoutStudentsInput = {
@@ -86318,6 +88202,7 @@ export namespace Prisma {
     capacidad?: IntFieldUpdateOperationsInput | number
     capacidadMaxima?: NullableIntFieldUpdateOperationsInput | number | null
     aulaAsignada?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     anioAcademico?: IntFieldUpdateOperationsInput | number
     activo?: BoolFieldUpdateOperationsInput | boolean
     turno?: EnumTurnoFieldUpdateOperationsInput | $Enums.Turno
@@ -86339,6 +88224,7 @@ export namespace Prisma {
     capacidad?: IntFieldUpdateOperationsInput | number
     capacidadMaxima?: NullableIntFieldUpdateOperationsInput | number | null
     aulaAsignada?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     nivelId?: StringFieldUpdateOperationsInput | string
     gradoId?: StringFieldUpdateOperationsInput | string
     tutorId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -88330,6 +90216,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionCreateNestedManyWithoutInstitucionInput
     users?: UserCreateNestedManyWithoutInstitucionInput
     sedes?: SedeCreateNestedManyWithoutInstitucionInput
+    politicasAsistencia?: PoliticaAsistenciaCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUncheckedCreateWithoutNivelesInput = {
@@ -88371,6 +90258,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUncheckedCreateNestedManyWithoutInstitucionInput
     users?: UserUncheckedCreateNestedManyWithoutInstitucionInput
     sedes?: SedeUncheckedCreateNestedManyWithoutInstitucionInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaCreateOrConnectWithoutNivelesInput = {
@@ -88385,6 +90273,7 @@ export namespace Prisma {
     capacidad?: number
     capacidadMaxima?: number | null
     aulaAsignada?: string | null
+    color?: string | null
     anioAcademico?: number
     activo?: boolean
     turno?: $Enums.Turno
@@ -88406,6 +90295,7 @@ export namespace Prisma {
     capacidad?: number
     capacidadMaxima?: number | null
     aulaAsignada?: string | null
+    color?: string | null
     gradoId: string
     tutorId?: string | null
     institucionId: string
@@ -88536,6 +90426,42 @@ export namespace Prisma {
     create: XOR<EventoCreateWithoutNivelesInput, EventoUncheckedCreateWithoutNivelesInput>
   }
 
+  export type PoliticaAsistenciaCreateWithoutNivelInput = {
+    id?: string
+    nombre: string
+    turno?: $Enums.Turno | null
+    horaEntrada?: string
+    horaSalida?: string
+    tolerancia?: number
+    activo?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    institucion: InstitucionEducativaCreateNestedOneWithoutPoliticasAsistenciaInput
+  }
+
+  export type PoliticaAsistenciaUncheckedCreateWithoutNivelInput = {
+    id?: string
+    nombre: string
+    turno?: $Enums.Turno | null
+    horaEntrada?: string
+    horaSalida?: string
+    tolerancia?: number
+    activo?: boolean
+    institucionId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PoliticaAsistenciaCreateOrConnectWithoutNivelInput = {
+    where: PoliticaAsistenciaWhereUniqueInput
+    create: XOR<PoliticaAsistenciaCreateWithoutNivelInput, PoliticaAsistenciaUncheckedCreateWithoutNivelInput>
+  }
+
+  export type PoliticaAsistenciaCreateManyNivelInputEnvelope = {
+    data: PoliticaAsistenciaCreateManyNivelInput | PoliticaAsistenciaCreateManyNivelInput[]
+    skipDuplicates?: boolean
+  }
+
   export type AreaCurricularUpsertWithWhereUniqueWithoutNivelInput = {
     where: AreaCurricularWhereUniqueInput
     update: XOR<AreaCurricularUpdateWithoutNivelInput, AreaCurricularUncheckedUpdateWithoutNivelInput>
@@ -88649,6 +90575,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUpdateManyWithoutInstitucionNestedInput
     users?: UserUpdateManyWithoutInstitucionNestedInput
     sedes?: SedeUpdateManyWithoutInstitucionNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaUncheckedUpdateWithoutNivelesInput = {
@@ -88690,6 +90617,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUncheckedUpdateManyWithoutInstitucionNestedInput
     users?: UserUncheckedUpdateManyWithoutInstitucionNestedInput
     sedes?: SedeUncheckedUpdateManyWithoutInstitucionNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedUpdateManyWithoutInstitucionNestedInput
   }
 
   export type NivelAcademicoUpsertWithWhereUniqueWithoutNivelInput = {
@@ -88738,6 +90666,22 @@ export namespace Prisma {
   export type EventoUpdateManyWithWhereWithoutNivelesInput = {
     where: EventoScalarWhereInput
     data: XOR<EventoUpdateManyMutationInput, EventoUncheckedUpdateManyWithoutNivelesInput>
+  }
+
+  export type PoliticaAsistenciaUpsertWithWhereUniqueWithoutNivelInput = {
+    where: PoliticaAsistenciaWhereUniqueInput
+    update: XOR<PoliticaAsistenciaUpdateWithoutNivelInput, PoliticaAsistenciaUncheckedUpdateWithoutNivelInput>
+    create: XOR<PoliticaAsistenciaCreateWithoutNivelInput, PoliticaAsistenciaUncheckedCreateWithoutNivelInput>
+  }
+
+  export type PoliticaAsistenciaUpdateWithWhereUniqueWithoutNivelInput = {
+    where: PoliticaAsistenciaWhereUniqueInput
+    data: XOR<PoliticaAsistenciaUpdateWithoutNivelInput, PoliticaAsistenciaUncheckedUpdateWithoutNivelInput>
+  }
+
+  export type PoliticaAsistenciaUpdateManyWithWhereWithoutNivelInput = {
+    where: PoliticaAsistenciaScalarWhereInput
+    data: XOR<PoliticaAsistenciaUpdateManyMutationInput, PoliticaAsistenciaUncheckedUpdateManyWithoutNivelInput>
   }
 
   export type CursoCreateWithoutGradoInput = {
@@ -88811,6 +90755,7 @@ export namespace Prisma {
     nivelesAcademicos?: NivelAcademicoCreateNestedManyWithoutNivelInput
     anuncios?: AnuncioCreateNestedManyWithoutNivelesInput
     eventos?: EventoCreateNestedManyWithoutNivelesInput
+    politicasAsistencia?: PoliticaAsistenciaCreateNestedManyWithoutNivelInput
   }
 
   export type NivelUncheckedCreateWithoutGradosInput = {
@@ -88826,6 +90771,7 @@ export namespace Prisma {
     nivelesAcademicos?: NivelAcademicoUncheckedCreateNestedManyWithoutNivelInput
     anuncios?: AnuncioUncheckedCreateNestedManyWithoutNivelesInput
     eventos?: EventoUncheckedCreateNestedManyWithoutNivelesInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedCreateNestedManyWithoutNivelInput
   }
 
   export type NivelCreateOrConnectWithoutGradosInput = {
@@ -88840,6 +90786,7 @@ export namespace Prisma {
     capacidad?: number
     capacidadMaxima?: number | null
     aulaAsignada?: string | null
+    color?: string | null
     anioAcademico?: number
     activo?: boolean
     turno?: $Enums.Turno
@@ -88861,6 +90808,7 @@ export namespace Prisma {
     capacidad?: number
     capacidadMaxima?: number | null
     aulaAsignada?: string | null
+    color?: string | null
     nivelId: string
     tutorId?: string | null
     institucionId: string
@@ -89031,6 +90979,7 @@ export namespace Prisma {
     nivelesAcademicos?: NivelAcademicoUpdateManyWithoutNivelNestedInput
     anuncios?: AnuncioUpdateManyWithoutNivelesNestedInput
     eventos?: EventoUpdateManyWithoutNivelesNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUpdateManyWithoutNivelNestedInput
   }
 
   export type NivelUncheckedUpdateWithoutGradosInput = {
@@ -89046,6 +90995,7 @@ export namespace Prisma {
     nivelesAcademicos?: NivelAcademicoUncheckedUpdateManyWithoutNivelNestedInput
     anuncios?: AnuncioUncheckedUpdateManyWithoutNivelesNestedInput
     eventos?: EventoUncheckedUpdateManyWithoutNivelesNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedUpdateManyWithoutNivelNestedInput
   }
 
   export type NivelAcademicoUpsertWithWhereUniqueWithoutGradoInput = {
@@ -89270,6 +91220,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionCreateNestedManyWithoutInstitucionInput
     users?: UserCreateNestedManyWithoutInstitucionInput
     sedes?: SedeCreateNestedManyWithoutInstitucionInput
+    politicasAsistencia?: PoliticaAsistenciaCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUncheckedCreateWithoutNivelesAcademicosInput = {
@@ -89311,6 +91262,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUncheckedCreateNestedManyWithoutInstitucionInput
     users?: UserUncheckedCreateNestedManyWithoutInstitucionInput
     sedes?: SedeUncheckedCreateNestedManyWithoutInstitucionInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaCreateOrConnectWithoutNivelesAcademicosInput = {
@@ -89331,6 +91283,7 @@ export namespace Prisma {
     institucion: InstitucionEducativaCreateNestedOneWithoutNivelesInput
     anuncios?: AnuncioCreateNestedManyWithoutNivelesInput
     eventos?: EventoCreateNestedManyWithoutNivelesInput
+    politicasAsistencia?: PoliticaAsistenciaCreateNestedManyWithoutNivelInput
   }
 
   export type NivelUncheckedCreateWithoutNivelesAcademicosInput = {
@@ -89346,6 +91299,7 @@ export namespace Prisma {
     grados?: GradoUncheckedCreateNestedManyWithoutNivelInput
     anuncios?: AnuncioUncheckedCreateNestedManyWithoutNivelesInput
     eventos?: EventoUncheckedCreateNestedManyWithoutNivelesInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedCreateNestedManyWithoutNivelInput
   }
 
   export type NivelCreateOrConnectWithoutNivelesAcademicosInput = {
@@ -89948,6 +91902,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUpdateManyWithoutInstitucionNestedInput
     users?: UserUpdateManyWithoutInstitucionNestedInput
     sedes?: SedeUpdateManyWithoutInstitucionNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaUncheckedUpdateWithoutNivelesAcademicosInput = {
@@ -89989,6 +91944,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUncheckedUpdateManyWithoutInstitucionNestedInput
     users?: UserUncheckedUpdateManyWithoutInstitucionNestedInput
     sedes?: SedeUncheckedUpdateManyWithoutInstitucionNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedUpdateManyWithoutInstitucionNestedInput
   }
 
   export type NivelUpsertWithoutNivelesAcademicosInput = {
@@ -90015,6 +91971,7 @@ export namespace Prisma {
     institucion?: InstitucionEducativaUpdateOneRequiredWithoutNivelesNestedInput
     anuncios?: AnuncioUpdateManyWithoutNivelesNestedInput
     eventos?: EventoUpdateManyWithoutNivelesNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUpdateManyWithoutNivelNestedInput
   }
 
   export type NivelUncheckedUpdateWithoutNivelesAcademicosInput = {
@@ -90030,6 +91987,7 @@ export namespace Prisma {
     grados?: GradoUncheckedUpdateManyWithoutNivelNestedInput
     anuncios?: AnuncioUncheckedUpdateManyWithoutNivelesNestedInput
     eventos?: EventoUncheckedUpdateManyWithoutNivelesNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedUpdateManyWithoutNivelNestedInput
   }
 
   export type SedeUpsertWithoutNivelesAcademicosInput = {
@@ -90353,6 +92311,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionCreateNestedManyWithoutInstitucionInput
     users?: UserCreateNestedManyWithoutInstitucionInput
+    politicasAsistencia?: PoliticaAsistenciaCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUncheckedCreateWithoutSedesInput = {
@@ -90394,6 +92353,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionUncheckedCreateNestedManyWithoutInstitucionInput
     users?: UserUncheckedCreateNestedManyWithoutInstitucionInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaCreateOrConnectWithoutSedesInput = {
@@ -90408,6 +92368,7 @@ export namespace Prisma {
     capacidad?: number
     capacidadMaxima?: number | null
     aulaAsignada?: string | null
+    color?: string | null
     anioAcademico?: number
     activo?: boolean
     turno?: $Enums.Turno
@@ -90429,6 +92390,7 @@ export namespace Prisma {
     capacidad?: number
     capacidadMaxima?: number | null
     aulaAsignada?: string | null
+    color?: string | null
     nivelId: string
     gradoId: string
     tutorId?: string | null
@@ -90503,6 +92465,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUpdateManyWithoutInstitucionNestedInput
     users?: UserUpdateManyWithoutInstitucionNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaUncheckedUpdateWithoutSedesInput = {
@@ -90544,6 +92507,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUncheckedUpdateManyWithoutInstitucionNestedInput
     users?: UserUncheckedUpdateManyWithoutInstitucionNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedUpdateManyWithoutInstitucionNestedInput
   }
 
   export type NivelAcademicoUpsertWithWhereUniqueWithoutSedeInput = {
@@ -90649,6 +92613,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionCreateNestedManyWithoutInstitucionInput
     users?: UserCreateNestedManyWithoutInstitucionInput
     sedes?: SedeCreateNestedManyWithoutInstitucionInput
+    politicasAsistencia?: PoliticaAsistenciaCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUncheckedCreateWithoutPeriodosInput = {
@@ -90690,6 +92655,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUncheckedCreateNestedManyWithoutInstitucionInput
     users?: UserUncheckedCreateNestedManyWithoutInstitucionInput
     sedes?: SedeUncheckedCreateNestedManyWithoutInstitucionInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaCreateOrConnectWithoutPeriodosInput = {
@@ -90763,6 +92729,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUpdateManyWithoutInstitucionNestedInput
     users?: UserUpdateManyWithoutInstitucionNestedInput
     sedes?: SedeUpdateManyWithoutInstitucionNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaUncheckedUpdateWithoutPeriodosInput = {
@@ -90804,6 +92771,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUncheckedUpdateManyWithoutInstitucionNestedInput
     users?: UserUncheckedUpdateManyWithoutInstitucionNestedInput
     sedes?: SedeUncheckedUpdateManyWithoutInstitucionNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaCreateWithoutAreasCurricularesInput = {
@@ -90845,6 +92813,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionCreateNestedManyWithoutInstitucionInput
     users?: UserCreateNestedManyWithoutInstitucionInput
     sedes?: SedeCreateNestedManyWithoutInstitucionInput
+    politicasAsistencia?: PoliticaAsistenciaCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUncheckedCreateWithoutAreasCurricularesInput = {
@@ -90886,6 +92855,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUncheckedCreateNestedManyWithoutInstitucionInput
     users?: UserUncheckedCreateNestedManyWithoutInstitucionInput
     sedes?: SedeUncheckedCreateNestedManyWithoutInstitucionInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaCreateOrConnectWithoutAreasCurricularesInput = {
@@ -90906,6 +92876,7 @@ export namespace Prisma {
     nivelesAcademicos?: NivelAcademicoCreateNestedManyWithoutNivelInput
     anuncios?: AnuncioCreateNestedManyWithoutNivelesInput
     eventos?: EventoCreateNestedManyWithoutNivelesInput
+    politicasAsistencia?: PoliticaAsistenciaCreateNestedManyWithoutNivelInput
   }
 
   export type NivelUncheckedCreateWithoutAreasCurricularesInput = {
@@ -90921,6 +92892,7 @@ export namespace Prisma {
     nivelesAcademicos?: NivelAcademicoUncheckedCreateNestedManyWithoutNivelInput
     anuncios?: AnuncioUncheckedCreateNestedManyWithoutNivelesInput
     eventos?: EventoUncheckedCreateNestedManyWithoutNivelesInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedCreateNestedManyWithoutNivelInput
   }
 
   export type NivelCreateOrConnectWithoutAreasCurricularesInput = {
@@ -91147,6 +93119,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUpdateManyWithoutInstitucionNestedInput
     users?: UserUpdateManyWithoutInstitucionNestedInput
     sedes?: SedeUpdateManyWithoutInstitucionNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaUncheckedUpdateWithoutAreasCurricularesInput = {
@@ -91188,6 +93161,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUncheckedUpdateManyWithoutInstitucionNestedInput
     users?: UserUncheckedUpdateManyWithoutInstitucionNestedInput
     sedes?: SedeUncheckedUpdateManyWithoutInstitucionNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedUpdateManyWithoutInstitucionNestedInput
   }
 
   export type NivelUpsertWithoutAreasCurricularesInput = {
@@ -91214,6 +93188,7 @@ export namespace Prisma {
     nivelesAcademicos?: NivelAcademicoUpdateManyWithoutNivelNestedInput
     anuncios?: AnuncioUpdateManyWithoutNivelesNestedInput
     eventos?: EventoUpdateManyWithoutNivelesNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUpdateManyWithoutNivelNestedInput
   }
 
   export type NivelUncheckedUpdateWithoutAreasCurricularesInput = {
@@ -91229,6 +93204,7 @@ export namespace Prisma {
     nivelesAcademicos?: NivelAcademicoUncheckedUpdateManyWithoutNivelNestedInput
     anuncios?: AnuncioUncheckedUpdateManyWithoutNivelesNestedInput
     eventos?: EventoUncheckedUpdateManyWithoutNivelesNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedUpdateManyWithoutNivelNestedInput
   }
 
   export type AreaCurricularUpsertWithoutSubAreasInput = {
@@ -91487,6 +93463,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionCreateNestedManyWithoutInstitucionInput
     users?: UserCreateNestedManyWithoutInstitucionInput
     sedes?: SedeCreateNestedManyWithoutInstitucionInput
+    politicasAsistencia?: PoliticaAsistenciaCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUncheckedCreateWithoutCursosInput = {
@@ -91528,6 +93505,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUncheckedCreateNestedManyWithoutInstitucionInput
     users?: UserUncheckedCreateNestedManyWithoutInstitucionInput
     sedes?: SedeUncheckedCreateNestedManyWithoutInstitucionInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaCreateOrConnectWithoutCursosInput = {
@@ -91542,6 +93520,7 @@ export namespace Prisma {
     capacidad?: number
     capacidadMaxima?: number | null
     aulaAsignada?: string | null
+    color?: string | null
     anioAcademico?: number
     activo?: boolean
     turno?: $Enums.Turno
@@ -91563,6 +93542,7 @@ export namespace Prisma {
     capacidad?: number
     capacidadMaxima?: number | null
     aulaAsignada?: string | null
+    color?: string | null
     nivelId: string
     gradoId: string
     tutorId?: string | null
@@ -91595,6 +93575,7 @@ export namespace Prisma {
     nivelesAcademicos?: NivelAcademicoCreateNestedManyWithoutNivelInput
     anuncios?: AnuncioCreateNestedManyWithoutNivelesInput
     eventos?: EventoCreateNestedManyWithoutNivelesInput
+    politicasAsistencia?: PoliticaAsistenciaCreateNestedManyWithoutNivelInput
   }
 
   export type NivelUncheckedCreateWithoutCursosInput = {
@@ -91610,6 +93591,7 @@ export namespace Prisma {
     nivelesAcademicos?: NivelAcademicoUncheckedCreateNestedManyWithoutNivelInput
     anuncios?: AnuncioUncheckedCreateNestedManyWithoutNivelesInput
     eventos?: EventoUncheckedCreateNestedManyWithoutNivelesInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedCreateNestedManyWithoutNivelInput
   }
 
   export type NivelCreateOrConnectWithoutCursosInput = {
@@ -92122,6 +94104,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUpdateManyWithoutInstitucionNestedInput
     users?: UserUpdateManyWithoutInstitucionNestedInput
     sedes?: SedeUpdateManyWithoutInstitucionNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaUncheckedUpdateWithoutCursosInput = {
@@ -92163,6 +94146,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUncheckedUpdateManyWithoutInstitucionNestedInput
     users?: UserUncheckedUpdateManyWithoutInstitucionNestedInput
     sedes?: SedeUncheckedUpdateManyWithoutInstitucionNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedUpdateManyWithoutInstitucionNestedInput
   }
 
   export type NivelAcademicoUpsertWithoutCursosInput = {
@@ -92183,6 +94167,7 @@ export namespace Prisma {
     capacidad?: IntFieldUpdateOperationsInput | number
     capacidadMaxima?: NullableIntFieldUpdateOperationsInput | number | null
     aulaAsignada?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     anioAcademico?: IntFieldUpdateOperationsInput | number
     activo?: BoolFieldUpdateOperationsInput | boolean
     turno?: EnumTurnoFieldUpdateOperationsInput | $Enums.Turno
@@ -92204,6 +94189,7 @@ export namespace Prisma {
     capacidad?: IntFieldUpdateOperationsInput | number
     capacidadMaxima?: NullableIntFieldUpdateOperationsInput | number | null
     aulaAsignada?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     nivelId?: StringFieldUpdateOperationsInput | string
     gradoId?: StringFieldUpdateOperationsInput | string
     tutorId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -92242,6 +94228,7 @@ export namespace Prisma {
     nivelesAcademicos?: NivelAcademicoUpdateManyWithoutNivelNestedInput
     anuncios?: AnuncioUpdateManyWithoutNivelesNestedInput
     eventos?: EventoUpdateManyWithoutNivelesNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUpdateManyWithoutNivelNestedInput
   }
 
   export type NivelUncheckedUpdateWithoutCursosInput = {
@@ -92257,6 +94244,7 @@ export namespace Prisma {
     nivelesAcademicos?: NivelAcademicoUncheckedUpdateManyWithoutNivelNestedInput
     anuncios?: AnuncioUncheckedUpdateManyWithoutNivelesNestedInput
     eventos?: EventoUncheckedUpdateManyWithoutNivelesNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedUpdateManyWithoutNivelNestedInput
   }
 
   export type UserUpsertWithoutCursosImpartidosInput = {
@@ -92886,6 +94874,7 @@ export namespace Prisma {
     capacidad?: number
     capacidadMaxima?: number | null
     aulaAsignada?: string | null
+    color?: string | null
     anioAcademico?: number
     activo?: boolean
     turno?: $Enums.Turno
@@ -92907,6 +94896,7 @@ export namespace Prisma {
     capacidad?: number
     capacidadMaxima?: number | null
     aulaAsignada?: string | null
+    color?: string | null
     nivelId: string
     gradoId: string
     tutorId?: string | null
@@ -93189,6 +95179,7 @@ export namespace Prisma {
     capacidad?: IntFieldUpdateOperationsInput | number
     capacidadMaxima?: NullableIntFieldUpdateOperationsInput | number | null
     aulaAsignada?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     anioAcademico?: IntFieldUpdateOperationsInput | number
     activo?: BoolFieldUpdateOperationsInput | boolean
     turno?: EnumTurnoFieldUpdateOperationsInput | $Enums.Turno
@@ -93210,6 +95201,7 @@ export namespace Prisma {
     capacidad?: IntFieldUpdateOperationsInput | number
     capacidadMaxima?: NullableIntFieldUpdateOperationsInput | number | null
     aulaAsignada?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     nivelId?: StringFieldUpdateOperationsInput | string
     gradoId?: StringFieldUpdateOperationsInput | string
     tutorId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -97565,6 +99557,7 @@ export namespace Prisma {
     institucion: InstitucionEducativaCreateNestedOneWithoutNivelesInput
     nivelesAcademicos?: NivelAcademicoCreateNestedManyWithoutNivelInput
     eventos?: EventoCreateNestedManyWithoutNivelesInput
+    politicasAsistencia?: PoliticaAsistenciaCreateNestedManyWithoutNivelInput
   }
 
   export type NivelUncheckedCreateWithoutAnunciosInput = {
@@ -97580,6 +99573,7 @@ export namespace Prisma {
     grados?: GradoUncheckedCreateNestedManyWithoutNivelInput
     nivelesAcademicos?: NivelAcademicoUncheckedCreateNestedManyWithoutNivelInput
     eventos?: EventoUncheckedCreateNestedManyWithoutNivelesInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedCreateNestedManyWithoutNivelInput
   }
 
   export type NivelCreateOrConnectWithoutAnunciosInput = {
@@ -98099,6 +100093,7 @@ export namespace Prisma {
     institucion: InstitucionEducativaCreateNestedOneWithoutNivelesInput
     nivelesAcademicos?: NivelAcademicoCreateNestedManyWithoutNivelInput
     anuncios?: AnuncioCreateNestedManyWithoutNivelesInput
+    politicasAsistencia?: PoliticaAsistenciaCreateNestedManyWithoutNivelInput
   }
 
   export type NivelUncheckedCreateWithoutEventosInput = {
@@ -98114,6 +100109,7 @@ export namespace Prisma {
     grados?: GradoUncheckedCreateNestedManyWithoutNivelInput
     nivelesAcademicos?: NivelAcademicoUncheckedCreateNestedManyWithoutNivelInput
     anuncios?: AnuncioUncheckedCreateNestedManyWithoutNivelesInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedCreateNestedManyWithoutNivelInput
   }
 
   export type NivelCreateOrConnectWithoutEventosInput = {
@@ -98692,6 +100688,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionCreateNestedManyWithoutInstitucionInput
     users?: UserCreateNestedManyWithoutInstitucionInput
     sedes?: SedeCreateNestedManyWithoutInstitucionInput
+    politicasAsistencia?: PoliticaAsistenciaCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUncheckedCreateWithoutProspectosInput = {
@@ -98733,6 +100730,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUncheckedCreateNestedManyWithoutInstitucionInput
     users?: UserUncheckedCreateNestedManyWithoutInstitucionInput
     sedes?: SedeUncheckedCreateNestedManyWithoutInstitucionInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaCreateOrConnectWithoutProspectosInput = {
@@ -98821,6 +100819,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUpdateManyWithoutInstitucionNestedInput
     users?: UserUpdateManyWithoutInstitucionNestedInput
     sedes?: SedeUpdateManyWithoutInstitucionNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaUncheckedUpdateWithoutProspectosInput = {
@@ -98862,6 +100861,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUncheckedUpdateManyWithoutInstitucionNestedInput
     users?: UserUncheckedUpdateManyWithoutInstitucionNestedInput
     sedes?: SedeUncheckedUpdateManyWithoutInstitucionNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedUpdateManyWithoutInstitucionNestedInput
   }
 
   export type UserCreateWithoutAdmisionesAutorizadasInput = {
@@ -100811,6 +102811,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionCreateNestedManyWithoutInstitucionInput
     users?: UserCreateNestedManyWithoutInstitucionInput
     sedes?: SedeCreateNestedManyWithoutInstitucionInput
+    politicasAsistencia?: PoliticaAsistenciaCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUncheckedCreateWithoutConceptosPagoInput = {
@@ -100852,6 +102853,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUncheckedCreateNestedManyWithoutInstitucionInput
     users?: UserUncheckedCreateNestedManyWithoutInstitucionInput
     sedes?: SedeUncheckedCreateNestedManyWithoutInstitucionInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaCreateOrConnectWithoutConceptosPagoInput = {
@@ -100947,6 +102949,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUpdateManyWithoutInstitucionNestedInput
     users?: UserUpdateManyWithoutInstitucionNestedInput
     sedes?: SedeUpdateManyWithoutInstitucionNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaUncheckedUpdateWithoutConceptosPagoInput = {
@@ -100988,6 +102991,7 @@ export namespace Prisma {
     tiposEvaluacion?: TipoEvaluacionUncheckedUpdateManyWithoutInstitucionNestedInput
     users?: UserUncheckedUpdateManyWithoutInstitucionNestedInput
     sedes?: SedeUncheckedUpdateManyWithoutInstitucionNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedUpdateManyWithoutInstitucionNestedInput
   }
 
   export type CronogramaPagoUpsertWithWhereUniqueWithoutConceptoInput = {
@@ -102564,6 +104568,270 @@ export namespace Prisma {
     comprobantesEnviados?: ComprobantePagoUncheckedUpdateManyWithoutPadreNestedInput
   }
 
+  export type InstitucionEducativaCreateWithoutPoliticasAsistenciaInput = {
+    id?: string
+    codigoModular: string
+    nombreInstitucion: string
+    nombreComercial?: string | null
+    tipoGestion: $Enums.TipoGestion
+    modalidad: $Enums.Modalidad
+    ugel: string
+    dre: string
+    ubigeo: string
+    direccion: string
+    distrito: string
+    provincia: string
+    departamento: string
+    telefono?: string | null
+    email?: string | null
+    sitioWeb?: string | null
+    resolucionCreacion?: string | null
+    fechaCreacion?: Date | string | null
+    resolucionActual?: string | null
+    logo?: string | null
+    cicloEscolarActual?: number
+    fechaInicioClases: Date | string
+    fechaFinClases: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    areasCurriculares?: AreaCurricularCreateNestedManyWithoutInstitucionInput
+    cargos?: CargoCreateNestedManyWithoutInstitucionInput
+    conceptosPago?: ConceptoPagoCreateNestedManyWithoutInstitucionInput
+    cursos?: CursoCreateNestedManyWithoutInstitucionInput
+    estadosUsuario?: EstadoUsuarioCreateNestedManyWithoutInstitucionInput
+    director?: UserCreateNestedOneWithoutInstitucionDirectorInput
+    niveles?: NivelCreateNestedManyWithoutInstitucionInput
+    nivelesAcademicos?: NivelAcademicoCreateNestedManyWithoutInstitucionInput
+    periodos?: PeriodoAcademicoCreateNestedManyWithoutInstitucionInput
+    prospectos?: ProspectoCreateNestedManyWithoutInstitucionInput
+    tiposDocumento?: TipoDocumentoCreateNestedManyWithoutInstitucionInput
+    tiposEvaluacion?: TipoEvaluacionCreateNestedManyWithoutInstitucionInput
+    users?: UserCreateNestedManyWithoutInstitucionInput
+    sedes?: SedeCreateNestedManyWithoutInstitucionInput
+  }
+
+  export type InstitucionEducativaUncheckedCreateWithoutPoliticasAsistenciaInput = {
+    id?: string
+    codigoModular: string
+    nombreInstitucion: string
+    nombreComercial?: string | null
+    tipoGestion: $Enums.TipoGestion
+    modalidad: $Enums.Modalidad
+    ugel: string
+    dre: string
+    ubigeo: string
+    direccion: string
+    distrito: string
+    provincia: string
+    departamento: string
+    telefono?: string | null
+    email?: string | null
+    sitioWeb?: string | null
+    resolucionCreacion?: string | null
+    fechaCreacion?: Date | string | null
+    resolucionActual?: string | null
+    logo?: string | null
+    directorId?: string | null
+    cicloEscolarActual?: number
+    fechaInicioClases: Date | string
+    fechaFinClases: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    areasCurriculares?: AreaCurricularUncheckedCreateNestedManyWithoutInstitucionInput
+    cargos?: CargoUncheckedCreateNestedManyWithoutInstitucionInput
+    conceptosPago?: ConceptoPagoUncheckedCreateNestedManyWithoutInstitucionInput
+    cursos?: CursoUncheckedCreateNestedManyWithoutInstitucionInput
+    estadosUsuario?: EstadoUsuarioUncheckedCreateNestedManyWithoutInstitucionInput
+    niveles?: NivelUncheckedCreateNestedManyWithoutInstitucionInput
+    nivelesAcademicos?: NivelAcademicoUncheckedCreateNestedManyWithoutInstitucionInput
+    periodos?: PeriodoAcademicoUncheckedCreateNestedManyWithoutInstitucionInput
+    prospectos?: ProspectoUncheckedCreateNestedManyWithoutInstitucionInput
+    tiposDocumento?: TipoDocumentoUncheckedCreateNestedManyWithoutInstitucionInput
+    tiposEvaluacion?: TipoEvaluacionUncheckedCreateNestedManyWithoutInstitucionInput
+    users?: UserUncheckedCreateNestedManyWithoutInstitucionInput
+    sedes?: SedeUncheckedCreateNestedManyWithoutInstitucionInput
+  }
+
+  export type InstitucionEducativaCreateOrConnectWithoutPoliticasAsistenciaInput = {
+    where: InstitucionEducativaWhereUniqueInput
+    create: XOR<InstitucionEducativaCreateWithoutPoliticasAsistenciaInput, InstitucionEducativaUncheckedCreateWithoutPoliticasAsistenciaInput>
+  }
+
+  export type NivelCreateWithoutPoliticasAsistenciaInput = {
+    id?: string
+    nombre: string
+    descripcion?: string | null
+    activo?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    areasCurriculares?: AreaCurricularCreateNestedManyWithoutNivelInput
+    cursos?: CursoCreateNestedManyWithoutNivelInput
+    grados?: GradoCreateNestedManyWithoutNivelInput
+    institucion: InstitucionEducativaCreateNestedOneWithoutNivelesInput
+    nivelesAcademicos?: NivelAcademicoCreateNestedManyWithoutNivelInput
+    anuncios?: AnuncioCreateNestedManyWithoutNivelesInput
+    eventos?: EventoCreateNestedManyWithoutNivelesInput
+  }
+
+  export type NivelUncheckedCreateWithoutPoliticasAsistenciaInput = {
+    id?: string
+    nombre: string
+    descripcion?: string | null
+    institucionId: string
+    activo?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    areasCurriculares?: AreaCurricularUncheckedCreateNestedManyWithoutNivelInput
+    cursos?: CursoUncheckedCreateNestedManyWithoutNivelInput
+    grados?: GradoUncheckedCreateNestedManyWithoutNivelInput
+    nivelesAcademicos?: NivelAcademicoUncheckedCreateNestedManyWithoutNivelInput
+    anuncios?: AnuncioUncheckedCreateNestedManyWithoutNivelesInput
+    eventos?: EventoUncheckedCreateNestedManyWithoutNivelesInput
+  }
+
+  export type NivelCreateOrConnectWithoutPoliticasAsistenciaInput = {
+    where: NivelWhereUniqueInput
+    create: XOR<NivelCreateWithoutPoliticasAsistenciaInput, NivelUncheckedCreateWithoutPoliticasAsistenciaInput>
+  }
+
+  export type InstitucionEducativaUpsertWithoutPoliticasAsistenciaInput = {
+    update: XOR<InstitucionEducativaUpdateWithoutPoliticasAsistenciaInput, InstitucionEducativaUncheckedUpdateWithoutPoliticasAsistenciaInput>
+    create: XOR<InstitucionEducativaCreateWithoutPoliticasAsistenciaInput, InstitucionEducativaUncheckedCreateWithoutPoliticasAsistenciaInput>
+    where?: InstitucionEducativaWhereInput
+  }
+
+  export type InstitucionEducativaUpdateToOneWithWhereWithoutPoliticasAsistenciaInput = {
+    where?: InstitucionEducativaWhereInput
+    data: XOR<InstitucionEducativaUpdateWithoutPoliticasAsistenciaInput, InstitucionEducativaUncheckedUpdateWithoutPoliticasAsistenciaInput>
+  }
+
+  export type InstitucionEducativaUpdateWithoutPoliticasAsistenciaInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    codigoModular?: StringFieldUpdateOperationsInput | string
+    nombreInstitucion?: StringFieldUpdateOperationsInput | string
+    nombreComercial?: NullableStringFieldUpdateOperationsInput | string | null
+    tipoGestion?: EnumTipoGestionFieldUpdateOperationsInput | $Enums.TipoGestion
+    modalidad?: EnumModalidadFieldUpdateOperationsInput | $Enums.Modalidad
+    ugel?: StringFieldUpdateOperationsInput | string
+    dre?: StringFieldUpdateOperationsInput | string
+    ubigeo?: StringFieldUpdateOperationsInput | string
+    direccion?: StringFieldUpdateOperationsInput | string
+    distrito?: StringFieldUpdateOperationsInput | string
+    provincia?: StringFieldUpdateOperationsInput | string
+    departamento?: StringFieldUpdateOperationsInput | string
+    telefono?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    sitioWeb?: NullableStringFieldUpdateOperationsInput | string | null
+    resolucionCreacion?: NullableStringFieldUpdateOperationsInput | string | null
+    fechaCreacion?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resolucionActual?: NullableStringFieldUpdateOperationsInput | string | null
+    logo?: NullableStringFieldUpdateOperationsInput | string | null
+    cicloEscolarActual?: IntFieldUpdateOperationsInput | number
+    fechaInicioClases?: DateTimeFieldUpdateOperationsInput | Date | string
+    fechaFinClases?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    areasCurriculares?: AreaCurricularUpdateManyWithoutInstitucionNestedInput
+    cargos?: CargoUpdateManyWithoutInstitucionNestedInput
+    conceptosPago?: ConceptoPagoUpdateManyWithoutInstitucionNestedInput
+    cursos?: CursoUpdateManyWithoutInstitucionNestedInput
+    estadosUsuario?: EstadoUsuarioUpdateManyWithoutInstitucionNestedInput
+    director?: UserUpdateOneWithoutInstitucionDirectorNestedInput
+    niveles?: NivelUpdateManyWithoutInstitucionNestedInput
+    nivelesAcademicos?: NivelAcademicoUpdateManyWithoutInstitucionNestedInput
+    periodos?: PeriodoAcademicoUpdateManyWithoutInstitucionNestedInput
+    prospectos?: ProspectoUpdateManyWithoutInstitucionNestedInput
+    tiposDocumento?: TipoDocumentoUpdateManyWithoutInstitucionNestedInput
+    tiposEvaluacion?: TipoEvaluacionUpdateManyWithoutInstitucionNestedInput
+    users?: UserUpdateManyWithoutInstitucionNestedInput
+    sedes?: SedeUpdateManyWithoutInstitucionNestedInput
+  }
+
+  export type InstitucionEducativaUncheckedUpdateWithoutPoliticasAsistenciaInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    codigoModular?: StringFieldUpdateOperationsInput | string
+    nombreInstitucion?: StringFieldUpdateOperationsInput | string
+    nombreComercial?: NullableStringFieldUpdateOperationsInput | string | null
+    tipoGestion?: EnumTipoGestionFieldUpdateOperationsInput | $Enums.TipoGestion
+    modalidad?: EnumModalidadFieldUpdateOperationsInput | $Enums.Modalidad
+    ugel?: StringFieldUpdateOperationsInput | string
+    dre?: StringFieldUpdateOperationsInput | string
+    ubigeo?: StringFieldUpdateOperationsInput | string
+    direccion?: StringFieldUpdateOperationsInput | string
+    distrito?: StringFieldUpdateOperationsInput | string
+    provincia?: StringFieldUpdateOperationsInput | string
+    departamento?: StringFieldUpdateOperationsInput | string
+    telefono?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    sitioWeb?: NullableStringFieldUpdateOperationsInput | string | null
+    resolucionCreacion?: NullableStringFieldUpdateOperationsInput | string | null
+    fechaCreacion?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resolucionActual?: NullableStringFieldUpdateOperationsInput | string | null
+    logo?: NullableStringFieldUpdateOperationsInput | string | null
+    directorId?: NullableStringFieldUpdateOperationsInput | string | null
+    cicloEscolarActual?: IntFieldUpdateOperationsInput | number
+    fechaInicioClases?: DateTimeFieldUpdateOperationsInput | Date | string
+    fechaFinClases?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    areasCurriculares?: AreaCurricularUncheckedUpdateManyWithoutInstitucionNestedInput
+    cargos?: CargoUncheckedUpdateManyWithoutInstitucionNestedInput
+    conceptosPago?: ConceptoPagoUncheckedUpdateManyWithoutInstitucionNestedInput
+    cursos?: CursoUncheckedUpdateManyWithoutInstitucionNestedInput
+    estadosUsuario?: EstadoUsuarioUncheckedUpdateManyWithoutInstitucionNestedInput
+    niveles?: NivelUncheckedUpdateManyWithoutInstitucionNestedInput
+    nivelesAcademicos?: NivelAcademicoUncheckedUpdateManyWithoutInstitucionNestedInput
+    periodos?: PeriodoAcademicoUncheckedUpdateManyWithoutInstitucionNestedInput
+    prospectos?: ProspectoUncheckedUpdateManyWithoutInstitucionNestedInput
+    tiposDocumento?: TipoDocumentoUncheckedUpdateManyWithoutInstitucionNestedInput
+    tiposEvaluacion?: TipoEvaluacionUncheckedUpdateManyWithoutInstitucionNestedInput
+    users?: UserUncheckedUpdateManyWithoutInstitucionNestedInput
+    sedes?: SedeUncheckedUpdateManyWithoutInstitucionNestedInput
+  }
+
+  export type NivelUpsertWithoutPoliticasAsistenciaInput = {
+    update: XOR<NivelUpdateWithoutPoliticasAsistenciaInput, NivelUncheckedUpdateWithoutPoliticasAsistenciaInput>
+    create: XOR<NivelCreateWithoutPoliticasAsistenciaInput, NivelUncheckedCreateWithoutPoliticasAsistenciaInput>
+    where?: NivelWhereInput
+  }
+
+  export type NivelUpdateToOneWithWhereWithoutPoliticasAsistenciaInput = {
+    where?: NivelWhereInput
+    data: XOR<NivelUpdateWithoutPoliticasAsistenciaInput, NivelUncheckedUpdateWithoutPoliticasAsistenciaInput>
+  }
+
+  export type NivelUpdateWithoutPoliticasAsistenciaInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    nombre?: StringFieldUpdateOperationsInput | string
+    descripcion?: NullableStringFieldUpdateOperationsInput | string | null
+    activo?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    areasCurriculares?: AreaCurricularUpdateManyWithoutNivelNestedInput
+    cursos?: CursoUpdateManyWithoutNivelNestedInput
+    grados?: GradoUpdateManyWithoutNivelNestedInput
+    institucion?: InstitucionEducativaUpdateOneRequiredWithoutNivelesNestedInput
+    nivelesAcademicos?: NivelAcademicoUpdateManyWithoutNivelNestedInput
+    anuncios?: AnuncioUpdateManyWithoutNivelesNestedInput
+    eventos?: EventoUpdateManyWithoutNivelesNestedInput
+  }
+
+  export type NivelUncheckedUpdateWithoutPoliticasAsistenciaInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    nombre?: StringFieldUpdateOperationsInput | string
+    descripcion?: NullableStringFieldUpdateOperationsInput | string | null
+    institucionId?: StringFieldUpdateOperationsInput | string
+    activo?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    areasCurriculares?: AreaCurricularUncheckedUpdateManyWithoutNivelNestedInput
+    cursos?: CursoUncheckedUpdateManyWithoutNivelNestedInput
+    grados?: GradoUncheckedUpdateManyWithoutNivelNestedInput
+    nivelesAcademicos?: NivelAcademicoUncheckedUpdateManyWithoutNivelNestedInput
+    anuncios?: AnuncioUncheckedUpdateManyWithoutNivelesNestedInput
+    eventos?: EventoUncheckedUpdateManyWithoutNivelesNestedInput
+  }
+
   export type CargoPermisoCreateManyCargoInput = {
     id?: string
     permisoId: string
@@ -103719,6 +105987,7 @@ export namespace Prisma {
     capacidad?: number
     capacidadMaxima?: number | null
     aulaAsignada?: string | null
+    color?: string | null
     nivelId: string
     gradoId: string
     tutorId?: string | null
@@ -103881,6 +106150,19 @@ export namespace Prisma {
     esPrincipal?: boolean
     lat?: number | null
     lng?: number | null
+    activo?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PoliticaAsistenciaCreateManyInstitucionInput = {
+    id?: string
+    nombre: string
+    nivelId?: string | null
+    turno?: $Enums.Turno | null
+    horaEntrada?: string
+    horaSalida?: string
+    tolerancia?: number
     activo?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -104134,6 +106416,7 @@ export namespace Prisma {
     nivelesAcademicos?: NivelAcademicoUpdateManyWithoutNivelNestedInput
     anuncios?: AnuncioUpdateManyWithoutNivelesNestedInput
     eventos?: EventoUpdateManyWithoutNivelesNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUpdateManyWithoutNivelNestedInput
   }
 
   export type NivelUncheckedUpdateWithoutInstitucionInput = {
@@ -104149,6 +106432,7 @@ export namespace Prisma {
     nivelesAcademicos?: NivelAcademicoUncheckedUpdateManyWithoutNivelNestedInput
     anuncios?: AnuncioUncheckedUpdateManyWithoutNivelesNestedInput
     eventos?: EventoUncheckedUpdateManyWithoutNivelesNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedUpdateManyWithoutNivelNestedInput
   }
 
   export type NivelUncheckedUpdateManyWithoutInstitucionInput = {
@@ -104167,6 +106451,7 @@ export namespace Prisma {
     capacidad?: IntFieldUpdateOperationsInput | number
     capacidadMaxima?: NullableIntFieldUpdateOperationsInput | number | null
     aulaAsignada?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     anioAcademico?: IntFieldUpdateOperationsInput | number
     activo?: BoolFieldUpdateOperationsInput | boolean
     turno?: EnumTurnoFieldUpdateOperationsInput | $Enums.Turno
@@ -104188,6 +106473,7 @@ export namespace Prisma {
     capacidad?: IntFieldUpdateOperationsInput | number
     capacidadMaxima?: NullableIntFieldUpdateOperationsInput | number | null
     aulaAsignada?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     nivelId?: StringFieldUpdateOperationsInput | string
     gradoId?: StringFieldUpdateOperationsInput | string
     tutorId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -104209,6 +106495,7 @@ export namespace Prisma {
     capacidad?: IntFieldUpdateOperationsInput | number
     capacidadMaxima?: NullableIntFieldUpdateOperationsInput | number | null
     aulaAsignada?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     nivelId?: StringFieldUpdateOperationsInput | string
     gradoId?: StringFieldUpdateOperationsInput | string
     tutorId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -104752,6 +107039,45 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type PoliticaAsistenciaUpdateWithoutInstitucionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    nombre?: StringFieldUpdateOperationsInput | string
+    turno?: NullableEnumTurnoFieldUpdateOperationsInput | $Enums.Turno | null
+    horaEntrada?: StringFieldUpdateOperationsInput | string
+    horaSalida?: StringFieldUpdateOperationsInput | string
+    tolerancia?: IntFieldUpdateOperationsInput | number
+    activo?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    nivel?: NivelUpdateOneWithoutPoliticasAsistenciaNestedInput
+  }
+
+  export type PoliticaAsistenciaUncheckedUpdateWithoutInstitucionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    nombre?: StringFieldUpdateOperationsInput | string
+    nivelId?: NullableStringFieldUpdateOperationsInput | string | null
+    turno?: NullableEnumTurnoFieldUpdateOperationsInput | $Enums.Turno | null
+    horaEntrada?: StringFieldUpdateOperationsInput | string
+    horaSalida?: StringFieldUpdateOperationsInput | string
+    tolerancia?: IntFieldUpdateOperationsInput | number
+    activo?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PoliticaAsistenciaUncheckedUpdateManyWithoutInstitucionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    nombre?: StringFieldUpdateOperationsInput | string
+    nivelId?: NullableStringFieldUpdateOperationsInput | string | null
+    turno?: NullableEnumTurnoFieldUpdateOperationsInput | $Enums.Turno | null
+    horaEntrada?: StringFieldUpdateOperationsInput | string
+    horaSalida?: StringFieldUpdateOperationsInput | string
+    tolerancia?: IntFieldUpdateOperationsInput | number
+    activo?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type AccountCreateManyUserInput = {
     id?: string
     type: string
@@ -105011,6 +107337,7 @@ export namespace Prisma {
     capacidad?: number
     capacidadMaxima?: number | null
     aulaAsignada?: string | null
+    color?: string | null
     nivelId: string
     gradoId: string
     institucionId: string
@@ -105909,6 +108236,7 @@ export namespace Prisma {
     capacidad?: IntFieldUpdateOperationsInput | number
     capacidadMaxima?: NullableIntFieldUpdateOperationsInput | number | null
     aulaAsignada?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     anioAcademico?: IntFieldUpdateOperationsInput | number
     activo?: BoolFieldUpdateOperationsInput | boolean
     turno?: EnumTurnoFieldUpdateOperationsInput | $Enums.Turno
@@ -105930,6 +108258,7 @@ export namespace Prisma {
     capacidad?: IntFieldUpdateOperationsInput | number
     capacidadMaxima?: NullableIntFieldUpdateOperationsInput | number | null
     aulaAsignada?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     nivelId?: StringFieldUpdateOperationsInput | string
     gradoId?: StringFieldUpdateOperationsInput | string
     institucionId?: StringFieldUpdateOperationsInput | string
@@ -105951,6 +108280,7 @@ export namespace Prisma {
     capacidad?: IntFieldUpdateOperationsInput | number
     capacidadMaxima?: NullableIntFieldUpdateOperationsInput | number | null
     aulaAsignada?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     nivelId?: StringFieldUpdateOperationsInput | string
     gradoId?: StringFieldUpdateOperationsInput | string
     institucionId?: StringFieldUpdateOperationsInput | string
@@ -106313,6 +108643,7 @@ export namespace Prisma {
     capacidad?: number
     capacidadMaxima?: number | null
     aulaAsignada?: string | null
+    color?: string | null
     gradoId: string
     tutorId?: string | null
     institucionId: string
@@ -106320,6 +108651,19 @@ export namespace Prisma {
     anioAcademico?: number
     activo?: boolean
     turno?: $Enums.Turno
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type PoliticaAsistenciaCreateManyNivelInput = {
+    id?: string
+    nombre: string
+    turno?: $Enums.Turno | null
+    horaEntrada?: string
+    horaSalida?: string
+    tolerancia?: number
+    activo?: boolean
+    institucionId: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -106487,6 +108831,7 @@ export namespace Prisma {
     capacidad?: IntFieldUpdateOperationsInput | number
     capacidadMaxima?: NullableIntFieldUpdateOperationsInput | number | null
     aulaAsignada?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     anioAcademico?: IntFieldUpdateOperationsInput | number
     activo?: BoolFieldUpdateOperationsInput | boolean
     turno?: EnumTurnoFieldUpdateOperationsInput | $Enums.Turno
@@ -106508,6 +108853,7 @@ export namespace Prisma {
     capacidad?: IntFieldUpdateOperationsInput | number
     capacidadMaxima?: NullableIntFieldUpdateOperationsInput | number | null
     aulaAsignada?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     gradoId?: StringFieldUpdateOperationsInput | string
     tutorId?: NullableStringFieldUpdateOperationsInput | string | null
     institucionId?: StringFieldUpdateOperationsInput | string
@@ -106529,6 +108875,7 @@ export namespace Prisma {
     capacidad?: IntFieldUpdateOperationsInput | number
     capacidadMaxima?: NullableIntFieldUpdateOperationsInput | number | null
     aulaAsignada?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     gradoId?: StringFieldUpdateOperationsInput | string
     tutorId?: NullableStringFieldUpdateOperationsInput | string | null
     institucionId?: StringFieldUpdateOperationsInput | string
@@ -106682,6 +109029,45 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type PoliticaAsistenciaUpdateWithoutNivelInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    nombre?: StringFieldUpdateOperationsInput | string
+    turno?: NullableEnumTurnoFieldUpdateOperationsInput | $Enums.Turno | null
+    horaEntrada?: StringFieldUpdateOperationsInput | string
+    horaSalida?: StringFieldUpdateOperationsInput | string
+    tolerancia?: IntFieldUpdateOperationsInput | number
+    activo?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    institucion?: InstitucionEducativaUpdateOneRequiredWithoutPoliticasAsistenciaNestedInput
+  }
+
+  export type PoliticaAsistenciaUncheckedUpdateWithoutNivelInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    nombre?: StringFieldUpdateOperationsInput | string
+    turno?: NullableEnumTurnoFieldUpdateOperationsInput | $Enums.Turno | null
+    horaEntrada?: StringFieldUpdateOperationsInput | string
+    horaSalida?: StringFieldUpdateOperationsInput | string
+    tolerancia?: IntFieldUpdateOperationsInput | number
+    activo?: BoolFieldUpdateOperationsInput | boolean
+    institucionId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PoliticaAsistenciaUncheckedUpdateManyWithoutNivelInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    nombre?: StringFieldUpdateOperationsInput | string
+    turno?: NullableEnumTurnoFieldUpdateOperationsInput | $Enums.Turno | null
+    horaEntrada?: StringFieldUpdateOperationsInput | string
+    horaSalida?: StringFieldUpdateOperationsInput | string
+    tolerancia?: IntFieldUpdateOperationsInput | number
+    activo?: BoolFieldUpdateOperationsInput | boolean
+    institucionId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type CursoCreateManyGradoInput = {
     id?: string
     nombre: string
@@ -106708,6 +109094,7 @@ export namespace Prisma {
     capacidad?: number
     capacidadMaxima?: number | null
     aulaAsignada?: string | null
+    color?: string | null
     nivelId: string
     tutorId?: string | null
     institucionId: string
@@ -106793,6 +109180,7 @@ export namespace Prisma {
     capacidad?: IntFieldUpdateOperationsInput | number
     capacidadMaxima?: NullableIntFieldUpdateOperationsInput | number | null
     aulaAsignada?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     anioAcademico?: IntFieldUpdateOperationsInput | number
     activo?: BoolFieldUpdateOperationsInput | boolean
     turno?: EnumTurnoFieldUpdateOperationsInput | $Enums.Turno
@@ -106814,6 +109202,7 @@ export namespace Prisma {
     capacidad?: IntFieldUpdateOperationsInput | number
     capacidadMaxima?: NullableIntFieldUpdateOperationsInput | number | null
     aulaAsignada?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     nivelId?: StringFieldUpdateOperationsInput | string
     tutorId?: NullableStringFieldUpdateOperationsInput | string | null
     institucionId?: StringFieldUpdateOperationsInput | string
@@ -106835,6 +109224,7 @@ export namespace Prisma {
     capacidad?: IntFieldUpdateOperationsInput | number
     capacidadMaxima?: NullableIntFieldUpdateOperationsInput | number | null
     aulaAsignada?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     nivelId?: StringFieldUpdateOperationsInput | string
     tutorId?: NullableStringFieldUpdateOperationsInput | string | null
     institucionId?: StringFieldUpdateOperationsInput | string
@@ -107505,6 +109895,7 @@ export namespace Prisma {
     capacidad?: number
     capacidadMaxima?: number | null
     aulaAsignada?: string | null
+    color?: string | null
     nivelId: string
     gradoId: string
     tutorId?: string | null
@@ -107523,6 +109914,7 @@ export namespace Prisma {
     capacidad?: IntFieldUpdateOperationsInput | number
     capacidadMaxima?: NullableIntFieldUpdateOperationsInput | number | null
     aulaAsignada?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     anioAcademico?: IntFieldUpdateOperationsInput | number
     activo?: BoolFieldUpdateOperationsInput | boolean
     turno?: EnumTurnoFieldUpdateOperationsInput | $Enums.Turno
@@ -107544,6 +109936,7 @@ export namespace Prisma {
     capacidad?: IntFieldUpdateOperationsInput | number
     capacidadMaxima?: NullableIntFieldUpdateOperationsInput | number | null
     aulaAsignada?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     nivelId?: StringFieldUpdateOperationsInput | string
     gradoId?: StringFieldUpdateOperationsInput | string
     tutorId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -107565,6 +109958,7 @@ export namespace Prisma {
     capacidad?: IntFieldUpdateOperationsInput | number
     capacidadMaxima?: NullableIntFieldUpdateOperationsInput | number | null
     aulaAsignada?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     nivelId?: StringFieldUpdateOperationsInput | string
     gradoId?: StringFieldUpdateOperationsInput | string
     tutorId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -108233,6 +110627,7 @@ export namespace Prisma {
     institucion?: InstitucionEducativaUpdateOneRequiredWithoutNivelesNestedInput
     nivelesAcademicos?: NivelAcademicoUpdateManyWithoutNivelNestedInput
     eventos?: EventoUpdateManyWithoutNivelesNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUpdateManyWithoutNivelNestedInput
   }
 
   export type NivelUncheckedUpdateWithoutAnunciosInput = {
@@ -108248,6 +110643,7 @@ export namespace Prisma {
     grados?: GradoUncheckedUpdateManyWithoutNivelNestedInput
     nivelesAcademicos?: NivelAcademicoUncheckedUpdateManyWithoutNivelNestedInput
     eventos?: EventoUncheckedUpdateManyWithoutNivelesNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedUpdateManyWithoutNivelNestedInput
   }
 
   export type NivelUncheckedUpdateManyWithoutAnunciosInput = {
@@ -108315,6 +110711,7 @@ export namespace Prisma {
     institucion?: InstitucionEducativaUpdateOneRequiredWithoutNivelesNestedInput
     nivelesAcademicos?: NivelAcademicoUpdateManyWithoutNivelNestedInput
     anuncios?: AnuncioUpdateManyWithoutNivelesNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUpdateManyWithoutNivelNestedInput
   }
 
   export type NivelUncheckedUpdateWithoutEventosInput = {
@@ -108330,6 +110727,7 @@ export namespace Prisma {
     grados?: GradoUncheckedUpdateManyWithoutNivelNestedInput
     nivelesAcademicos?: NivelAcademicoUncheckedUpdateManyWithoutNivelNestedInput
     anuncios?: AnuncioUncheckedUpdateManyWithoutNivelesNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedUpdateManyWithoutNivelNestedInput
   }
 
   export type NivelUncheckedUpdateManyWithoutEventosInput = {

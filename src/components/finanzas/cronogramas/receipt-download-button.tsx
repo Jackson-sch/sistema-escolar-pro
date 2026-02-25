@@ -1,7 +1,9 @@
 import { IconFileDownload } from "@tabler/icons-react";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { ComprobantePDF } from "@/components/finanzas/cronogramas/comprobante-pdf";
+import { ComprobanteTicketPDF } from "@/components/finanzas/cronogramas/comprobante-ticket-pdf";
 import { Button } from "@/components/ui/button";
+import type { FormatoComprobante } from "@/lib/comprobante-constants";
 
 interface ReceiptDownloadButtonProps {
   paymentData: {
@@ -30,17 +32,22 @@ interface ReceiptDownloadButtonProps {
     telefono?: string;
     ruc?: string;
   };
+  formato?: FormatoComprobante;
 }
 
 export const ReceiptDownloadButton = ({
   paymentData,
   estudiante,
   institucion,
+  formato = "A4",
 }: ReceiptDownloadButtonProps) => {
+  const PdfComponent =
+    formato === "TICKET" ? ComprobanteTicketPDF : ComprobantePDF;
+
   return (
     <PDFDownloadLink
       document={
-        <ComprobantePDF
+        <PdfComponent
           pago={paymentData}
           estudiante={estudiante}
           institucion={institucion}

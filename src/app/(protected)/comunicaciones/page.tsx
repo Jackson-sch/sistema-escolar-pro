@@ -11,7 +11,13 @@ import { AddAnnouncementButton } from "@/components/comunicaciones/anuncios/add-
 import { AddEventButton } from "@/components/comunicaciones/eventos/add-event-button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+import { auth } from "@/auth";
+
 export default async function ComunicacionesPage() {
+  const session = await auth();
+  const isProfessor = session?.user?.role === "profesor";
+  const profesorId = session?.user?.id;
+
   const [{ data: anuncios = [] }, { data: eventos = [] }] = await Promise.all([
     getAnunciosAction(),
     getEventosAction(),
@@ -30,7 +36,10 @@ export default async function ComunicacionesPage() {
         </div>
         <div className="flex gap-2">
           <AddEventButton />
-          <AddAnnouncementButton />
+          <AddAnnouncementButton
+            isProfessor={isProfessor}
+            profesorId={profesorId}
+          />
         </div>
       </div>
 

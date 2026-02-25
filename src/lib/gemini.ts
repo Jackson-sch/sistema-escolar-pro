@@ -1,12 +1,12 @@
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { getSystemVariable } from './settings';
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { getSystemVariable } from "./settings";
 
 /**
  * Obtiene el cliente de Google AI configurado con la API Key dinámica.
  */
 export async function getGoogleClient() {
-  const apiKey = await getSystemVariable('GOOGLE_GENERATIVE_AI_API_KEY');
-  
+  const apiKey = await getSystemVariable("GOOGLE_GENERATIVE_AI_API_KEY");
+
   return createGoogleGenerativeAI({
     apiKey: apiKey,
   });
@@ -17,7 +17,10 @@ export async function getGoogleClient() {
  */
 export async function getGeminiModel() {
   const client = await getGoogleClient();
-  const modelName = await getSystemVariable('GEMINI_MODEL', 'gemini-3-flash-preview');
-  
+  const modelName = await getSystemVariable(
+    "GEMINI_MODEL",
+    "gemini-3-flash-preview",
+  );
+
   return client(modelName);
 }

@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { getInstitucionByIdAction } from "@/actions/institucion";
 
 export default async function PortalLayout({
   children,
@@ -34,6 +35,11 @@ export default async function PortalLayout({
     redirect("/cambiar-password");
   }
 
+  const institucionRes = await getInstitucionByIdAction(
+    session.user.institucionId || undefined,
+  );
+  const institucionData = institucionRes.success;
+
   return (
     <div className="[--header-height:calc(var(--spacing)*14)]">
       <SidebarProvider>
@@ -47,9 +53,11 @@ export default async function PortalLayout({
           userApellidoMaterno={
             user?.apellidoMaterno || session.user.apellidoMaterno || undefined
           }
+          institucionName={institucionData?.nombreInstitucion}
+          institucionLogo={institucionData?.logo}
         />
         <SidebarInset>
-          <SiteHeader />
+          <SiteHeader institucionName="Portal Padres" />
           <main className="flex flex-1 flex-col gap-4 p-4 relative ">
             {children}
           </main>

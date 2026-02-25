@@ -1,10 +1,5 @@
 import {
-  IconUsers,
   IconCloudDownload,
-  IconSchool,
-  IconCertificate,
-  IconArrowRight,
-  IconBook2,
 } from "@tabler/icons-react";
 import {
   getEnrollmentsAction,
@@ -16,8 +11,6 @@ import { columns } from "@/components/gestion/matriculas/components/columns";
 import { EnrollmentTable } from "@/components/gestion/matriculas/management/enrollment-table";
 import { AddEnrollmentButton } from "@/components/gestion/matriculas/components/add-enrollment-button";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import Stats from "@/components/gestion/matriculas/components/stats";
 import {
   Tooltip,

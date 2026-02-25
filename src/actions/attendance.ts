@@ -1,25 +1,28 @@
-"use server"
+"use server";
 
-import prisma from "@/lib/prisma"
-import { revalidatePath } from "next/cache"
+import prisma from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
 
 /**
  * Obtiene la asistencia de una sección para una fecha específica
  */
-export async function getAsistenciaAction(nivelAcademicoId: string, fecha: Date) {
+export async function getAsistenciaAction(
+  nivelAcademicoId: string,
+  fecha: Date,
+) {
   try {
     // Normalizar fecha a inicio del día
-    const startOfDay = new Date(fecha)
-    startOfDay.setHours(0, 0, 0, 0)
+    const startOfDay = new Date(fecha);
+    startOfDay.setHours(0, 0, 0, 0);
 
-    const endOfDay = new Date(fecha)
-    endOfDay.setHours(23, 59, 59, 999)
+    const endOfDay = new Date(fecha);
+    endOfDay.setHours(23, 59, 59, 999);
 
     // Buscar si la sección tiene cursos asignados para obtener el cursoId
     // Nota: El esquema requiere un cursoId, así que usaremos el primero que encontremos
     const curso = await prisma.curso.findFirst({
-      where: { nivelAcademicoId }
-    })
+      where: { nivelAcademicoId },
+    });
 
     // Obtener alumnos matriculados en esta sección
     const alumnos = await prisma.user.findMany({
@@ -28,9 +31,9 @@ export async function getAsistenciaAction(nivelAcademicoId: string, fecha: Date)
         nivelAcademicoId,
         matriculas: {
           some: {
-            estado: "activo"
-          }
-        }
+            estado: "activo",
+          },
+        },
       },
       select: {
         id: true,
@@ -42,44 +45,46 @@ export async function getAsistenciaAction(nivelAcademicoId: string, fecha: Date)
           where: {
             fecha: {
               gte: startOfDay,
-              lte: endOfDay
+              lte: endOfDay,
             },
-            ...(curso?.id ? { cursoId: curso.id } : {})
-          }
-        }
+            ...(curso?.id ? { cursoId: curso.id } : {}),
+          },
+        },
       },
       orderBy: {
-        apellidoPaterno: "asc"
-      }
-    })
+        apellidoPaterno: "asc",
+      },
+    });
 
-    return { data: JSON.parse(JSON.stringify(alumnos)), cursoId: curso?.id }
+    return { data: JSON.parse(JSON.stringify(alumnos)), cursoId: curso?.id };
   } catch (error) {
-    console.error("Error fetching asistencia:", error)
-    return { error: "No se pudo obtener el registro de asistencia" }
+    console.error("Error fetching asistencia:", error);
+    return { error: "No se pudo obtener el registro de asistencia" };
   }
 }
 
 /**
  * Registra o actualiza la asistencia masiva
  */
-export async function upsertAsistenciaAction(asistencias: {
-  estudianteId: string,
-  cursoId: string,
-  fecha: Date,
-  presente: boolean,
-  tardanza: boolean,
-  justificada: boolean,
-  justificacion?: string
-}[]) {
+export async function upsertAsistenciaAction(
+  asistencias: {
+    estudianteId: string;
+    cursoId: string;
+    fecha: Date;
+    presente: boolean;
+    tardanza: boolean;
+    justificada: boolean;
+    justificacion?: string;
+  }[],
+) {
   try {
     const results = await Promise.all(
       asistencias.map(async (asist) => {
-        const startOfDay = new Date(asist.fecha)
-        startOfDay.setHours(0, 0, 0, 0)
+        const startOfDay = new Date(asist.fecha);
+        startOfDay.setHours(0, 0, 0, 0);
 
-        const endOfDay = new Date(asist.fecha)
-        endOfDay.setHours(23, 59, 59, 999)
+        const endOfDay = new Date(asist.fecha);
+        endOfDay.setHours(23, 59, 59, 999);
 
         // Buscar si ya existe para ese día y curso
         const existing = await prisma.asistencia.findFirst({
@@ -88,10 +93,10 @@ export async function upsertAsistenciaAction(asistencias: {
             cursoId: asist.cursoId,
             fecha: {
               gte: startOfDay,
-              lte: endOfDay
-            }
-          }
-        })
+              lte: endOfDay,
+            },
+          },
+        });
 
         if (existing) {
           return prisma.asistencia.update({
@@ -100,9 +105,9 @@ export async function upsertAsistenciaAction(asistencias: {
               presente: asist.presente,
               tardanza: asist.tardanza,
               justificada: asist.justificada,
-              justificacion: asist.justificacion
-            }
-          })
+              justificacion: asist.justificacion,
+            },
+          });
         } else {
           return prisma.asistencia.create({
             data: {
@@ -112,18 +117,24 @@ export async function upsertAsistenciaAction(asistencias: {
               presente: asist.presente,
               tardanza: asist.tardanza,
               justificada: asist.justificada,
-              justificacion: asist.justificacion
-            }
-          })
+              justificacion: asist.justificacion,
+            },
+          });
         }
-      })
-    )
+      }),
+    );
 
-    revalidatePath("/asistencia")
-    return { success: "Asistencia guardada correctamente", data: JSON.parse(JSON.stringify(results)) }
+    revalidatePath("/asistencia");
+    return {
+      success: "Asistencia guardada correctamente",
+      data: JSON.parse(JSON.stringify(results)),
+    };
   } catch (error) {
-    console.error("Error upserting asistencia:", error)
-    return { error: "No se pudo guardar la asistencia (verifique si la sección tiene cursos asignados)" }
+    console.error("Error upserting asistencia:", error);
+    return {
+      error:
+        "No se pudo guardar la asistencia (verifique si la sección tiene cursos asignados)",
+    };
   }
 }
 
@@ -132,37 +143,41 @@ export async function upsertAsistenciaAction(asistencias: {
  */
 export async function getAsistenciaStatsAction(nivelAcademicoId?: string) {
   try {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
     const total = await prisma.asistencia.count({
       where: {
         fecha: { gte: today },
-        ...(nivelAcademicoId ? { curso: { nivelAcademicoId } } : {})
-      }
-    })
+        ...(nivelAcademicoId ? { curso: { nivelAcademicoId } } : {}),
+      },
+    });
 
     const presentes = await prisma.asistencia.count({
       where: {
         presente: true,
         fecha: { gte: today },
-        ...(nivelAcademicoId ? { curso: { nivelAcademicoId } } : {})
-      }
-    })
+        ...(nivelAcademicoId ? { curso: { nivelAcademicoId } } : {}),
+      },
+    });
 
-    return { data: { total, presentes, ausentes: total - presentes } }
+    return { data: { total, presentes, ausentes: total - presentes } };
   } catch (error) {
-    return { error: "Fallo al obtener estadísticas" }
+    return { error: "Fallo al obtener estadísticas" };
   }
 }
 
 /**
  * Obtiene el reporte mensual de asistencia para una sección
  */
-export async function getMonthlyAsistenciaReportAction(seccionId: string, mes: number, anio: number) {
+export async function getMonthlyAsistenciaReportAction(
+  seccionId: string,
+  mes: number,
+  anio: number,
+) {
   try {
-    const startDate = new Date(anio, mes, 1)
-    const endDate = new Date(anio, mes + 1, 0, 23, 59, 59, 999)
+    const startDate = new Date(anio, mes, 1);
+    const endDate = new Date(anio, mes + 1, 0, 23, 59, 59, 999);
 
     // Obtener alumnos matriculados en esta sección
     const alumnos = await prisma.user.findMany({
@@ -171,9 +186,9 @@ export async function getMonthlyAsistenciaReportAction(seccionId: string, mes: n
         nivelAcademicoId: seccionId,
         matriculas: {
           some: {
-            estado: "activo"
-          }
-        }
+            estado: "activo",
+          },
+        },
       },
       select: {
         id: true,
@@ -184,56 +199,59 @@ export async function getMonthlyAsistenciaReportAction(seccionId: string, mes: n
           where: {
             fecha: {
               gte: startDate,
-              lte: endDate
-            }
+              lte: endDate,
+            },
           },
           select: {
             fecha: true,
             presente: true,
             tardanza: true,
-            justificada: true
-          }
-        }
+            justificada: true,
+          },
+        },
       },
       orderBy: {
-        apellidoPaterno: "asc"
-      }
-    })
+        apellidoPaterno: "asc",
+      },
+    });
 
     return {
       data: JSON.parse(JSON.stringify(alumnos)),
       meta: {
         totalDias: endDate.getDate(),
         mes,
-        anio
-      }
-    }
+        anio,
+      },
+    };
   } catch (error) {
-    console.error("Error fetching monthly report:", error)
-    return { error: "No se pudo obtener el reporte mensual" }
+    console.error("Error fetching monthly report:", error);
+    return { error: "No se pudo obtener el reporte mensual" };
   }
 }
 
 /**
  * Obtiene alumnos con alertas de inasistencia (falla mayor al 15%)
  */
-export async function getAttendanceAlertsAction(anioAcademico: number, seccionId?: string) {
+export async function getAttendanceAlertsAction(
+  anioAcademico: number,
+  seccionId?: string,
+) {
   try {
-    const threshold = 0.15 // 15% de inasistencia
+    const threshold = 0.15; // 15% de inasistencia
 
     // Obtener total de días lectivos registrados hasta hoy en el año
     const totalDiasRes = await prisma.asistencia.groupBy({
-      by: ['fecha'],
+      by: ["fecha"],
       where: {
         fecha: {
           gte: new Date(anioAcademico, 0, 1),
-          lte: new Date(anioAcademico + 1, 0, 0)
-        }
-      }
-    })
-    const totalDiasYear = totalDiasRes.length
+          lte: new Date(anioAcademico + 1, 0, 0),
+        },
+      },
+    });
+    const totalDiasYear = totalDiasRes.length;
 
-    if (totalDiasYear === 0) return { data: [], meta: { totalDias: 0 } }
+    if (totalDiasYear === 0) return { data: [], meta: { totalDias: 0 } };
 
     const alumnos = await prisma.user.findMany({
       where: {
@@ -242,46 +260,51 @@ export async function getAttendanceAlertsAction(anioAcademico: number, seccionId
         matriculas: {
           some: {
             anioAcademico,
-            estado: "activo"
-          }
-        }
+            estado: "activo",
+          },
+        },
       },
       include: {
         nivelAcademico: {
           include: {
-            grado: true
-          }
+            grado: true,
+          },
         },
         asistencias: {
           where: {
             fecha: {
               gte: new Date(anioAcademico, 0, 1),
-              lte: new Date()
-            }
-          }
-        }
-      }
-    })
+              lte: new Date(),
+            },
+          },
+        },
+      },
+    });
 
-    const alertas = alumnos.map(alumno => {
-      const faltas = alumno.asistencias.filter((a: any) => !a.presente && !a.justificada).length
-      const porcentajeFaltas = totalDiasYear > 0 ? (faltas / totalDiasYear) * 100 : 0
+    const alertas = alumnos
+      .map((alumno) => {
+        const faltas = alumno.asistencias.filter(
+          (a: any) => !a.presente && !a.justificada,
+        ).length;
+        const porcentajeFaltas =
+          totalDiasYear > 0 ? (faltas / totalDiasYear) * 100 : 0;
 
-      return {
-        id: alumno.id,
-        nombre: `${alumno.apellidoPaterno} ${alumno.apellidoMaterno}, ${alumno.name}`,
-        seccion: `${alumno.nivelAcademico?.grado.nombre} "${alumno.nivelAcademico?.seccion}"`,
-        faltas,
-        totalDias: totalDiasYear,
-        porcentaje: Number(porcentajeFaltas.toFixed(2))
-      }
-    }).filter(a => a.porcentaje >= (threshold * 100))
-      .sort((a, b) => b.porcentaje - a.porcentaje)
+        return {
+          id: alumno.id,
+          nombre: `${alumno.apellidoPaterno} ${alumno.apellidoMaterno}, ${alumno.name}`,
+          seccion: `${alumno.nivelAcademico?.grado.nombre} "${alumno.nivelAcademico?.seccion}"`,
+          faltas,
+          totalDias: totalDiasYear,
+          porcentaje: Number(porcentajeFaltas.toFixed(2)),
+        };
+      })
+      .filter((a) => a.porcentaje >= threshold * 100)
+      .sort((a, b) => b.porcentaje - a.porcentaje);
 
-    return { data: JSON.parse(JSON.stringify(alertas)) }
+    return { data: JSON.parse(JSON.stringify(alertas)) };
   } catch (error) {
-    console.error("Error fetching alerts:", error)
-    return { error: "Fallo al obtener alertas" }
+    console.error("Error fetching alerts:", error);
+    return { error: "Fallo al obtener alertas" };
   }
 }
 
@@ -290,104 +313,117 @@ export async function getAttendanceAlertsAction(anioAcademico: number, seccionId
  */
 export async function getInstitutionalSummaryAction(fecha: Date) {
   try {
-    const start = new Date(fecha)
-    start.setHours(0, 0, 0, 0)
-    const end = new Date(fecha)
-    end.setHours(23, 59, 59, 999)
+    const start = new Date(fecha);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(fecha);
+    end.setHours(23, 59, 59, 999);
 
     const niveles = await prisma.nivelAcademico.findMany({
       include: {
         grado: true,
-        institucion: true
-      }
-    })
+        institucion: true,
+      },
+    });
 
-    const summary = await Promise.all(niveles.map(async (nivel) => {
-      const asistencias = await prisma.asistencia.findMany({
-        where: {
-          estudiante: {
-            nivelAcademicoId: nivel.id
+    const summary = await Promise.all(
+      niveles.map(async (nivel) => {
+        const asistencias = await prisma.asistencia.findMany({
+          where: {
+            estudiante: {
+              nivelAcademicoId: nivel.id,
+            },
+            fecha: {
+              gte: start,
+              lte: end,
+            },
           },
-          fecha: {
-            gte: start,
-            lte: end
-          }
-        }
-      })
+        });
 
-      const matriculados = await prisma.matricula.count({
-        where: {
-          nivelAcademicoId: nivel.id,
-          estado: "activo"
-        }
-      })
+        const matriculados = await prisma.matricula.count({
+          where: {
+            nivelAcademicoId: nivel.id,
+            estado: "activo",
+          },
+        });
 
-      return {
-        id: nivel.id,
-        nombre: `${nivel.grado.nombre} "${nivel.seccion}"`,
-        presentes: asistencias.filter(a => a.presente).length,
-        ausentes: matriculados - asistencias.filter(a => a.presente).length,
-        total: matriculados
-      }
-    }))
+        return {
+          id: nivel.id,
+          nombre: `${nivel.grado.nombre} "${nivel.seccion}"`,
+          presentes: asistencias.filter((a) => a.presente).length,
+          ausentes: matriculados - asistencias.filter((a) => a.presente).length,
+          total: matriculados,
+        };
+      }),
+    );
 
-    return { data: JSON.parse(JSON.stringify(summary)) }
+    return { data: JSON.parse(JSON.stringify(summary)) };
   } catch (error) {
-    console.error("Error institutional summary:", error)
-    return { error: "Fallo al obtener resumen institucional" }
+    console.error("Error institutional summary:", error);
+    return { error: "Fallo al obtener resumen institucional" };
   }
 }
 
 /**
  * Obtiene el historial anual de un estudiante
  */
-export async function getStudentAnnualAttendanceAction(estudianteId: string, anio: number) {
+export async function getStudentAnnualAttendanceAction(
+  estudianteId: string,
+  anio: number,
+) {
   try {
     const asistencias = await prisma.asistencia.findMany({
       where: {
         estudianteId,
         fecha: {
           gte: new Date(anio, 0, 1),
-          lte: new Date(anio, 11, 31)
-        }
+          lte: new Date(anio, 11, 31),
+        },
       },
-      orderBy: { fecha: 'asc' }
-    })
+      orderBy: { fecha: "asc" },
+    });
 
     // Agrupar por mes
     const summary = Array.from({ length: 12 }, (_, i) => {
-      const mesAsis = asistencias.filter(a => new Date(a.fecha).getMonth() === i)
+      const mesAsis = asistencias.filter(
+        (a) => new Date(a.fecha).getMonth() === i,
+      );
       return {
         mes: i,
-        presentes: mesAsis.filter(a => a.presente && !a.tardanza && !a.justificada).length,
-        ausentes: mesAsis.filter(a => !a.presente && !a.justificada).length,
-        tardanzas: mesAsis.filter(a => a.tardanza).length,
-        justificadas: mesAsis.filter(a => a.justificada).length
-      }
-    })
+        presentes: mesAsis.filter(
+          (a) => a.presente && !a.tardanza && !a.justificada,
+        ).length,
+        ausentes: mesAsis.filter((a) => !a.presente && !a.justificada).length,
+        tardanzas: mesAsis.filter((a) => a.tardanza).length,
+        justificadas: mesAsis.filter((a) => a.justificada).length,
+      };
+    });
 
-    return { data: JSON.parse(JSON.stringify(summary)) }
+    return { data: JSON.parse(JSON.stringify(summary)) };
   } catch (error) {
-    console.error("Error student annual attendance:", error)
-    return { error: "No se pudo obtener el historial anual" }
+    console.error("Error student annual attendance:", error);
+    return { error: "No se pudo obtener el historial anual" };
   }
 }
 
 /**
  * Obtiene la lista de justificaciones registradas
  */
-export async function getJustificacionesAction(anio: number, seccionId?: string) {
+export async function getJustificacionesAction(
+  anio: number,
+  seccionId?: string,
+) {
   try {
     const justificaciones = await prisma.asistencia.findMany({
       where: {
         justificada: true,
         fecha: {
           gte: new Date(anio, 0, 1),
-          lte: new Date(anio, 11, 31)
+          lte: new Date(anio, 11, 31),
         },
         estudiante: {
-          nivelAcademicoId: seccionId === "all" ? undefined : seccionId || undefined
-        }
+          nivelAcademicoId:
+            seccionId === "all" ? undefined : seccionId || undefined,
+        },
       },
       include: {
         estudiante: {
@@ -397,26 +433,252 @@ export async function getJustificacionesAction(anio: number, seccionId?: string)
             apellidoMaterno: true,
             nivelAcademico: {
               include: {
-                grado: true
-              }
-            }
-          }
-        }
+                grado: true,
+              },
+            },
+          },
+        },
       },
-      orderBy: { fecha: 'desc' }
-    })
+      orderBy: { fecha: "desc" },
+    });
 
-    const data = justificaciones.map(j => ({
+    const data = justificaciones.map((j) => ({
       id: j.id,
       fecha: j.fecha,
       estudiante: `${j.estudiante.apellidoPaterno} ${j.estudiante.apellidoMaterno}, ${j.estudiante.name}`,
       seccion: `${j.estudiante.nivelAcademico?.grado.nombre} "${j.estudiante.nivelAcademico?.seccion}"`,
-      justificacion: j.justificacion || "Sin detalle"
-    }))
+      justificacion: j.justificacion || "Sin detalle",
+    }));
 
-    return { data: JSON.parse(JSON.stringify(data)) }
+    return { data: JSON.parse(JSON.stringify(data)) };
   } catch (error) {
-    console.error("Error fetching justifications:", error)
-    return { error: "No se pudo obtener el reporte de justificaciones" }
+    console.error("Error fetching justifications:", error);
+    return { error: "No se pudo obtener el reporte de justificaciones" };
+  }
+}
+/**
+ * Registra asistencia mediante QR (Usado en el scanner de entrada)
+ */
+export async function registerQRAsistenciaAction(dni: string) {
+  try {
+    const today = new Date();
+    const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+
+    // 1. Buscar estudiante por DNI
+    const student = await prisma.user.findFirst({
+      where: {
+        dni,
+        role: "estudiante",
+      },
+      include: {
+        matriculas: {
+          where: { estado: "activo" },
+          include: { nivelAcademico: true },
+          orderBy: { anioAcademico: "desc" },
+          take: 1,
+        },
+      },
+    });
+
+    if (!student) return { error: "Estudiante no encontrado" };
+    if (student.matriculas.length === 0)
+      return { error: "Estudiante no cuenta con matrícula activa" };
+
+    const matricula = student.matriculas[0];
+
+    // 2. Determinar si hay tardanza mediante Polticas de Asistencia
+    // Buscamos políticas aplicables: 1. Nivel + Turno, 2. Nivel, 3. Turno, 4. Global
+    const [hEntradaFallback, mEntradaFallback] = (
+      (
+        await prisma.variableSistema.findUnique({
+          where: { clave: "HORA_ENTRADA" },
+        })
+      )?.valor || "08:00"
+    )
+      .split(":")
+      .map(Number);
+
+    const [hSalidaFallback, mSalidaFallback] = (
+      (
+        await prisma.variableSistema.findUnique({
+          where: { clave: "HORA_SALIDA" },
+        })
+      )?.valor || "13:00"
+    )
+      .split(":")
+      .map(Number);
+
+    // Intentar encontrar política específica
+    const politica = await prisma.politicaAsistencia.findFirst({
+      where: {
+        institucionId: student.institucionId || undefined,
+        activo: true,
+        OR: [
+          {
+            nivelId: matricula.nivelAcademico.nivelId,
+            turno: matricula.nivelAcademico.turno,
+          },
+          { nivelId: matricula.nivelAcademico.nivelId, turno: null },
+          { nivelId: null, turno: matricula.nivelAcademico.turno },
+        ],
+      },
+      orderBy: [
+        { nivelId: "desc" }, // Priorizar los que tienen nivelId
+        { turno: "desc" }, // Priorizar los que tienen turno
+      ],
+    });
+
+    const hEntrada = politica
+      ? parseInt(politica.horaEntrada.split(":")[0])
+      : hEntradaFallback;
+    const mEntrada = politica
+      ? parseInt(politica.horaEntrada.split(":")[1])
+      : mEntradaFallback;
+    const tolerancia = politica?.tolerancia || 0;
+
+    const checkTime = new Date();
+    const limitTime = new Date();
+    limitTime.setHours(hEntrada, mEntrada, 0, 0);
+
+    // Aplicar tolerancia: si la entrada es 08:00 y tolerancia 10, el límite es 08:10
+    if (tolerancia > 0) {
+      limitTime.setMinutes(limitTime.getMinutes() + tolerancia);
+    }
+
+    const isTardanza = checkTime > limitTime;
+    const horaLlegada = checkTime.toLocaleTimeString("es-PE", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    // 3. Buscar el primer curso disponible para registrar la asistencia académica
+    // (En una implementación ideal, esto sería un registro de ingreso general)
+    const curso = await prisma.curso.findFirst({
+      where: { nivelAcademicoId: matricula.nivelAcademicoId },
+    });
+
+    if (!curso)
+      return {
+        error: "No se encontró curso asignado para registrar la asistencia",
+      };
+
+    // 4. Registrar o actualizar la asistencia
+    const existing = await prisma.asistencia.findFirst({
+      where: {
+        estudianteId: student.id,
+        cursoId: curso.id,
+        fecha: {
+          gte: startOfDay,
+          lte: endOfDay,
+        },
+      },
+    });
+
+    let result;
+    if (existing) {
+      // Si ya marcó hoy, no permitir marcar de nuevo para evitar spam
+      if (existing.presente) {
+        return {
+          error: "El estudiante ya registró su asistencia el día de hoy",
+          alreadyMarked: true,
+          data: {
+            student: {
+              name: student.name,
+              apellidoPaterno: student.apellidoPaterno,
+              apellidoMaterno: student.apellidoMaterno,
+              image: student.image,
+              dni: student.dni,
+            },
+          },
+        };
+      }
+
+      // Si existía (quizás marcado como ausente por el sistema temprano), lo ponemos como presente
+      result = await prisma.asistencia.update({
+        where: { id: existing.id },
+        data: {
+          presente: true,
+          tardanza: isTardanza,
+          horaLlegada: existing.horaLlegada || horaLlegada,
+        },
+      });
+    } else {
+      result = await prisma.asistencia.create({
+        data: {
+          estudianteId: student.id,
+          cursoId: curso.id,
+          fecha: new Date(), // Usar hora exacta del servidor
+          presente: true,
+          tardanza: isTardanza,
+          horaLlegada: horaLlegada,
+        },
+      });
+    }
+
+    revalidatePath("/asistencia");
+    return {
+      success: "Asistencia registrada correctamente",
+      data: {
+        ...JSON.parse(JSON.stringify(result)),
+        student: {
+          name: student.name,
+          apellidoPaterno: student.apellidoPaterno,
+          apellidoMaterno: student.apellidoMaterno,
+          image: student.image,
+          dni: student.dni,
+        },
+      },
+    };
+  } catch (error) {
+    console.error("Error in QR attendance:", error);
+    return { error: "Error al procesar el ingreso por QR" };
+  }
+}
+
+/**
+ * Obtiene los registros de asistencia más recientes para el scanner
+ */
+export async function getRecentAttendanceLogsAction() {
+  try {
+    const today = new Date();
+    const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+
+    const logs = await prisma.asistencia.findMany({
+      where: {
+        fecha: {
+          gte: startOfDay,
+          lte: endOfDay,
+        },
+        presente: true,
+      },
+      include: {
+        estudiante: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 20,
+    });
+
+    const formattedLogs = logs.map((log) => ({
+      id: log.id,
+      studentName: `${log.estudiante.name} ${log.estudiante.apellidoPaterno} ${log.estudiante.apellidoMaterno}`,
+      dni: log.estudiante.dni,
+      time:
+        log.horaLlegada ||
+        new Date(log.fecha).toLocaleTimeString("es-PE", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      status: log.tardanza ? "late" : "success",
+      image: log.estudiante.image || undefined,
+    }));
+
+    return { data: JSON.parse(JSON.stringify(formattedLogs)) };
+  } catch (error) {
+    console.error("Error fetching recent logs:", error);
+    return { error: "Fallo al obtener el historial reciente" };
   }
 }

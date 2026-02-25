@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useQueryState, parseAsString } from "nuqs";
+import { useQueryState, parseAsString, parseAsInteger } from "nuqs";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/ui/data-table";
 import {
@@ -92,6 +92,13 @@ export function StaffTable<TData, TValue>({
     parseAsString.withDefault("ALL"),
   );
 
+  // Pagination states with nuqs
+  const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
+  const [limit, setLimit] = useQueryState(
+    "limit",
+    parseAsInteger.withDefault(10),
+  );
+
   const hasActiveFilters =
     searchQuery !== "" || estadoFilter !== "ALL" || rolFilter !== "ALL";
 
@@ -99,6 +106,7 @@ export function StaffTable<TData, TValue>({
     setSearchQuery("");
     setEstadoFilter("ALL");
     setRolFilter("ALL");
+    setPage(1);
   };
 
   return (
@@ -108,10 +116,19 @@ export function StaffTable<TData, TValue>({
       searchKey="personal"
       searchPlaceholder="Nombre, DNI o cargo..."
       searchValue={searchQuery}
-      onSearchChange={setSearchQuery}
+      onSearchChange={(value) => {
+        setSearchQuery(value);
+        setPage(1);
+      }}
       onClearFilters={clearFilters}
       hasActiveFilters={hasActiveFilters}
       meta={meta}
+      // Controlled pagination
+      pageIndex={page - 1}
+      pageSize={limit}
+      onPageIndexChange={(index) => setPage(index + 1)}
+      onPageSizeChange={setLimit}
+      showColumnVisibility={false}
     >
       {(table: any) => (
         <StaffFilters

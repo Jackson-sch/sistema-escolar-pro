@@ -29,12 +29,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useCurrentRole } from "@/hooks/use-current-role";
 
 interface DisciplineTabProps {
   studentId: string;
 }
 
 export function DisciplineTab({ studentId }: DisciplineTabProps) {
+  const role = useCurrentRole();
+  const isProfessor = role === "profesor";
   const [history, setHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -81,13 +84,15 @@ export function DisciplineTab({ studentId }: DisciplineTabProps) {
             Seguimiento de conducta y bienestar emocional.
           </p>
         </div>
-        <Button
-          size="sm"
-          onClick={() => setShowAddModal(true)}
-          className="rounded-full"
-        >
-          <IconPlus className="mr-2 h-4 w-4" /> Nuevo Registro
-        </Button>
+        {!isProfessor && (
+          <Button
+            size="sm"
+            onClick={() => setShowAddModal(true)}
+            className="rounded-full"
+          >
+            <IconPlus className="mr-2 h-4 w-4" /> Nuevo Registro
+          </Button>
+        )}
       </div>
 
       <div className="relative space-y-8 before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-linear-to-b before:from-transparent before:via-border/40 before:to-transparent">
@@ -124,34 +129,36 @@ export function DisciplineTab({ studentId }: DisciplineTabProps) {
                     </span>
                   </div>
 
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        className="h-8 w-8 p-0 rounded-full hover:bg-muted/50"
+                  {!isProfessor && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          className="h-8 w-8 p-0 rounded-full hover:bg-muted/50"
+                        >
+                          <IconDots className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="end"
+                        className="w-[160px] border-border/40"
                       >
-                        <IconDots className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      align="end"
-                      className="w-[160px] border-border/40"
-                    >
-                      <DropdownMenuItem
-                        onClick={() => setEditingItem(item)}
-                        className="text-xs py-2 cursor-pointer"
-                      >
-                        <IconEdit className="mr-2 h-3.5 w-3.5 text-blue-500" />{" "}
-                        Editar
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => setDeletingId(item.id)}
-                        className="text-xs py-2 cursor-pointer text-red-500 focus:text-red-500 focus:bg-red-500/10"
-                      >
-                        <IconTrash className="mr-2 h-3.5 w-3.5" /> Eliminar
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                        <DropdownMenuItem
+                          onClick={() => setEditingItem(item)}
+                          className="text-xs py-2 cursor-pointer"
+                        >
+                          <IconEdit className="mr-2 h-3.5 w-3.5 text-blue-500" />{" "}
+                          Editar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => setDeletingId(item.id)}
+                          className="text-xs py-2 cursor-pointer text-red-500 focus:text-red-500 focus:bg-red-500/10"
+                        >
+                          <IconTrash className="mr-2 h-3.5 w-3.5" /> Eliminar
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
                 </div>
 
                 <div className="space-y-3">

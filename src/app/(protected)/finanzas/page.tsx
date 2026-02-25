@@ -6,6 +6,11 @@ import {
 } from "@/actions/finance";
 import { getInstitucionesAction } from "@/actions/academic";
 import { getSeccionesAction } from "@/actions/academic-structure";
+import { getVariableByKeyAction } from "@/actions/variables";
+import {
+  FORMATO_COMPROBANTE_KEY,
+  type FormatoComprobante,
+} from "@/lib/comprobante-constants";
 import { ConceptoTable } from "@/components/finanzas/conceptos/concepto-table";
 import { CronogramaTable } from "@/components/finanzas/cronogramas/cronograma-table";
 import { AddConceptoButton } from "@/components/finanzas/conceptos/add-concepto-button";
@@ -35,25 +40,29 @@ async function FinanzasContent() {
     { success: cronograma = [] },
     { data: instituciones = [] },
     { data: secciones = [] },
+    formatoRes,
   ] = await Promise.all([
     getConceptosAction({}),
     getCronogramaAction({}),
     getInstitucionesAction(),
     getSeccionesAction({ anioAcademico: currentYear }),
+    getVariableByKeyAction(FORMATO_COMPROBANTE_KEY),
   ]);
 
   const institucionId = instituciones[0]?.id || "";
+  const formatoComprobante = (formatoRes.data?.valor ||
+    "A4") as FormatoComprobante;
 
   return (
     <FinanzasTabs>
       {{
         cronograma: (
           <>
-            <div className="flex justify-between items-center">
-              <p className="text-sm text-muted-foreground">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+              <p className="text-sm text-muted-foreground order-2 sm:order-1">
                 Cronograma de pagos pendientes por estudiante.
               </p>
-              <div className="flex items-center gap-2">
+              <div className="flex-1 flex justify-end items-center gap-2 order-1 sm:order-2">
                 <BulkActionsButton
                   conceptos={conceptos}
                   secciones={secciones}
@@ -65,16 +74,19 @@ async function FinanzasContent() {
               data={cronograma}
               conceptos={conceptos}
               institucion={instituciones[0]}
+              formatoComprobante={formatoComprobante}
             />
           </>
         ),
         conceptos: (
           <>
-            <div className="flex justify-between items-center">
-              <p className="text-sm text-muted-foreground">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+              <p className="text-sm text-muted-foreground order-2 sm:order-1">
                 Catálogo de conceptos de pago: Matrícula, Pensiones, etc.
               </p>
-              <AddConceptoButton institucionId={institucionId} />
+              <div className="order-1 sm:order-2">
+                <AddConceptoButton institucionId={institucionId} />
+              </div>
             </div>
             <ConceptoTable data={conceptos} meta={{ institucionId }} />
           </>

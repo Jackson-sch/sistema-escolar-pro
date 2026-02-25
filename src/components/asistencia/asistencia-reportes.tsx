@@ -3,7 +3,6 @@
 import { useState, useTransition, useEffect, useRef } from "react";
 import { toast } from "sonner";
 
-import { Separator } from "@/components/ui/separator";
 import { useQueryState, parseAsString, parseAsInteger } from "nuqs";
 import {
   getMonthlyAsistenciaReportAction,
@@ -30,12 +29,14 @@ interface AsistenciaReportesProps {
   initialSecciones: any[];
   aniosAcademicos: number[];
   defaultYear: number;
+  profesorId?: string;
 }
 
 export function AsistenciaReportes({
   initialSecciones,
   aniosAcademicos,
   defaultYear,
+  profesorId,
 }: AsistenciaReportesProps) {
   const [anio, setAnio] = useQueryState(
     "anio",
@@ -79,7 +80,10 @@ export function AsistenciaReportes({
   useEffect(() => {
     const loadSecciones = async () => {
       setIsLoadingSecciones(true);
-      const res = await getSeccionesAction({ anioAcademico: anio });
+      const res = await getSeccionesAction({
+        anioAcademico: anio,
+        profesorId,
+      });
       if (res.data) {
         setSecciones(res.data);
         // Solo limpiar si no es el primer render
@@ -208,7 +212,7 @@ export function AsistenciaReportes({
                 data={reportData}
                 daysInMonth={daysInMonth}
               />
-              
+
               <div>
                 {reportData.length > 0 ? (
                   <ReporteTable

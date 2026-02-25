@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useQueryState, parseAsString } from "nuqs";
+import { useQueryState, parseAsString, parseAsInteger } from "nuqs";
 import { ColumnDef } from "@tanstack/react-table";
 import { IconGrain, IconTrash, IconFilterOff } from "@tabler/icons-react";
 import { toast } from "sonner";
@@ -52,11 +52,19 @@ export function GradoTable({ data, meta }: GradoTableProps) {
     parseAsString.withDefault("ALL"),
   );
 
+  // Pagination states with nuqs
+  const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
+  const [limit, setLimit] = useQueryState(
+    "limit",
+    parseAsInteger.withDefault(10),
+  );
+
   const hasActiveFilters = searchQuery !== "" || nivelFilter !== "ALL";
 
   const onClearFilters = () => {
     setSearchQuery("");
     setNivelFilter("ALL");
+    setPage(1);
   };
 
   const columns: ColumnDef<GradoTableType>[] = [
@@ -163,10 +171,19 @@ export function GradoTable({ data, meta }: GradoTableProps) {
         searchKey="nombre"
         searchPlaceholder="Buscar grado..."
         searchValue={searchQuery}
-        onSearchChange={setSearchQuery}
-        hasActiveFilters={hasActiveFilters}
+        onSearchChange={(value) => {
+          setSearchQuery(value);
+          setPage(1);
+        }}
         onClearFilters={onClearFilters}
+        hasActiveFilters={hasActiveFilters}
         meta={meta}
+        // Controlled pagination
+        pageIndex={page - 1}
+        pageSize={limit}
+        onPageIndexChange={(index) => setPage(index + 1)}
+        onPageSizeChange={setLimit}
+        showColumnVisibility={false}
       >
         {(table) => {
           // Sync URL level filter with table column filter

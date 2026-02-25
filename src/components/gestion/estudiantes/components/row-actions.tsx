@@ -7,6 +7,7 @@ import {
   IconEdit,
   IconTrash,
   IconEye,
+  IconFilePlus,
 } from "@tabler/icons-react";
 import { Row, Table } from "@tanstack/react-table";
 import { toast } from "sonner";
@@ -28,6 +29,7 @@ import { StudentTableType } from "@/components/gestion/estudiantes/components/co
 import { ConfirmModal } from "@/components/modals/confirm-modal";
 import { useCurrentRole } from "@/hooks/use-current-role";
 import { ViewStudentSheet } from "@/components/gestion/estudiantes/management/view-student-sheet";
+import { EnrollmentForm } from "@/components/gestion/matriculas/management/enrollment-form";
 
 interface RowActionsProps {
   row: Row<StudentTableType>;
@@ -41,6 +43,7 @@ export function RowActions({ row, table }: RowActionsProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showViewSheet, setShowViewSheet] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showEnrollmentDialog, setShowEnrollmentDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const student = row.original;
 
@@ -64,6 +67,9 @@ export function RowActions({ row, table }: RowActionsProps) {
     nivelesAcademicos: any[];
     institucion: any;
   };
+
+  const isEnrolled = !!student.matriculadoEsteAnio;
+  const year = new Date().getFullYear();
 
   return (
     <>
@@ -90,6 +96,15 @@ export function RowActions({ row, table }: RowActionsProps) {
           </DropdownMenuItem>
           {!isProfessor && (
             <>
+              {!isEnrolled && (
+                <DropdownMenuItem
+                  onClick={() => setShowEnrollmentDialog(true)}
+                  className="text-[13px] py-2 cursor-pointer transition-colors text-emerald-500 focus:text-emerald-500 focus:bg-emerald-500/10"
+                >
+                  <IconFilePlus className="mr-2 h-4 w-4" />
+                  Matricular Alumno
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem
                 onClick={() => setShowEditDialog(true)}
                 className="text-[13px] py-2 cursor-pointer transition-colors"
@@ -133,6 +148,26 @@ export function RowActions({ row, table }: RowActionsProps) {
           instituciones={metaData?.instituciones || []}
           estados={metaData?.estados || []}
         />
+      </FormModal>
+
+      <FormModal
+        title={`Inscripción Académica ${year}`}
+        description={`Formalice la vacante de ${student.name} ${student.apellidoPaterno} para el nuevo periodo lectivo.`}
+        isOpen={showEnrollmentDialog}
+        onOpenChange={setShowEnrollmentDialog}
+        className="sm:max-w-2xl"
+      >
+        {showEnrollmentDialog && (
+          <EnrollmentForm
+            onSuccess={() => {
+              setShowEnrollmentDialog(false);
+              // Podríamos necesitar revalidar o refrescar la tabla si no es automático
+            }}
+            onCancel={() => setShowEnrollmentDialog(false)}
+            nivelesAcademicos={metaData?.nivelesAcademicos || []}
+            defaultStudentId={student.id}
+          />
+        )}
       </FormModal>
 
       <ViewStudentSheet

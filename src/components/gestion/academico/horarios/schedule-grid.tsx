@@ -142,8 +142,8 @@ export function ScheduleGrid({ horarios, onDelete }: ScheduleGridProps) {
                                     className="size-1 rounded-full shrink-0"
                                     style={{ backgroundColor: areaColor }}
                                   />
-                                  {slot.curso.profesor.name}{" "}
-                                  {slot.curso.profesor.apellidoPaterno}
+                                  {slot.curso.profesor?.name ?? "Sin docente"}{" "}
+                                  {slot.curso.profesor?.apellidoPaterno ?? ""}
                                 </p>
                                 {slot.aula && (
                                   <div className="flex items-center gap-1 text-[8px] font-bold text-muted-foreground/60 uppercase tracking-tighter">

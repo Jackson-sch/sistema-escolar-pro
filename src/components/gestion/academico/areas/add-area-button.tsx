@@ -1,24 +1,29 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { IconBooks } from "@tabler/icons-react"
+import { useState } from "react";
+import { IconBooks } from "@tabler/icons-react";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
-import { FormModal } from "@/components/modals/form-modal"
-import { AreaForm } from "./area-form"
+} from "@/components/ui/tooltip";
+import { FormModal } from "@/components/modals/form-modal";
+import { AreaForm } from "./area-form";
+import { useComponentShortcuts } from "@/hooks/use-component-shortcuts";
 
 interface AddAreaButtonProps {
-  institucionId: string
+  institucionId: string;
 }
 
 export function AddAreaButton({ institucionId }: AddAreaButtonProps) {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
+
+  useComponentShortcuts({
+    onNew: () => setOpen(true),
+  });
 
   return (
     <>
@@ -52,5 +57,5 @@ export function AddAreaButton({ institucionId }: AddAreaButtonProps) {
         />
       </FormModal>
     </>
-  )
+  );
 }

@@ -1,15 +1,12 @@
 "use client";
 
-import * as React from "react";
 import {
   IconSchool,
   IconFileCertificate,
-  IconUser,
   IconCalendar,
   IconDownload,
 } from "@tabler/icons-react";
 import { formatLongDate, getInitials } from "@/lib/formats";
-import { PDFDownloadLink } from "@react-pdf/renderer";
 import { EnrollmentCertificateActions } from "@/components/gestion/documentos/enrollment-certificate-actions";
 
 import {
@@ -44,7 +41,7 @@ export function EnrollmentViewSheet({
       <SheetContent className="sm:max-w-md overflow-y-auto">
         <SheetHeader className="space-y-4">
           <div className="flex items-start gap-4">
-            <Avatar className="h-16 w-16 border-2 border-primary/20 shadow-lg shadow-primary/20 bg-primary/20">
+            <Avatar className="h-16 w-16 border-2 border-primary/20 shadow-lg bg-primary/20">
               <AvatarImage src={enrollment.estudiante.image || ""} />
               <AvatarFallback className="bg-primary/10 text-primary text-xl font-semibold">
                 {getInitials(

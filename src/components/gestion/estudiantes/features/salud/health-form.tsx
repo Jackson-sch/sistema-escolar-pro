@@ -33,6 +33,9 @@ import {
   HealthAndInfoValues,
 } from "@/lib/schemas/student";
 
+import { useFormModal } from "@/components/modals/form-modal-context";
+import { useEffect } from "react";
+
 interface HealthFormProps {
   studentId: string;
   initialData?: Partial<HealthAndInfoValues>;
@@ -45,6 +48,7 @@ export function HealthForm({
   onSuccess,
 }: HealthFormProps) {
   const [isPending, startTransition] = useTransition();
+  const { setIsDirty, setOnSubmit } = useFormModal();
 
   const form = useForm<HealthAndInfoValues>({
     resolver: zodResolver(HealthAndInfoSchema) as any,
@@ -83,6 +87,7 @@ export function HealthForm({
           toast.error(result.error);
         } else {
           toast.success("Información de salud actualizada");
+          setIsDirty(false);
           onSuccess?.();
         }
       } catch (error) {
@@ -90,6 +95,18 @@ export function HealthForm({
       }
     });
   };
+
+  useEffect(() => {
+    setOnSubmit(() => form.handleSubmit(onSubmit)());
+    return () => setOnSubmit(undefined);
+  }, [form, onSubmit, setOnSubmit]);
+
+  const { isDirty } = form.formState;
+
+  useEffect(() => {
+    setIsDirty(isDirty);
+    return () => setIsDirty(false);
+  }, [isDirty, setIsDirty]);
 
   return (
     <Form {...form}>

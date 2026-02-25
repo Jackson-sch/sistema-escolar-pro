@@ -1,12 +1,18 @@
-"use client"
+"use client";
 
-import * as z from "zod"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useState, useTransition } from "react"
-import { IconMail, IconLock, IconLoader2, IconAlertCircle, IconCircleCheck } from "@tabler/icons-react"
+import * as z from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState, useTransition } from "react";
+import {
+  IconMail,
+  IconLock,
+  IconLoader2,
+  IconAlertCircle,
+  IconCircleCheck,
+} from "@tabler/icons-react";
 
-import { LoginSchema } from "@/lib/schemas/auth"
+import { LoginSchema } from "@/lib/schemas/auth";
 import {
   Form,
   FormControl,
@@ -14,15 +20,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { loginAction } from "@/actions/login"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { loginAction } from "@/actions/login";
 
 export function LoginForm() {
-  const [error, setError] = useState<string | undefined>("")
-  const [success, setSuccess] = useState<string | undefined>("")
-  const [isPending, startTransition] = useTransition()
+  const [error, setError] = useState<string | undefined>("");
+  const [success, setSuccess] = useState<string | undefined>("");
+  const [isPending, startTransition] = useTransition();
 
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
@@ -30,19 +36,19 @@ export function LoginForm() {
       email: "",
       password: "",
     },
-  })
+  });
 
   const onSubmit = (values: z.infer<typeof LoginSchema>) => {
-    setError("")
-    setSuccess("")
+    setError("");
+    setSuccess("");
 
     startTransition(() => {
       loginAction(values).then((data) => {
-        setError(data?.error)
-        setSuccess(data?.success)
-      })
-    })
-  }
+        setError(data?.error);
+        setSuccess(data?.success);
+      });
+    });
+  };
 
   return (
     <div className="w-full space-y-6">
@@ -78,7 +84,11 @@ export function LoginForm() {
                 <FormItem>
                   <div className="flex items-center justify-between">
                     <FormLabel>Contraseña</FormLabel>
-                    <Button variant="link" size="sm" className="px-0 font-normal h-auto py-0">
+                    <Button
+                      variant="link"
+                      size="sm"
+                      className="px-0 font-normal h-auto py-0"
+                    >
                       ¿Olvidaste tu contraseña?
                     </Button>
                   </div>
@@ -125,5 +135,5 @@ export function LoginForm() {
         </form>
       </Form>
     </div>
-  )
+  );
 }

@@ -46,6 +46,9 @@ import {
 } from "@/lib/validations/achievement";
 import { createAchievementAction } from "@/actions/achievement";
 
+import { useFormModal } from "@/components/modals/form-modal-context";
+import { useEffect } from "react";
+
 interface AchievementFormProps {
   studentId: string;
   onSuccess?: () => void;
@@ -56,6 +59,7 @@ export function AchievementForm({
   onSuccess,
 }: AchievementFormProps) {
   const [isPending, startTransition] = useTransition();
+  const { setIsDirty, setOnSubmit } = useFormModal();
 
   const form = useForm<AchievementValues>({
     resolver: zodResolver(achievementSchema),
@@ -76,6 +80,7 @@ export function AchievementForm({
         const res = await createAchievementAction(studentId, values);
         if (res.success) {
           toast.success(res.success);
+          setIsDirty(false);
           onSuccess?.();
         } else {
           toast.error(res.error);
@@ -85,6 +90,18 @@ export function AchievementForm({
       }
     });
   };
+
+  useEffect(() => {
+    setOnSubmit(() => form.handleSubmit(onSubmit)());
+    return () => setOnSubmit(undefined);
+  }, [form, onSubmit, setOnSubmit]);
+
+  const { isDirty } = form.formState;
+
+  useEffect(() => {
+    setIsDirty(isDirty);
+    return () => setIsDirty(false);
+  }, [isDirty, setIsDirty]);
 
   return (
     <Form {...form}>

@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/tooltip";
 import { StudentForm } from "@/components/gestion/estudiantes/management/student-form";
 import { FormModal } from "@/components/modals/form-modal";
+import { useCurrentRole } from "@/hooks/use-current-role";
+import { useComponentShortcuts } from "@/hooks/use-component-shortcuts";
 
 interface AddStudentButtonProps {
   instituciones: { id: string; nombreInstitucion: string }[];
@@ -24,7 +26,15 @@ export function AddStudentButton({
   estados,
   periodoAcademico,
 }: AddStudentButtonProps) {
+  const role = useCurrentRole();
+  const isProfessor = role === "profesor";
   const [open, setOpen] = useState(false);
+
+  useComponentShortcuts({
+    onNew: () => setOpen(true),
+  });
+
+  if (isProfessor) return null;
 
   return (
     <>

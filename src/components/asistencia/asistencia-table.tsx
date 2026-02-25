@@ -3,7 +3,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { IconUser } from "@tabler/icons-react";
-import { SegmentedControl } from "./segmented-control";
+import { SegmentedControl } from "@/components/asistencia/segmented-control";
 
 interface AsistenciaTableProps {
   data: any[];

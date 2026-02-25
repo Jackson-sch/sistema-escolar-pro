@@ -135,7 +135,7 @@ export const columns: ColumnDef<CourseTableType>[] = [
   {
     id: "periodo",
     header: "Periodo",
-    accessorFn: (row) => row.anioAcademico,
+    accessorFn: (row) => String(row.anioAcademico),
     cell: ({ row }) => (
       <Badge variant="outline" className="font-normal whitespace-nowrap">
         {row.original.anioAcademico}

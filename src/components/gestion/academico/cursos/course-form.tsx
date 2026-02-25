@@ -55,7 +55,7 @@ export function CourseForm({
   profesores,
 }: CourseFormProps) {
   const [isPending, startTransition] = useTransition();
-  const { setIsDirty } = useFormModal();
+  const { setIsDirty, setOnSubmit } = useFormModal();
 
   const form = useForm<CourseValues>({
     resolver: zodResolver(CourseSchema),
@@ -81,13 +81,6 @@ export function CourseForm({
         },
   });
 
-  const { isDirty } = form.formState;
-
-  useEffect(() => {
-    setIsDirty(isDirty);
-    return () => setIsDirty(false);
-  }, [isDirty, setIsDirty]);
-
   const onSubmit = (values: CourseValues) => {
     startTransition(() => {
       upsertCourseAction(values, id).then((data) => {
@@ -100,6 +93,18 @@ export function CourseForm({
       });
     });
   };
+
+  const { isDirty } = form.formState;
+
+  useEffect(() => {
+    setIsDirty(isDirty);
+    return () => setIsDirty(false);
+  }, [isDirty, setIsDirty]);
+
+  useEffect(() => {
+    setOnSubmit(() => form.handleSubmit(onSubmit)());
+    return () => setOnSubmit(undefined);
+  }, [form, onSubmit, setOnSubmit]);
 
   return (
     <Form {...form}>

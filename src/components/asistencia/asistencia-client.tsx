@@ -29,7 +29,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { Separator } from "@/components/ui/separator";
 import {
   useQueryState,
   parseAsString,
@@ -50,12 +49,14 @@ interface AsistenciaClientProps {
   initialSecciones: any[];
   aniosAcademicos: number[];
   defaultYear: number;
+  profesorId?: string;
 }
 
 export function AsistenciaClient({
   initialSecciones,
   aniosAcademicos,
   defaultYear,
+  profesorId,
 }: AsistenciaClientProps) {
   const [fecha, setFecha] = useQueryState(
     "fecha",
@@ -84,7 +85,10 @@ export function AsistenciaClient({
   useEffect(() => {
     const loadSecciones = async () => {
       setIsLoadingSecciones(true);
-      const res = await getSeccionesAction({ anioAcademico: anio });
+      const res = await getSeccionesAction({
+        anioAcademico: anio,
+        profesorId,
+      });
       if (res.data) {
         setSecciones(res.data);
         // Solo limpiar la sección si NO es el primer render (ej. el usuario cambió el año)
@@ -306,7 +310,10 @@ export function AsistenciaClient({
                   Registro de Asistencia
                 </h2>
                 <div className="flex items-center gap-2 mt-0.5">
-                  <Badge variant="outline" className="text-[9px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded-full whitespace-nowrap">
+                  <Badge
+                    variant="outline"
+                    className="text-[9px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded-full whitespace-nowrap"
+                  >
                     {secciones.find((s) => s.id === seccionId)?.nivel.nombre}
                   </Badge>
                   <span className="text-[9px] font-bold text-muted-foreground whitespace-nowrap">

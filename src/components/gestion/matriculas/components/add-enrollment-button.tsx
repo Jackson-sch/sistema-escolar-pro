@@ -49,6 +49,7 @@ export function AddEnrollmentButton({
         {open && (
           <EnrollmentForm
             onSuccess={() => setOpen(false)}
+            onCancel={() => setOpen(false)}
             nivelesAcademicos={nivelesAcademicos}
           />
         )}

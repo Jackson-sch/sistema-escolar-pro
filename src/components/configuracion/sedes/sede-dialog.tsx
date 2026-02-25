@@ -162,7 +162,7 @@ function SedeFormContent({ sede, onSuccess }: SedeFormContentProps) {
             <FormItem>
               <FormLabel>Nombre de la Sede</FormLabel>
               <FormControl>
-                <Input placeholder="Ej. Sede Central" {...field} />
+                <Input placeholder="Ej. Sede Central" {...field} className="rounded-full" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -177,7 +177,7 @@ function SedeFormContent({ sede, onSuccess }: SedeFormContentProps) {
               <FormItem>
                 <FormLabel>Código Modular/Local</FormLabel>
                 <FormControl>
-                  <Input placeholder="Ej. 123456" {...field} />
+                  <Input placeholder="Ej. 123456" {...field} className="rounded-full" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -190,7 +190,7 @@ function SedeFormContent({ sede, onSuccess }: SedeFormContentProps) {
               <FormItem>
                 <FormLabel>Teléfono</FormLabel>
                 <FormControl>
-                  <Input placeholder="Ej. 999888777" {...field} />
+                  <Input placeholder="Ej. 999888777" {...field} className="rounded-full" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -205,7 +205,7 @@ function SedeFormContent({ sede, onSuccess }: SedeFormContentProps) {
             <FormItem>
               <FormLabel>Dirección</FormLabel>
               <FormControl>
-                <Input placeholder="Av. Principal 123" {...field} />
+                <Input placeholder="Av. Principal 123" {...field} className="rounded-full" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -220,7 +220,7 @@ function SedeFormContent({ sede, onSuccess }: SedeFormContentProps) {
               <FormItem>
                 <FormLabel>Email de Contacto</FormLabel>
                 <FormControl>
-                  <Input placeholder="contacto@sede.com" {...field} />
+                  <Input placeholder="contacto@sede.com" {...field} className="rounded-full" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -233,7 +233,7 @@ function SedeFormContent({ sede, onSuccess }: SedeFormContentProps) {
               <FormItem>
                 <FormLabel>Director / Encargado</FormLabel>
                 <FormControl>
-                  <Input placeholder="Nombre del responsable" {...field} />
+                  <Input placeholder="Nombre del responsable" {...field} className="rounded-full" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -297,7 +297,7 @@ function SedeFormContent({ sede, onSuccess }: SedeFormContentProps) {
                   <FormControl>
                     <Input
                       placeholder="Ej. -8.083672"
-                      className="h-8 text-xs font-mono"
+                      className="h-8 text-xs font-mono rounded-full"
                       {...field}
                       value={field.value ?? ""}
                       onPaste={(e) => {
@@ -340,7 +340,7 @@ function SedeFormContent({ sede, onSuccess }: SedeFormContentProps) {
                   <FormControl>
                     <Input
                       placeholder="Ej. -79.000787"
-                      className="h-8 text-xs font-mono"
+                      className="h-8 text-xs font-mono rounded-full"
                       {...field}
                       value={field.value ?? ""}
                       onChange={(e) =>

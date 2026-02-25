@@ -25,9 +25,16 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { upsertAnuncioAction } from "@/actions/communications";
+import {
+  getGradosAction,
+  getNivelesAction,
+} from "@/actions/academic-structure";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { useFormModal } from "@/components/modals/form-modal-context";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const announcementSchema = z.object({
   titulo: z.string().min(4, "El título debe tener al menos 4 caracteres"),
@@ -38,21 +45,41 @@ const announcementSchema = z.object({
   importante: z.boolean().default(false),
   urgente: z.boolean().default(false),
   fijado: z.boolean().default(false),
+  grados: z.array(z.string()).default([]),
+  niveles: z.array(z.string()).default([]),
 });
 
 interface AnnouncementFormProps {
   onSuccess: () => void;
   initialData?: any;
   id?: string;
+  isProfessor?: boolean;
+  profesorId?: string;
 }
 
 export function AnnouncementForm({
   onSuccess,
   initialData,
   id,
+  isProfessor,
+  profesorId,
 }: AnnouncementFormProps) {
   const [loading, setLoading] = useState(false);
-  const { setIsDirty } = useFormModal();
+  const [grados, setGrados] = useState<any[]>([]);
+  const [niveles, setNiveles] = useState<any[]>([]);
+  const { setIsDirty, setOnSubmit } = useFormModal();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const [{ data: gradosRes }, { data: nivelesRes }] = await Promise.all([
+        getGradosAction(undefined, isProfessor ? profesorId : undefined),
+        getNivelesAction(),
+      ]);
+      if (gradosRes) setGrados(gradosRes);
+      if (nivelesRes) setNiveles(nivelesRes);
+    };
+    fetchData();
+  }, [isProfessor, profesorId]);
 
   const form = useForm<z.infer<typeof announcementSchema>>({
     resolver: zodResolver(announcementSchema) as any,
@@ -65,15 +92,10 @@ export function AnnouncementForm({
       importante: initialData?.importante || false,
       urgente: initialData?.urgente || false,
       fijado: initialData?.fijado || false,
+      grados: (initialData?.grados || []).map((g: any) => g.id),
+      niveles: (initialData?.niveles || []).map((n: any) => n.id),
     },
   });
-
-  const { isDirty } = form.formState;
-
-  useEffect(() => {
-    setIsDirty(isDirty);
-    return () => setIsDirty(false);
-  }, [isDirty, setIsDirty]);
 
   const onSubmit = async (values: z.infer<typeof announcementSchema>) => {
     setLoading(true);
@@ -96,6 +118,18 @@ export function AnnouncementForm({
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    setOnSubmit(() => form.handleSubmit(onSubmit)());
+    return () => setOnSubmit(undefined);
+  }, [form, onSubmit, setOnSubmit]);
+
+  const { isDirty } = form.formState;
+
+  useEffect(() => {
+    setIsDirty(isDirty);
+    return () => setIsDirty(false);
+  }, [isDirty, setIsDirty]);
 
   return (
     <Form {...form}>
@@ -177,6 +211,74 @@ export function AnnouncementForm({
                 </FormItem>
               )}
             />
+
+            {(form.watch("dirigidoA") === "ESTUDIANTES" ||
+              form.watch("dirigidoA") === "PADRES") && (
+              <FormField
+                control={form.control}
+                name="grados"
+                render={() => (
+                  <FormItem>
+                    <div className="mb-2">
+                      <FormLabel className="text-xs font-bold text-muted-foreground/70">
+                        Seleccionar Grados
+                      </FormLabel>
+                      <FormDescription className="text-[10px]">
+                        Seleccione los grados a los que desea enviar el anuncio.
+                      </FormDescription>
+                    </div>
+                    <ScrollArea className="h-[100px] rounded-lg border border-muted bg-background/60">
+                      <div className="grid grid-cols-2 gap-2 p-2">
+                        {grados.map((grado) => (
+                          <FormField
+                            key={grado.id}
+                            control={form.control}
+                            name="grados"
+                            render={({ field }) => {
+                              return (
+                                <FormItem
+                                  key={grado.id}
+                                  className="flex flex-row items-center space-x-3 space-y-0"
+                                >
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={field.value?.includes(grado.id)}
+                                      onCheckedChange={(checked) => {
+                                        const current = field.value || [];
+                                        if (checked) {
+                                          field.onChange([
+                                            ...current,
+                                            grado.id,
+                                          ]);
+                                        } else {
+                                          field.onChange(
+                                            current.filter(
+                                              (v: string) => v !== grado.id,
+                                            ),
+                                          );
+                                        }
+                                      }}
+                                      className="rounded-md border-border/40 bg-background/50"
+                                    />
+                                  </FormControl>
+                                  <FormLabel className="text-[11px] font-medium leading-none cursor-pointer">
+                                    {grado.nombre}
+                                    <span className="ml-1 text-[9px] text-muted-foreground">
+                                      {grado.nivel?.nombre.substring(0, 3)}
+                                    </span>
+                                  </FormLabel>
+                                </FormItem>
+                              );
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </ScrollArea>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
           </div>
 
           <div className="flex flex-col items-center justify-center space-y-2">
@@ -215,7 +317,7 @@ export function AnnouncementForm({
                 <Textarea
                   placeholder="Escriba aquí el mensaje detallado..."
                   {...field}
-                  className="min-h-[100px] rounded-2xl border-border/40 bg-background/50"
+                  className="min-h-[70px] rounded-2xl border-border/40 bg-background/50"
                 />
               </FormControl>
               <FormMessage />

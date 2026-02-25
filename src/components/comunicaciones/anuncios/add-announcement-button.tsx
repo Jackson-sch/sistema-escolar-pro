@@ -1,13 +1,21 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { IconSpeakerphone } from "@tabler/icons-react"
-import { AnnouncementForm } from "@/components/comunicaciones/anuncios/announcement-form"
-import { FormModal } from "@/components/modals/form-modal"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { IconSpeakerphone } from "@tabler/icons-react";
+import { AnnouncementForm } from "@/components/comunicaciones/anuncios/announcement-form";
+import { FormModal } from "@/components/modals/form-modal";
 
-export function AddAnnouncementButton() {
-  const [open, setOpen] = useState(false)
+interface AddAnnouncementButtonProps {
+  isProfessor?: boolean;
+  profesorId?: string;
+}
+
+export function AddAnnouncementButton({
+  isProfessor,
+  profesorId,
+}: AddAnnouncementButtonProps) {
+  const [open, setOpen] = useState(false);
 
   return (
     <>
@@ -27,8 +35,10 @@ export function AddAnnouncementButton() {
       >
         <AnnouncementForm
           onSuccess={() => setOpen(false)}
+          isProfessor={isProfessor}
+          profesorId={profesorId}
         />
       </FormModal>
     </>
-  )
+  );
 }

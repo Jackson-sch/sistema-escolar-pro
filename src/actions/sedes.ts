@@ -123,6 +123,20 @@ export async function updateSedeAction(
       },
     });
 
+    // Si es la sede principal, sincronizar datos con la institución
+    if (existing?.esPrincipal && existing.institucionId) {
+      await prisma.institucionEducativa.update({
+        where: { id: existing.institucionId },
+        data: {
+          nombreInstitucion: validatedFields.data.nombre,
+          direccion: validatedFields.data.direccion || undefined,
+          telefono: validatedFields.data.telefono || undefined,
+          email: validatedFields.data.email || undefined,
+          logo: validatedFields.data.logo || undefined,
+        },
+      });
+    }
+
     revalidatePath(REVALIDATE_PATH);
     return { success: "Sede actualizada correctamente" };
   } catch (error: any) {

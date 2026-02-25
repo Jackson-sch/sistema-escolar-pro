@@ -1,12 +1,15 @@
-"use server"
+"use server";
 
-import prisma from "@/lib/prisma"
-import { revalidatePath } from "next/cache"
-import { createSafeAction } from "@/lib/safe-action"
-import { CronogramaFilterSchema, CreateCronogramaMasivoSchema } from "@/lib/schemas/finance"
-import { z } from "zod"
+import prisma from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
+import { createSafeAction } from "@/lib/safe-action";
+import {
+  CronogramaFilterSchema,
+  CreateCronogramaMasivoSchema,
+} from "@/lib/schemas/finance";
+import { z } from "zod";
 
-const REVALIDATE_PATH = "/finanzas"
+const REVALIDATE_PATH = "/finanzas";
 
 /**
  * Obtiene el cronograma de pagos (deudas) de estudiantes
@@ -14,7 +17,7 @@ const REVALIDATE_PATH = "/finanzas"
 export const getCronogramaAction = createSafeAction(
   CronogramaFilterSchema,
   async (filters, session) => {
-    const institucionId = session.user.institucionId
+    const institucionId = session.user.institucionId;
 
     const cronograma = await prisma.cronogramaPago.findMany({
       where: {
@@ -23,7 +26,7 @@ export const getCronogramaAction = createSafeAction(
           id: filters?.estudianteId,
         },
         conceptoId: filters?.conceptoId,
-        pagado: filters?.pagado
+        pagado: filters?.pagado,
       },
       include: {
         estudiante: {
@@ -39,36 +42,36 @@ export const getCronogramaAction = createSafeAction(
             nivelAcademico: {
               include: {
                 grado: true,
-                nivel: true
-              }
+                nivel: true,
+              },
             },
             matriculas: {
               include: {
                 nivelAcademico: {
                   include: {
                     grado: true,
-                    nivel: true
-                  }
-                }
+                    nivel: true,
+                  },
+                },
               },
               orderBy: { anioAcademico: "desc" },
-              take: 1
-            }
-          }
+              take: 1,
+            },
+          },
         },
         concepto: {
-          select: { id: true, nombre: true }
+          select: { id: true, nombre: true },
         },
-        pagos: true
+        pagos: true,
       },
       orderBy: [
         { fechaVencimiento: "asc" },
-        { estudiante: { apellidoPaterno: "asc" } }
-      ]
-    })
-    return { success: JSON.parse(JSON.stringify(cronograma)) }
-  }
-)
+        { estudiante: { apellidoPaterno: "asc" } },
+      ],
+    });
+    return { success: JSON.parse(JSON.stringify(cronograma)) };
+  },
+);
 
 /**
  * Crea deudas masivamente para todos los estudiantes de un nivel académico
@@ -76,51 +79,84 @@ export const getCronogramaAction = createSafeAction(
 export const createCronogramaMasivoAction = createSafeAction(
   CreateCronogramaMasivoSchema,
   async (values, session) => {
-    const institucionId = session.user.institucionId
-    if (!institucionId) return { error: "Institución no identificada." }
+    const institucionId = session.user.institucionId;
+    if (!institucionId) return { error: "Institución no identificada." };
 
-    const date = new Date(values.fechaVencimiento)
+    const date = new Date(values.fechaVencimiento);
     const concepto = await prisma.conceptoPago.findUnique({
-      where: { id: values.conceptoId, institucionId }
-    })
+      where: { id: values.conceptoId, institucionId },
+    });
 
     if (!concepto) {
-      return { error: "El concepto de pago seleccionado no existe o no pertenece a su institución." }
+      return {
+        error:
+          "El concepto de pago seleccionado no existe o no pertenece a su institución.",
+      };
     }
+
+    // Obtener la institución para saber el ciclo escolar actual
+    const institucion = await prisma.institucionEducativa.findUnique({
+      where: { id: institucionId },
+      select: { cicloEscolarActual: true },
+    });
+
+    if (!institucion)
+      return {
+        error: "No se pudo encontrar la información de la institución.",
+      };
+
+    const anioActual = institucion.cicloEscolarActual;
 
     const estudiantes = await prisma.user.findMany({
       where: {
         role: "estudiante",
         institucionId,
-        nivelAcademicoId: values.nivelAcademicoId || undefined
+        nivelAcademicoId: values.nivelAcademicoId || undefined,
+        // Solo estudiantes con matrícula activa en el año actual
+        matriculas: {
+          some: {
+            anioAcademico: anioActual,
+            estado: "activo",
+          },
+        },
       },
       include: {
         matriculas: {
-          where: { estado: "activo" },
+          where: {
+            anioAcademico: anioActual,
+            estado: "activo",
+          },
           select: { descuentoBeca: true, tipoBeca: true, anioAcademico: true },
-          take: 1
+          take: 1,
         },
         cronogramaPagos: {
-          where: { conceptoId: values.conceptoId }
-        }
-      }
-    })
+          where: { conceptoId: values.conceptoId },
+        },
+      },
+    });
 
     if (estudiantes.length === 0) {
-      return { error: "No se encontraron estudiantes para los filtros seleccionados." }
+      return {
+        error: "No se encontraron estudiantes para los filtros seleccionados.",
+      };
     }
 
     // Filtrar estudiantes que ya tienen este concepto generado
-    const estudiantesSinConcepto = estudiantes.filter(est => est.cronogramaPagos.length === 0)
+    const estudiantesSinConcepto = estudiantes.filter(
+      (est) => est.cronogramaPagos.length === 0,
+    );
 
     if (estudiantesSinConcepto.length === 0) {
-      return { error: "Todos los estudiantes seleccionados ya tienen este concepto generado." }
+      return {
+        error:
+          "Todos los estudiantes seleccionados ya tienen este concepto generado.",
+      };
     }
 
     const results = await prisma.$transaction(
       estudiantesSinConcepto.map((est: any) => {
-        const beca = est.matriculas?.[0]?.descuentoBeca || 0
-        const montoFinal = Math.max(0, values.monto - beca)
+        const beca = est.matriculas?.[0]?.descuentoBeca || 0;
+        const montoFinal = Math.max(0, values.monto - beca);
 
         return prisma.cronogramaPago.create({
           data: {
@@ -129,19 +165,19 @@ export const createCronogramaMasivoAction = createSafeAction(
             monto: montoFinal,
             fechaVencimiento: date,
             montoPagado: 0,
-            pagado: false
-          }
-        })
-      })
-    )
+            pagado: false,
+          },
+        });
+      }),
+    );
 
-    revalidatePath(REVALIDATE_PATH)
+    revalidatePath(REVALIDATE_PATH);
     return {
       success: `Cronograma generado exitosamente para ${results.length} estudiantes`,
-    }
+    };
   },
-  { roles: ["administrativo"] }
-)
+  { roles: ["administrativo"] },
+);
 
 /**
  * Elimina cronogramas masivamente por concepto
@@ -149,10 +185,10 @@ export const createCronogramaMasivoAction = createSafeAction(
 export const deleteCronogramaMasivoAction = createSafeAction(
   z.object({
     conceptoId: z.string(),
-    nivelAcademicoId: z.string().optional()
+    nivelAcademicoId: z.string().optional(),
   }),
   async (values, session) => {
-    const institucionId = session.user.institucionId
+    const institucionId = session.user.institucionId;
 
     const where: any = {
       conceptoId: values.conceptoId,
@@ -160,20 +196,23 @@ export const deleteCronogramaMasivoAction = createSafeAction(
       montoPagado: 0,
       estudiante: {
         institucionId,
-        nivelAcademicoId: values.nivelAcademicoId
-      }
-    }
+        nivelAcademicoId: values.nivelAcademicoId,
+      },
+    };
 
-    const count = await prisma.cronogramaPago.count({ where })
-    if (count === 0) return { error: "No se encontraron cronogramas pendientes para eliminar." }
+    const count = await prisma.cronogramaPago.count({ where });
+    if (count === 0)
+      return {
+        error: "No se encontraron cronogramas pendientes para eliminar.",
+      };
 
-    await prisma.cronogramaPago.deleteMany({ where })
+    await prisma.cronogramaPago.deleteMany({ where });
 
-    revalidatePath(REVALIDATE_PATH)
-    return { success: `Se eliminaron ${count} cronogramas correctamente` }
+    revalidatePath(REVALIDATE_PATH);
+    return { success: `Se eliminaron ${count} cronogramas correctamente` };
   },
-  { roles: ["administrativo"] }
-)
+  { roles: ["administrativo"] },
+);
 
 /**
  * Actualiza la fecha de vencimiento masivamente
@@ -182,34 +221,39 @@ export const updateCronogramaFechaMasivoAction = createSafeAction(
   z.object({
     conceptoId: z.string(),
     nuevaFecha: z.union([z.date(), z.string()]),
-    nivelAcademicoId: z.string().optional()
+    nivelAcademicoId: z.string().optional(),
   }),
   async (values, session) => {
-    const institucionId = session.user.institucionId
-    const nuevaFecha = new Date(values.nuevaFecha)
+    const institucionId = session.user.institucionId;
+    const nuevaFecha = new Date(values.nuevaFecha);
 
     const where: any = {
       conceptoId: values.conceptoId,
       pagado: false,
       estudiante: {
         institucionId,
-        nivelAcademicoId: values.nivelAcademicoId
-      }
-    }
+        nivelAcademicoId: values.nivelAcademicoId,
+      },
+    };
 
-    const count = await prisma.cronogramaPago.count({ where })
-    if (count === 0) return { error: "No se encontraron cronogramas pendientes para actualizar." }
+    const count = await prisma.cronogramaPago.count({ where });
+    if (count === 0)
+      return {
+        error: "No se encontraron cronogramas pendientes para actualizar.",
+      };
 
     await prisma.cronogramaPago.updateMany({
       where,
-      data: { fechaVencimiento: nuevaFecha }
-    })
+      data: { fechaVencimiento: nuevaFecha },
+    });
 
-    revalidatePath(REVALIDATE_PATH)
-    return { success: `Se actualizó la fecha de ${count} cronogramas correctamente` }
+    revalidatePath(REVALIDATE_PATH);
+    return {
+      success: `Se actualizó la fecha de ${count} cronogramas correctamente`,
+    };
   },
-  { roles: ["administrativo"] }
-)
+  { roles: ["administrativo"] },
+);
 
 /**
  * Aplica mora (interés) masivamente
@@ -217,12 +261,12 @@ export const updateCronogramaFechaMasivoAction = createSafeAction(
 export const applyBulkMoraAction = createSafeAction(
   z.object({
     conceptoId: z.string().optional(),
-    nivelAcademicoId: z.string().optional()
+    nivelAcademicoId: z.string().optional(),
   }),
   async (filters, session) => {
-    const institucionId = session.user.institucionId
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
+    const institucionId = session.user.institucionId;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
     const cronogramasVencidos = await prisma.cronogramaPago.findMany({
       where: {
@@ -231,41 +275,44 @@ export const applyBulkMoraAction = createSafeAction(
         conceptoId: filters.conceptoId || undefined,
         estudiante: {
           institucionId,
-          nivelAcademicoId: filters.nivelAcademicoId || undefined
-        }
+          nivelAcademicoId: filters.nivelAcademicoId || undefined,
+        },
       },
       include: {
-        concepto: true
-      }
-    })
+        concepto: true,
+      },
+    });
 
-    if (cronogramasVencidos.length === 0) return { success: "No hay cronogramas vencidos para procesar." }
+    if (cronogramasVencidos.length === 0)
+      return { success: "No hay cronogramas vencidos para procesar." };
 
-    let count = 0
+    let count = 0;
     await prisma.$transaction(
-      cronogramasVencidos.map(cp => {
-        const fechaVencimiento = new Date(cp.fechaVencimiento)
-        fechaVencimiento.setHours(0, 0, 0, 0)
+      cronogramasVencidos.map((cp) => {
+        const fechaVencimiento = new Date(cp.fechaVencimiento);
+        fechaVencimiento.setHours(0, 0, 0, 0);
 
-        const diffTime = Math.abs(today.getTime() - fechaVencimiento.getTime())
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+        const diffTime = Math.abs(today.getTime() - fechaVencimiento.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-        const moraDiaria = cp.concepto.moraDiaria || 0
-        const nuevaMora = diffDays * moraDiaria
+        const moraDiaria = cp.concepto.moraDiaria || 0;
+        const nuevaMora = diffDays * moraDiaria;
 
-        count++
+        count++;
         return prisma.cronogramaPago.update({
           where: { id: cp.id },
           data: {
             moraAcumulada: nuevaMora,
-            updatedAt: new Date()
-          }
-        })
-      })
-    )
+            updatedAt: new Date(),
+          },
+        });
+      }),
+    );
 
-    revalidatePath(REVALIDATE_PATH)
-    return { success: `Se actualizó el interés por mora de ${count} registros` }
+    revalidatePath(REVALIDATE_PATH);
+    return {
+      success: `Se actualizó el interés por mora de ${count} registros`,
+    };
   },
-  { roles: ["administrativo"] }
-)
+  { roles: ["administrativo"] },
+);

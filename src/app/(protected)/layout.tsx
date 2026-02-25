@@ -7,6 +7,7 @@ import { DirectivoChat } from "@/components/chat/directivo-chat";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { getDashboardStatsAction } from "@/actions/dashboard";
 import { getEstadisticasCobranzaAction } from "@/actions/finance";
+import { getInstitucionByIdAction } from "@/actions/institucion";
 import { CommandPalette } from "@/components/common/command-palette";
 import { SiteFooter } from "@/components/layout/site-footer";
 
@@ -35,11 +36,13 @@ export default async function ProtectedLayout({
     },
   });
 
+  // Verificar si debe cambiar contraseña (para todos los roles)
+  if (user?.mustChangePassword) {
+    redirect("/cambiar-password");
+  }
+
   if (user?.role === "padre") {
     // Si es padre, debe ir al portal
-    if (user.mustChangePassword) {
-      redirect("/cambiar-password");
-    }
     redirect("/portal");
   }
 
@@ -55,14 +58,13 @@ export default async function ProtectedLayout({
     },
   });
 
-  const [stats, financeStats, institucion] = await Promise.all([
+  const [stats, financeStats, institucionRes] = await Promise.all([
     getDashboardStatsAction({}),
     getEstadisticasCobranzaAction({}),
-    prisma.institucionEducativa.findFirst({
-      where: { id: session.user.institucionId || undefined },
-      select: { cicloEscolarActual: true },
-    }),
+    getInstitucionByIdAction(session.user.institucionId || undefined),
   ]);
+
+  const institucionData = institucionRes.success;
 
   const contextData = {
     estadisticasGenerales: stats.success,
@@ -85,9 +87,14 @@ export default async function ProtectedLayout({
             user?.apellidoPaterno || session.user.apellidoPaterno || undefined
           }
           pendingComprobantes={pendingComprobantes}
+          institucionName={institucionData?.nombreInstitucion}
+          institucionLogo={institucionData?.logo}
         />
         <SidebarInset className="flex flex-col min-h-screen">
-          <SiteHeader anioAcademico={institucion?.cicloEscolarActual || 2025} />
+          <SiteHeader
+            anioAcademico={institucionData?.cicloEscolarActual || 2025}
+            institucionName={institucionData?.nombreInstitucion}
+          />
           <main className="flex flex-1 flex-col gap-4 p-2 relative w-full overflow-x-hidden">
             <div className="flex-1 w-full">{children}</div>
             <DirectivoChat context={contextData} />

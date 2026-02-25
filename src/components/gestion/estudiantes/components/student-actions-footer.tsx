@@ -17,9 +17,13 @@ interface StudentActionsFooterProps {
       nombreInstitucion?: string;
       lema?: string;
       codigoModular?: string;
+      logo?: string;
     };
   };
 }
+
+import { useState, useEffect } from "react";
+import QRCode from "qrcode";
 
 export function StudentActionsFooter({
   student,
@@ -27,6 +31,27 @@ export function StudentActionsFooter({
   onEdit,
   metaData,
 }: StudentActionsFooterProps) {
+  const [qrCode, setQrCode] = useState<string>("");
+
+  useEffect(() => {
+    const generateQR = async () => {
+      try {
+        const url = await QRCode.toDataURL(student.dni, {
+          margin: 1,
+          width: 200,
+          color: {
+            dark: "#000000",
+            light: "#ffffff",
+          },
+        });
+        setQrCode(url);
+      } catch (err) {
+        console.error("Error generating QR code:", err);
+      }
+    };
+    generateQR();
+  }, [student.dni]);
+
   return (
     <div className="p-4 md:p-6 border-t border-border/40 bg-card space-y-3">
       {/* Primary Actions Grid */}
@@ -46,12 +71,14 @@ export function StudentActionsFooter({
           document={
             <StudentCardPDF
               student={student as any}
+              qrCode={qrCode}
               institucion={{
                 nombreInstitucion:
                   metaData?.institucion?.nombreInstitucion ||
                   "SISTEMA ESCOLAR PRO",
                 lema: metaData?.institucion?.lema || "Excelencia Educativa",
                 codigoModular: metaData?.institucion?.codigoModular || "---",
+                logo: metaData?.institucion?.logo,
               }}
             />
           }

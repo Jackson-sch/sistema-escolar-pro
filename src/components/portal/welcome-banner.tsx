@@ -16,14 +16,14 @@ export function WelcomeBanner({ userName }: WelcomeBannerProps) {
         <Badge className="w-fit border-none bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
           Portal Familiar
         </Badge>
-        <h1 className="flex items-center gap-3 text-3xl font-black tracking-tight sm:text-4xl">
+        <h1 className="flex-1 items-center gap-3 text-2xl md:text-3xl font-black tracking-tight sm:text-4xl">
           ¡Hola,{" "}
           <span className="bg-linear-to-r from-primary to-primary/50 bg-clip-text text-transparent capitalize">
-            {firstName}
+            {firstName}{" "}
           </span>
-          !
+          Bienvenido !
         </h1>
-        <p className="max-w-xl text-balance text-lg text-muted-foreground">
+        <p className="max-w-xl text-balance text-md md:text-lg text-muted-foreground">
           Gestiona los pagos y el progreso académico de tus hijos de forma ágil
           y segura desde tu panel personal.
         </p>

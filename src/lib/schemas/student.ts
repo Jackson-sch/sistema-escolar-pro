@@ -1,4 +1,4 @@
-import * as z from "zod"
+import * as z from "zod";
 
 export const StudentSchema = z.object({
   name: z.string().min(1, "El nombre es requerido"),
@@ -18,22 +18,18 @@ export const StudentSchema = z.object({
   ubigeo: z.string().optional().or(z.literal("")),
   codigoEstudiante: z.string().optional().or(z.literal("")),
   codigoSiagie: z.string().optional().or(z.literal("")),
-  tipoSangre: z.string().optional().or(z.literal("")),
-  alergias: z.string().optional().or(z.literal("")),
-  condicionesMedicas: z.string().optional().or(z.literal("")),
   estadoId: z.string().min(1, "El estado es requerido"),
   institucionId: z.string().min(1, "La institución es requerida"),
-
-
+  image: z.string().optional().or(z.literal("")),
 
   // Datos del Apoderado (Opcionales para el registro rápido)
   nombreApoderado: z.string().optional().or(z.literal("")),
   dniApoderado: z.string().optional().or(z.literal("")),
   telefonoApoderado: z.string().optional().or(z.literal("")),
   parentescoApoderado: z.string().optional().or(z.literal("")),
-})
+});
 
-export type StudentValues = z.infer<typeof StudentSchema>
+export type StudentValues = z.infer<typeof StudentSchema>;
 
 export const HealthAndInfoSchema = z.object({
   // Salud y condiciones
@@ -61,6 +57,6 @@ export const HealthAndInfoSchema = z.object({
   lenguaMaterna: z.string().optional().or(z.literal("")),
   religion: z.string().optional().or(z.literal("")),
   numeroHermanos: z.coerce.number().optional(),
-})
+});
 
-export type HealthAndInfoValues = z.infer<typeof HealthAndInfoSchema>
+export type HealthAndInfoValues = z.infer<typeof HealthAndInfoSchema>;

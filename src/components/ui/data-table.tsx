@@ -75,6 +75,11 @@ interface DataTableProps<TData, TValue> {
   stackFilters?: boolean; // Whether search and filters are stacked in two rows
   emptyStateTitle?: string;
   emptyStateDescription?: string;
+  pageIndex?: number;
+  pageSize?: number;
+  onPageIndexChange?: (pageIndex: number) => void;
+  onPageSizeChange?: (pageSize: number) => void;
+  showColumnVisibility?: boolean;
 }
 
 export function DataTable<TData, TValue>({
@@ -92,6 +97,11 @@ export function DataTable<TData, TValue>({
   stackFilters = false,
   emptyStateTitle,
   emptyStateDescription,
+  pageIndex,
+  pageSize,
+  onPageIndexChange,
+  onPageSizeChange,
+  showColumnVisibility = true,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
@@ -109,12 +119,28 @@ export function DataTable<TData, TValue>({
       columnVisibility,
       rowSelection,
       columnFilters,
+      ...(pageIndex !== undefined && pageSize !== undefined
+        ? { pagination: { pageIndex, pageSize } }
+        : {}),
     },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
+    onPaginationChange: (updater) => {
+      if (typeof updater === "function") {
+        const nextPagination = updater({
+          pageIndex: pageIndex ?? table.getState().pagination.pageIndex,
+          pageSize: pageSize ?? table.getState().pagination.pageSize,
+        });
+        onPageIndexChange?.(nextPagination.pageIndex);
+        onPageSizeChange?.(nextPagination.pageSize);
+      } else {
+        onPageIndexChange?.(updater.pageIndex);
+        onPageSizeChange?.(updater.pageSize);
+      }
+    },
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -123,10 +149,14 @@ export function DataTable<TData, TValue>({
     getFacetedUniqueValues: getFacetedUniqueValues(),
     initialState: {
       pagination: {
-        pageSize: 10,
+        pageSize: pageSize ?? 10,
+        pageIndex: pageIndex ?? 0,
       },
       ...initialState,
     },
+    manualPagination:
+      pageIndex !== undefined && pageSize !== undefined ? false : false, // We still want client-side pagination but controlled states
+    autoResetPageIndex: false,
     meta,
   });
 
@@ -141,14 +171,19 @@ export function DataTable<TData, TValue>({
       {/* TOOLBAR */}
       <div
         className={cn(
-          "bg-card rounded-2xl shadow-sm border flex flex-col",
+          "bg-card rounded-2xl shadow-sm border flex flex-col transition-all duration-200",
           !stackFilters && "lg:flex-row lg:items-center justify-between",
-          stackFilters ? "p-3.5 sm:p-4 gap-4" : "p-2.5 sm:p-3 gap-3",
+          stackFilters
+            ? "p-3 sm:p-4 gap-3 sm:gap-4"
+            : "p-2 sm:p-3 gap-2 sm:gap-3",
         )}
       >
         {/* Superior: Buscador (Ocupa fila completa si stackFilters o si no hay filtros) */}
         <div
-          className={cn("w-full md:w-[500px]", !stackFilters && "lg:max-w-sm mb-3 lg:mb-0")}
+          className={cn(
+            "w-full md:w-[500px]",
+            !stackFilters && "lg:max-w-sm mb-3 lg:mb-0",
+          )}
         >
           {searchKey && (
             <InputGroup className="w-full bg-background rounded-full">
@@ -211,45 +246,47 @@ export function DataTable<TData, TValue>({
             </Button>
           )}
 
-          <div className="flex items-center gap-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="ml-auto hidden rounded-full lg:flex h-10 px-4"
-                >
-                  <IconAdjustmentsHorizontal className="mr-2 h-4 w-4" />
-                  Columnas
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-[150px]">
-                <DropdownMenuLabel>Alternar columnas</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {table
-                  .getAllColumns()
-                  .filter(
-                    (column) =>
-                      typeof column.accessorFn !== "undefined" &&
-                      column.getCanHide(),
-                  )
-                  .map((column) => {
-                    return (
-                      <DropdownMenuCheckboxItem
-                        key={column.id}
-                        className="capitalize"
-                        checked={column.getIsVisible()}
-                        onCheckedChange={(value) =>
-                          column.toggleVisibility(!!value)
-                        }
-                      >
-                        {column.id}
-                      </DropdownMenuCheckboxItem>
-                    );
-                  })}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+          {showColumnVisibility && (
+            <div className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="ml-auto hidden rounded-full lg:flex h-10 px-4"
+                  >
+                    <IconAdjustmentsHorizontal className="mr-2 h-4 w-4" />
+                    Columnas
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-[150px]">
+                  <DropdownMenuLabel>Alternar columnas</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {table
+                    .getAllColumns()
+                    .filter(
+                      (column) =>
+                        typeof column.accessorFn !== "undefined" &&
+                        column.getCanHide(),
+                    )
+                    .map((column) => {
+                      return (
+                        <DropdownMenuCheckboxItem
+                          key={column.id}
+                          className="capitalize"
+                          checked={column.getIsVisible()}
+                          onCheckedChange={(value) =>
+                            column.toggleVisibility(!!value)
+                          }
+                        >
+                          {column.id}
+                        </DropdownMenuCheckboxItem>
+                      );
+                    })}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          )}
         </div>
       </div>
 

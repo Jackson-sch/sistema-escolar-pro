@@ -58,7 +58,7 @@ interface EventFormProps {
 
 export function EventForm({ onSuccess, initialData, id }: EventFormProps) {
   const [loading, setLoading] = useState(false);
-  const { setIsDirty } = useFormModal();
+  const { setIsDirty, setOnSubmit } = useFormModal();
 
   const form = useForm<z.infer<typeof eventSchema>>({
     resolver: zodResolver(eventSchema) as any,
@@ -79,13 +79,6 @@ export function EventForm({ onSuccess, initialData, id }: EventFormProps) {
       publico: initialData?.publico ?? true,
     },
   });
-
-  const { isDirty } = form.formState;
-
-  useEffect(() => {
-    setIsDirty(isDirty);
-    return () => setIsDirty(false);
-  }, [isDirty, setIsDirty]);
 
   const onSubmit = async (values: z.infer<typeof eventSchema>) => {
     setLoading(true);
@@ -109,6 +102,18 @@ export function EventForm({ onSuccess, initialData, id }: EventFormProps) {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    setOnSubmit(() => form.handleSubmit(onSubmit)());
+    return () => setOnSubmit(undefined);
+  }, [form, onSubmit, setOnSubmit]);
+
+  const { isDirty } = form.formState;
+
+  useEffect(() => {
+    setIsDirty(isDirty);
+    return () => setIsDirty(false);
+  }, [isDirty, setIsDirty]);
 
   return (
     <Form {...form}>
