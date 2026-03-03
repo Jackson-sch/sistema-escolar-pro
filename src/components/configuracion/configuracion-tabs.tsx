@@ -1,14 +1,15 @@
 "use client";
 
 import { useQueryState, parseAsString } from "nuqs";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AnimatedTabs } from "../ui/animated-tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { AnimatedTabs } from "@/components/ui/animated-tabs";
 
 interface ConfiguracionTabsProps {
   children: {
     datos: React.ReactNode;
     sedes: React.ReactNode;
     variables: React.ReactNode;
+    bancos: React.ReactNode;
   };
 }
 
@@ -22,6 +23,7 @@ export function ConfiguracionTabs({ children }: ConfiguracionTabsProps) {
     { id: "datos", label: "Datos Institucionales" },
     { id: "sedes", label: "Sedes" },
     { id: "variables", label: "Variables de Sistema" },
+    { id: "bancos", label: "Cuentas y Pagos" },
   ];
 
   return (
@@ -45,6 +47,10 @@ export function ConfiguracionTabs({ children }: ConfiguracionTabsProps) {
         <div className="animate-in fade-in duration-500">
           {children.variables}
         </div>
+      </TabsContent>
+
+      <TabsContent value="bancos" className="mt-0 outline-none">
+        <div className="animate-in fade-in duration-500">{children.bancos}</div>
       </TabsContent>
     </Tabs>
   );

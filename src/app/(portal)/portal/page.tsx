@@ -1,9 +1,9 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { getParentDashboardDataAction } from "@/actions/portal";
-import { WelcomeBanner } from "@/components/portal/welcome-banner";
-import { StudentSelector } from "@/components/portal/student-selector";
-import { DashboardContent } from "@/components/portal/dashboard-content";
+import { WelcomeBanner } from "@/components/portal/dashboard/welcome-banner";
+import { StudentSelector } from "@/components/portal/layout/student-selector";
+import { DashboardContent } from "@/components/portal/dashboard/dashboard-content";
 import { Card } from "@/components/ui/card";
 import { IconUser } from "@tabler/icons-react";
 
@@ -72,7 +72,7 @@ export default async function PortalDashboardPage({
       <main className="space-y-8">
         <div className="flex items-center gap-3">
           <div className="h-8 w-1.5 bg-primary rounded-full" />
-          <h2 className="text-2xl font-black tracking-tight">
+          <h2 className="text-2xl font-black tracking-tight capitalize">
             Panel de {currentStudent.name}
           </h2>
         </div>

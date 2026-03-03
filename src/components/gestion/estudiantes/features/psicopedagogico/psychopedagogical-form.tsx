@@ -13,6 +13,7 @@ import {
   IconStethoscope,
   IconNotes,
   IconEye,
+  IconPlus,
 } from "@tabler/icons-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -50,6 +51,8 @@ import {
   getIncidentCategoriesAction,
 } from "@/actions/discipline";
 import { Switch } from "@/components/ui/switch";
+import { FormModal } from "@/components/modals/form-modal";
+import { CategoryForm } from "./category-form";
 
 import { useFormModal } from "@/components/modals/form-modal-context";
 
@@ -78,6 +81,7 @@ export function PsychopedagogicalForm({
 }: PsychopedagogicalFormProps) {
   const [isPending, startTransition] = useTransition();
   const [categories, setCategories] = useState<any[]>([]);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
   const { setIsDirty, setOnSubmit } = useFormModal();
 
   const form = useForm<PsychValues>({
@@ -93,11 +97,12 @@ export function PsychopedagogicalForm({
     },
   });
 
+  const loadCategories = async () => {
+    const res = await getIncidentCategoriesAction();
+    if (res.data) setCategories(res.data);
+  };
+
   useEffect(() => {
-    const loadCategories = async () => {
-      const res = await getIncidentCategoriesAction();
-      if (res.data) setCategories(res.data);
-    };
     loadCategories();
   }, []);
 
@@ -126,205 +131,231 @@ export function PsychopedagogicalForm({
   }, [isDirty, setIsDirty]);
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="fecha"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel className="text-[11px] font-bold tracking-wider text-muted-foreground/70 ml-1">
-                  Fecha del Evento
-                </FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
+    <>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="fecha"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel className="text-[11px] font-bold tracking-wider text-muted-foreground/70 ml-1">
+                    Fecha del Evento
+                  </FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full pl-3 text-left font-normal bg-muted/5 border-border/40 rounded-xl",
+                            !field.value && "text-muted-foreground",
+                          )}
+                        >
+                          {field.value ? (
+                            format(field.value, "PPP", { locale: es })
+                          ) : (
+                            <span>Seleccionar fecha</span>
+                          )}
+                          <IconCalendar className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-auto p-0 rounded-xl border-border/40"
+                      align="start"
+                    >
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        disabled={(date) =>
+                          date > new Date() || date < new Date("1900-01-01")
+                        }
+                        initialFocus
+                        locale={es}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="categoriaId"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex items-center justify-between ml-1">
+                    <FormLabel className="text-[11px] font-bold tracking-wider text-muted-foreground/70">
+                      Tipo de Registro
+                    </FormLabel>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="size-5 rounded-full hover:bg-primary/10 text-primary"
+                      onClick={() => setShowCategoryModal(true)}
+                    >
+                      <IconPlus className="size-3" />
+                    </Button>
+                  </div>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full pl-3 text-left font-normal bg-muted/5 border-border/40 rounded-xl",
-                          !field.value && "text-muted-foreground",
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "PPP", { locale: es })
-                        ) : (
-                          <span>Seleccionar fecha</span>
-                        )}
-                        <IconCalendar className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
+                      <SelectTrigger className="w-full bg-muted/5 border-border/40 rounded-xl">
+                        <SelectValue placeholder="Seleccionar categoría" />
+                      </SelectTrigger>
                     </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent
-                    className="w-auto p-0 rounded-xl border-border/40"
-                    align="start"
-                  >
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) =>
-                        date > new Date() || date < new Date("1900-01-01")
-                      }
-                      initialFocus
-                      locale={es}
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                    <SelectContent>
+                      {categories.length > 0 ? (
+                        categories.map((cat) => (
+                          <SelectItem key={cat.id} value={cat.id}>
+                            {cat.nombre}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="none" disabled>
+                          No hay categorías
+                        </SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           <FormField
             control={form.control}
-            name="categoriaId"
+            name="motivo"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-[11px] font-bold tracking-wider text-muted-foreground/70 ml-1">
-                  Tipo de Registro
+                  Motivo / Título
                 </FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger className="w-full bg-muted/5 border-border/40 rounded-xl">
-                      <SelectValue placeholder="Seleccionar categoría" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {categories.length > 0 ? (
-                      categories.map((cat) => (
-                        <SelectItem key={cat.id} value={cat.id}>
-                          {cat.nombre}
-                        </SelectItem>
-                      ))
-                    ) : (
-                      <SelectItem value="none" disabled>
-                        No hay categorías
-                      </SelectItem>
-                    )}
-                  </SelectContent>
-                </Select>
+                <FormControl>
+                  <div className="relative">
+                    <IconMessageReport className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      {...field}
+                      placeholder="Ej. Seguimiento conductual"
+                      className="pl-10 bg-muted/5 border-border/40 rounded-xl"
+                    />
+                  </div>
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-        </div>
 
-        <FormField
-          control={form.control}
-          name="motivo"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-[11px] font-bold tracking-wider text-muted-foreground/70 ml-1">
-                Motivo / Título
-              </FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <IconMessageReport className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    {...field}
-                    placeholder="Ej. Seguimiento conductual"
-                    className="pl-10 bg-muted/5 border-border/40 rounded-xl"
-                  />
-                </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="descripcion"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-[11px] font-bold tracking-wider text-muted-foreground/70 ml-1">
-                Descripción del Incidente / Sesión
-              </FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <IconNotes className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Textarea
-                    {...field}
-                    placeholder="Detalle lo ocurrido o lo conversado en la sesión..."
-                    className="pl-10 min-h-32 bg-muted/5 border-border/40 rounded-xl resize-none"
-                  />
-                </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="recomendaciones"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-[11px] font-bold tracking-wider text-muted-foreground/70 ml-1">
-                Recomendaciones / Acuerdos
-              </FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <IconStethoscope className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Textarea
-                    {...field}
-                    placeholder="Acciones a seguir o acuerdos rectificativos..."
-                    className="pl-10 min-h-24 bg-muted/5 border-border/40 rounded-xl resize-none"
-                  />
-                </div>
-              </FormControl>
-              <FormDescription className="text-[10px] ml-1">
-                Opcional. Ayuda al seguimiento preventivo.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="visibleParaPadres"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-xl border border-border/40 p-4 bg-muted/5 shadow-sm">
-              <div className="space-y-0.5">
-                <FormLabel className="text-sm font-semibold flex items-center gap-2">
-                  <IconEye className="size-4 text-primary" />
-                  Visible para los padres
+          <FormField
+            control={form.control}
+            name="descripcion"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-[11px] font-bold tracking-wider text-muted-foreground/70 ml-1">
+                  Descripción del Incidente / Sesión
                 </FormLabel>
-                <FormDescription className="text-xs">
-                  Si se activa, el padre/tutor podrá ver este registro en su
-                  portal.
-                </FormDescription>
-              </div>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+                <FormControl>
+                  <div className="relative">
+                    <IconNotes className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Textarea
+                      {...field}
+                      placeholder="Detalle lo ocurrido o lo conversado en la sesión..."
+                      className="pl-10 min-h-32 bg-muted/5 border-border/40 rounded-xl resize-none"
+                    />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <Button
-          disabled={isPending}
-          type="submit"
-          className="w-full rounded-full"
-        >
-          {isPending ? (
-            <IconLoader2 className="animate-spin" />
-          ) : (
-            <>
-              <IconDeviceFloppy className="mr-2" /> Guardar Registro
-            </>
-          )}
-        </Button>
-      </form>
-    </Form>
+          <FormField
+            control={form.control}
+            name="recomendaciones"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-[11px] font-bold tracking-wider text-muted-foreground/70 ml-1">
+                  Recomendaciones / Acuerdos
+                </FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <IconStethoscope className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Textarea
+                      {...field}
+                      placeholder="Acciones a seguir o acuerdos rectificativos..."
+                      className="pl-10 min-h-24 bg-muted/5 border-border/40 rounded-xl resize-none"
+                    />
+                  </div>
+                </FormControl>
+                <FormDescription className="text-[10px] ml-1">
+                  Opcional. Ayuda al seguimiento preventivo.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="visibleParaPadres"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center justify-between rounded-xl border border-border/40 p-4 bg-muted/5 shadow-sm">
+                <div className="space-y-0.5">
+                  <FormLabel className="text-sm font-semibold flex items-center gap-2">
+                    <IconEye className="size-4 text-primary" />
+                    Visible para los padres
+                  </FormLabel>
+                  <FormDescription className="text-xs">
+                    Si se activa, el padre/tutor podrá ver este registro en su
+                    portal.
+                  </FormDescription>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          <Button
+            disabled={isPending}
+            type="submit"
+            className="w-full rounded-full"
+          >
+            {isPending ? (
+              <IconLoader2 className="animate-spin" />
+            ) : (
+              <>
+                <IconDeviceFloppy className="mr-2" /> Guardar Registro
+              </>
+            )}
+          </Button>
+        </form>
+      </Form>
+
+      <FormModal
+        title="Nueva Categoría"
+        description="Agregue una nueva categoría para los registros psicopedagógicos."
+        isOpen={showCategoryModal}
+        onOpenChange={setShowCategoryModal}
+        className="sm:max-w-md"
+      >
+        <CategoryForm
+          onSuccess={(category) => {
+            setShowCategoryModal(false);
+            loadCategories();
+            form.setValue("categoriaId", category.id);
+          }}
+        />
+      </FormModal>
+    </>
   );
 }

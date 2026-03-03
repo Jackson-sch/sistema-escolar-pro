@@ -1,13 +1,13 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import prisma from "@/lib/prisma";
 import {
   getPeriodosAction,
   getResumenNotasEstudianteAction,
 } from "@/actions/evaluations";
-import { NotasBanner } from "@/components/portal/notas-banner";
-import { CourseGradesCard } from "@/components/portal/course-grades-card";
-import { NotasFilter } from "@/components/portal/notas-filter";
+import { getParentStudentsAction } from "@/actions/portal";
+import { NotasBanner } from "@/components/portal/academic/notas-banner";
+import { CourseGradesCard } from "@/components/portal/academic/course-grades-card";
+import { NotasFilter } from "@/components/portal/academic/notas-filter";
 import { Card } from "@/components/ui/card";
 import { IconUser, IconBookOff } from "@tabler/icons-react";
 
@@ -26,20 +26,8 @@ export default async function PortalNotasPage({
   }
 
   // 1. Obtener hijos del padre
-  const relaciones = await prisma.relacionFamiliar.findMany({
-    where: { padreTutorId: session.user.id },
-    include: {
-      hijo: {
-        select: {
-          id: true,
-          name: true,
-          apellidoPaterno: true,
-        },
-      },
-    },
-  });
-
-  const hijos = relaciones.map((r) => r.hijo);
+  const hijosRes = await getParentStudentsAction(session.user.id);
+  const hijos = hijosRes.data || [];
 
   if (hijos.length === 0) {
     return (
@@ -58,7 +46,8 @@ export default async function PortalNotasPage({
 
   // 2. Determinar hijo seleccionado
   const selectedHijoId = hijoId || hijos[0].id;
-  const selectedHijo = hijos.find((h) => h.id === selectedHijoId) || hijos[0];
+  const selectedHijo =
+    hijos.find((h: any) => h.id === selectedHijoId) || hijos[0];
 
   // 3. Obtener periodos académicos
   const periodosRes = await getPeriodosAction(2025); // Hardcoded year for now as in the rest of the app
@@ -71,7 +60,7 @@ export default async function PortalNotasPage({
   // 5. Obtener notas del estudiante seleccionado
   const notasRes = await getResumenNotasEstudianteAction(
     selectedHijoId,
-    selectedPeriodoId
+    selectedPeriodoId,
   );
   const notasPorCurso = notasRes.data || {};
   const cursosIds = Object.keys(notasPorCurso);

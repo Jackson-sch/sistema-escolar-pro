@@ -20,6 +20,7 @@ import {
   IconFileDownload,
   IconChartBar,
   IconHeartHandshake,
+  IconShirt,
 } from "@tabler/icons-react";
 
 import { NavMain } from "@/components/layout/nav-main";
@@ -92,6 +93,11 @@ const adminNavItems = [
     icon: IconMessage2,
   },
   {
+    title: "Uniformes",
+    url: "/uniformes",
+    icon: IconShirt,
+  },
+  {
     title: "Configuración",
     url: "/configuracion/institucion",
     icon: IconSettings,
@@ -144,6 +150,11 @@ const padreNavItems = [
     title: "Conducta y Seguimiento",
     url: "/portal/disciplina",
     icon: IconHeartHandshake,
+  },
+  {
+    title: "Tienda de Uniformes",
+    url: "/portal/uniformes",
+    icon: IconShirt,
   },
 ];
 

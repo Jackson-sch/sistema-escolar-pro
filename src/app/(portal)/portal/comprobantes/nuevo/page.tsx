@@ -1,7 +1,10 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import prisma from "@/lib/prisma";
-import { ComprobanteForm } from "@/components/portal/comprobante-form";
+import {
+  getCronogramaDetailAction,
+  getAllPendingDeudasAction,
+} from "@/actions/portal";
+import { ComprobanteForm } from "@/components/portal/finance/comprobante-form";
 import { formatCurrency } from "@/lib/formats";
 import { Badge } from "@/components/ui/badge";
 import { IconUpload, IconCloudUpload } from "@tabler/icons-react";
@@ -22,58 +25,34 @@ export default async function NuevoComprobantePage({
   let cronogramaPrecargado = null;
 
   if (params.cronogramaId) {
-    const cronograma = await prisma.cronogramaPago.findUnique({
-      where: { id: params.cronogramaId },
-      include: {
-        concepto: true,
-        estudiante: {
-          include: {
-            padresTutores: true,
-          },
-        },
-      },
-    });
+    const cronoRes = await getCronogramaDetailAction(
+      params.cronogramaId,
+      session.user.id,
+    );
+    const cronograma = cronoRes.data;
 
     if (cronograma) {
-      // Verificar que es padre del estudiante
-      const esPadre = cronograma.estudiante.padresTutores.some(
-        (r) => r.padreTutorId === session.user?.id
-      );
-
-      if (esPadre) {
-        cronogramaPrecargado = {
-          id: cronograma.id,
-          concepto: cronograma.concepto.nombre,
-          monto: cronograma.monto - cronograma.montoPagado,
-          estudiante: `${cronograma.estudiante.name} ${cronograma.estudiante.apellidoPaterno}`,
-        };
-      }
+      cronogramaPrecargado = {
+        id: cronograma.id,
+        concepto: cronograma.concepto.nombre,
+        monto: cronograma.monto - cronograma.montoPagado,
+        estudiante: `${cronograma.estudiante.name} ${cronograma.estudiante.apellidoPaterno}`,
+      };
     }
   }
 
   // Obtener todas las deudas de los hijos para el selector
-  const relaciones = await prisma.relacionFamiliar.findMany({
-    where: { padreTutorId: session.user.id },
-    include: {
-      hijo: {
-        include: {
-          cronogramaPagos: {
-            where: { pagado: false },
-            include: { concepto: true },
-          },
-        },
-      },
-    },
-  });
+  const deudasRes = await getAllPendingDeudasAction(session.user.id);
+  const relaciones = deudasRes.data || [];
 
-  const opcionesDeuda = relaciones.flatMap((r) =>
-    r.hijo.cronogramaPagos.map((c) => ({
+  const opcionesDeuda = relaciones.flatMap((r: any) =>
+    r.hijo.cronogramaPagos.map((c: any) => ({
       id: c.id,
       label: `${c.concepto.nombre} - ${r.hijo.name} (${formatCurrency(
-        c.monto - c.montoPagado
+        c.monto - c.montoPagado,
       )})`,
       monto: c.monto - c.montoPagado,
-    }))
+    })),
   );
 
   return (

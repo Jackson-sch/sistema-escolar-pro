@@ -42,7 +42,9 @@ export function NavMain({ items }: { items: NavItem[] }) {
         <SidebarMenu>
           {items.map((item) => {
             const isActive =
-              pathname === item.url || pathname.startsWith(item.url + "/");
+              item.url === "/portal" || item.url === "/dashboard"
+                ? pathname === item.url
+                : pathname === item.url || pathname.startsWith(item.url + "/");
             const hasSubitems = item.items && item.items.length > 0;
 
             if (hasSubitems) {

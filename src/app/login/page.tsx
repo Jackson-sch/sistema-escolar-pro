@@ -2,11 +2,9 @@ import { LoginForm } from "@/components/auth/login-form";
 import { IconSchool, IconCheck } from "@tabler/icons-react";
 import SVGAnimado from "@/components/common/svg-animado";
 import { getInstitucionAction } from "@/actions/institucion";
-import Image from "next/image";
 
 export default async function LoginPage() {
   const { data } = await getInstitucionAction();
-  console.log("🚀 ~ LoginPage ~ institucion:", data);
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
@@ -22,15 +20,21 @@ export default async function LoginPage() {
           <SVGAnimado />
         </div>
 
-        <div className="relative z-10 flex items-center gap-2 font-semibold text-xl">
-          <Image
-            src={data?.logo}
-            alt={data?.nombreInstitucion || "Logo de la institución"}
-            width={32}
-            height={32}
-          />
-          <IconSchool className="h-8 w-8 text-primary" />
-          <span>{data?.nombreInstitucion}</span>
+        <div className="relative z-10 flex items-center gap-3 font-semibold text-xl">
+          <div className="flex h-10 w-10 items-center justify-center rounded-sm bg-primary/10 p-1 border border-primary/20 backdrop-blur-sm overflow-hidden">
+            {data?.logo ? (
+              <img
+                src={data.logo}
+                alt={data.nombreInstitucion || "Logo"}
+                className="h-full w-full object-contain rounded-sm"
+              />
+            ) : (
+              <IconSchool className="h-6 w-6 text-primary" />
+            )}
+          </div>
+          <span className="tracking-tight">
+            {data?.nombreInstitucion || "EduPeru Pro"}
+          </span>
         </div>
 
         <div className="relative z-10 space-y-8">
@@ -70,10 +74,20 @@ export default async function LoginPage() {
       <div className="flex items-center justify-center p-8 bg-zinc-50/50 dark:bg-zinc-950/50">
         <div className="w-full max-w-[420px] space-y-8">
           <div className="lg:hidden flex flex-col items-center gap-4 mb-8">
-            <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/20">
-              <IconSchool className="h-7 w-7" />
+            <div className="h-16 w-16 rounded-2xl bg-white dark:bg-zinc-900 flex items-center justify-center shadow-xl shadow-primary/5 border border-zinc-200 dark:border-zinc-800 overflow-hidden p-2">
+              {data?.logo ? (
+                <img
+                  src={data.logo}
+                  alt={data.nombreInstitucion || "Logo"}
+                  className="h-full w-full object-contain"
+                />
+              ) : (
+                <IconSchool className="h-10 w-10 text-primary" />
+              )}
             </div>
-            <h1 className="text-2xl font-bold">EduPeru Pro</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-center">
+              {data?.nombreInstitucion || "EduPeru Pro"}
+            </h1>
           </div>
 
           <div className="space-y-2 text-center lg:text-left">

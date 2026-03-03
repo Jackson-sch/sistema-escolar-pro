@@ -558,7 +558,11 @@ async function main() {
   await prisma.relacionFamiliar.deleteMany({});
   await prisma.nota.deleteMany({});
   await prisma.asistencia.deleteMany({});
+  await (prisma as any).fichaPsicopedagogica.deleteMany({});
   await prisma.pago.deleteMany({});
+  await prisma.documento.deleteMany({});
+  await prisma.logro.deleteMany({});
+  await (prisma as any).comprobantePago.deleteMany({});
   await prisma.cronogramaPago.deleteMany({});
   await prisma.user.deleteMany({ where: { role: "estudiante" } });
 
@@ -595,6 +599,17 @@ async function main() {
         telefonoEmergencia: s.telefonoApoderado,
         parentescoContactoEmergencia: s.parentescoApoderado,
       },
+    });
+  }
+
+  // 13. Categorías de Uniformes
+  console.log("- Sembrando Categorías de Uniformes...");
+  const categoriasUniformes = ["Diario", "Deportivo", "Gala"];
+  for (const nombre of categoriasUniformes) {
+    await (prisma as any).categoriaUniforme.upsert({
+      where: { nombre },
+      update: {},
+      create: { nombre },
     });
   }
 

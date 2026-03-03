@@ -25,8 +25,8 @@ export function CommunicationsBanner() {
       {/* Abstract background elements */}
       <div className="absolute -right-24 -top-24 size-80 rounded-full bg-sky-600/10 blur-[120px]" />
       <div className="absolute -bottom-24 -left-24 size-64 rounded-full bg-blue-500/10 blur-[100px]" />
-      <IconMessage2 className="absolute -bottom-10 -right-10 size-64 -rotate-12 text-sky-500/5 select-none" />
-      <IconNotification className="absolute top-1/2 right-1/4 size-32 opacity-[0.03] -translate-y-1/2 select-none" />
+      <IconMessage2 className="absolute -bottom-5 -right-5 size-32 -rotate-12 text-sky-500/5 select-none" />
+      <IconNotification className="absolute top-1/4 right-1/8 size-24 opacity-[0.03] -translate-y-1/2 select-none" />
     </div>
   );
 }

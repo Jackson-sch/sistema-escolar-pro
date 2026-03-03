@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import prisma from "@/lib/prisma";
+import { getBoletasPortalAction } from "@/actions/portal";
 import { formatCurrency, formatDate } from "@/lib/formats";
 import {
   IconReceipt,
@@ -10,7 +10,7 @@ import {
   IconCalendar,
   IconHistory,
 } from "@tabler/icons-react";
-import { BoletaDownloadButton } from "@/components/portal/boleta-download-button";
+import { BoletaDownloadButton } from "@/components/portal/finance/boleta-download-button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -21,74 +21,17 @@ export default async function BoletasPage() {
     redirect("/login");
   }
 
-  // Obtener datos de la institución
-  const institucion = await prisma.institucionEducativa.findFirst();
-
-  // Obtener pagos aprobados de los hijos del padre
-  const relaciones = await prisma.relacionFamiliar.findMany({
-    where: { padreTutorId: session.user.id },
-    include: {
-      hijo: {
-        include: {
-          nivelAcademico: {
-            include: {
-              grado: true,
-              nivel: true,
-            },
-          },
-          cronogramaPagos: {
-            where: {
-              pagado: true,
-              pagos: {
-                some: {
-                  numeroBoleta: { not: null },
-                },
-              },
-            },
-            include: {
-              concepto: true,
-              pagos: {
-                where: { numeroBoleta: { not: null } },
-                orderBy: { createdAt: "desc" },
-                take: 1,
-              },
-            },
-            orderBy: { updatedAt: "desc" },
-          },
-        },
-      },
-    },
-  });
-
-  // Obtener comprobantes aprobados del padre
-  const comprobantesAprobados = await prisma.comprobantePago.findMany({
-    where: {
-      padreId: session.user.id,
-      estado: "APROBADO",
-    },
-    include: {
-      cronograma: {
-        include: {
-          concepto: true,
-          estudiante: {
-            include: {
-              nivelAcademico: {
-                include: {
-                  grado: true,
-                  nivel: true,
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-    orderBy: { verificadoEn: "desc" },
-  });
+  // Obtener datos vía server action
+  const boletasRes = await getBoletasPortalAction(session.user.id);
+  const {
+    institucion,
+    relaciones = [],
+    comprobantesAprobados = [],
+  } = boletasRes.data || {};
 
   // Combinar pagos de cronogramas pagados
-  const boletasDisponibles = relaciones.flatMap((r) =>
-    r.hijo.cronogramaPagos.map((c) => {
+  const boletasDisponibles = relaciones.flatMap((r: any) =>
+    r.hijo.cronogramaPagos.map((c: any) => {
       const ultimoPago = c.pagos[0];
       return {
         id: c.id,
@@ -113,7 +56,7 @@ export default async function BoletasPage() {
             : undefined,
         },
       };
-    })
+    }),
   );
 
   const institucionData = institucion
@@ -172,7 +115,7 @@ export default async function BoletasPage() {
         ) : (
           <div className="grid gap-4">
             {/* Boletas de cronogramas pagados */}
-            {boletasDisponibles.map((boleta) => (
+            {boletasDisponibles.map((boleta: any) => (
               <Card
                 key={boleta.id}
                 className="group transition-all hover:shadow-lg bg-card/50 backdrop-blur-sm overflow-hidden border-primary/5"
@@ -237,7 +180,7 @@ export default async function BoletasPage() {
             ))}
 
             {/* Comprobantes aprobados sin boleta generada formalmente en cronograma */}
-            {comprobantesAprobados.map((comp) => (
+            {comprobantesAprobados.map((comp: any) => (
               <Card
                 key={comp.id}
                 className="group transition-all hover:shadow-lg bg-card/50 backdrop-blur-sm overflow-hidden border-primary/5"

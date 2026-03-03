@@ -1,11 +1,13 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import prisma from "@/lib/prisma";
-import { getPortalCommunicationsAction } from "@/actions/portal";
-import { CommunicationsBanner } from "@/components/portal/communications-banner";
-import { AnnouncementCard } from "@/components/portal/announcement-card";
-import { EventCard } from "@/components/portal/event-card";
-import { NotasFilter } from "@/components/portal/notas-filter";
+import {
+  getPortalCommunicationsAction,
+  getParentStudentsAction,
+} from "@/actions/portal";
+import { CommunicationsBanner } from "@/components/portal/common/communications-banner";
+import { AnnouncementCard } from "@/components/portal/dashboard/announcement-card";
+import { EventCard } from "@/components/portal/dashboard/event-card";
+import { NotasFilter } from "@/components/portal/academic/notas-filter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { IconMessage2Off, IconCalendarOff } from "@tabler/icons-react";
@@ -25,27 +27,18 @@ export default async function PortalComunicacionesPage({
   }
 
   // 1. Obtener hijos del padre
-  const relaciones = await prisma.relacionFamiliar.findMany({
-    where: { padreTutorId: session.user.id },
-    include: {
-      hijo: {
-        select: {
-          id: true,
-          name: true,
-          apellidoPaterno: true,
-        },
-      },
-    },
-  });
-
-  const hijos = relaciones.map((r) => r.hijo);
+  const hijosRes = await getParentStudentsAction(session.user.id);
+  const hijos = hijosRes.data || [];
+  console.log("🚀 ~ PortalComunicacionesPage ~ hijos:", hijos)
 
   if (hijos.length === 0) {
     return (
       <div className="flex flex-1 flex-col gap-6 p-4 sm:p-6 pt-0">
         <CommunicationsBanner />
         <Card className="border-dashed p-12 text-center">
-          <p className="text-lg font-bold">No tienes hijos vinculados</p>
+          <p className="text-lg font-bold">
+            {hijosRes.error || "No tienes hijos vinculados"}
+          </p>
         </Card>
       </div>
     );
@@ -68,6 +61,7 @@ export default async function PortalComunicacionesPage({
         currentHijoId={selectedHijoId}
         currentPeriodoId=""
         showPeriodo={false}
+        showGeneralOption={true}
       />
 
       <Tabs defaultValue="anuncios" className="w-full">
@@ -134,12 +128,6 @@ export default async function PortalComunicacionesPage({
           )}
         </TabsContent>
       </Tabs>
-
-      <div className="text-center py-4">
-        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground/40">
-          EduPeru Pro Communications System v2.0
-        </p>
-      </div>
     </div>
   );
 }

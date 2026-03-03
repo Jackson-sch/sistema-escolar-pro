@@ -11,6 +11,7 @@ import {
   IconUser,
   IconLogout,
   IconSchool,
+  IconShirt,
 } from "@tabler/icons-react";
 
 import {
@@ -47,6 +48,11 @@ const navItems = [
     title: "Mis Boletas",
     url: "/portal/boletas",
     icon: IconFileDownload,
+  },
+  {
+    title: "Uniformes",
+    url: "/portal/uniformes",
+    icon: IconShirt,
   },
 ];
 

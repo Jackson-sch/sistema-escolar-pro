@@ -103,18 +103,20 @@ model TipoEvaluacion {
 }
 
 model HistorialEstadoUsuario {
-  id               String         @id @default(cuid())
+  id               String                @id @default(cuid())
   usuarioId        String
   estadoAnteriorId String?
   estadoNuevoId    String
   motivo           String?
   observaciones    String?
   cambiadoPorId    String
-  fechaCambio      DateTime       @default(now())
-  cambiadoPor      User           @relation("CambiosEstadoRealizados", fields: [cambiadoPorId], references: [id])
-  estadoAnterior   EstadoUsuario? @relation("EstadoAnteriorHistorial", fields: [estadoAnteriorId], references: [id])
-  estadoNuevo      EstadoUsuario  @relation("EstadoNuevoHistorial", fields: [estadoNuevoId], references: [id])
-  usuario          User           @relation(fields: [usuarioId], references: [id])
+  fechaCambio      DateTime              @default(now())
+  cambiadoPor      User                  @relation("CambiosEstadoRealizados", fields: [cambiadoPorId], references: [id])
+  estadoAnterior   EstadoUsuario?        @relation("EstadoAnteriorHistorial", fields: [estadoAnteriorId], references: [id])
+  estadoNuevo      EstadoUsuario         @relation("EstadoNuevoHistorial", fields: [estadoNuevoId], references: [id])
+  usuario          User                  @relation(fields: [usuarioId], references: [id])
+  institucionId    String?
+  institucion      InstitucionEducativa? @relation(fields: [institucionId], references: [id])
 
   @@index([usuarioId])
   @@index([fechaCambio])
@@ -174,47 +176,50 @@ model CargoPermiso {
 }
 
 model InstitucionEducativa {
-  id                  String               @id @default(cuid())
-  codigoModular       String               @unique
-  nombreInstitucion   String
-  nombreComercial     String?
-  tipoGestion         TipoGestion
-  modalidad           Modalidad
-  ugel                String
-  dre                 String
-  ubigeo              String
-  direccion           String
-  distrito            String
-  provincia           String
-  departamento        String
-  telefono            String?
-  email               String?
-  sitioWeb            String?
-  resolucionCreacion  String?
-  fechaCreacion       DateTime?
-  resolucionActual    String?
-  logo                String?
-  directorId          String?              @unique
-  cicloEscolarActual  Int                  @default(2025)
-  fechaInicioClases   DateTime
-  fechaFinClases      DateTime
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
-  areasCurriculares   AreaCurricular[]
-  cargos              Cargo[]
-  conceptosPago       ConceptoPago[]
-  cursos              Curso[]
-  estadosUsuario      EstadoUsuario[]
-  director            User?                @relation("DirectorInstitucion", fields: [directorId], references: [id])
-  niveles             Nivel[]
-  nivelesAcademicos   NivelAcademico[]
-  periodos            PeriodoAcademico[]
-  prospectos          Prospecto[]
-  tiposDocumento      TipoDocumento[]
-  tiposEvaluacion     TipoEvaluacion[]
-  users               User[]
-  sedes               Sede[]
-  politicasAsistencia PoliticaAsistencia[]
+  id                    String                   @id @default(cuid())
+  codigoModular         String                   @unique
+  nombreInstitucion     String
+  nombreComercial       String?
+  tipoGestion           TipoGestion
+  modalidad             Modalidad
+  ugel                  String
+  dre                   String
+  ubigeo                String
+  direccion             String
+  distrito              String
+  provincia             String
+  departamento          String
+  telefono              String?
+  email                 String?
+  sitioWeb              String?
+  resolucionCreacion    String?
+  fechaCreacion         DateTime?
+  resolucionActual      String?
+  logo                  String?
+  directorId            String?                  @unique
+  cicloEscolarActual    Int                      @default(2025)
+  movimientosInventario MovimientoInventario[]
+  historialEstados      HistorialEstadoUsuario[]
+  cuentasBancarias      CuentaBancaria[]
+  fechaInicioClases     DateTime
+  fechaFinClases        DateTime
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
+  areasCurriculares     AreaCurricular[]
+  cargos                Cargo[]
+  conceptosPago         ConceptoPago[]
+  cursos                Curso[]
+  estadosUsuario        EstadoUsuario[]
+  director              User?                    @relation("DirectorInstitucion", fields: [directorId], references: [id])
+  niveles               Nivel[]
+  nivelesAcademicos     NivelAcademico[]
+  periodos              PeriodoAcademico[]
+  prospectos            Prospecto[]
+  tiposDocumento        TipoDocumento[]
+  tiposEvaluacion       TipoEvaluacion[]
+  users                 User[]
+  sedes                 Sede[]
+  politicasAsistencia   PoliticaAsistencia[]
 }
 
 model User {
@@ -308,6 +313,11 @@ model User {
   comprobantesEnviados    ComprobantePago[]        @relation("ComprobantesPadre")
   comprobantesVerificados ComprobantePago[]        @relation("ComprobantesVerificados")
 
+  // Relaciones modulo uniformes
+  ventasUniformeEstudiante VentaUniforme[] @relation("VentasUniformeEstudiante")
+  ventasUniformePadre      VentaUniforme[] @relation("VentasUniformePadre")
+  ventasAprobadas          VentaUniforme[] @relation("VentasAprobadas")
+
   // Salud y condiciones
   medicamentos              String?
   seguroMedico              String?
@@ -330,6 +340,9 @@ model User {
   lenguaMaterna   String?
   religion        String?
   numeroHermanos  Int?
+
+  // Favoritos
+  favoritos FavoritoUniforme[]
 
   @@index([cargoId])
   @@index([estadoId])
@@ -473,6 +486,10 @@ model Sede {
   updatedAt         DateTime             @updatedAt
   institucion       InstitucionEducativa @relation(fields: [institucionId], references: [id])
   nivelesAcademicos NivelAcademico[]
+
+  // Relaciones modulo uniformes
+  variantesUniforme VarianteUniforme[]
+  ventasUniforme    VentaUniforme[]
 
   @@unique([institucionId, nombre])
   @@index([institucionId])
@@ -902,6 +919,9 @@ model CronogramaPago {
   pagos            Pago[]
   comprobantes     ComprobantePago[]
 
+  // Relaciones modulo uniformes
+  ventaUniforme VentaUniforme?
+
   @@index([estudianteId])
   @@index([conceptoId])
 }
@@ -1044,4 +1064,175 @@ model PoliticaAsistencia {
 
   @@index([institucionId])
   @@index([nivelId])
+}
+
+// ==================== MODULO DE UNIFORMES ====================
+
+model CategoriaUniforme {
+  id          String     @id @default(cuid())
+  nombre      String // "Diario", "Deportivo", "Gala"
+  descripcion String?
+  activo      Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  uniformes   Uniforme[]
+
+  @@unique([nombre])
+}
+
+model Uniforme {
+  id          String             @id @default(cuid())
+  nombre      String // "Camisa Manga Larga", "Pantalón"
+  descripcion String?
+  categoriaId String
+  genero      GeneroUniforme     @default(UNISEX)
+  imagen      String? // URL de imagen
+  activo      Boolean            @default(true)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  categoria   CategoriaUniforme  @relation(fields: [categoriaId], references: [id])
+  variantes   VarianteUniforme[]
+  favoritos   FavoritoUniforme[]
+
+  @@index([categoriaId])
+}
+
+model VarianteUniforme {
+  id            String                 @id @default(cuid())
+  uniformeId    String
+  talla         String // "4","6","8","10","12","14","16","XS","S","M","L","XL","XXL"
+  tipoTalla     TipoTalla              @default(ALFABETICA)
+  precio        Float
+  sedeId        String
+  stock         Int                    @default(0)
+  stockMinimo   Int                    @default(5)
+  activo        Boolean                @default(true)
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+  uniforme      Uniforme               @relation(fields: [uniformeId], references: [id], onDelete: Cascade)
+  sede          Sede                   @relation(fields: [sedeId], references: [id])
+  movimientos   MovimientoInventario[]
+  detallesVenta DetalleVentaUniforme[]
+
+  @@unique([uniformeId, talla, sedeId])
+  @@index([sedeId])
+  @@index([uniformeId])
+}
+
+model MovimientoInventario {
+  id            String                @id @default(cuid())
+  varianteId    String
+  tipo          TipoMovimiento // ENTRADA, SALIDA, AJUSTE
+  cantidad      Int
+  motivo        String? // "Compra proveedor", "Venta", "Ajuste inventario"
+  referencia    String? // ID de la venta u orden
+  createdAt     DateTime              @default(now())
+  variante      VarianteUniforme      @relation(fields: [varianteId], references: [id])
+  institucionId String?
+  institucion   InstitucionEducativa? @relation(fields: [institucionId], references: [id])
+
+  @@index([varianteId])
+}
+
+model VentaUniforme {
+  id               String                 @id @default(cuid())
+  codigo           String                 @unique // VU-2026-0001
+  estudianteId     String
+  padreId          String?
+  sedeId           String
+  estado           EstadoVentaUniforme    @default(RESERVADO)
+  total            Float
+  observaciones    String?
+  cronogramaPagoId String?                @unique // Uno a uno con cronograma generado
+  aprobadoPorId    String?
+  aprobadoEn       DateTime?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  estudiante       User                   @relation("VentasUniformeEstudiante", fields: [estudianteId], references: [id])
+  padre            User?                  @relation("VentasUniformePadre", fields: [padreId], references: [id])
+  sede             Sede                   @relation(fields: [sedeId], references: [id])
+  cronogramaPago   CronogramaPago?        @relation(fields: [cronogramaPagoId], references: [id])
+  aprobadoPor      User?                  @relation("VentasAprobadas", fields: [aprobadoPorId], references: [id])
+  detalles         DetalleVentaUniforme[]
+
+  @@index([estudianteId])
+  @@index([padreId])
+  @@index([estado])
+}
+
+model DetalleVentaUniforme {
+  id             String           @id @default(cuid())
+  ventaId        String
+  varianteId     String
+  cantidad       Int
+  precioUnitario Float
+  subtotal       Float
+  venta          VentaUniforme    @relation(fields: [ventaId], references: [id], onDelete: Cascade)
+  variante       VarianteUniforme @relation(fields: [varianteId], references: [id])
+
+  @@index([ventaId])
+}
+
+enum GeneroUniforme {
+  MASCULINO
+  FEMENINO
+  UNISEX
+}
+
+enum TipoTalla {
+  NUMERICA // 4,6,8,10,12,14,16
+  ALFABETICA // XS,S,M,L,XL,XXL
+}
+
+enum TipoMovimiento {
+  ENTRADA
+  SALIDA
+  AJUSTE
+}
+
+enum EstadoVentaUniforme {
+  RESERVADO // Padre reserva desde portal
+  EN_PRUEBA // Alumno se está probando
+  APROBADO // Admin aprueba → genera CronogramaPago
+  PAGADO // Padre pagó
+  ENTREGADO // Uniforme entregado
+  CANCELADO // Cancelada
+}
+
+model FavoritoUniforme {
+  id         String   @id @default(cuid())
+  userId     String
+  uniformeId String
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  uniforme   Uniforme @relation(fields: [uniformeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, uniformeId])
+  @@index([userId])
+  @@index([uniformeId])
+}
+
+model CuentaBancaria {
+  id            String                @id @default(cuid())
+  nombre        String // "BCP", "Yape", "Interbank", etc.
+  tipo          TipoCuentaBancaria    @default(BANCO)
+  numero        String // Número de cuenta o número de celular
+  cci           String?
+  titular       String
+  tipoCuenta    String? // "Ahorros", "Corriente" (solo para bancos)
+  qrCode        String? // URL de la imagen del QR (especialmente para Yape/Plin)
+  esPrincipal   Boolean               @default(false)
+  activo        Boolean               @default(true)
+  institucionId String?
+  institucion   InstitucionEducativa? @relation(fields: [institucionId], references: [id])
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+
+  @@index([institucionId])
+  @@index([activo])
+}
+
+enum TipoCuentaBancaria {
+  BANCO
+  BILLETERA_DIGITAL
 }

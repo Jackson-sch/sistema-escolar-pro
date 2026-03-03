@@ -40,6 +40,42 @@ export async function getStudentMonthAttendanceAction(
  */
 export async function getPortalCommunicationsAction(estudianteId: string) {
   try {
+    if (estudianteId === "todos") {
+      const [anuncios, eventos] = await Promise.all([
+        prisma.anuncio.findMany({
+          where: {
+            activo: true,
+            OR: [{ dirigidoA: "TODOS" }, { dirigidoA: "PADRES" }],
+          },
+          include: {
+            autor: {
+              select: { name: true, apellidoPaterno: true, image: true },
+            },
+          },
+          orderBy: [{ fijado: "desc" }, { fechaPublicacion: "desc" }],
+        }),
+        prisma.evento.findMany({
+          where: {
+            estado: "programado",
+            OR: [{ publico: true }, { dirigidoA: "PADRES" }],
+          },
+          include: {
+            organizador: {
+              select: { name: true, image: true },
+            },
+          },
+          orderBy: { fechaInicio: "asc" },
+        }),
+      ]);
+
+      return {
+        data: {
+          anuncios: JSON.parse(JSON.stringify(anuncios)),
+          eventos: JSON.parse(JSON.stringify(eventos)),
+        },
+      };
+    }
+
     const estudiante = await prisma.user.findUnique({
       where: { id: estudianteId },
       include: {
@@ -58,8 +94,24 @@ export async function getPortalCommunicationsAction(estudianteId: string) {
           activo: true,
           OR: [
             { dirigidoA: "TODOS" },
-            { niveles: { some: { id: nivelId } } },
-            { grados: { some: { id: gradoId } } },
+            {
+              AND: [
+                { dirigidoA: "PADRES" },
+                { niveles: { none: {} } },
+                { grados: { none: {} } },
+              ],
+            },
+            {
+              AND: [
+                { dirigidoA: { in: ["PADRES", "ESTUDIANTES"] } },
+                {
+                  OR: [
+                    { niveles: { some: { id: nivelId } } },
+                    { grados: { some: { id: gradoId } } },
+                  ],
+                },
+              ],
+            },
           ],
         },
         include: {
@@ -74,8 +126,24 @@ export async function getPortalCommunicationsAction(estudianteId: string) {
           estado: "programado",
           OR: [
             { publico: true },
-            { niveles: { some: { id: nivelId } } },
-            { grados: { some: { id: gradoId } } },
+            {
+              AND: [
+                { dirigidoA: "PADRES" },
+                { niveles: { none: {} } },
+                { grados: { none: {} } },
+              ],
+            },
+            {
+              AND: [
+                { dirigidoA: { in: ["PADRES", "ESTUDIANTES"] } },
+                {
+                  OR: [
+                    { niveles: { some: { id: nivelId } } },
+                    { grados: { some: { id: gradoId } } },
+                  ],
+                },
+              ],
+            },
           ],
         },
         include: {
@@ -250,6 +318,7 @@ export async function getParentDashboardDataAction({
           activo: true,
           OR: [
             { dirigidoA: "TODOS" },
+            { dirigidoA: "PADRES" },
             {
               niveles: {
                 some: { id: currentStudent.nivelAcademico?.nivelId },
@@ -350,5 +419,250 @@ export async function getParentDashboardDataAction({
   } catch (error) {
     console.error("Error fetching parent dashboard data:", error);
     return { error: "Error al cargar la información del portal" };
+  }
+}
+
+/**
+ * Obtiene la lista de estudiantes vinculados a un padre/tutor
+ */
+export async function getParentStudentsAction(padreId: string) {
+  try {
+    const relaciones = await prisma.relacionFamiliar.findMany({
+      where: { padreTutorId: padreId },
+      include: {
+        hijo: {
+          select: {
+            id: true,
+            name: true,
+            apellidoPaterno: true,
+            image: true,
+            nivelAcademico: {
+              select: {
+                nivel: {
+                  select: {
+                    id: true,
+                    nombre: true,
+                  },
+                },
+                grado: {
+                  select: {
+                    id: true,
+                    nombre: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const hijos = relaciones.map((r) => r.hijo);
+    return { data: JSON.parse(JSON.stringify(hijos)) };
+  } catch (error) {
+    console.error("Error fetching parent students:", error);
+    return { error: "No se pudo obtener la lista de estudiantes" };
+  }
+}
+
+/**
+ * Obtiene la información del usuario (padre) para el layout
+ */
+export async function getParentUserAction(userId: string) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        mustChangePassword: true,
+        role: true,
+        name: true,
+        email: true,
+        apellidoPaterno: true,
+        apellidoMaterno: true,
+      },
+    });
+    return { data: JSON.parse(JSON.stringify(user)) };
+  } catch (error) {
+    console.error("Error fetching parent user:", error);
+    return { error: "No se pudo obtener la información del usuario" };
+  }
+}
+
+/**
+ * Obtiene las deudas y los hijos para el módulo de deudas
+ */
+export async function getDeudasPortalAction(padreId: string, hijoId?: string) {
+  try {
+    const relaciones = await prisma.relacionFamiliar.findMany({
+      where: { padreTutorId: padreId },
+      include: {
+        hijo: {
+          include: {
+            nivelAcademico: {
+              include: { grado: true, nivel: true },
+            },
+          },
+        },
+      },
+    });
+
+    const hijos = relaciones.map((r) => r.hijo);
+    const selectedHijoId = hijoId || hijos[0]?.id;
+
+    let deudas: any[] = [];
+    if (selectedHijoId) {
+      deudas = await prisma.cronogramaPago.findMany({
+        where: {
+          estudianteId: selectedHijoId,
+          pagado: false,
+        },
+        include: {
+          concepto: true,
+          estudiante: true,
+        },
+        orderBy: { fechaVencimiento: "asc" },
+      });
+    }
+
+    return {
+      data: {
+        hijos: JSON.parse(JSON.stringify(hijos)),
+        deudas: JSON.parse(JSON.stringify(deudas)),
+        selectedHijoId,
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching deudas portal info:", error);
+    return { error: "No se pudieron obtener las deudas" };
+  }
+}
+
+/**
+ * Obtiene las boletas y comprobantes para el módulo de boletas
+ */
+export async function getBoletasPortalAction(padreId: string) {
+  try {
+    const [institucion, relaciones, comprobantesAprobados] = await Promise.all([
+      prisma.institucionEducativa.findFirst(),
+      prisma.relacionFamiliar.findMany({
+        where: { padreTutorId: padreId },
+        include: {
+          hijo: {
+            include: {
+              nivelAcademico: {
+                include: { grado: true, nivel: true },
+              },
+              cronogramaPagos: {
+                where: {
+                  pagado: true,
+                  pagos: { some: { numeroBoleta: { not: null } } },
+                },
+                include: {
+                  concepto: true,
+                  pagos: {
+                    where: { numeroBoleta: { not: null } },
+                    orderBy: { createdAt: "desc" },
+                    take: 1,
+                  },
+                },
+                orderBy: { updatedAt: "desc" },
+              },
+            },
+          },
+        },
+      }),
+      prisma.comprobantePago.findMany({
+        where: { padreId: padreId, estado: "APROBADO" },
+        include: {
+          cronograma: {
+            include: {
+              concepto: true,
+              estudiante: {
+                include: {
+                  nivelAcademico: {
+                    include: { grado: true, nivel: true },
+                  },
+                },
+              },
+            },
+          },
+        },
+        orderBy: { verificadoEn: "desc" },
+      }),
+    ]);
+
+    return {
+      data: {
+        institucion: JSON.parse(JSON.stringify(institucion)),
+        relaciones: JSON.parse(JSON.stringify(relaciones)),
+        comprobantesAprobados: JSON.parse(
+          JSON.stringify(comprobantesAprobados),
+        ),
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching boletas portal info:", error);
+    return { error: "No se pudieron obtener las boletas" };
+  }
+}
+
+/**
+ * Obtiene el detalle de un cronograma para el formulario de nuevo comprobante
+ */
+export async function getCronogramaDetailAction(
+  cronogramaId: string,
+  padreId: string,
+) {
+  try {
+    const cronograma = await prisma.cronogramaPago.findUnique({
+      where: { id: cronogramaId },
+      include: {
+        concepto: true,
+        estudiante: {
+          include: {
+            padresTutores: true,
+          },
+        },
+      },
+    });
+
+    if (!cronograma) return { error: "Deuda no encontrada" };
+
+    const esPadre = cronograma.estudiante.padresTutores.some(
+      (r) => r.padreTutorId === padreId,
+    );
+
+    if (!esPadre) return { error: "No tienes permiso para ver esta deuda" };
+
+    return { data: JSON.parse(JSON.stringify(cronograma)) };
+  } catch (error) {
+    console.error("Error fetching cronograma detail:", error);
+    return { error: "No se pudo obtener el detalle de la deuda" };
+  }
+}
+
+/**
+ * Obtiene todas las deudas pendientes de todos los hijos para el selector
+ */
+export async function getAllPendingDeudasAction(padreId: string) {
+  try {
+    const relaciones = await prisma.relacionFamiliar.findMany({
+      where: { padreTutorId: padreId },
+      include: {
+        hijo: {
+          include: {
+            cronogramaPagos: {
+              where: { pagado: false },
+              include: { concepto: true },
+            },
+          },
+        },
+      },
+    });
+
+    return { data: JSON.parse(JSON.stringify(relaciones)) };
+  } catch (error) {
+    console.error("Error fetching all pending deudas:", error);
+    return { error: "No se pudieron obtener las deudas pendientes" };
   }
 }

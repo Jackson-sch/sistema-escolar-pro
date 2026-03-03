@@ -33,10 +33,10 @@ export function AcademicProgressChart({ data }: AcademicProgressChartProps) {
     <div className="space-y-6 w-auto h-full flex flex-col">
       <div className="flex items-start justify-between">
         <div className="space-y-1">
-          <h3 className="font-bold text-slate-300 text-sm uppercase tracking-wider">
+          <h3 className="font-bold text-sm uppercase tracking-wider">
             Progreso Académico
           </h3>
-          <p className="text-xs text-slate-500 font-medium tracking-tight">
+          <p className="text-xs text-muted-foreground font-medium tracking-tight">
             Rendimiento Semestre Actual
           </p>
         </div>
@@ -98,7 +98,6 @@ export function AcademicProgressChart({ data }: AcademicProgressChartProps) {
                   stroke: "#10b981",
                   strokeWidth: 2,
                   r: 4,
-                  fill: "#0f172a",
                 }}
                 activeDot={{ r: 6, strokeWidth: 0, fill: "#10b981" }}
               />

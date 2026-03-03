@@ -1,10 +1,12 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import prisma from "@/lib/prisma";
-import { getStudentScheduleAction } from "@/actions/portal";
-import { ScheduleBanner } from "@/components/portal/schedule-banner";
-import { WeeklySchedule } from "@/components/portal/weekly-schedule";
-import { NotasFilter } from "@/components/portal/notas-filter";
+import {
+  getStudentScheduleAction,
+  getParentStudentsAction,
+} from "@/actions/portal";
+import { ScheduleBanner } from "@/components/portal/schedule/schedule-banner";
+import { WeeklySchedule } from "@/components/portal/schedule/weekly-schedule";
+import { NotasFilter } from "@/components/portal/academic/notas-filter";
 import { Card } from "@/components/ui/card";
 import { IconBookOff } from "@tabler/icons-react";
 
@@ -23,20 +25,8 @@ export default async function PortalHorarioPage({
   }
 
   // 1. Obtener hijos del padre
-  const relaciones = await prisma.relacionFamiliar.findMany({
-    where: { padreTutorId: session.user.id },
-    include: {
-      hijo: {
-        select: {
-          id: true,
-          name: true,
-          apellidoPaterno: true,
-        },
-      },
-    },
-  });
-
-  const hijos = relaciones.map((r) => r.hijo);
+  const hijosRes = await getParentStudentsAction(session.user.id);
+  const hijos = hijosRes.data || [];
 
   if (hijos.length === 0) {
     return (

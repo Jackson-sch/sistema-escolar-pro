@@ -193,7 +193,8 @@ exports.Prisma.HistorialEstadoUsuarioScalarFieldEnum = {
   motivo: 'motivo',
   observaciones: 'observaciones',
   cambiadoPorId: 'cambiadoPorId',
-  fechaCambio: 'fechaCambio'
+  fechaCambio: 'fechaCambio',
+  institucionId: 'institucionId'
 };
 
 exports.Prisma.PermisoScalarFieldEnum = {
@@ -809,6 +810,100 @@ exports.Prisma.PoliticaAsistenciaScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.CategoriaUniformeScalarFieldEnum = {
+  id: 'id',
+  nombre: 'nombre',
+  descripcion: 'descripcion',
+  activo: 'activo',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.UniformeScalarFieldEnum = {
+  id: 'id',
+  nombre: 'nombre',
+  descripcion: 'descripcion',
+  categoriaId: 'categoriaId',
+  genero: 'genero',
+  imagen: 'imagen',
+  activo: 'activo',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.VarianteUniformeScalarFieldEnum = {
+  id: 'id',
+  uniformeId: 'uniformeId',
+  talla: 'talla',
+  tipoTalla: 'tipoTalla',
+  precio: 'precio',
+  sedeId: 'sedeId',
+  stock: 'stock',
+  stockMinimo: 'stockMinimo',
+  activo: 'activo',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.MovimientoInventarioScalarFieldEnum = {
+  id: 'id',
+  varianteId: 'varianteId',
+  tipo: 'tipo',
+  cantidad: 'cantidad',
+  motivo: 'motivo',
+  referencia: 'referencia',
+  createdAt: 'createdAt',
+  institucionId: 'institucionId'
+};
+
+exports.Prisma.VentaUniformeScalarFieldEnum = {
+  id: 'id',
+  codigo: 'codigo',
+  estudianteId: 'estudianteId',
+  padreId: 'padreId',
+  sedeId: 'sedeId',
+  estado: 'estado',
+  total: 'total',
+  observaciones: 'observaciones',
+  cronogramaPagoId: 'cronogramaPagoId',
+  aprobadoPorId: 'aprobadoPorId',
+  aprobadoEn: 'aprobadoEn',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.DetalleVentaUniformeScalarFieldEnum = {
+  id: 'id',
+  ventaId: 'ventaId',
+  varianteId: 'varianteId',
+  cantidad: 'cantidad',
+  precioUnitario: 'precioUnitario',
+  subtotal: 'subtotal'
+};
+
+exports.Prisma.FavoritoUniformeScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  uniformeId: 'uniformeId',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.CuentaBancariaScalarFieldEnum = {
+  id: 'id',
+  nombre: 'nombre',
+  tipo: 'tipo',
+  numero: 'numero',
+  cci: 'cci',
+  titular: 'titular',
+  tipoCuenta: 'tipoCuenta',
+  qrCode: 'qrCode',
+  esPrincipal: 'esPrincipal',
+  activo: 'activo',
+  institucionId: 'institucionId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -896,6 +991,37 @@ exports.EstadoComprobante = exports.$Enums.EstadoComprobante = {
   RECHAZADO: 'RECHAZADO'
 };
 
+exports.GeneroUniforme = exports.$Enums.GeneroUniforme = {
+  MASCULINO: 'MASCULINO',
+  FEMENINO: 'FEMENINO',
+  UNISEX: 'UNISEX'
+};
+
+exports.TipoTalla = exports.$Enums.TipoTalla = {
+  NUMERICA: 'NUMERICA',
+  ALFABETICA: 'ALFABETICA'
+};
+
+exports.TipoMovimiento = exports.$Enums.TipoMovimiento = {
+  ENTRADA: 'ENTRADA',
+  SALIDA: 'SALIDA',
+  AJUSTE: 'AJUSTE'
+};
+
+exports.EstadoVentaUniforme = exports.$Enums.EstadoVentaUniforme = {
+  RESERVADO: 'RESERVADO',
+  EN_PRUEBA: 'EN_PRUEBA',
+  APROBADO: 'APROBADO',
+  PAGADO: 'PAGADO',
+  ENTREGADO: 'ENTREGADO',
+  CANCELADO: 'CANCELADO'
+};
+
+exports.TipoCuentaBancaria = exports.$Enums.TipoCuentaBancaria = {
+  BANCO: 'BANCO',
+  BILLETERA_DIGITAL: 'BILLETERA_DIGITAL'
+};
+
 exports.Prisma.ModelName = {
   Cargo: 'Cargo',
   EstadoUsuario: 'EstadoUsuario',
@@ -940,7 +1066,15 @@ exports.Prisma.ModelName = {
   CronogramaPago: 'CronogramaPago',
   VariableSistema: 'VariableSistema',
   ComprobantePago: 'ComprobantePago',
-  PoliticaAsistencia: 'PoliticaAsistencia'
+  PoliticaAsistencia: 'PoliticaAsistencia',
+  CategoriaUniforme: 'CategoriaUniforme',
+  Uniforme: 'Uniforme',
+  VarianteUniforme: 'VarianteUniforme',
+  MovimientoInventario: 'MovimientoInventario',
+  VentaUniforme: 'VentaUniforme',
+  DetalleVentaUniforme: 'DetalleVentaUniforme',
+  FavoritoUniforme: 'FavoritoUniforme',
+  CuentaBancaria: 'CuentaBancaria'
 };
 
 /**

@@ -1,10 +1,11 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import prisma from "@/lib/prisma";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { getInstitucionByIdAction } from "@/actions/institucion";
+import { SiteFooter } from "@/components/layout/site-footer";
+import { getParentUserAction } from "@/actions/portal";
 
 export default async function PortalLayout({
   children,
@@ -14,22 +15,13 @@ export default async function PortalLayout({
   const session = await auth();
 
   // Verificar que el usuario está autenticado
-  if (!session?.user) {
+  if (!session?.user?.id) {
     redirect("/login");
   }
 
   // Verificar si debe cambiar la contraseña
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: {
-      mustChangePassword: true,
-      role: true,
-      name: true,
-      email: true,
-      apellidoPaterno: true,
-      apellidoMaterno: true,
-    },
-  });
+  const userRes = await getParentUserAction(session.user.id);
+  const user = userRes.data;
 
   if (user?.mustChangePassword) {
     redirect("/cambiar-password");
@@ -59,7 +51,8 @@ export default async function PortalLayout({
         <SidebarInset>
           <SiteHeader institucionName="Portal Padres" />
           <main className="flex flex-1 flex-col gap-4 p-4 relative ">
-            {children}
+            <div className="flex-1 w-full">{children}</div>
+            <SiteFooter />
           </main>
         </SidebarInset>
       </SidebarProvider>
