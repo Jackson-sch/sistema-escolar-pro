@@ -4,23 +4,23 @@ import {
   getPortalCommunicationsAction,
   getParentStudentsAction,
 } from "@/actions/portal";
-import { CommunicationsBanner } from "@/components/portal/common/communications-banner";
-import { AnnouncementCard } from "@/components/portal/dashboard/announcement-card";
-import { EventCard } from "@/components/portal/dashboard/event-card";
-import { NotasFilter } from "@/components/portal/academic/notas-filter";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ComunicacionesDashboardClient } from "@/components/portal/dashboard/comunicaciones-dashboard-client";
 import { Card } from "@/components/ui/card";
-import { IconMessage2Off, IconCalendarOff } from "@tabler/icons-react";
+import { StudentSelector } from "@/components/portal/layout/student-selector";
+import Link from "next/link";
+
+import { TeacherCard } from "@/components/portal/docentes/teacher-card";
+import { getDirectorioDocentesAction } from "@/actions/docentes";
 
 interface ComunicacionesPageProps {
-  searchParams: Promise<{ hijoId?: string }>;
+  searchParams: Promise<{ hijoId?: string; view?: string }>;
 }
 
 export default async function PortalComunicacionesPage({
   searchParams,
 }: ComunicacionesPageProps) {
   const session = await auth();
-  const { hijoId } = await searchParams;
+  const { hijoId, view } = await searchParams;
 
   if (!session?.user?.id) {
     redirect("/login");
@@ -29,12 +29,18 @@ export default async function PortalComunicacionesPage({
   // 1. Obtener hijos del padre
   const hijosRes = await getParentStudentsAction(session.user.id);
   const hijos = hijosRes.data || [];
-  console.log("🚀 ~ PortalComunicacionesPage ~ hijos:", hijos)
 
   if (hijos.length === 0) {
     return (
-      <div className="flex flex-1 flex-col gap-6 p-4 sm:p-6 pt-0">
-        <CommunicationsBanner />
+      <div className="flex flex-1 flex-col gap-8 p-4 sm:p-10 pt-0">
+        <div className="space-y-1 mt-4 md:mt-0">
+          <h1 className="text-3xl md:text-4xl font-black tracking-tight">
+            Centro de Comunicaciones
+          </h1>
+          <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed">
+            Mantente informado con los avisos y circulares de la institución.
+          </p>
+        </div>
         <Card className="border-dashed p-12 text-center">
           <p className="text-lg font-bold">
             {hijosRes.error || "No tienes hijos vinculados"}
@@ -47,87 +53,85 @@ export default async function PortalComunicacionesPage({
   // 2. Determinar hijo seleccionado
   const selectedHijoId = hijoId || hijos[0].id;
 
-  // 3. Obtener comunicaciones
-  const commsRes = await getPortalCommunicationsAction(selectedHijoId);
+  // 3. Obtener comunicaciones o docentes
+  let commsRes: any = {};
+  let docentes: any[] = [];
+
+  if (view === "docentes") {
+    const docentesRes = await getDirectorioDocentesAction();
+    docentes = docentesRes.data || [];
+  } else {
+    commsRes = await getPortalCommunicationsAction(selectedHijoId);
+  }
+
   const { anuncios = [], eventos = [] } = commsRes.data || {};
 
   return (
-    <div className="flex flex-1 flex-col gap-8 p-4 sm:p-6 pt-0 animate-in fade-in duration-700">
-      <CommunicationsBanner />
+    <div className="flex-1 flex flex-col gap-8 p-4 sm:p-10 pt-0 animate-in fade-in duration-700">
+      {/* Sección de Encabezado */}
+      <div className="space-y-1 mt-4 md:mt-0 mb-4 xl:mb-0">
+        <h1 className="text-3xl md:text-4xl font-black tracking-tight">
+          {view === "docentes"
+            ? "Directorio Docente"
+            : "Centro de Comunicaciones"}
+        </h1>
+        <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed">
+          {view === "docentes"
+            ? "Conoce a los profesionales de la educación que conforman nuestro plantel."
+            : "Mantente informado con los avisos y circulares de la institución."}
+        </p>
+      </div>
 
-      <NotasFilter
-        hijos={hijos}
-        periodos={[]}
-        currentHijoId={selectedHijoId}
-        currentPeriodoId=""
-        showPeriodo={false}
-        showGeneralOption={true}
-      />
+      <div className="flex flex-col xl:flex-row w-full gap-8">
+        {/* Sidebar Izquierdo (Student & Navigation) */}
+        <aside className="w-full xl:w-64 flex flex-col gap-8 shrink-0">
+          <div className="bg-card rounded-2xl p-4 shadow-sm border border-border">
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4 px-2">
+              Estudiante Actual
+            </p>
+            <StudentSelector students={hijos} orientation="vertical" />
+          </div>
 
-      <Tabs defaultValue="anuncios" className="w-full">
-        <TabsList className="bg-muted/50 p-1 h-14 rounded-2xl border border-border/50 mb-8 overflow-x-auto overflow-y-hidden w-full sm:w-auto">
-          <TabsTrigger
-            value="anuncios"
-            className="flex-1 sm:flex-none h-12 rounded-xl px-8 font-black uppercase tracking-widest text-[10px] data-[state=active]:bg-background data-[state=active]:shadow-lg"
-          >
-            Anuncios Centrales
-          </TabsTrigger>
-          <TabsTrigger
-            value="eventos"
-            className="flex-1 sm:flex-none h-12 rounded-xl px-8 font-black uppercase tracking-widest text-[10px] data-[state=active]:bg-background data-[state=active]:shadow-lg"
-          >
-            Calendario Escolar
-          </TabsTrigger>
-        </TabsList>
+          <div className="hidden xl:flex flex-col gap-1">
+            <Link
+              href="/portal/comunicaciones"
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${!view || view !== "docentes" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted/50"}`}
+            >
+              Actividad Reciente
+            </Link>
+            <Link
+              href="/portal/comunicaciones?view=docentes"
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${view === "docentes" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted/50"}`}
+            >
+              Directorio Docente
+            </Link>
+          </div>
+        </aside>
 
-        <TabsContent
-          value="anuncios"
-          className="space-y-6 animate-in slide-in-from-bottom-2 duration-500"
-        >
-          {anuncios.length === 0 ? (
-            <Card className="border-dashed p-20 text-center bg-muted/20">
-              <IconMessage2Off className="mx-auto size-16 text-muted-foreground/40 mb-4" />
-              <p className="text-xl font-bold tracking-tight">
-                Sin anuncios recientes
-              </p>
-              <p className="text-sm text-muted-foreground mt-2">
-                Te avisaremos cuando haya noticias importantes para el grado de
-                tu hijo.
-              </p>
-            </Card>
-          ) : (
-            <div className="grid gap-6">
-              {anuncios.map((anuncio: any) => (
-                <AnnouncementCard key={anuncio.id} anuncio={anuncio} />
-              ))}
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent
-          value="eventos"
-          className="space-y-6 animate-in slide-in-from-bottom-2 duration-500"
-        >
-          {eventos.length === 0 ? (
-            <Card className="border-dashed p-20 text-center bg-muted/20">
-              <IconCalendarOff className="mx-auto size-16 text-muted-foreground/40 mb-4" />
-              <p className="text-xl font-bold tracking-tight">
-                No hay eventos programados
-              </p>
-              <p className="text-sm text-muted-foreground mt-2">
-                Busca de nuevo más tarde para ver actividades extracurriculares
-                o reuniones.
-              </p>
-            </Card>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2">
-              {eventos.map((evento: any) => (
-                <EventCard key={evento.id} evento={evento} />
-              ))}
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
+        {/* Contenido Principal (Feed o Docentes) */}
+        {view === "docentes" ? (
+          <div className="flex-1 space-y-8 min-w-0">
+            {docentes.length === 0 ? (
+              <div className="flex-1 flex flex-col items-center justify-center p-20 border-2 border-dashed border-border rounded-3xl bg-muted/10">
+                <p className="text-xl font-bold text-muted-foreground/80">
+                  Sin docentes registrados
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {docentes.map((docente) => (
+                  <TeacherCard key={docente.id} teacher={docente as any} />
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <ComunicacionesDashboardClient
+            anuncios={anuncios}
+            eventos={eventos}
+          />
+        )}
+      </div>
     </div>
   );
 }

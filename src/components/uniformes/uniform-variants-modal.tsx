@@ -121,10 +121,10 @@ export function UniformVariantsModal({
       description="Configura los precios y stock disponible por cada sede."
       isOpen={isOpen}
       onOpenChange={onOpenChange}
-      className="sm:max-w-3xl"
+      className="sm:max-w-3xl bg-card/60 backdrop-blur-2xl"
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
               Lista de Variantes
@@ -143,7 +143,7 @@ export function UniformVariantsModal({
             </Button>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-2">
             {fields.map((field, index) => (
               <div
                 key={field.id}
@@ -159,12 +159,12 @@ export function UniformVariantsModal({
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-12 gap-4">
                   <FormField
                     control={form.control}
                     name={`variantes.${index}.sedeId`}
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="col-span-12 lg:col-span-6">
                         <FormLabel className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-widest flex items-center gap-1.5 ml-1">
                           <Home className="h-3 w-3" /> Sede
                         </FormLabel>
@@ -173,7 +173,7 @@ export function UniformVariantsModal({
                           defaultValue={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger className="bg-muted/10 border-border/40 h-9 rounded-lg text-xs">
+                            <SelectTrigger className="bg-muted/10 border-border/40 h-9 w-full rounded-lg text-xs">
                               <SelectValue placeholder="Sede" />
                             </SelectTrigger>
                           </FormControl>
@@ -198,7 +198,7 @@ export function UniformVariantsModal({
                     control={form.control}
                     name={`variantes.${index}.talla`}
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="col-span-12 lg:col-span-2">
                         <FormLabel className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-widest flex items-center gap-1.5 ml-1">
                           <Ruler className="h-3 w-3" /> Talla
                         </FormLabel>
@@ -218,7 +218,7 @@ export function UniformVariantsModal({
                     control={form.control}
                     name={`variantes.${index}.precio`}
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="col-span-12 lg:col-span-2">
                         <FormLabel className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-widest flex items-center gap-1.5 ml-1">
                           <BadgeDollarSign className="h-3 w-3" /> Precio (S/)
                         </FormLabel>
@@ -239,7 +239,7 @@ export function UniformVariantsModal({
                     control={form.control}
                     name={`variantes.${index}.stock`}
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="col-span-12 lg:col-span-2">
                         <FormLabel className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-widest flex items-center gap-1.5 ml-1">
                           <Package className="h-3 w-3" /> Stock
                         </FormLabel>
@@ -259,7 +259,7 @@ export function UniformVariantsModal({
             ))}
           </div>
 
-          <div className="flex gap-3 pt-4 border-t">
+          <div className="flex gap-3 pt-4">
             <Button
               type="button"
               variant="outline"

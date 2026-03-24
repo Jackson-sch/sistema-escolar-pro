@@ -124,6 +124,55 @@ export function FamilyMemberForm({
     return () => setIsDirty(false);
   }, [isDirty, setIsDirty]);
 
+  // Observar cambios en el DNI para auto-completar
+  const dni = form.watch("dni");
+
+  useEffect(() => {
+    // Solo buscar si es un DNI nuevo (no en edición con datos iniciales)
+    if (!initialData && dni && dni.length === 8) {
+      const searchGuardian = async () => {
+        try {
+          const res = await getGuardianByDniAction(dni);
+          if (res?.data) {
+            form.setValue("name", res.data.name || "", {
+              shouldValidate: true,
+              shouldDirty: true,
+            });
+            form.setValue("apellidoPaterno", res.data.apellidoPaterno || "", {
+              shouldValidate: true,
+              shouldDirty: true,
+            });
+            form.setValue("apellidoMaterno", res.data.apellidoMaterno || "", {
+              shouldValidate: true,
+              shouldDirty: true,
+            });
+            form.setValue("telefono", res.data.telefono || "", {
+              shouldValidate: true,
+              shouldDirty: true,
+            });
+            form.setValue("email", res.data.email || "", {
+              shouldValidate: true,
+              shouldDirty: true,
+            });
+            toast.success(
+              "Familiar encontrado, datos cargados automáticamente.",
+            );
+          }
+        } catch (error) {
+          console.error("Error searching guardian:", error);
+        }
+      };
+      searchGuardian();
+    } else if (!initialData && !dni) {
+      // Limpiar campos si el DNI se borra
+      form.setValue("name", "");
+      form.setValue("apellidoPaterno", "");
+      form.setValue("apellidoMaterno", "");
+      form.setValue("telefono", "");
+      form.setValue("email", "");
+    }
+  }, [dni, form, initialData]);
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

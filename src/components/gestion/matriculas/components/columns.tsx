@@ -117,6 +117,9 @@ export const columns: ColumnDef<EnrollmentTableType>[] = [
   {
     accessorKey: "anioAcademico",
     header: "Período",
+    filterFn: (row, id, value) => {
+      return row.getValue(id)?.toString() === value?.toString();
+    },
     cell: ({ row }) => (
       <Badge className="font-semibold bg-primary/10 text-primary border border-primary/30 hover:bg-primary/20 transition-colors">
         Año {row.getValue("anioAcademico")}

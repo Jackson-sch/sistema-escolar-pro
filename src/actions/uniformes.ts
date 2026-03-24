@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { deleteFile } from "@/lib/storage";
 
 // --- CATEGORÍAS ---
 
@@ -72,27 +73,59 @@ export async function upsertUniformeAction(data: any) {
     }
 
     if (id && variantes) {
+      // 1. Obtener variantes actuales
+      const currentVariantes = await prisma.varianteUniforme.findMany({
+        where: { uniformeId: id },
+      });
+
+      // 2. Determinar cuáles eliminar (las que no vienen en el nuevo array)
+      const incomingIds = variantes.map((v: any) => v.id).filter(Boolean);
+      const toDelete = currentVariantes.filter(
+        (cv) => !incomingIds.includes(cv.id),
+      );
+
+      if (toDelete.length > 0) {
+        await prisma.varianteUniforme.deleteMany({
+          where: { id: { in: toDelete.map((d) => d.id) } },
+        });
+      }
+
+      // 3. Upsert de las que vienen
       for (const v of variantes) {
-        await prisma.varianteUniforme.upsert({
-          where: {
-            uniformeId_talla_sedeId: {
-              uniformeId: id,
+        if (v.id) {
+          // Si tiene ID, actualizamos directamente por ID para mayor seguridad
+          await prisma.varianteUniforme.update({
+            where: { id: v.id },
+            data: {
               talla: v.talla,
+              precio: v.precio,
+              stock: v.stock,
               sedeId: v.sedeId,
             },
-          },
-          update: {
-            precio: v.precio,
-            stock: v.stock,
-          },
-          create: {
-            uniformeId: id,
-            talla: v.talla,
-            precio: v.precio,
-            stock: v.stock,
-            sedeId: v.sedeId,
-          },
-        });
+          });
+        } else {
+          // Si no tiene ID, es nueva o intentamos por clave única
+          await prisma.varianteUniforme.upsert({
+            where: {
+              uniformeId_talla_sedeId: {
+                uniformeId: id,
+                talla: v.talla,
+                sedeId: v.sedeId,
+              },
+            },
+            update: {
+              precio: v.precio,
+              stock: v.stock,
+            },
+            create: {
+              uniformeId: id,
+              talla: v.talla,
+              precio: v.precio,
+              stock: v.stock,
+              sedeId: v.sedeId,
+            },
+          });
+        }
       }
     }
 
@@ -350,7 +383,6 @@ export async function aprobarVentaUniformeAction(
         },
       });
 
-      // 3. Actualizar Venta
       const ventaActualizada = await tx.ventaUniforme.update({
         where: { id: ventaId },
         data: {
@@ -358,6 +390,26 @@ export async function aprobarVentaUniformeAction(
           aprobadoPorId: adminId,
           aprobadoEn: new Date(),
           cronogramaPagoId: cronograma.id,
+        },
+        include: {
+          estudiante: {
+            include: {
+              nivelAcademico: {
+                include: {
+                  grado: true,
+                  nivel: true,
+                },
+              },
+            },
+          },
+          sede: true,
+          detalles: {
+            include: {
+              variante: {
+                include: { uniforme: true },
+              },
+            },
+          },
         },
       });
 
@@ -493,12 +545,31 @@ export async function confirmarEntregaUniformeAction(ventaId: string) {
         });
       }
 
-      // 2. Actualizar estado de la venta
       const ventaActualizada = await tx.ventaUniforme.update({
         where: { id: ventaId },
         data: {
           estado: "ENTREGADO",
           updatedAt: new Date(),
+        },
+        include: {
+          estudiante: {
+            include: {
+              nivelAcademico: {
+                include: {
+                  grado: true,
+                  nivel: true,
+                },
+              },
+            },
+          },
+          sede: true,
+          detalles: {
+            include: {
+              variante: {
+                include: { uniforme: true },
+              },
+            },
+          },
         },
       });
 
@@ -572,5 +643,36 @@ export async function toggleFavoritoUniformeAction(
   } catch (error) {
     console.error("Error toggling uniform favorite:", error);
     return { error: "No se pudo actualizar favoritos" };
+  }
+}
+export async function deleteUniformeAction(id: string) {
+  try {
+    const uniforme = await prisma.uniforme.findUnique({
+      where: { id },
+      select: { imagen: true },
+    });
+
+    if (!uniforme) {
+      return { error: "Uniforme no encontrado" };
+    }
+
+    // 1. Eliminar de la base de datos
+    await prisma.uniforme.delete({
+      where: { id },
+    });
+
+    // 2. Eliminar imagen física (si existe)
+    if (uniforme.imagen) {
+      await deleteFile(uniforme.imagen);
+    }
+
+    revalidatePath("/uniformes");
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting uniform:", error);
+    return {
+      error:
+        "No se pudo eliminar el uniforme. Verifique que no tenga pedidos asociados.",
+    };
   }
 }

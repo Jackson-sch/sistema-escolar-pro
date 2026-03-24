@@ -69,7 +69,7 @@ export function AttendanceCalendar({
 
   return (
     <Card className="border-border/50 bg-card/50 shadow-xl overflow-hidden">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 p-6 border-b border-border/50">
+      <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-6 border-b border-border/50">
         <div className="flex items-center gap-3">
           <CardTitle className="text-xl font-black tracking-tight capitalize">
             {format(currentDate, "MMMM yyyy", { locale: es })}
@@ -94,22 +94,22 @@ export function AttendanceCalendar({
           </div>
         </div>
 
-        <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground/80">
+        <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground/80">
           <div className="flex items-center gap-1.5">
             <div className="size-2.5 rounded-full bg-success" />
-            <span>Asistencia</span>
+            <span className="hidden xs:inline">Asistencia</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="size-2.5 rounded-full bg-warning" />
-            <span>Tardanza</span>
+            <span className="hidden xs:inline">Tardanza</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="size-2.5 rounded-full bg-destructive" />
-            <span>Falta</span>
+            <span className="hidden xs:inline">Falta</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="size-2.5 rounded-full bg-info" />
-            <span>Justificada</span>
+            <span className="hidden xs:inline">Justificada</span>
           </div>
         </div>
       </CardHeader>
@@ -121,7 +121,8 @@ export function AttendanceCalendar({
               key={day}
               className="py-3 text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground/60"
             >
-              {day}
+              <span className="hidden xs:inline">{day}</span>
+              <span className="xs:hidden">{day.charAt(0)}</span>
             </div>
           ))}
         </div>
@@ -130,7 +131,7 @@ export function AttendanceCalendar({
           {paddingDays.map((_, i) => (
             <div
               key={`padding-${i}`}
-              className="h-28 border-r border-b border-border/50 bg-muted/10 last:border-r-0"
+              className="h-20 sm:h-28 border-r border-b border-border/50 bg-muted/10 last:border-r-0"
             />
           ))}
 
@@ -142,7 +143,7 @@ export function AttendanceCalendar({
               <div
                 key={day.toString()}
                 className={cn(
-                  "relative h-28 border-r border-b border-border/50 p-2 transition-colors last:border-r-0 hover:bg-muted/30",
+                  "relative h-20 sm:h-28 border-r border-b border-border/50 p-2 transition-colors last:border-r-0 hover:bg-muted/30",
                   !isSameMonth(day, monthStart) && "text-muted-foreground/30",
                   isToday(day) && "bg-primary/5",
                 )}

@@ -56,31 +56,15 @@ export default async function NuevoComprobantePage({
   );
 
   return (
-    <div className="flex flex-1 flex-col gap-8 p-4 sm:p-6 pt-0 animate-in fade-in duration-500">
-      {/* Premium Banner */}
-      <div className="relative overflow-hidden rounded-3xl border border-blue-500/20 bg-card/50 p-8">
-        <div className="relative z-10 flex flex-col gap-3 md:max-w-[70%]">
-          <Badge className="w-fit border-none bg-blue-500/10 text-blue-600">
-            Confirmación de Pago
-          </Badge>
-          <h1 className="flex items-center gap-3 text-3xl font-black tracking-tight sm:text-4xl">
-            Subir{" "}
-            <span className="bg-linear-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent">
-              Comprobante
-            </span>
-            <IconCloudUpload className="size-8 sm:size-10 text-blue-500" />
-          </h1>
-          <p className="max-w-xl text-balance text-lg text-muted-foreground">
-            Sube la imagen o el PDF de tu transferencia. Nuestro equipo
-            administrativo validará el pago en un plazo máximo de 24-48 horas
-            hábiles.
-          </p>
-        </div>
-
-        {/* Abstract background elements */}
-        <div className="absolute -right-24 -top-24 size-80 rounded-full bg-blue-500/10 blur-[120px]" />
-        <div className="absolute -bottom-24 -left-24 size-64 rounded-full bg-indigo-500/5 blur-[100px]" />
-        <IconUpload className="absolute -bottom-8 -right-8 size-56 -rotate-12 text-blue-500/5 select-none" />
+    <div className="flex flex-1 flex-col gap-8 p-4 sm:p-10 pt-0 animate-in fade-in duration-500">
+      {/* Sección de Encabezado */}
+      <div className="space-y-1 mt-4 md:mt-0">
+        <h1 className="text-3xl md:text-4xl font-black tracking-tight">
+          Mis Comprobantes
+        </h1>
+        <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed">
+          Historial de pagos realizados y descarga de facturas/recibos.
+        </p>
       </div>
 
       <div className="max-w-2xl mx-auto w-full">

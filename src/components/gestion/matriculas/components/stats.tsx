@@ -10,6 +10,7 @@ export default function Stats({ stats }: { stats: any }) {
       iconColor: "text-blue-400",
       iconBgColor: "bg-blue-400/10",
       description: "Vacantes cubiertas estimadas",
+      glowColor: "#0000FF",
     },
     {
       title: "MATRICULADOS HOY",
@@ -18,6 +19,7 @@ export default function Stats({ stats }: { stats: any }) {
       iconColor: "text-green-400",
       iconBgColor: "bg-green-400/10",
       description: "Registros procesados hoy",
+      glowColor: "#0000FF",
     },
     {
       title: "SITUACIÓN REGULAR",
@@ -26,6 +28,7 @@ export default function Stats({ stats }: { stats: any }) {
       iconColor: "text-orange-400",
       iconBgColor: "bg-orange-400/10",
       description: "Alumnos ratificados exitosamente",
+      glowColor: "#0000FF",
     },
   ];
   return (

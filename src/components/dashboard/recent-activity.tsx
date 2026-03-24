@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   IconCircleCheck,
   IconCreditCard,
@@ -41,6 +41,9 @@ export function RecentActivity({ activities }: RecentActivityProps) {
     <Card className="h-full">
       <CardHeader>
         <CardTitle className="text-lg font-bold">Actividad Reciente</CardTitle>
+        <CardDescription>
+          Últimos eventos registrados en el sistema.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="relative space-y-4 before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-linear-to-b before:from-transparent before:via-slate-200/50 before:to-transparent">

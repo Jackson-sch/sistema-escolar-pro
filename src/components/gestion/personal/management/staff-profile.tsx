@@ -20,6 +20,10 @@ import {
 } from "@tabler/icons-react";
 import { StaffTableType } from "@/components/gestion/personal/components/columns";
 import { getInitials } from "@/lib/formats";
+import { useRef, useState } from "react";
+import { updateStaffAction } from "@/actions/staff";
+import { toast } from "sonner";
+import { IconCamera, IconLoader2, IconTrash } from "@tabler/icons-react";
 
 interface StaffProfileProps {
   staff: StaffTableType;
@@ -29,11 +33,92 @@ interface StaffProfileProps {
 }
 
 export default function StaffProfile({
-  staff,
+  staff: initialStaff,
   showViewSheet,
   setShowViewSheet,
   setShowEditDialog,
 }: StaffProfileProps) {
+  const [staff, setStaff] = useState(initialStaff);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validaciones básicas antes de subir
+    if (!file.type.startsWith("image/")) {
+      toast.error("Por favor, selecciona una imagen válida");
+      return;
+    }
+
+    if (file.size > 4 * 1024 * 1024) {
+      toast.error("La imagen es demasiado grande (máximo 4MB)");
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      const uploadUrl = data.url;
+
+      // Si ya tenía una imagen, eliminarla físicamente
+      const result = await updateStaffAction(staff.id, {
+        image: uploadUrl,
+      });
+
+      if (result.error) {
+        throw new Error(result.error);
+      }
+
+      // Actualizar estado local
+      setStaff((prev) => ({ ...prev, image: uploadUrl }));
+      toast.success("Imagen de perfil actualizada");
+    } catch (error: any) {
+      console.error("Upload error:", error);
+      toast.error(error.message || "Error al subir la imagen");
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleDeleteImage = async () => {
+    try {
+      setIsUploading(true);
+      const result = await updateStaffAction(staff.id, { image: null });
+
+      if (result.error) {
+        throw new Error(result.error);
+      }
+
+      setStaff((prev) => ({ ...prev, image: null }));
+      toast.success("Imagen de perfil eliminada");
+    } catch (error: any) {
+      console.error("Delete error:", error);
+      toast.error(error.message || "Error al eliminar la imagen");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   return (
     <Sheet open={showViewSheet} onOpenChange={setShowViewSheet}>
       <SheetContent className="sm:max-w-[420px] p-0 overflow-y-auto bg-background flex flex-col">
@@ -49,7 +134,7 @@ export default function StaffProfile({
         <div className="relative w-full shrink-0">
           {/* Fondo con degradado */}
           <div className="h-24 w-full bg-primary/10 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/5 to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-br from-primary/20 via-primary/5 to-transparent" />
             {/* Patrón decorativo */}
             <div className="absolute -right-10 -top-10 w-40 h-40 bg-primary/5 rounded-full blur-2xl" />
             <div className="absolute left-10 bottom-0 w-20 h-20 bg-primary/5 rounded-full blur-xl" />
@@ -86,17 +171,60 @@ export default function StaffProfile({
           {/* Avatar */}
           <div className="absolute bottom-0 left-6 transform translate-y-1/2 z-10">
             <div className="relative group">
-              <Avatar className="size-24 border-4 border-background shadow-lg bg-muted">
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept="image/*"
+                onChange={handleFileChange}
+              />
+              <Avatar className="size-24 border-4 border-background shadow-lg bg-muted relative overflow-hidden">
                 <AvatarImage src={staff.image || ""} alt={staff.name} />
                 <AvatarFallback className="text-2xl font-bold bg-primary text-primary-foreground">
                   {getInitials(staff.name, staff.apellidoPaterno)}
                 </AvatarFallback>
+
+                {/* Overlay de carga */}
+                {isUploading && (
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-20 backdrop-blur-[2px]">
+                    <IconLoader2 className="size-8 text-white animate-spin" />
+                  </div>
+                )}
               </Avatar>
-              {/* Indicador de estado */}
-              <div
-                className="absolute bottom-1 right-1 size-4 rounded-full border-2 border-background shadow-sm ring-1 ring-black/5 transition-transform group-hover:scale-110"
-                style={{ backgroundColor: staff.estado?.color || "#94a3b8" }}
-              />
+
+              {/* Botón de Cámara Pequeño */}
+              <button
+                disabled={isUploading}
+                onClick={handleImageClick}
+                className="absolute -bottom-1 -right-1 size-8 rounded-full bg-primary text-primary-foreground border-2 border-background shadow-md flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-30 group/btn"
+                title="Cambiar imagen de perfil"
+              >
+                {isUploading ? (
+                  <IconLoader2 className="size-3.5 animate-spin" />
+                ) : (
+                  <IconCamera className="size-3.5" />
+                )}
+              </button>
+
+              {/* Botón de borrar (Solo si hay imagen) */}
+              {staff.image && !isUploading && (
+                <button
+                  onClick={handleDeleteImage}
+                  className="absolute -bottom-1 -left-1 size-8 rounded-full bg-destructive text-destructive-foreground border-2 border-background shadow-md flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-30"
+                  title="Eliminar imagen de perfil"
+                >
+                  <IconTrash className="size-3.5" />
+                </button>
+              )}
+
+              {/* Indicador de estado movido un poco más arriba si es necesario o integrado con el botón */}
+              {!isUploading && (
+                <div
+                  className="absolute top-1 right-1 size-3.5 rounded-full border-2 border-background shadow-sm ring-1 ring-black/5"
+                  style={{ backgroundColor: staff.estado?.color || "#94a3b8" }}
+                  title={`Estado: ${staff.estado?.nombre || "N/A"}`}
+                />
+              )}
             </div>
           </div>
         </div>
@@ -191,7 +319,7 @@ export default function StaffProfile({
                   Expediente Académico
                 </h3>
 
-                <div className="rounded-xl border border-primary/10 bg-gradient-to-br from-primary/[0.02] to-background p-5 shadow-sm relative overflow-hidden group hover:border-primary/20 transition-colors">
+                <div className="rounded-xl border border-primary/10 bg-linear-to-br from-primary/[0.02] to-background p-5 shadow-sm relative overflow-hidden group hover:border-primary/20 transition-colors">
                   {/* Decoración sutil */}
                   <div className="absolute top-0 right-0 w-16 h-16 bg-primary/5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110" />
 

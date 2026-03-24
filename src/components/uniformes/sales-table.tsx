@@ -41,6 +41,7 @@ import {
   confirmarEntregaUniformeAction,
   actualizarEstadoVentaUniformeAction,
 } from "@/actions/uniformes";
+import { UniformReceiptDownload } from "./uniform-receipt-download";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -74,7 +75,7 @@ export function SalesTable({ ventas, adminId }: SalesTableProps) {
         toast.error(res.error);
       } else {
         toast.success(`Estado del pedido actualizado a ${nuevoEstado}`);
-        setSelectedVenta(null);
+        setSelectedVenta(res.data);
       }
     });
   };
@@ -86,7 +87,7 @@ export function SalesTable({ ventas, adminId }: SalesTableProps) {
         toast.error(res.error);
       } else {
         toast.success("Reserva aprobada y vinculada al cronograma de pagos");
-        setSelectedVenta(null);
+        setSelectedVenta(res.data.venta);
       }
     });
   };
@@ -98,7 +99,7 @@ export function SalesTable({ ventas, adminId }: SalesTableProps) {
         toast.error(res.error);
       } else {
         toast.success("Pedido entregado y stock actualizado correctamente");
-        setSelectedVenta(null);
+        setSelectedVenta(res.data);
       }
     });
   };
@@ -335,20 +336,13 @@ export function SalesTable({ ventas, adminId }: SalesTableProps) {
               )}
 
               {selectedVenta.estado === "APROBADO" && (
-                <div className="bg-green-50 p-4 rounded-xl border border-green-100 flex items-center justify-between">
+                <div className="bg-emerald-500/10 p-4 rounded-2xl border border-emerald-500/20 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
-                    <span className="text-xs font-bold text-green-800">
-                      Esta venta ya ha sido aprobada
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                    <span className="text-xs font-bold text-emerald-600">
+                      Esta venta ha sido aprobada
                     </span>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 text-green-700 hover:bg-green-100"
-                  >
-                    Ver Pago
-                  </Button>
                 </div>
               )}
             </div>
@@ -425,18 +419,25 @@ export function SalesTable({ ventas, adminId }: SalesTableProps) {
               </div>
             )}
             {selectedVenta?.estado === "APROBADO" && (
-              <Button
-                onClick={() => handleConfirmDelivery(selectedVenta.id)}
-                disabled={isPending}
-                className="bg-foreground text-background hover:bg-foreground/90 rounded-xl h-11 font-bold flex-2"
-              >
-                {isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  "Confirmar Entrega"
-                )}
-              </Button>
+              <div className="flex gap-2 flex-1">
+                <UniformReceiptDownload venta={selectedVenta} />
+                <Button
+                  onClick={() => handleConfirmDelivery(selectedVenta.id)}
+                  disabled={isPending}
+                  className="bg-foreground text-background hover:bg-foreground/90 rounded-xl h-11 font-bold flex-1"
+                >
+                  {isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    "Confirmar Entrega"
+                  )}
+                </Button>
+              </div>
             )}
+            {selectedVenta &&
+              ["ENTREGADO", "PAGADO"].includes(selectedVenta.estado) && (
+                <UniformReceiptDownload venta={selectedVenta} />
+              )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

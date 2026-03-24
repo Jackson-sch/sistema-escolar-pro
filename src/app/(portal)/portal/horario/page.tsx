@@ -4,9 +4,7 @@ import {
   getStudentScheduleAction,
   getParentStudentsAction,
 } from "@/actions/portal";
-import { ScheduleBanner } from "@/components/portal/schedule/schedule-banner";
-import { WeeklySchedule } from "@/components/portal/schedule/weekly-schedule";
-import { NotasFilter } from "@/components/portal/academic/notas-filter";
+import { ScheduleViewManager } from "@/components/portal/schedule/schedule-view-manager";
 import { Card } from "@/components/ui/card";
 import { IconBookOff } from "@tabler/icons-react";
 
@@ -30,8 +28,15 @@ export default async function PortalHorarioPage({
 
   if (hijos.length === 0) {
     return (
-      <div className="flex flex-1 flex-col gap-6 p-4 sm:p-6 pt-0">
-        <ScheduleBanner />
+      <div className="flex flex-1 flex-col gap-8 p-4 sm:p-10 pt-0">
+        <div className="space-y-1 mt-4 md:mt-0">
+          <h1 className="text-3xl md:text-4xl font-black tracking-tight">
+            Horario Escolar
+          </h1>
+          <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed">
+            Consulta la programación semanal de clases y actividades.
+          </p>
+        </div>
         <Card className="border-dashed p-12 text-center">
           <p className="text-lg font-bold">No tienes hijos vinculados</p>
         </Card>
@@ -47,19 +52,19 @@ export default async function PortalHorarioPage({
   const horarios = scheduleRes.data || [];
 
   return (
-    <div className="flex flex-1 flex-col gap-8 p-4 sm:p-6 pt-0 animate-in fade-in duration-700">
-      <ScheduleBanner />
-
-      <NotasFilter
-        hijos={hijos}
-        periodos={[]}
-        currentHijoId={selectedHijoId}
-        currentPeriodoId=""
-        showPeriodo={false}
-      />
+    <div className="flex flex-1 flex-col gap-8 p-4 sm:p-10 pt-0 animate-in fade-in duration-700 max-w-[1400px] w-full mx-auto">
+      {/* Sección de Encabezado */}
+      <div className="space-y-1 mt-4 md:mt-0">
+        <h1 className="text-3xl md:text-4xl font-black tracking-tight">
+          Horario Escolar
+        </h1>
+        <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed">
+          Consulta la programación semanal de clases y actividades.
+        </p>
+      </div>
 
       {horarios.length === 0 ? (
-        <Card className="border-dashed p-20 text-center bg-muted/20">
+        <Card className="border-dashed p-20 text-center bg-muted/20 mt-8">
           <IconBookOff className="mx-auto size-16 text-muted-foreground/40 mb-4" />
           <p className="text-xl font-bold tracking-tight">
             Horario no disponible
@@ -69,24 +74,12 @@ export default async function PortalHorarioPage({
           </p>
         </Card>
       ) : (
-        <WeeklySchedule horarios={horarios} />
+        <ScheduleViewManager
+          horarios={horarios}
+          hijos={hijos}
+          selectedHijoId={selectedHijoId}
+        />
       )}
-
-      <div className="bg-amber-500/5 border border-amber-500/10 p-6 rounded-3xl flex items-start gap-4 shadow-inner">
-        <div className="size-10 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500 shrink-0">
-          <IconBookOff className="size-6" />
-        </div>
-        <div>
-          <h4 className="font-bold text-amber-900 dark:text-amber-200">
-            Sobre la Programación Académica
-          </h4>
-          <p className="text-sm text-amber-700/80 dark:text-amber-300/60 mt-1">
-            Los horarios están sujetos a cambios por actividades institucionales
-            programadas. Se notificará a través del módulo de Comunicaciones
-            cualquier ajuste mayor.
-          </p>
-        </div>
-      </div>
     </div>
   );
 }

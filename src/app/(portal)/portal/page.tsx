@@ -1,7 +1,6 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { getParentDashboardDataAction } from "@/actions/portal";
-import { WelcomeBanner } from "@/components/portal/dashboard/welcome-banner";
 import { StudentSelector } from "@/components/portal/layout/student-selector";
 import { DashboardContent } from "@/components/portal/dashboard/dashboard-content";
 import { Card } from "@/components/ui/card";
@@ -42,8 +41,15 @@ export default async function PortalDashboardPage({
 
   if (hijos.length === 0) {
     return (
-      <div className="flex flex-1 flex-col gap-6 p-4">
-        <WelcomeBanner userName={session.user.name || ""} />
+      <div className="flex flex-1 flex-col gap-8 p-4 sm:p-10 pt-0">
+        <div className="space-y-1 mt-4 md:mt-0">
+          <h1 className="text-3xl md:text-4xl font-black tracking-tight">
+            Bienvenido al Portal
+          </h1>
+          <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed">
+            Resumen general de la actividad escolar y accesos rápidos.
+          </p>
+        </div>
         <Card className="border-dashed p-12 text-center bg-muted/20">
           <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-muted">
             <IconUser className="size-8 text-muted-foreground" />
@@ -58,15 +64,22 @@ export default async function PortalDashboardPage({
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-4 md:p-8 pt-0 @container/main animate-in fade-in slide-in-from-bottom-4 duration-700 min-h-screen max-w-[1600px] mx-auto w-full">
-      {/* Premium Welcome Banner */}
-      <WelcomeBanner userName={session.user.name || ""} />
-      {/* Custom Header from Design */}
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 py-8 border-b border-white/5">
+    <div className="flex flex-1 flex-col gap-8 p-4 md:p-10 pt-0 @container/main animate-in fade-in duration-700 min-h-screen max-w-[1600px] mx-auto w-full">
+      {/* Sección de Encabezado */}
+      <div className="space-y-1 mt-4 md:mt-0">
+        <h1 className="text-3xl md:text-4xl font-black tracking-tight">
+          Bienvenido al Portal
+        </h1>
+        <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed">
+          Resumen general de la actividad escolar y accesos rápidos.
+        </p>
+      </div>
+
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 py-2 border-b border-white/5">
         <div className="flex flex-col gap-4">
           <StudentSelector students={hijos} />
         </div>
-      </header>
+      </div>
 
       {/* Dashboard Específico del Estudiante */}
       <main className="space-y-8">

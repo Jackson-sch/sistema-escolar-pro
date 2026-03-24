@@ -18,9 +18,13 @@ interface Student {
 
 interface StudentSelectorProps {
   students: Student[];
+  orientation?: "horizontal" | "vertical";
 }
 
-export function StudentSelector({ students }: StudentSelectorProps) {
+export function StudentSelector({
+  students,
+  orientation = "horizontal",
+}: StudentSelectorProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentId = searchParams.get("hijoId") || students[0]?.id;
@@ -32,7 +36,14 @@ export function StudentSelector({ students }: StudentSelectorProps) {
   };
 
   return (
-    <div className="flex items-center gap-3 overflow-x-auto scrollbar-none">
+    <div
+      className={cn(
+        "flex gap-3 overflow-x-auto scrollbar-none",
+        orientation === "vertical"
+          ? "flex-col items-stretch overflow-y-auto"
+          : "items-center",
+      )}
+    >
       {students.map((student) => {
         const isActive = currentId === student.id;
         const initials =
@@ -76,7 +87,7 @@ export function StudentSelector({ students }: StudentSelectorProps) {
                   isActive ? "text-primary" : "text-muted-foreground",
                 )}
               >
-                {student.name} 
+                {student.name}
               </span>
               <span className="text-[10px] text-muted-foreground truncate">
                 {student.nivelAcademico?.grado.nombre || "Estudiante"}

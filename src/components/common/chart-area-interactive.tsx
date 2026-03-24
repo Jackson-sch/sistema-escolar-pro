@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
+import * as React from "react";
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
-import { useIsMobile } from "@/hooks/use-mobile"
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Card,
   CardAction,
@@ -11,24 +11,21 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from "@/components/ui/chart"
+} from "@/components/ui/chart";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@/components/ui/toggle-group"
+} from "@/components/ui/select";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface ChartAreaInteractiveProps {
   data?: { date: string; revenue: number }[];
@@ -39,31 +36,31 @@ const chartConfig = {
     label: "Recaudación",
     color: "var(--primary)",
   },
-} satisfies ChartConfig
+} satisfies ChartConfig;
 
 export function ChartAreaInteractive({ data = [] }: ChartAreaInteractiveProps) {
-  const isMobile = useIsMobile()
-  const [timeRange, setTimeRange] = React.useState("90d")
+  const isMobile = useIsMobile();
+  const [timeRange, setTimeRange] = React.useState("90d");
 
   React.useEffect(() => {
     if (isMobile) {
-      setTimeRange("7d")
+      setTimeRange("7d");
     }
-  }, [isMobile])
+  }, [isMobile]);
 
   const filteredData = React.useMemo(() => {
-    if (!data.length) return []
+    if (!data.length) return [];
 
-    const lastDate = new Date(data[data.length - 1].date)
-    let daysToSubtract = 90
-    if (timeRange === "30d") daysToSubtract = 30
-    if (timeRange === "7d") daysToSubtract = 7
+    const lastDate = new Date(data[data.length - 1].date);
+    let daysToSubtract = 90;
+    if (timeRange === "30d") daysToSubtract = 30;
+    if (timeRange === "7d") daysToSubtract = 7;
 
-    const startDate = new Date(lastDate)
-    startDate.setDate(startDate.getDate() - daysToSubtract)
+    const startDate = new Date(lastDate);
+    startDate.setDate(startDate.getDate() - daysToSubtract);
 
-    return data.filter((item) => new Date(item.date) >= startDate)
-  }, [data, timeRange])
+    return data.filter((item) => new Date(item.date) >= startDate);
+  }, [data, timeRange]);
 
   return (
     <Card className="@container/card">
@@ -134,11 +131,11 @@ export function ChartAreaInteractive({ data = [] }: ChartAreaInteractiveProps) {
               tickMargin={8}
               minTickGap={32}
               tickFormatter={(value) => {
-                const date = new Date(value)
+                const date = new Date(value);
                 return date.toLocaleDateString("es-PE", {
                   month: "short",
                   day: "numeric",
-                })
+                });
               }}
             />
             <YAxis
@@ -156,8 +153,8 @@ export function ChartAreaInteractive({ data = [] }: ChartAreaInteractiveProps) {
                     return new Date(value).toLocaleDateString("es-PE", {
                       month: "long",
                       day: "numeric",
-                      year: "numeric"
-                    })
+                      year: "numeric",
+                    });
                   }}
                   indicator="dot"
                 />
@@ -174,5 +171,5 @@ export function ChartAreaInteractive({ data = [] }: ChartAreaInteractiveProps) {
         </ChartContainer>
       </CardContent>
     </Card>
-  )
+  );
 }

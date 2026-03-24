@@ -33,7 +33,7 @@ export function WelcomeBanner({ userName }: WelcomeBannerProps) {
             size="lg"
             className="rounded-2xl font-bold shadow-xl shadow-primary/10 transition-all hover:scale-[1.02] active:scale-[0.98]"
           >
-            <Link href="/portal/comprobantes/nuevo">
+            <Link href="/portal/deudas">
               Subir Pago
               <IconArrowRight className="ml-2 size-5" />
             </Link>

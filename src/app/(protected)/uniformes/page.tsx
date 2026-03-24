@@ -18,9 +18,8 @@ import { getSedesAction } from "@/actions/sedes";
 import { UniformList } from "@/components/uniformes/uniform-list";
 import { InventoryTable } from "@/components/uniformes/inventory-table";
 import { SalesTable } from "@/components/uniformes/sales-table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { UniformTabs } from "@/components/uniformes/uniform-tabs";
 
 export const metadata = {
   title: "Gestión de Uniformes | EduPeru Pro",
@@ -59,58 +58,29 @@ export default async function UniformesPage() {
         </div>
       </div>
 
-      <Tabs defaultValue="catalogo" className="space-y-6">
-        <div className="flex justify-between items-center bg-slate-100/50 p-1 rounded-xl w-fit">
-          <TabsList className="bg-transparent border-none">
-            <TabsTrigger
-              value="catalogo"
-              className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm rounded-lg transition-all"
-            >
-              <Shirt className="h-4 w-4 mr-2" />
-              Catálogo
-            </TabsTrigger>
-            <TabsTrigger
-              value="inventario"
-              className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm rounded-lg transition-all"
-            >
-              <Package className="h-4 w-4 mr-2" />
-              Inventario
-            </TabsTrigger>
-            <TabsTrigger
-              value="ventas"
-              className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm rounded-lg transition-all"
-            >
-              <History className="h-4 w-4 mr-2" />
-              Ventas y Reservas
-            </TabsTrigger>
-          </TabsList>
-        </div>
-
-        <TabsContent value="catalogo" className="border-none p-0 outline-none">
-          <Suspense fallback={<UniformListSkeleton />}>
-            <UniformList
-              uniforms={uniforms}
-              categories={categories}
-              sedes={sedes}
-            />
-          </Suspense>
-        </TabsContent>
-
-        <TabsContent
-          value="inventario"
-          className="border-none p-0 outline-none"
-        >
-          <Suspense fallback={<InventorySkeleton />}>
-            <InventoryTable variantes={variants} sedes={sedes} />
-          </Suspense>
-        </TabsContent>
-
-        <TabsContent value="ventas" className="border-none p-0 outline-none">
-          <Suspense fallback={<SalesSkeleton />}>
-            <SalesTable ventas={ventas} adminId={session?.user?.id || ""} />
-          </Suspense>
-        </TabsContent>
-      </Tabs>
+      <UniformTabs>
+        {{
+          catalogo: (
+            <Suspense fallback={<UniformListSkeleton />}>
+              <UniformList
+                uniforms={uniforms}
+                categories={categories}
+                sedes={sedes}
+              />
+            </Suspense>
+          ),
+          inventario: (
+            <Suspense fallback={<InventorySkeleton />}>
+              <InventoryTable variantes={variants} sedes={sedes} />
+            </Suspense>
+          ),
+          ventas: (
+            <Suspense fallback={<SalesSkeleton />}>
+              <SalesTable ventas={ventas} adminId={session?.user?.id || ""} />
+            </Suspense>
+          ),
+        }}
+      </UniformTabs>
     </div>
   );
 }

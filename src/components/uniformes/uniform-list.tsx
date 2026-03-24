@@ -13,6 +13,8 @@ import {
   Layers,
   Ruler,
 } from "lucide-react";
+import { toast } from "sonner";
+import { deleteUniformeAction } from "@/actions/uniformes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +22,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -31,7 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
+import { ConfirmModal } from "@/components/modals/confirm-modal";
 import { UniformBasicModal } from "./uniform-basic-modal";
 import { UniformVariantsModal } from "./uniform-variants-modal";
 
@@ -47,6 +48,10 @@ export function UniformList({ uniforms, categories, sedes }: UniformListProps) {
   const [isBasicModalOpen, setIsBasicModalOpen] = useState(false);
   const [isVariantsModalOpen, setIsVariantsModalOpen] = useState(false);
   const [editingUniform, setEditingUniform] = useState<any>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [uniformToDelete, setUniformToDelete] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const filteredUniforms = uniforms.filter((u) => {
     const matchesSearch =
@@ -56,6 +61,31 @@ export function UniformList({ uniforms, categories, sedes }: UniformListProps) {
       selectedCategory === "all" || u.categoriaId === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  const handleDeleteClick = (uniform: any) => {
+    setUniformToDelete(uniform);
+    setIsDeleteModalOpen(true);
+  };
+
+  const onConfirmDelete = async () => {
+    if (!uniformToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      const result = await deleteUniformeAction(uniformToDelete.id);
+      if (result.success) {
+        toast.success("Uniforme eliminado correctamente");
+        setIsDeleteModalOpen(false);
+        setUniformToDelete(null);
+      } else {
+        toast.error(result.error || "Error al eliminar el uniforme");
+      }
+    } catch (error) {
+      toast.error("Error inesperado al eliminar");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -114,6 +144,7 @@ export function UniformList({ uniforms, categories, sedes }: UniformListProps) {
               setEditingUniform(uniform);
               setIsVariantsModalOpen(true);
             }}
+            onDelete={() => handleDeleteClick(uniform)}
           />
         ))}
 
@@ -141,6 +172,16 @@ export function UniformList({ uniforms, categories, sedes }: UniformListProps) {
         uniform={editingUniform}
         sedes={sedes}
       />
+
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={onConfirmDelete}
+        loading={isDeleting}
+        title="Eliminar Uniforme"
+        description={`¿Estás seguro de que deseas eliminar "${uniformToDelete?.nombre}"? Esta acción eliminará el registro y su imagen permanentemente.`}
+        variant="danger"
+      />
     </div>
   );
 }
@@ -149,17 +190,19 @@ function UniformCard({
   uniform,
   onEdit,
   onManageVariants,
+  onDelete,
 }: {
   uniform: any;
   onEdit: () => void;
   onManageVariants: () => void;
+  onDelete: () => void;
 }) {
   const totalStock =
     uniform.variantes?.reduce((acc: number, v: any) => acc + v.stock, 0) || 0;
   const variantCount = uniform.variantes?.length || 0;
 
   return (
-    <Card className="group overflow-hidden border-border/40 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 bg-card/40 backdrop-blur-xl rounded-3xl animate-in fade-in zoom-in-95">
+    <Card className="group overflow-hidden p-0 border-border/40 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 bg-card/40 backdrop-blur-xl rounded-3xl animate-in fade-in zoom-in-95">
       <div className="aspect-4/3 relative bg-muted/10 overflow-hidden">
         {uniform.imagen ? (
           <img
@@ -198,6 +241,7 @@ function UniformCard({
             <Button
               variant="destructive"
               size="icon"
+              onClick={onDelete}
               className="h-10 w-10 bg-rose-500/80 hover:bg-rose-500 text-white border-none backdrop-blur-md rounded-xl shadow-lg"
             >
               <Trash2 className="h-4 w-4" />

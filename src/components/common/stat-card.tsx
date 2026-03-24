@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { Banknote, CreditCard, LucideIcon, Smartphone } from "lucide-react";
 import { ComparisonBadge } from "@/components/common/comparison-badge";
+import { GlowBlob } from "./glow-blob";
 
 interface StatCardProps {
   title: string;
@@ -10,6 +11,7 @@ interface StatCardProps {
   icon: LucideIcon;
   iconColor?: string;
   iconBgColor?: string;
+  glowColor?: string;
   className?: string;
   comparison?: number;
   cashSales?: string;
@@ -24,6 +26,7 @@ export default function StatCard({
   icon: Icon,
   iconColor = "text-primary",
   iconBgColor,
+  glowColor="",
   className = "",
   comparison,
   cashSales,
@@ -37,7 +40,7 @@ export default function StatCard({
         className,
       )}
     >
-      <div className="absolute top-0 right-0 w-16 h-16 bg-primary/5 blur-xl -mr-8 -mt-8 rounded-full" />
+      <GlowBlob color={glowColor} gradient="conic" />
 
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
@@ -61,7 +64,7 @@ export default function StatCard({
       <CardContent>
         <div
           className={cn(
-            "text-2xl md:text-3xl font-black tracking-tighter text-foreground group-hover:text-primary transition-colors",
+            "text-2xl md:text-3xl font-black tracking-tighter text-foreground transition-colors",
           )}
         >
           {value}

@@ -16,7 +16,6 @@ import {
   IconCalendarCheck,
   IconHome,
   IconReceipt,
-  IconUpload,
   IconFileDownload,
   IconChartBar,
   IconHeartHandshake,
@@ -120,11 +119,6 @@ const padreNavItems = [
     title: "Deudas Pendientes",
     url: "/portal/deudas",
     icon: IconReceipt,
-  },
-  {
-    title: "Subir Comprobante",
-    url: "/portal/comprobantes/nuevo",
-    icon: IconUpload,
   },
   {
     title: "Asistencia Diaria",

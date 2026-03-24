@@ -510,24 +510,54 @@ export async function getDeudasPortalAction(padreId: string, hijoId?: string) {
     const selectedHijoId = hijoId || hijos[0]?.id;
 
     let deudas: any[] = [];
+    let historial: any[] = [];
+
     if (selectedHijoId) {
-      deudas = await prisma.cronogramaPago.findMany({
-        where: {
-          estudianteId: selectedHijoId,
-          pagado: false,
-        },
-        include: {
-          concepto: true,
-          estudiante: true,
-        },
-        orderBy: { fechaVencimiento: "asc" },
-      });
+      const [deudasRes, historialRes] = await Promise.all([
+        prisma.cronogramaPago.findMany({
+          where: {
+            estudianteId: selectedHijoId,
+            pagado: false,
+          },
+          include: {
+            concepto: true,
+            estudiante: true,
+          },
+          orderBy: { fechaVencimiento: "asc" },
+        }),
+        prisma.cronogramaPago.findMany({
+          where: {
+            estudianteId: selectedHijoId,
+            pagado: true,
+          },
+          include: {
+            concepto: true,
+            estudiante: {
+              include: {
+                nivelAcademico: {
+                  include: { grado: true, nivel: true },
+                },
+              },
+            },
+            pagos: {
+              where: { numeroBoleta: { not: null } },
+              orderBy: { createdAt: "desc" },
+              take: 1,
+            },
+          },
+          orderBy: { updatedAt: "desc" },
+        }),
+      ]);
+
+      deudas = deudasRes;
+      historial = historialRes;
     }
 
     return {
       data: {
         hijos: JSON.parse(JSON.stringify(hijos)),
         deudas: JSON.parse(JSON.stringify(deudas)),
+        historial: JSON.parse(JSON.stringify(historial)),
         selectedHijoId,
       },
     };

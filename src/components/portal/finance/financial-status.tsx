@@ -21,7 +21,6 @@ export function FinancialStatus({ payments }: FinancialStatusProps) {
   );
   const upcomingAmount = payments.upcoming[0]?.monto || 0;
 
-
   return (
     <Card className="overflow-hidden shadow-2xl h-full flex flex-col @container">
       <CardContent className="p-6 flex flex-col gap-6 h-full">
@@ -82,8 +81,7 @@ export function FinancialStatus({ payments }: FinancialStatusProps) {
                     {p.concepto.nombre}
                   </p>
                   <p className="text-[10px] font-bold text-red-500 uppercase">
-                    Vencido •{" "}
-                    {formatDate(p.fechaVencimiento, "dd MMMM")}
+                    Vencido • {formatDate(p.fechaVencimiento, "dd MMMM")}
                   </p>
                 </div>
                 <p className="text-sm font-black text-red-500 shrink-0 ml-2">
@@ -103,8 +101,7 @@ export function FinancialStatus({ payments }: FinancialStatusProps) {
                     {p.concepto.nombre}
                   </p>
                   <p className="text-[10px] font-bold text-slate-500 uppercase">
-                    Vence •{" "}
-                    {formatDate(p.fechaVencimiento, "dd MMMM")}
+                    Vence • {formatDate(p.fechaVencimiento, "dd MMMM")}
                   </p>
                 </div>
                 <p className="text-sm font-black text-emerald-500 shrink-0 ml-2">

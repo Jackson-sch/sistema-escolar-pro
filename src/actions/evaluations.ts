@@ -465,3 +465,141 @@ export async function getResumenNotasEstudianteAction(
     return { error: "No se pudo obtener el resumen de notas" };
   }
 }
+
+/**
+ * Calcula el ranking de un estudiante dentro de su sección (nivel académico)
+ */
+export async function getRankingEstudianteAction(
+  estudianteId: string,
+  periodoId?: string,
+  anioEscolar: number = new Date().getFullYear(),
+) {
+  try {
+    // 1. Obtener la sección del estudiante
+    const estudiante = await prisma.user.findUnique({
+      where: { id: estudianteId },
+      select: { nivelAcademicoId: true },
+    });
+
+    if (!estudiante?.nivelAcademicoId) {
+      return { data: { posicion: 0, total: 0 } };
+    }
+
+    // 2. Obtener todos los estudiantes de la misma sección
+    const compañeros = await prisma.user.findMany({
+      where: {
+        nivelAcademicoId: estudiante.nivelAcademicoId,
+        role: "estudiante",
+      },
+      select: { id: true, name: true },
+    });
+
+    if (compañeros.length === 0) {
+      return { data: { posicion: 1, total: 1 } };
+    }
+
+    // 3. Obtener todas las notas de todos los alumnos de la sección para el periodo/año
+    const notasSeccion = await prisma.nota.findMany({
+      where: {
+        estudianteId: { in: compañeros.map((c) => c.id) },
+        evaluacion: {
+          periodo: {
+            anioEscolar,
+            id: periodoId || undefined,
+          },
+        },
+      },
+      select: { valor: true, estudianteId: true },
+    });
+
+    // 4. Calcular el promedio de cada estudiante
+    const promediosEstudiantes = compañeros.map((comp) => {
+      const notasComp = notasSeccion.filter((n) => n.estudianteId === comp.id);
+      const promedio =
+        notasComp.length > 0
+          ? notasComp.reduce((acc, current) => acc + current.valor, 0) /
+            notasComp.length
+          : 0;
+      return { id: comp.id, promedio };
+    });
+
+    // 5. Ordenar por promedio descendente
+    const rankingOrdenado = promediosEstudiantes.sort(
+      (a, b) => b.promedio - a.promedio,
+    );
+
+    // 6. Encontrar posición del estudiante actual
+    const index = rankingOrdenado.findIndex((r) => r.id === estudianteId);
+    const posicion = index !== -1 ? index + 1 : rankingOrdenado.length;
+
+    return {
+      data: {
+        posicion,
+        total: rankingOrdenado.length,
+        promedioEstudiante: rankingOrdenado[index]?.promedio || 0,
+      },
+    };
+  } catch (error) {
+    console.error("Error calculando ranking:", error);
+    return { error: "No se pudo calcular el ranking" };
+  }
+}
+
+/**
+ * Calcula el porcentaje de asistencia de un estudiante
+ */
+export async function getAsistenciaEstudianteAction(
+  estudianteId: string,
+  periodoId?: string,
+  anioEscolar: number = new Date().getFullYear(),
+) {
+  try {
+    let whereClause: any = {
+      estudianteId,
+    };
+
+    // Si hay periodo, filtramos por fechas del periodo
+    if (periodoId) {
+      const periodo = await prisma.periodoAcademico.findUnique({
+        where: { id: periodoId },
+        select: { fechaInicio: true, fechaFin: true },
+      });
+
+      if (periodo) {
+        whereClause.fecha = {
+          gte: periodo.fechaInicio,
+          lte: periodo.fechaFin,
+        };
+      }
+    } else {
+      // Si no hay periodo (Todos), filtramos por el año escolar
+      const fechaInicioAnio = new Date(anioEscolar, 0, 1);
+      const fechaFinAnio = new Date(anioEscolar, 11, 31);
+      whereClause.fecha = {
+        gte: fechaInicioAnio,
+        lte: fechaFinAnio,
+      };
+    }
+
+    const asistencias = await prisma.asistencia.findMany({
+      where: whereClause,
+      select: { presente: true },
+    });
+
+    const totalDias = asistencias.length;
+    const diasPresente = asistencias.filter((a) => a.presente).length;
+
+    const porcentaje = totalDias > 0 ? (diasPresente / totalDias) * 100 : 0;
+
+    return {
+      data: {
+        porcentaje: parseFloat(porcentaje.toFixed(1)),
+        totalDias,
+        diasPresente,
+      },
+    };
+  } catch (error) {
+    console.error("Error calculando asistencia:", error);
+    return { error: "No se pudo calcular la asistencia" };
+  }
+}

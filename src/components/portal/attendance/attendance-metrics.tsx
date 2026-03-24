@@ -61,19 +61,19 @@ export function AttendanceMetrics({ stats }: AttendanceMetricsProps) {
           key={index}
           className="overflow-hidden border-border/50 bg-card/50 transition-all hover:shadow-lg hover:shadow-primary/5"
         >
-          <CardContent className="p-6">
+          <CardContent className="px-2">
             <div className="flex items-center gap-4">
               <div
                 className={cn(
-                  "flex size-12 items-center justify-center rounded-2xl shadow-inner",
+                  "flex size-10 p-3 items-center justify-center rounded-2xl shadow-inner",
                   item.bgColor,
                   item.color,
                 )}
               >
-                <item.icon className="size-6" />
+                <item.icon className="size-4" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
+                <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground/60">
                   {item.label}
                 </p>
                 <div className="flex items-baseline gap-2">

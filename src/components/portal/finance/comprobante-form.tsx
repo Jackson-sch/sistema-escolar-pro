@@ -176,7 +176,7 @@ export function ComprobanteForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 pb-6">
+    <form onSubmit={handleSubmit} className="space-y-6 pb-3">
       {/* Info precargada */}
       {cronogramaPrecargado && (
         <Card className="border-border/40 bg-primary/5 dark:bg-primary/10 overflow-hidden rounded-2xl">
@@ -336,7 +336,7 @@ export function ComprobanteForm({
               value={form.monto}
               onChange={(e) => setForm({ ...form, monto: e.target.value })}
               placeholder="0.00"
-              className="h-11 pl-10 rounded-xl border-border/40 bg-card/50 focus:ring-primary/20 font-black text-base"
+              className="h-11 pl-10 rounded-full border-border/40 bg-card/50 focus:ring-primary/20 font-black text-base"
             />
           </div>
           {isMontoMismatched && (
@@ -359,7 +359,7 @@ export function ComprobanteForm({
             onChange={(e) =>
               setForm({ ...form, fechaOperacion: e.target.value })
             }
-            className="h-11 rounded-xl border-border/40 bg-card/50 focus:ring-primary/20 font-bold"
+            className="h-11 rounded-full border-border/40 bg-card/50 focus:ring-primary/20 font-bold"
           />
         </div>
 
@@ -372,7 +372,7 @@ export function ComprobanteForm({
             value={form.bancoOrigen}
             onChange={(e) => setForm({ ...form, bancoOrigen: e.target.value })}
             placeholder="Ej: BCP, Interbank..."
-            className="h-11 rounded-xl border-border/40 bg-card/50 focus:ring-primary/20 font-bold"
+            className="h-11 rounded-full border-border/40 bg-card/50 focus:ring-primary/20 font-bold"
           />
         </div>
 
@@ -387,7 +387,7 @@ export function ComprobanteForm({
               setForm({ ...form, numeroOperacion: e.target.value })
             }
             placeholder="Ej: 123456"
-            className="h-11 rounded-xl border-border/40 bg-card/50 focus:ring-primary/20 font-mono text-sm"
+            className="h-11 rounded-full border-border/40 bg-card/50 focus:ring-primary/20 font-mono text-sm"
           />
         </div>
       </div>
@@ -399,7 +399,7 @@ export function ComprobanteForm({
           disabled={
             loading || !preview || !form.cronogramaId || isMontoMismatched
           }
-          className="w-full h-12 rounded-xl gap-2 font-black text-base shadow-lg shadow-primary/20 transition-all hover:shadow-primary/30 active:scale-[0.98] bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:grayscale"
+          className="w-full h-12 rounded-full gap-2 font-black text-base shadow-lg shadow-primary/20 transition-all hover:shadow-primary/30 active:scale-[0.98] bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:grayscale"
         >
           {loading ? (
             <>

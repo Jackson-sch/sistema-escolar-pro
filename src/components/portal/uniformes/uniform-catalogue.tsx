@@ -297,21 +297,21 @@ export function UniformCatalogue({
         )}
 
         {activeTab === "mis-reservas" && (
-          <div className="bg-white dark:bg-slate-900/50 backdrop-blur-xl p-6 rounded-[2rem] border border-slate-200 dark:border-white/5 shadow-xl shadow-slate-200/50 dark:shadow-none space-y-6 animate-in slide-in-from-bottom-4 duration-500">
+          <div className="bg-white dark:bg-card backdrop-blur-xl p-6 rounded-[2rem] border border-slate-200 dark:border-white/5 shadow-xl shadow-slate-200/50 dark:shadow-none space-y-6 animate-in slide-in-from-bottom-4 duration-500">
             <header className="space-y-1">
               <h2 className="text-3xl font-black dark:text-white">
                 Historial de Reservas
               </h2>
-              <p className="text-slate-500 font-medium">
+              <p className="text-muted-foreground">
                 Sigue y gestiona tus pedidos de uniformes.
               </p>
             </header>
-            <div className="grid grid-cols-1 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {ventas.map((v) => (
                 <ReservationCard key={v.id} venta={v} />
               ))}
-              {ventas.length === 0 && (
-                <div className="flex flex-col items-center justify-center p-20 text-slate-400 bg-white dark:bg-slate-900/50 backdrop-blur-sm rounded-[3rem] border border-dashed border-slate-200 dark:border-white/10">
+              {ventas.length === 2 && (
+                <div className="flex flex-col items-center justify-center p-20 text-muted-foreground bg-card backdrop-blur-sm rounded-[3rem] border border-dashed border-border">
                   <History className="h-16 w-16 mb-4 opacity-10" />
                   <p className="text-lg font-bold">
                     No se encontraron reservas

@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { deleteFile } from "@/lib/storage";
 import { Role } from "../../prisma/client";
 import bcrypt from "bcryptjs";
 
@@ -111,6 +112,18 @@ export async function createStaffAction(values: any) {
  */
 export async function updateStaffAction(id: string, values: any) {
   try {
+    // Si se está actualizando la imagen, eliminar la anterior físicamente
+    if (Object.prototype.hasOwnProperty.call(values, "image")) {
+      const currentStaff = await prisma.user.findUnique({
+        where: { id },
+        select: { image: true },
+      });
+
+      if (currentStaff?.image && currentStaff.image !== values.image) {
+        await deleteFile(currentStaff.image);
+      }
+    }
+
     const staff = await prisma.user.update({
       where: { id },
       data: values,

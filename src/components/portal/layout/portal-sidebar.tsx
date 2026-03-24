@@ -1,14 +1,11 @@
 "use client";
 
-import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   IconHome,
   IconReceipt,
-  IconUpload,
   IconFileDownload,
-  IconUser,
   IconLogout,
   IconSchool,
   IconShirt,
@@ -38,11 +35,6 @@ const navItems = [
     title: "Deudas Pendientes",
     url: "/portal/deudas",
     icon: IconReceipt,
-  },
-  {
-    title: "Subir Comprobante",
-    url: "/portal/comprobantes/nuevo",
-    icon: IconUpload,
   },
   {
     title: "Mis Boletas",

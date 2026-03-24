@@ -1,19 +1,100 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { StudentTableType } from "@/components/gestion/estudiantes/components/columns";
-import { IconCopy, IconCheck } from "@tabler/icons-react";
+import {
+  IconCopy,
+  IconCheck,
+  IconCamera,
+  IconTrash,
+  IconLoader2,
+} from "@tabler/icons-react";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { cn } from "@/lib/utils";
+import { updateStudentAction } from "@/actions/students";
+import { toast } from "sonner";
 
 interface StudentProfileHeaderProps {
   student: StudentTableType;
 }
 
-export function StudentProfileHeader({ student }: StudentProfileHeaderProps) {
+export function StudentProfileHeader({
+  student: initialStudent,
+}: StudentProfileHeaderProps) {
+  const [student, setStudent] = useState(initialStudent);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { copied, copy } = useCopyToClipboard();
+
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Por favor, selecciona una imagen válida");
+      return;
+    }
+
+    if (file.size > 4 * 1024 * 1024) {
+      toast.error("La imagen es demasiado grande (máximo 4MB)");
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (data.error) throw new Error(data.error);
+
+      // 2. Actualizar en la base de datos
+      const result = await updateStudentAction(student.id, {
+        image: data.url,
+      });
+
+      if (result.error) {
+        throw new Error(result.error);
+      }
+      setStudent((prev) => ({ ...prev, image: data.url }));
+      toast.success("Imagen de perfil actualizada");
+    } catch (error: any) {
+      toast.error(error.message || "Error al subir la imagen");
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleDeleteImage = async () => {
+    try {
+      setIsUploading(true);
+      // Actualizamos base de datos
+      const result = await updateStudentAction(student.id, { image: null });
+
+      if (result.error) {
+        throw new Error(result.error);
+      }
+
+      setStudent((prev) => ({ ...prev, image: null }));
+      toast.success("Imagen de perfil eliminada");
+    } catch (error: any) {
+      toast.error(error.message || "Error al eliminar la imagen");
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   // Memoizar valores calculados para evitar recálculos innecesarios
   const initials = useMemo(() => {
@@ -45,7 +126,7 @@ export function StudentProfileHeader({ student }: StudentProfileHeaderProps) {
 
       {/* Gradientes ambientales */}
       <div
-        className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent z-0"
+        className="absolute inset-0 bg-linear-to-b from-primary/5 via-transparent to-transparent z-0"
         aria-hidden="true"
       />
       <div
@@ -61,23 +142,62 @@ export function StudentProfileHeader({ student }: StudentProfileHeaderProps) {
       <div className="relative z-10 flex flex-col items-center text-center gap-4">
         {/* Avatar con indicador de estado */}
         <div className="relative mb-1 group">
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            accept="image/*"
+            onChange={handleFileChange}
+          />
           <div
             className="absolute inset-0 blur-2xl rounded-full opacity-40 transition-opacity group-hover:opacity-60"
             style={{ backgroundColor: statusColor }}
             aria-hidden="true"
           />
 
-          <div className="relative p-1 rounded-full bg-primary/80 backdrop-blur-sm shadow-xl">
-            <Avatar className="size-16 md:size-20 border-2 border-background shadow-inner">
+          <div className="relative p-1 rounded-full bg-primary/80 backdrop-blur-sm shadow-xl overflow-visible">
+            <Avatar className="size-16 md:size-20 border-2 border-background shadow-inner relative overflow-hidden">
               <AvatarImage src={student.image || ""} className="object-cover" />
-              <AvatarFallback className="text-2xl md:text-3xl font-black bg-gradient-to-br from-primary to-primary/50 text-white uppercase">
+              <AvatarFallback className="text-2xl md:text-3xl font-black bg-linear-to-br from-primary to-primary/50 text-white uppercase">
                 {initials}
               </AvatarFallback>
+
+              {/* Overlay de carga */}
+              {isUploading && (
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-20 backdrop-blur-[2px]">
+                  <IconLoader2 className="size-6 text-white animate-spin" />
+                </div>
+              )}
             </Avatar>
 
-            {/* Indicador circular de estado */}
+            {/* Botón de Cámara */}
+            <button
+              disabled={isUploading}
+              onClick={handleImageClick}
+              className="absolute -bottom-1 -right-1 size-7 rounded-full bg-primary text-primary-foreground border-2 border-background shadow-md flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-30"
+              title="Cambiar imagen"
+            >
+              {isUploading ? (
+                <IconLoader2 className="size-3 animate-spin" />
+              ) : (
+                <IconCamera className="size-3.5" />
+              )}
+            </button>
+
+            {/* Botón de Borrar */}
+            {student.image && !isUploading && (
+              <button
+                onClick={handleDeleteImage}
+                className="absolute -bottom-1 -left-1 size-7 rounded-full bg-destructive text-destructive-foreground border-2 border-background shadow-md flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-30"
+                title="Eliminar imagen"
+              >
+                <IconTrash className="size-3.5" />
+              </button>
+            )}
+
+            {/* Indicador circular de estado (Movido arriba si hay botones) */}
             <div
-              className="absolute bottom-1 right-1 size-5 rounded-full border-[3px] border-background shadow-sm"
+              className="absolute top-0 right-0 size-3.5 rounded-full border-2 border-background shadow-sm z-30"
               style={{ backgroundColor: statusColor }}
               aria-label={`Estado: ${student.estado?.nombre || "Desconocido"}`}
               role="status"

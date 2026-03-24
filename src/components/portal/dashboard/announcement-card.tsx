@@ -1,17 +1,12 @@
-"use client";
-
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
   IconBulb,
-  IconCalendar,
-  IconPin,
-  IconAlertTriangle,
-  IconClock,
+  IconCalendarEvent,
+  IconBuildingCommunity,
+  IconArrowRight,
 } from "@tabler/icons-react";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
-import { cn } from "@/lib/utils";
+import Image from "next/image";
+import Link from "next/link";
+import { formatDate } from "@/lib/formats";
 
 interface AnnouncementCardProps {
   anuncio: {
@@ -22,93 +17,140 @@ interface AnnouncementCardProps {
     importante: boolean;
     urgente: boolean;
     fijado: boolean;
+    imagen?: string | null;
+    categoria?: string;
     autor: { name: string; apellidoPaterno: string; image?: string };
   };
+  variant?: "pinned" | "standard";
 }
 
-export function AnnouncementCard({ anuncio }: AnnouncementCardProps) {
-  return (
-    <Card
-      className={cn(
-        "group relative overflow-hidden transition-all hover:shadow-xl hover:shadow-primary/5 border-border/50 bg-card/50",
-        anuncio.urgente && "border-destructive/30 bg-destructive/5",
-        anuncio.importante && "border-warning/30 bg-warning/5",
-      )}
-    >
-      <CardContent className="p-0">
-        <div className="p-6 space-y-4">
-          <div className="flex items-start justify-between gap-4">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 mb-2">
-                {anuncio.fijado && (
-                  <Badge
-                    variant="outline"
-                    className="bg-primary/10 text-primary border-primary/20 text-[9px] font-black uppercase px-2 py-0"
-                  >
-                    <IconPin className="size-2.5 mr-1" /> Fijado
-                  </Badge>
-                )}
-                {anuncio.urgente && (
-                  <Badge
-                    variant="outline"
-                    className="bg-destructive/10 text-destructive border-destructive/20 text-[9px] font-black uppercase px-2 py-0"
-                  >
-                    <IconAlertTriangle className="size-2.5 mr-1" /> Urgente
-                  </Badge>
-                )}
-                {anuncio.importante && (
-                  <Badge
-                    variant="outline"
-                    className="bg-warning/10 text-warning border-warning/20 text-[9px] font-black uppercase px-2 py-0"
-                  >
-                    <IconBulb className="size-2.5 mr-1" /> Importante
-                  </Badge>
-                )}
-              </div>
-              <h3 className="text-xl font-black tracking-tight leading-tight group-hover:text-primary transition-colors">
-                {anuncio.titulo}
-              </h3>
-            </div>
-            <div className="flex flex-col items-end shrink-0">
-              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 flex items-center gap-1">
-                <IconClock className="size-3" />
-                {format(new Date(anuncio.fechaPublicacion), "dd MMM, yyyy", {
-                  locale: es,
-                })}
-              </span>
-            </div>
-          </div>
+export function AnnouncementCard({
+  anuncio,
+  variant = "standard",
+}: AnnouncementCardProps) {
+  const isPinned = variant === "pinned" || anuncio.fijado;
 
+  if (isPinned) {
+    return (
+      <div className="group relative bg-card border border-border rounded-[2rem] overflow-hidden shadow-xl flex flex-col">
+        <div className="aspect-16/7 w-full overflow-hidden relative bg-muted/20">
+          {anuncio.imagen ? (
+            <Image
+              src={anuncio.imagen}
+              alt={anuncio.titulo}
+              fill
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center bg-linear-to-br from-primary/10 to-muted">
+              <IconBulb className="size-16 text-muted-foreground/30" />
+            </div>
+          )}
+          <div className="absolute top-6 left-6 flex gap-2 z-10">
+            <span className="bg-primary/90 text-primary-foreground text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">
+              Aviso Importante
+            </span>
+            {anuncio.categoria && (
+              <span className="bg-black/30 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">
+                {anuncio.categoria}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="p-6 md:p-8 flex flex-col gap-4 relative z-10 bg-card">
+          <h3 className="text-xl font-bold text-foreground">
+            {anuncio.titulo}
+          </h3>
           <div
-            className="text-sm text-balance text-muted-foreground leading-relaxed line-clamp-3 group-hover:line-clamp-none transition-all duration-500"
+            className="text-muted-foreground text-sm leading-relaxed max-w-3xl font-medium"
             dangerouslySetInnerHTML={{ __html: anuncio.contenido }}
           />
 
-          <div className="flex items-center justify-between pt-4 border-t border-border/40">
-            <div className="flex items-center gap-2">
-              <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">
-                {anuncio.autor?.name?.[0] || "A"}
+          <div className="flex flex-wrap items-center justify-between gap-6 pt-4 mt-4 border-t border-border/60">
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2 text-muted-foreground text-xs capitalize font-medium">
+                <IconCalendarEvent className="text-primary size-5" />
+                {formatDate(anuncio.fechaPublicacion, "EEEE, dd MMMM • h:mm a")}
               </div>
-              <div>
-                <p className="text-xs font-bold leading-none capitalize">
-                  {anuncio.autor?.name?.toLowerCase() || "Admin"}{" "}
-                  {anuncio.autor?.apellidoPaterno?.toLowerCase() || ""}
-                </p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">
-                  Autor institucional
-                </p>
+              <div className="hidden sm:flex items-center gap-2 text-muted-foreground text-xs font-medium">
+                <IconBuildingCommunity className="text-primary size-5" />
+                Comunicado Oficial
               </div>
             </div>
-
-            <Badge
-              variant="outline"
-              className="text-[10px] font-medium border-border/50 opacity-60"
+            <Link
+              href={`/portal/comunicaciones/${anuncio.id}`}
+              className="bg-primary text-primary-foreground px-8 py-3 rounded-xl font-bold hover:shadow-lg hover:shadow-primary/30 transition-all text-center"
             >
-              ID: {anuncio.id.slice(-6)}
-            </Badge>
+              Leer Más
+            </Link>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    );
+  }
+
+  // Standard Bento Card
+  return (
+    <div className="bg-card rounded-[2rem] overflow-hidden shadow-lg border border-border flex flex-col group h-full">
+      <div className="aspect-16/10 w-full overflow-hidden relative bg-muted/20">
+        {anuncio.imagen ? (
+          <Image
+            src={anuncio.imagen}
+            alt={anuncio.titulo}
+            fill
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center bg-linear-to-br from-primary/5 to-muted/50">
+            <IconBulb className="size-12 text-muted-foreground/20" />
+          </div>
+        )}
+      </div>
+
+      <div className="p-6 flex flex-col gap-3 flex-1">
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] font-bold text-primary uppercase tracking-widest">
+            {anuncio.categoria || (anuncio.urgente ? "Urgente" : "Académico")}
+          </span>
+          <span className="text-xs text-muted-foreground font-medium">
+            {formatDate(anuncio.fechaPublicacion, "MMM d")}
+          </span>
+        </div>
+
+        <h4 className="text-xl font-bold text-foreground">{anuncio.titulo}</h4>
+
+        <div
+          className="text-muted-foreground text-sm line-clamp-2 font-medium"
+          dangerouslySetInnerHTML={{ __html: anuncio.contenido }}
+        />
+
+        <div className="mt-auto pt-4 flex items-center justify-between">
+          <div className="flex -space-x-2">
+            {anuncio.autor?.image ? (
+              <div className="size-7 rounded-full border-2 border-background bg-slate-300 overflow-hidden">
+                <Image
+                  src={anuncio.autor.image}
+                  alt="autor"
+                  width={28}
+                  height={28}
+                  className="object-cover"
+                />
+              </div>
+            ) : (
+              <div className="size-7 rounded-full border-2 border-background bg-muted flex items-center justify-center text-[10px] font-bold text-muted-foreground uppercase">
+                {anuncio.autor?.name?.[0]}
+              </div>
+            )}
+          </div>
+          <Link
+            href={`/portal/comunicaciones/${anuncio.id}`}
+            className="text-primary font-bold text-sm flex items-center gap-1 hover:underline group-hover:gap-2 transition-all"
+          >
+            Leer Más <IconArrowRight className="size-4" />
+          </Link>
+        </div>
+      </div>
+    </div>
   );
 }

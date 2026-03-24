@@ -98,6 +98,7 @@ export function UniformBasicModal({
       description="Completa la información básica de la prenda para el catálogo."
       isOpen={isOpen}
       onOpenChange={onOpenChange}
+      className="sm:max-w-lg max-w-full bg-card"
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -106,14 +107,14 @@ export function UniformBasicModal({
             name="nombre"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-[10px] font-black text-muted-foreground/80 uppercase tracking-[0.2em] ml-1">
+                <FormLabel className="text-muted-foreground/80 ml-1">
                   Nombre del producto
                 </FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Ej. Camisa Blanca Manga Larga"
                     {...field}
-                    className="bg-muted/10 border-border/40 focus:bg-muted/20 transition-all h-11 rounded-xl"
+                    className="bg-muted/10 border-border/40 focus:bg-muted/20 transition-all h-11 rounded-full"
                   />
                 </FormControl>
                 <FormMessage />
@@ -127,7 +128,7 @@ export function UniformBasicModal({
               name="categoriaId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[10px] font-black text-muted-foreground/80 uppercase tracking-[0.2em] ml-1">
+                  <FormLabel className="text-muted-foreground/80 ml-1">
                     Categoría
                   </FormLabel>
                   <Select
@@ -135,7 +136,7 @@ export function UniformBasicModal({
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger className="bg-muted/10 border-border/40 h-11 rounded-xl">
+                      <SelectTrigger className="bg-muted/10 border-border/40 w-full h-11 rounded-full">
                         <SelectValue placeholder="Selecciona" />
                       </SelectTrigger>
                     </FormControl>
@@ -157,7 +158,7 @@ export function UniformBasicModal({
               name="genero"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[10px] font-black text-muted-foreground/80 uppercase tracking-[0.2em] ml-1">
+                  <FormLabel className="text-muted-foreground/80 ml-1">
                     Género
                   </FormLabel>
                   <Select
@@ -165,7 +166,7 @@ export function UniformBasicModal({
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger className="bg-muted/10 border-border/40 h-11 rounded-xl">
+                      <SelectTrigger className="bg-muted/10 border-border/40 w-full h-11 rounded-full">
                         <SelectValue placeholder="Selecciona" />
                       </SelectTrigger>
                     </FormControl>
@@ -186,13 +187,13 @@ export function UniformBasicModal({
             name="descripcion"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-[10px] font-black text-muted-foreground/80 uppercase tracking-[0.2em] ml-1">
+                <FormLabel className="text-muted-foreground/80 ml-1">
                   Descripción (Opcional)
                 </FormLabel>
                 <FormControl>
                   <Textarea
                     placeholder="Material, cuidado de la prenda, etc."
-                    className="resize-none bg-muted/10 border-border/40 h-28 rounded-xl p-4"
+                    className="resize-none bg-muted/10 border-border/40 h-16 rounded-xl p-4"
                     {...field}
                   />
                 </FormControl>
@@ -206,7 +207,7 @@ export function UniformBasicModal({
             name="imagen"
             render={({ field }) => (
               <FormItem className="flex flex-col items-center justify-center space-y-4 bg-muted/5 p-4 rounded-3xl border border-dashed border-border/40">
-                <FormLabel className="text-[10px] font-black text-muted-foreground/80 uppercase tracking-[0.2em] w-full text-left ml-1">
+                <FormLabel className="text-muted-foreground/80 w-full text-left ml-1">
                   Imagen de la prenda
                 </FormLabel>
                 <FormControl>

@@ -50,7 +50,6 @@ import { formatDate } from "@/lib/formats";
 import CardGeneric from "@/components/common/card-generic";
 import { SEXO_OPTIONS, PARENTESCO_OPTIONS } from "@/lib/constants";
 import { useFormModal } from "@/components/modals/form-modal-context";
-import { ImageUpload } from "@/components/ui/image-upload";
 
 interface StudentFormProps {
   id?: string;
@@ -91,7 +90,6 @@ export function StudentForm({
           institucionId:
             initialData.institucionId || instituciones[0]?.id || "",
           estadoId: initialData.estadoId || estados[0]?.id || "",
-          image: initialData.image || "",
 
           fechaNacimiento: initialData.fechaNacimiento
             ? new Date(initialData.fechaNacimiento)
@@ -131,7 +129,6 @@ export function StudentForm({
             estados.find((e) => e.nombre === "Activo")?.id ||
             estados[0]?.id ||
             "",
-          image: "",
           nombreApoderado: "",
           dniApoderado: "",
           telefonoApoderado: "",
@@ -189,8 +186,9 @@ export function StudentForm({
       const searchGuardian = async () => {
         try {
           const res = await getGuardianByDniAction(dniApoderado);
+          const fullName = `${res.data.name} ${res.data.apellidoPaterno} ${res.data.apellidoMaterno}`;
           if (res?.data) {
-            form.setValue("nombreApoderado", res.data.name, {
+            form.setValue("nombreApoderado", fullName, {
               shouldValidate: true,
               shouldDirty: true,
             });
@@ -207,6 +205,10 @@ export function StudentForm({
         }
       };
       searchGuardian();
+    } else if (!dniApoderado) {
+      // Limpiar campos si el DNI del apoderado se borra
+      form.setValue("nombreApoderado", "");
+      form.setValue("telefonoApoderado", "");
     }
   }, [dniApoderado, form]);
 
@@ -219,25 +221,6 @@ export function StudentForm({
           description="Datos básicos de identificación del estudiante."
           icon={<IconUser className="h-4 w-4" />}
         >
-          <div className="flex flex-col items-center justify-center pb-6">
-            <FormField
-              control={form.control}
-              name="image"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <ImageUpload
-                      value={field.value}
-                      onChange={field.onChange}
-                      onRemove={() => field.onChange("")}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
             {/* Nombre (ancho 4) */}
             <FormField

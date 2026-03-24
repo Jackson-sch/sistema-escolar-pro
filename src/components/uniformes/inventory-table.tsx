@@ -41,6 +41,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Label } from "../ui/label";
+import { formatCurrency } from "@/lib/formats";
 
 interface InventoryTableProps {
   variantes: any[];
@@ -162,7 +164,7 @@ export function InventoryTable({ variantes, sedes }: InventoryTableProps) {
                   </div>
                 </TableCell>
                 <TableCell className="text-right font-black text-sm text-foreground/80">
-                  S/ {v.precio.toFixed(2)}
+                  {formatCurrency(v.precio)}
                 </TableCell>
                 <TableCell className="text-right">
                   <Button
@@ -250,13 +252,13 @@ function StockAdjustmentModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] border-border/40 bg-card/40 backdrop-blur-xl shadow-2xl rounded-3xl overflow-hidden animate-in fade-in zoom-in-95">
+      <DialogContent className="sm:max-w-[425px] border-border/40 dark:bg-card/40 backdrop-blur-xl shadow-2xl rounded-3xl overflow-hidden animate-in fade-in zoom-in-95">
         <DialogHeader className="space-y-1">
           <DialogTitle className="flex items-center gap-2 text-xl font-black text-foreground">
             <PackageCheck className="h-5 w-5 text-primary" />
             Ajustar Inventario
           </DialogTitle>
-          <DialogDescription className="text-muted-foreground/60 text-xs font-medium uppercase tracking-wider">
+          <DialogDescription className="text-muted-foreground/60 text-xs font-medium">
             {variante.uniforme.nombre} - Talla {variante.talla} (
             {variante.sede.nombre})
           </DialogDescription>
@@ -295,11 +297,11 @@ function StockAdjustmentModal({
 
           <div className="space-y-6">
             <div className="space-y-3">
-              <label className="text-[10px] font-black text-muted-foreground/80 uppercase tracking-[0.2em] ml-1">
+              <Label>
                 {tipo === "AJUSTE"
                   ? "Stock Final deseado"
                   : "Cantidad del movimiento"}
-              </label>
+              </Label>
               <div className="flex items-center gap-4 bg-muted/5 p-2 rounded-2xl border border-border/40">
                 <Button
                   variant="outline"
@@ -327,14 +329,12 @@ function StockAdjustmentModal({
             </div>
 
             <div className="space-y-3">
-              <label className="text-[10px] font-black text-muted-foreground/80 uppercase tracking-[0.2em] ml-1">
-                Motivo o Referencia
-              </label>
+              <Label>Motivo o Referencia</Label>
               <Input
                 placeholder="Ej. Guía de remisión #1234"
                 value={motivo}
                 onChange={(e) => setMotivo(e.target.value)}
-                className="bg-muted/10 border-border/40 h-11 rounded-xl focus:bg-muted/20"
+                className="bg-muted/10 border-border/40 h-11 rounded-full focus:bg-muted/20"
               />
             </div>
           </div>

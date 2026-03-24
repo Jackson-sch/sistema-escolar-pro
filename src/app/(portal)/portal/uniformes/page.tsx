@@ -35,7 +35,16 @@ export default async function PortalUniformesPage() {
   const { uniforms, categorias, sedes, hijos, ventas } = res.data;
 
   return (
-    <div className="flex flex-1 flex-col gap-8 p-4 md:p-8 pt-0 @container/main animate-in fade-in slide-in-from-bottom-4 duration-700 min-h-screen max-w-[1600px] mx-auto w-full">
+    <div className="flex flex-1 flex-col gap-8 p-4 sm:p-10 pt-0 @container/main animate-in fade-in duration-700 min-h-screen max-w-[1600px] mx-auto w-full">
+      {/* Sección de Encabezado */}
+      <div className="space-y-1 mt-4 md:mt-0">
+        <h1 className="text-3xl md:text-4xl font-black tracking-tight">
+          Guía de Uniformes
+        </h1>
+        <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed">
+          Información sobre los uniformes y prendas reglamentarias.
+        </p>
+      </div>
       <Suspense fallback={<PortalUniformsSkeleton />}>
         <UniformCatalogue
           uniforms={uniforms}

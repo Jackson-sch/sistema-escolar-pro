@@ -4,7 +4,6 @@ import {
   getStudentMonthAttendanceAction,
   getParentStudentsAction,
 } from "@/actions/portal";
-import { AttendanceBanner } from "@/components/portal/attendance/attendance-banner";
 import { AttendanceMetrics } from "@/components/portal/attendance/attendance-metrics";
 import { AttendanceCalendar } from "@/components/portal/attendance/attendance-calendar";
 import { NotasFilter } from "@/components/portal/academic/notas-filter"; // Reusing the filter component
@@ -32,7 +31,14 @@ export default async function PortalAsistenciaPage({
   if (hijos.length === 0) {
     return (
       <div className="flex flex-1 flex-col gap-6 p-4 sm:p-6 pt-0">
-        <AttendanceBanner />
+        <div className="space-y-1 mt-4 md:mt-0">
+          <h1 className="text-3xl md:text-4xl font-black tracking-tight">
+            Control de Asistencia
+          </h1>
+          <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed">
+            Monitorea la puntualidad y asistencia diaria a clases.
+          </p>
+        </div>
         <Card className="border-dashed p-12 text-center">
           <IconUser className="mx-auto size-12 text-muted-foreground mb-4" />
           <p className="text-lg font-bold">No tienes hijos vinculados</p>
@@ -71,7 +77,15 @@ export default async function PortalAsistenciaPage({
 
   return (
     <div className="flex flex-1 flex-col gap-8 p-4 sm:p-6 pt-0 animate-in fade-in duration-700">
-      <AttendanceBanner />
+      {/* Sección de Encabezado */}
+      <div className="space-y-1 mt-4 md:mt-0">
+        <h1 className="text-3xl md:text-4xl font-black tracking-tight">
+          Control de Asistencia
+        </h1>
+        <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed">
+          Monitorea la puntualidad y asistencia diaria a clases.
+        </p>
+      </div>
 
       {/* Selector de Hijo (Reutilizamos NotasFilter por ahora ya que tiene la lógica de URL) */}
       <NotasFilter
@@ -95,7 +109,7 @@ export default async function PortalAsistenciaPage({
         </div>
         <div>
           <h4 className="font-bold">Nota sobre Registro de Asistencia</h4>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-xs text-balance text-muted-foreground mt-1">
             La asistencia es registrada diariamente por el tutor o secretario en
             el aula. Si nota alguna inconsistencia en el registro de su hijo,
             por favor comuníquese con la oficina académica.

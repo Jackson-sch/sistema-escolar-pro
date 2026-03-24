@@ -39,11 +39,11 @@ export const PARENTESCO_OPTIONS = [
   { label: "Otro", value: "OTRO" },
 ] as const;
 
+const currentYear = new Date().getFullYear();
 export const ANIO_LECTIVO_OPTIONS = [
-  { label: "Año 2024", value: "2024" },
-  { label: "Año 2025", value: "2025" },
-  { label: "Año 2026", value: "2026" },
-] as const;
+  { label: `Año ${currentYear}`, value: String(currentYear) },
+  { label: `Año ${currentYear + 1}`, value: String(currentYear + 1) },
+];
 
 export const PAYMENT_STATUS_OPTIONS = [
   { label: "Pendiente", value: "PENDING" },

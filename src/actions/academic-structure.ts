@@ -400,3 +400,63 @@ export async function getPeriodosByAnioAction(anio: number) {
     return { error: "No se pudieron obtener los periodos" };
   }
 }
+
+/**
+ * Clona la estructura de secciones de un año a otro
+ */
+export async function cloneAcademicStructureAction(fromYear: number, toYear: number, institucionId: string) {
+  try {
+    // 1. Verificar si ya existen secciones para el año destino
+    const existingToYear = await prisma.nivelAcademico.count({
+      where: { 
+        anioAcademico: toYear,
+        institucionId
+      }
+    });
+
+    if (existingToYear > 0) {
+      return { error: `Ya existen secciones creadas para el año ${toYear}. No se puede clonar sobre datos existentes.` };
+    }
+
+    // 2. Obtener todas las secciones del año origen
+    const sourceSections = await prisma.nivelAcademico.findMany({
+      where: { 
+        anioAcademico: fromYear,
+        institucionId
+      }
+    });
+
+    if (sourceSections.length === 0) {
+      return { error: `No se encontraron secciones en el año ${fromYear} para clonar.` };
+    }
+
+    // 3. Crear las nuevas secciones
+    const newSectionsData = sourceSections.map(s => ({
+      seccion: s.seccion,
+      descripcion: s.descripcion,
+      capacidad: s.capacidad,
+      capacidadMaxima: s.capacidadMaxima,
+      aulaAsignada: s.aulaAsignada,
+      nivelId: s.nivelId,
+      gradoId: s.gradoId,
+      tutorId: null, // Wipe tutor as it usually changes
+      institucionId: s.institucionId,
+      sedeId: s.sedeId,
+      anioAcademico: toYear,
+      activo: true,
+      turno: s.turno,
+      color: s.color,
+    }));
+
+    await prisma.nivelAcademico.createMany({
+      data: newSectionsData
+    });
+
+    revalidatePath(REVALIDATE_PATH);
+    return { success: `Se clonaron ${newSectionsData.length} secciones al año ${toYear} con éxito.` };
+
+  } catch (error) {
+    console.error("Error cloning academic structure:", error);
+    return { error: "Ocurrió un error al clonar la estructura académica." };
+  }
+}

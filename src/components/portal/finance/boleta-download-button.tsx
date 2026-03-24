@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { ComprobantePDF } from "@/components/finanzas/cronogramas/comprobante-pdf";
 import { IconDownload, IconLoader2 } from "@tabler/icons-react";
@@ -43,6 +44,12 @@ export function BoletaDownloadButton({
     ruc: "-",
   },
 }: BoletaDownloadButtonProps) {
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const pagoData = {
     numeroBoleta: pago.numeroBoleta || `B-${pago.id.slice(-6).toUpperCase()}`,
     fechaPago: new Date(pago.fechaPago),
@@ -64,6 +71,15 @@ export function BoletaDownloadButton({
     estudiante.apellidoPaterno
   }.pdf`;
 
+  if (!isMounted) {
+    return (
+      <button className="inline-flex items-center gap-2 px-4 py-2 bg-muted rounded-xl text-sm font-bold opacity-50 cursor-not-allowed">
+        <IconLoader2 className="size-4 animate-spin" />
+        Cargando...
+      </button>
+    );
+  }
+
   return (
     <PDFDownloadLink
       document={
@@ -74,18 +90,18 @@ export function BoletaDownloadButton({
         />
       }
       fileName={fileName}
-      className="inline-flex items-center gap-2 px-4 py-2 bg-muted rounded-xl text-sm font-bold hover:bg-muted/50 transition-colors"
+      className="inline-flex items-center gap-2 px-4 py-2 bg-muted rounded-xl text-sm font-bold hover:bg-primary/50 transition-colors"
     >
       {({ loading }) =>
         loading ? (
           <>
             <IconLoader2 className="size-4 animate-spin" />
-            Generando...
+            
           </>
         ) : (
           <>
             <IconDownload className="size-4" />
-            Descargar
+            
           </>
         )
       }

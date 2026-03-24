@@ -196,7 +196,7 @@ export function BankAccountForm({
                     : "Nueva Entidad Bancaria"}
                 </h2>
                 {cuenta && (
-                  <Badge className="text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 bg-primary/10 text-primary rounded-full border border-primary/20 shadow-sm shadow-primary/5">
+                  <Badge className="text-[10px] font-black px-3 py-1 bg-primary/10 text-primary rounded-full border border-primary/20 shadow-sm shadow-primary/5">
                     Modo Edición
                   </Badge>
                 )}
@@ -259,7 +259,7 @@ export function BankAccountForm({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* ── Left column ── */}
           <div className="space-y-5">
             <Field label="Entidad Financiera">
@@ -289,7 +289,7 @@ export function BankAccountForm({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-5">
             <Field
               label={isBanco ? "Número de Cuenta" : "Número de Celular"}
@@ -320,14 +320,12 @@ export function BankAccountForm({
                 <Label className="text-[10px] font-black uppercase tracking-widest text-emerald-600/80 flex items-center gap-2 mb-1">
                   <IconQrCode size={16} /> Código QR de Recaudación
                 </Label>
-                <div className="bg-white/40 backdrop-blur-sm rounded-full p-4 border border-emerald-500/10">
                   <ImageUpload
                     value={form.qrCode}
                     onChange={(url) => patch("qrCode", url)}
                     onRemove={() => patch("qrCode", "")}
                     className="w-full"
                   />
-                </div>
                 <p className="text-[9px] text-center text-emerald-600/50 font-black uppercase tracking-widest leading-relaxed mt-2">
                   Los padres verán este QR al reportar sus pagos por billetera.
                 </p>
@@ -388,14 +386,14 @@ export function BankAccountForm({
             variant="outline"
             onClick={onClose}
             disabled={loading}
-            className="w-full sm:w-auto rounded-full px-8 text-[11px] font-black uppercase tracking-[0.2em] border-border/40 hover:bg-accent/50 transition-all hover:scale-[1.02] active:scale-95"
+            className="w-full sm:w-auto rounded-full px-8 border-border/40 hover:bg-accent/50 transition-all hover:scale-[1.02] active:scale-95"
           >
             Descartar
           </Button>
           <Button
             type="submit"
             disabled={loading}
-            className="w-full sm:w-auto rounded-full px-12 text-[11px] font-black uppercase tracking-[0.2em] shadow-xl shadow-primary/20 hover:shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all bg-primary hover:bg-primary/90"
+            className="w-full sm:w-auto rounded-full px-12 shadow-xl shadow-primary/20 hover:shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all bg-primary hover:bg-primary/90"
           >
             {loading && <IconLoader2 className="mr-3 size-5 animate-spin" />}
             {cuenta ? "Actualizar Cuenta" : "Guardar Entidad"}

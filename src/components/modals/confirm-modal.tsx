@@ -44,7 +44,7 @@ export function ConfirmModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md bg-card/40 backdrop-blur-xl">
         <ShineBorder shineColor={["#ff000099", "#ff000033", "#ff000066"]} />
         <DialogHeader>
           <div className="flex items-center gap-2 mb-2">

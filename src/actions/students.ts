@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { deleteFile } from "@/lib/storage";
 import { Role } from "../../prisma/client";
 import bcrypt from "bcryptjs";
 
@@ -261,6 +262,18 @@ export async function updateStudentAction(id: string, values: any) {
       ...studentData
     } = values;
 
+    // Si se está actualizando la imagen, eliminar la anterior físicamente
+    if (Object.prototype.hasOwnProperty.call(studentData, "image")) {
+      const currentStudent = await prisma.user.findUnique({
+        where: { id },
+        select: { image: true },
+      });
+
+      if (currentStudent?.image && currentStudent.image !== studentData.image) {
+        await deleteFile(currentStudent.image);
+      }
+    }
+
     // 1. Actualizar el estudiante
     const student = await prisma.user.update({
       where: { id },
@@ -352,12 +365,12 @@ export async function updateStudentAction(id: string, values: any) {
 
     revalidatePath("/gestion/estudiantes");
     return {
-      success: "Estudiante actualizado con éxito",
+      success: "Estudiante actualizado correctamente",
       data: JSON.parse(JSON.stringify(student)),
     };
   } catch (error: any) {
     console.error("Error updating student:", error);
-    return { error: "No se pudo actualizar el estudiante" };
+    return { error: "No se pudo actualizar la información del estudiante" };
   }
 }
 

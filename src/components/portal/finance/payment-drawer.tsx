@@ -43,7 +43,7 @@ export function PaymentDrawer({
               Completa los datos de tu transferencia para validar el pago.
             </DrawerDescription>
           </DrawerHeader>
-          <ScrollArea className="p-6 h-full max-h-[calc(95vh-120px)] overflow-y-auto">
+          <ScrollArea className="p-6 h-full max-h-[calc(95vh-50px)] overflow-y-auto">
             <ComprobanteForm
               opcionesDeuda={[]} // No necesario si ya hay deuda precargada
               cronogramaPrecargado={selectedDeuda}

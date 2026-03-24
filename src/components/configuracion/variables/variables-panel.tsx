@@ -13,6 +13,8 @@ import { VariableSistema } from "./types";
 import { ConfirmModal } from "@/components/modals/confirm-modal";
 import { ComprobanteFormatConfig } from "./comprobante-format-config";
 import { FORMATO_COMPROBANTE_KEY } from "@/lib/comprobante-constants";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Info, Cloudy } from "lucide-react";
 
 interface VariablesPanelProps {
   initialData: VariableSistema[];
@@ -84,6 +86,31 @@ export function VariablesPanel({ initialData }: VariablesPanelProps) {
 
   return (
     <div className="space-y-6">
+      <Alert className="bg-blue-50/50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-900">
+        <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+        <AlertTitle className="text-blue-800 dark:text-blue-300 flex items-center gap-2">
+          <Cloudy className="h-4 w-4" />
+          Configuración de Almacenamiento (Cloudinary)
+        </AlertTitle>
+        <AlertDescription className="text-blue-700/80 dark:text-blue-400/80">
+          Para habilitar el almacenamiento en la nube y evitar el uso del disco
+          local, registre las siguientes variables de sistema:
+          <ul className="list-disc list-inside mt-2 font-mono text-xs space-y-1">
+            <li>CLOUDINARY_CLOUD_NAME</li>
+            <li>CLOUDINARY_API_KEY</li>
+            <li>CLOUDINARY_API_SECRET</li>
+          </ul>
+          <p className="mt-2 text-xs italic">
+            * Si estas variables no están configuradas o están inactivas, el
+            sistema utilizará automáticamente la carpeta local{" "}
+            <code className="bg-blue-100 dark:bg-blue-900/40 px-1 rounded">
+              /public/uploads
+            </code>
+            .
+          </p>
+        </AlertDescription>
+      </Alert>
+
       <ComprobanteFormatConfig currentValue={formatoComprobante} />
       <VariableForm onVariableSaved={handleVariableSaved} />
       <VariableList
