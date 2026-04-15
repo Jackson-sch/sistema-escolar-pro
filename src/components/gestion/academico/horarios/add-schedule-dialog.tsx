@@ -43,11 +43,30 @@ const formSchema = z.object({
   aula: z.string().optional(),
 });
 
+interface Course {
+  id: string;
+  nombre: string;
+  horasSemanales?: number;
+  profesor?: {
+    name: string;
+    apellidoPaterno: string;
+  };
+}
+
+interface Schedule {
+  id: string;
+  cursoId: string;
+  diaSemana: number;
+  horaInicio: string;
+  horaFin: string;
+  aula?: string;
+}
+
 interface AddScheduleDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  courses: any[];
-  existingSchedules: any[];
+  courses: Course[];
+  existingSchedules: Schedule[];
   onSuccess: () => void;
 }
 
@@ -167,12 +186,12 @@ export function AddScheduleDialog({
                   defaultValue={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger className="w-full w-full rounded-full">
+                    <SelectTrigger className="w-full rounded-full">
                       <SelectValue placeholder="Seleccione un curso" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent className="bg-[#09090b] border-white/10">
-                    {courses.map((course) => (
+                    {courses.map((course: Course) => (
                       <SelectItem key={course.id} value={course.id}>
                         <div className="flex flex-col gap-0.5 text-left">
                           <span className="font-bold">{course.nombre}</span>

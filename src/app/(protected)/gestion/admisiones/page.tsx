@@ -1,4 +1,3 @@
-import { IconUserPlus } from "@tabler/icons-react";
 import { getProspectosAction } from "@/actions/admissions";
 import { getGradosAction } from "@/actions/academic-structure";
 import { getInstitucionesAction } from "@/actions/academic";
@@ -19,10 +18,10 @@ export default async function AdmisionesPage() {
   ]);
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-4 pt-0 @container/main">
+    <div className="flex flex-1 flex-col gap-8 p-0 sm:p-6 pt-0">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-2">
         <div>
-          <h1 className="text-xl sm:text-3xl font-bold tracking-tight text-primary">
+          <h1 className="text-xl sm:text-3xl font-bold tracking-tight">
             Admisiones (CRM)
           </h1>
           <p className="text-[10px] sm:text-sm text-muted-foreground font-medium">

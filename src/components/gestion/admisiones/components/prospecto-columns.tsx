@@ -2,38 +2,14 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
 import { ProspectoRowActions } from "@/components/gestion/admisiones/components/prospecto-row-actions";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
 export const columns: ColumnDef<any>[] = [
   {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-        className="translate-y-[2px] border-border/50"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-        className="translate-y-[2px] border-border/50"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "prospecto",
+    id: "prospecto",
+    accessorFn: (row) => `${row.dni || ""} ${row.nombre} ${row.apellidoPaterno} ${row.apellidoMaterno}`,
     header: "Interesado",
     cell: ({ row }) => {
       const p = row.original;

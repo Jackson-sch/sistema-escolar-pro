@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import prisma from "@/lib/prisma";
+import { getLayoutUserAction } from "@/actions/auth";
 import { ChangePasswordForm } from "@/components/auth/change-password-form";
 
 export default async function ChangePasswordPage() {
@@ -11,10 +11,8 @@ export default async function ChangePasswordPage() {
   }
 
   // Verificar si el usuario realmente necesita cambiar la contraseña
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { mustChangePassword: true, name: true, role: true },
-  });
+  const userRes = await getLayoutUserAction(session.user.id);
+  const user = userRes.success;
 
   if (!user?.mustChangePassword) {
     // Si no necesita cambiar, redirigir según su rol

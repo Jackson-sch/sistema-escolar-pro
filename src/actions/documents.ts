@@ -3,6 +3,44 @@
 import prisma from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 
+/**
+ * Verifica un documento por su código de verificación (usado por la API pública)
+ */
+export async function getDocumentByCodeAction(codigo: string) {
+  try {
+    const documento = await prisma.documento.findUnique({
+      where: { codigoVerificacion: codigo },
+      include: {
+        estudiante: {
+          select: {
+            name: true,
+            apellidoPaterno: true,
+            apellidoMaterno: true,
+            dni: true,
+            codigoEstudiante: true
+          }
+        },
+        emisor: {
+          select: {
+            name: true,
+            apellidoPaterno: true,
+            apellidoMaterno: true,
+            cargo: {
+              select: {
+                nombre: true
+              }
+            }
+          }
+        },
+        tipoDocumento: true
+      }
+    })
+    return { data: documento ? JSON.parse(JSON.stringify(documento)) : null }
+  } catch (error) {
+    console.error("Error verifying document:", error)
+    return { error: "Error interno al verificar el documento" }
+  }
+}
 export async function registerDocumentAction(data: {
   tipoDocumentoCodigo: string
   titulo: string

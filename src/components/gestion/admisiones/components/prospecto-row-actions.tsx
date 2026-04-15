@@ -1,37 +1,24 @@
 "use client";
 
+import { useState } from "react";
+import { toast } from "sonner";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import {
-  IconDots,
   IconEdit,
   IconTrash,
-  IconFileCertificate,
-  IconUserCheck,
   IconArrowRight,
   IconClipboardCheck,
 } from "@tabler/icons-react";
-import { useState } from "react";
-import { convertProspectoToAdmisionAction } from "@/actions/admissions";
-import { toast } from "sonner";
+
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet";
-import { AdmisionFlow } from "@/components/gestion/admisiones/management/admision-flow";
+  ResponsiveRowActions,
+  ActionItem,
+} from "@/components/common/responsive-row-actions";
 import { FormModal } from "@/components/modals/form-modal";
-import { ProspectoForm } from "@/components/gestion/admisiones/management/prospecto-form";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ProspectoForm } from "@/components/gestion/admisiones/management/prospecto-form";
+import { AdmisionFlow } from "@/components/gestion/admisiones/management/admision-flow";
+import { convertProspectoToAdmisionAction } from "@/actions/admissions";
 
 interface ProspectoRowActionsProps {
   row: any;
@@ -59,54 +46,49 @@ export function ProspectoRowActions({ row, table }: ProspectoRowActionsProps) {
     }
   };
 
+  const actions: ActionItem[] = [
+    {
+      icon: IconEdit,
+      label: "Editar Datos",
+      onClick: () => setShowEdit(true),
+      variant: "ghost",
+      className: "text-blue-500 rounded-full",
+    },
+    ...(p.estado === "INTERESADO"
+      ? ([
+          {
+            icon: IconArrowRight,
+            label: "Iniciar Evaluación",
+            onClick: onStartAdmision,
+            disabled: loading,
+            variant: "ghost",
+            className: "text-green-500 rounded-full",
+          },
+        ] as ActionItem[])
+      : []),
+    ...(p.admision
+      ? ([
+          {
+            icon: IconClipboardCheck,
+            label: "Ver Evaluación",
+            onClick: () => setShowFlow(true),
+            variant: "ghost",
+            className: "text-emerald-500 rounded-full",
+          },
+        ] as ActionItem[])
+      : []),
+    { isSeparator: true },
+    {
+      icon: IconTrash,
+      label: "Eliminar",
+      onClick: () => {},
+      className: "text-red-500 rounded-full",
+    },
+  ];
+
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Abrir menú</span>
-            <IconDots className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align="end"
-          className="w-[200px] border-border/40 bg-background/95 backdrop-blur-xl"
-        >
-          <DropdownMenuLabel className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest p-2">
-            Acciones
-          </DropdownMenuLabel>
-          <DropdownMenuItem
-            onClick={() => setShowEdit(true)}
-            className="text-[13px] py-2 cursor-pointer"
-          >
-            <IconEdit className="mr-2 h-4 w-4 text-blue-500" /> Editar Datos
-          </DropdownMenuItem>
-
-          {p.estado === "INTERESADO" && (
-            <DropdownMenuItem
-              onClick={onStartAdmision}
-              disabled={loading}
-              className="text-[13px] py-2 cursor-pointer text-violet-500 focus:text-violet-500 focus:bg-violet-500/10"
-            >
-              <IconArrowRight className="mr-2 h-4 w-4" /> Iniciar Evaluación
-            </DropdownMenuItem>
-          )}
-
-          {p.admision && (
-            <DropdownMenuItem
-              onClick={() => setShowFlow(true)}
-              className="text-[13px] py-2 cursor-pointer text-blue-500 focus:text-blue-500 focus:bg-blue-500/10"
-            >
-              <IconClipboardCheck className="mr-2 h-4 w-4" /> Ver Evaluación
-            </DropdownMenuItem>
-          )}
-
-          <DropdownMenuSeparator className="bg-border/40" />
-          <DropdownMenuItem className="text-[13px] py-2 cursor-pointer text-red-500 focus:text-red-500 focus:bg-red-500/10">
-            <IconTrash className="mr-2 h-4 w-4" /> Eliminar
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <ResponsiveRowActions actions={actions} label="Acciones" />
 
       {/* Modal de Edición */}
       <FormModal

@@ -27,8 +27,20 @@ export type StaffTableType = {
   colegioProfesor: string | null;
   escalaMagisterial: string | null;
   image: string | null;
+  // Datos personales extendidos
+  fechaNacimiento: Date | null;
+  estadoCivil: string | null;
+  nacionalidad: string | null;
+  // Datos laborales extendidos
+  tipoContrato: string | null;
+  fechaContratacion: Date | null;
+  turno: string | null;
+  // Contacto de emergencia
+  contactoEmergencia: string | null;
+  telefonoEmergencia: string | null;
   cargo: {
     nombre: string;
+    codigo: string;
   } | null;
   estado: {
     nombre: string;
@@ -39,6 +51,7 @@ export type StaffTableType = {
   cargoId: string | null;
   createdAt: Date;
 };
+
 
 export const columns: ColumnDef<StaffTableType>[] = [
   {
@@ -63,7 +76,7 @@ export const columns: ColumnDef<StaffTableType>[] = [
       return (
         <div className="flex items-center gap-3">
           <Avatar className="h-9 w-9 border border-border/50">
-            <AvatarImage src={staff.image || ""} alt={fullName} />
+            <AvatarImage src={staff.image ?? undefined} alt={fullName} />
             <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
               {getInitials(staff.name, staff.apellidoPaterno)}
             </AvatarFallback>

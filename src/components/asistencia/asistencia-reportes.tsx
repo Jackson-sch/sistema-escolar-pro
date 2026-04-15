@@ -1,9 +1,21 @@
 "use client";
 
-import { useState, useTransition, useEffect, useRef } from "react";
+import { useState, useTransition, useEffect, useRef, useMemo } from "react";
 import { toast } from "sonner";
 
-import { useQueryState, parseAsString, parseAsInteger } from "nuqs";
+import {
+  IconBook,
+  IconChevronRight,
+  IconLoader2,
+} from "@tabler/icons-react";
+import { NIVEL_ICON_MAP } from "@/lib/constants";
+import { cn } from "@/lib/utils";
+import {
+  useQueryState,
+  parseAsString,
+  parseAsInteger,
+  parseAsStringLiteral,
+} from "nuqs";
 import {
   getMonthlyAsistenciaReportAction,
   getAttendanceAlertsAction,
@@ -55,19 +67,55 @@ export function AsistenciaReportes({
     "type",
     parseAsString.withDefault("mensual"),
   ) as any;
+  const [rPeriod, setRPeriod] = useQueryState("rPeriod", parseAsStringLiteral(["today", "month", "year"]).withDefault("today"));
   const [studentId, setStudentId] = useQueryState(
     "student",
     parseAsString.withDefault(""),
   );
+  const [nivelId, setNivelId] = useQueryState("nivel", parseAsString.withDefault(""));
+  const [gradoId, setGradoId] = useQueryState("grado", parseAsString.withDefault(""));
 
   const [reportData, setReportData] = useState<any[]>([]);
   const [daysInMonth, setDaysInMonth] = useState<number>(0);
 
   // Estados para otros reportes
   const [alertsData, setAlertsData] = useState<any[]>([]);
-  const [instData, setInstData] = useState<any[]>([]);
+  const [instData, setInstData] = useState<{ 
+    data: any[]; 
+    stats?: any; 
+    trendData?: any[]; 
+    meta?: any 
+  }>({ data: [] });
   const [studentData, setStudentData] = useState<any[]>([]);
   const [justificationsData, setJustificationsData] = useState<any[]>([]);
+
+  // ── Derived Data ──────────────────────────────────────────────────────────
+  const niveles = useMemo(() => {
+    const map = new Map();
+    secciones.forEach((s) => {
+      if (s.nivel && !map.has(s.nivel.id)) map.set(s.nivel.id, s.nivel);
+    });
+    return Array.from(map.values());
+  }, [secciones]);
+
+  const grados = useMemo(() => {
+    if (!nivelId) return [];
+    const map = new Map();
+    secciones
+      .filter((s) => s.nivel?.id === nivelId)
+      .forEach((s) => {
+        if (s.grado && !map.has(s.grado.id)) map.set(s.grado.id, s.grado);
+      });
+    return Array.from(map.values());
+  }, [secciones, nivelId]);
+
+  const filteredSecciones = useMemo(() => {
+    if (!gradoId) return [];
+    return secciones.filter((s) => s.grado?.id === gradoId);
+  }, [secciones, gradoId]);
+
+  const nivelActual = niveles.find((n: any) => n.id === nivelId);
+  const seccionActual = secciones.find((s) => s.id === seccionId);
 
   const [isPending, startTransition] = useTransition();
   const [isLoadingSecciones, setIsLoadingSecciones] = useState(false);
@@ -86,17 +134,27 @@ export function AsistenciaReportes({
       });
       if (res.data) {
         setSecciones(res.data);
-        // Solo limpiar si no es el primer render
+        // Si no es el primer render (ej. cambio de año), limpiar estados secundarios
         if (!isFirstRender.current) {
+          setNivelId("");
+          setGradoId("");
           setSeccionId("");
           setStudentId("");
           setReportData([]);
         }
+        isFirstRender.current = false;
       }
       setIsLoadingSecciones(false);
     };
     loadSecciones();
   }, [anio]);
+
+  // Selección por defecto del primer nivel disponible
+  useEffect(() => {
+    if (niveles.length > 0 && !nivelId) {
+      setNivelId(niveles[0].id);
+    }
+  }, [niveles, nivelId, setNivelId]);
 
   // Cargar alumnos cuando cambie la sección (solo para reporte individual)
   useEffect(() => {
@@ -118,7 +176,7 @@ export function AsistenciaReportes({
       // Limpiar datos previos
       setReportData([]);
       setAlertsData([]);
-      setInstData([]);
+      setInstData({ data: [], stats: undefined, trendData: [], meta: undefined });
       setStudentData([]);
       setJustificationsData([]);
 
@@ -137,12 +195,26 @@ export function AsistenciaReportes({
         const res = await getAttendanceAlertsAction(
           anio,
           seccionId === "all" ? undefined : seccionId,
+          nivelId || undefined,
+          gradoId || undefined,
         );
         if (res.data) setAlertsData(res.data);
         else if (res.error) toast.error(res.error);
       } else if (reportType === "institucional") {
-        const res = await getInstitutionalSummaryAction(new Date());
-        if (res.data) setInstData(res.data);
+        const res = await getInstitutionalSummaryAction(
+          new Date(),
+          nivelId || undefined,
+          gradoId || undefined,
+          mes,
+          anio,
+          rPeriod as "today" | "month" | "year",
+        );
+        if (res.data) setInstData({ 
+          data: res.data, 
+          stats: res.stats, 
+          trendData: res.trendData, 
+          meta: res.meta 
+        });
         else if (res.error) toast.error(res.error);
       } else if (reportType === "individual") {
         if (!studentId) return;
@@ -153,6 +225,8 @@ export function AsistenciaReportes({
         const res = await getJustificacionesAction(
           anio,
           seccionId === "all" ? undefined : seccionId,
+          nivelId || undefined,
+          gradoId || undefined,
         );
         if (res.data) setJustificationsData(res.data);
         else if (res.error) toast.error(res.error);
@@ -173,107 +247,228 @@ export function AsistenciaReportes({
     } else if (reportType === "individual" && studentId) {
       loadReport();
     }
-  }, [seccionId, studentId, mes, reportType, anio]);
+  }, [seccionId, studentId, mes, reportType, anio, rPeriod, nivelId, gradoId]);
 
   return (
-    <div className="flex flex-col gap-4 w-full animate-in fade-in duration-500">
-      <ReporteFiltros
-        anio={anio}
-        setAnio={setAnio}
-        mes={mes}
-        setMes={setMes}
-        seccionId={seccionId}
-        setSeccionId={setSeccionId}
-        studentId={studentId}
-        setStudentId={setStudentId}
-        reportType={reportType}
-        setReportType={setReportType}
-        secciones={secciones}
-        alumnos={alumnos}
-        aniosAcademicos={aniosAcademicos}
-        isLoadingSecciones={isLoadingSecciones}
-        isLoadingAlumnos={isLoadingAlumnos}
-        isPending={isPending}
-        onConsultar={loadReport}
-      />
-
-      {reportType === "mensual" && seccionId && (
-        <div className="bg-card border border-border/40 rounded-2xl overflow-hidden shadow-sm flex flex-col">
-          {isPending ? (
-            <div className="min-h-[400px] flex items-center justify-center">
-              <ReporteEmptyState type="loading" />
-            </div>
-          ) : (
-            <>
-              <ReporteHeader
-                mes={mes}
-                anio={anio}
-                totalEstudiantes={reportData.length}
-                data={reportData}
-                daysInMonth={daysInMonth}
-              />
-
-              <div>
-                {reportData.length > 0 ? (
-                  <ReporteTable
-                    reportData={reportData}
-                    daysInMonth={daysInMonth}
-                    anio={anio}
-                    mes={mes}
-                  />
-                ) : (
-                  <ReporteEmptyState type="empty" />
-                )}
-              </div>
-            </>
-          )}
+    <div className="flex gap-0 w-full animate-in fade-in duration-300 min-h-[calc(100vh-12rem)]">
+      {/* Sidebar de Niveles */}
+      <aside className="hidden lg:flex flex-col w-[240px] shrink-0 border-r bg-card/50 backdrop-blur-sm rounded-l-2xl overflow-hidden">
+        <div className="px-5 py-5 border-b border-border/30">
+          <h2 className="text-xs font-black uppercase tracking-widest text-foreground/80">
+            Reportes Escolares
+          </h2>
+          <p className="text-[10px] text-muted-foreground mt-0.5 font-medium uppercase tracking-wide">
+            Análisis de asistencia
+          </p>
         </div>
-      )}
 
-      {reportType === "alertas" && (
-        <ReporteAlertas alertas={alertsData} isPending={isPending} />
-      )}
+        <nav className="flex-1 px-3 py-4 space-y-1">
+          {niveles.map((nivel: any) => {
+            const Icon = NIVEL_ICON_MAP[nivel.nombre] || IconBook;
+            const isActive = nivelId === nivel.id;
+            return (
+              <button
+                key={nivel.id}
+                onClick={() => {
+                  setNivelId(nivel.id);
+                  setGradoId("");
+                  setSeccionId("");
+                  setStudentId("");
+                  setReportData([]);
+                }}
+                className={cn(
+                  "w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-left transition-all duration-200 group",
+                  isActive
+                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
+                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+                )}
+              >
+                <Icon className={cn("size-5 shrink-0 transition-transform", isActive && "scale-110")} />
+                <span className="text-[11px] font-bold tracking-wider">
+                  {nivel.nombre}
+                </span>
+              </button>
+            );
+          })}
 
-      {reportType === "institucional" && (
-        <ReporteInstitucional
-          resumen={
-            seccionId && seccionId !== "all"
-              ? instData.filter((d) => d.id === seccionId)
-              : instData
-          }
-          isPending={isPending}
-        />
-      )}
+          {niveles.length === 0 && !isLoadingSecciones && (
+            <p className="text-[10px] text-muted-foreground/50 text-center py-8 italic">
+              No hay niveles disponibles
+            </p>
+          )}
+          {isLoadingSecciones && (
+            <div className="flex items-center justify-center py-8">
+              <IconLoader2 className="size-5 animate-spin text-muted-foreground/30" />
+            </div>
+          )}
+        </nav>
+      </aside>
 
-      {reportType === "individual" && studentId && (
-        <ReporteIndividual
-          data={studentData}
-          estudianteNombre={
-            alumnos.find((a) => a.id === studentId)
-              ? `${alumnos.find((a) => a.id === studentId).apellidoPaterno} ${alumnos.find((a) => a.id === studentId).apellidoMaterno}, ${alumnos.find((a) => a.id === studentId).name}`
-              : ""
-          }
-          isPending={isPending}
-        />
-      )}
-
-      {reportType === "justificaciones" && (
-        <ReporteJustificaciones
-          justificaciones={justificationsData}
-          isPending={isPending}
-        />
-      )}
-
-      {!seccionId &&
-        !studentId &&
-        reportType !== "institucional" &&
-        reportType !== "alertas" &&
-        reportType !== "justificaciones" &&
-        !isPending && (
-          <div className="min-h-[400px] flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-dashed border-border/40 bg-muted/5">
-            <ReporteEmptyState type="initial" />
+      {/* Main Content Area */}
+      <main className="flex-1 flex flex-col min-w-0">
+        {/* Mobile Level Selector */}
+        <div className="lg:hidden px-4 pt-4">
+          <div className="flex gap-1 p-1 bg-muted/50 rounded-xl border border-border/40">
+            {niveles.map((nivel: any) => {
+              const Icon = NIVEL_ICON_MAP[nivel.nombre?.toUpperCase()] || IconBook;
+              const isActive = nivelId === nivel.id;
+              return (
+                <button
+                  key={nivel.id}
+                  onClick={() => {
+                    setNivelId(nivel.id);
+                    setGradoId("");
+                    setSeccionId("");
+                    setStudentId("");
+                  }}
+                  className={cn(
+                    "flex-1 flex flex-col items-center py-2.5 rounded-lg transition-all gap-1",
+                    isActive
+                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
+                      : "text-muted-foreground",
+                  )}
+                >
+                  <Icon className="size-4" />
+                  <span className="text-[9px] font-bold uppercase tracking-wider">{nivel.nombre}</span>
+                </button>
+              );
+            })}
           </div>
-        )}
+        </div>
+
+        {/* Dashboard Header & Filters */}
+        <div className="flex flex-col gap-4 p-4 lg:p-6 pb-0">
+          <div className="space-y-1">
+            <h1 className="text-lg font-bold tracking-tight uppercase">
+              {nivelActual
+                ? `Reportes de ${nivelActual.nombre}`
+                : "Reportes de Asistencia"}
+            </h1>
+            <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+              {seccionActual ? (
+                <>
+                  <span>{seccionActual.grado?.nombre}</span>
+                  <IconChevronRight className="size-3 opacity-40" />
+                  <span>Sección &ldquo;{seccionActual.seccion}&rdquo;</span>
+                </>
+              ) : nivelActual ? (
+                <span>Selecciona grado y sección para generar reportes</span>
+              ) : (
+                <span>Selecciona un nivel en el panel lateral</span>
+              )}
+            </div>
+          </div>
+
+          <ReporteFiltros
+            anio={anio}
+            setAnio={setAnio}
+            mes={mes}
+            setMes={setMes}
+            nivelId={nivelId}
+            gradoId={gradoId}
+            seccionId={seccionId}
+            setSeccionId={setSeccionId}
+            setGradoId={setGradoId}
+            studentId={studentId}
+            setStudentId={setStudentId}
+            rPeriod={rPeriod as "today" | "month" | "year"}
+            setRPeriod={setRPeriod}
+            reportType={reportType}
+            setReportType={setReportType}
+            secciones={filteredSecciones}
+            grados={grados}
+            alumnos={alumnos}
+            aniosAcademicos={aniosAcademicos}
+            isLoadingSecciones={isLoadingSecciones}
+            isLoadingAlumnos={isLoadingAlumnos}
+            isPending={isPending}
+            onConsultar={loadReport}
+          />
+        </div>
+
+        <div className="flex-1 p-4 lg:p-6 pt-0">
+          {reportType === "mensual" && seccionId && (
+            <div className="bg-card border border-border/40 rounded-2xl overflow-hidden shadow-sm flex flex-col animate-in fade-in zoom-in-95 duration-300">
+              {isPending ? (
+                <div className="min-h-[400px] flex items-center justify-center">
+                  <ReporteEmptyState type="loading" />
+                </div>
+              ) : (
+                <>
+                  <ReporteHeader
+                    mes={mes}
+                    anio={anio}
+                    totalEstudiantes={reportData.length}
+                    data={reportData}
+                    daysInMonth={daysInMonth}
+                  />
+
+                  <div>
+                    {reportData.length > 0 ? (
+                      <ReporteTable
+                        reportData={reportData}
+                        daysInMonth={daysInMonth}
+                        anio={anio}
+                        mes={mes}
+                      />
+                    ) : (
+                      <ReporteEmptyState type="empty" />
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
+          {reportType === "alertas" && (
+            <ReporteAlertas alertas={alertsData} isPending={isPending} />
+          )}
+
+          {reportType === "institucional" && (
+            <ReporteInstitucional
+              resumen={
+                seccionId && seccionId !== "all"
+                  ? instData.data.filter((d: any) => d.id === seccionId)
+                  : instData.data
+              }
+              stats={instData.stats}
+              trendData={instData.trendData}
+              meta={instData.meta}
+              isPending={isPending}
+            />
+          )}
+
+          {reportType === "individual" && studentId && (
+            <ReporteIndividual
+              data={studentData}
+              estudianteNombre={
+                alumnos.find((a) => a.id === studentId)
+                  ? `${alumnos.find((a) => a.id === studentId).apellidoPaterno} ${alumnos.find((a) => a.id === studentId).apellidoMaterno}, ${alumnos.find((a) => a.id === studentId).name}`
+                  : ""
+              }
+              isPending={isPending}
+            />
+          )}
+
+          {reportType === "justificaciones" && (
+            <ReporteJustificaciones
+              justificaciones={justificationsData}
+              isPending={isPending}
+            />
+          )}
+
+          {!seccionId &&
+            !studentId &&
+            reportType !== "institucional" &&
+            reportType !== "alertas" &&
+            reportType !== "justificaciones" &&
+            !isPending && (
+              <div className="min-h-[400px] flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-dashed border-border/40 bg-muted/5 animate-in fade-in duration-500">
+                <ReporteEmptyState type="initial" />
+              </div>
+            )}
+        </div>
+      </main>
     </div>
   );
 }

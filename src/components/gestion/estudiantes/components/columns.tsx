@@ -86,7 +86,7 @@ export const columns: ColumnDef<StudentTableType>[] = [
         <div className="flex items-center gap-3">
           <Avatar className="h-9 w-9 border border-border/40 shadow-sm relative overflow-hidden group">
             <AvatarImage
-              src={student.image || ""}
+              src={student.image ?? undefined}
               className="object-cover transition-transform group-hover:scale-110"
             />
             <AvatarFallback className="bg-blue-500/10 text-blue-500">
@@ -114,12 +114,11 @@ export const columns: ColumnDef<StudentTableType>[] = [
     accessorFn: (row) => row.nivelAcademico?.nivel.nombre || "",
     cell: ({ row }) => {
       const info = row.original.nivelAcademico;
-      const matriculado = row.original.matriculadoEsteAnio;
 
       if (!info) {
         return (
           <div className="flex flex-col">
-            <span className="text-[11px] font-bold text-red-500/70 border border-red-500/20 bg-red-500/5 px-2 py-0.5 rounded-md w-fit uppercase tracking-tighter">
+            <span className="text-[11px] font-bold text-red-500/70 border border-red-500/20 bg-red-500/5 px-2 py-0.5 rounded-full w-fit uppercase tracking-tighter">
               Sin Matrícula Activa
             </span>
           </div>

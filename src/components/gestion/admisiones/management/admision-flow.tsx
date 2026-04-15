@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -30,14 +31,14 @@ import {
 import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
 import { formatDate } from "@/lib/formats"
-import { updateAdmisionResultAction } from "@/actions/admissions"
+import { updateAdmisionResultAction, convertProspectoToEstudianteAction } from "@/actions/admissions"
 import { toast } from "sonner"
 import {
   IconCalendarEvent,
   IconClipboardCheck,
   IconAlertCircle,
-  IconCheck,
-  IconLoader2
+  IconLoader2,
+  IconUserPlus
 } from "@tabler/icons-react"
 import { es } from "date-fns/locale"
 
@@ -55,6 +56,8 @@ interface AdmisionFlowProps {
 
 export function AdmisionFlow({ admision, onSuccess }: AdmisionFlowProps) {
   const [loading, setLoading] = useState(false)
+  const [isGenerating, setIsGenerating] = useState(false)
+  const router = useRouter()
 
   const form = useForm<z.infer<typeof flowSchema>>({
     resolver: zodResolver(flowSchema),
@@ -84,6 +87,22 @@ export function AdmisionFlow({ admision, onSuccess }: AdmisionFlowProps) {
       }
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleGenerateStudent = async () => {
+    setIsGenerating(true)
+    try {
+      const res = await convertProspectoToEstudianteAction(admision.prospectoId)
+      if (res.success) {
+        toast.success(res.success)
+        router.push("/gestion/matriculas")
+        onSuccess()
+      } else {
+        toast.error(res.error)
+      }
+    } finally {
+      setIsGenerating(false)
     }
   }
 
@@ -233,7 +252,7 @@ export function AdmisionFlow({ admision, onSuccess }: AdmisionFlowProps) {
             <Button
               type="submit"
               className="w-full"
-              disabled={loading}
+              disabled={loading || admision.prospecto.estado === "MATRICULADO"}
             >
               {loading ? (
                 <div className="flex items-center gap-2">
@@ -247,6 +266,42 @@ export function AdmisionFlow({ admision, onSuccess }: AdmisionFlowProps) {
           </div>
         </form>
       </Form>
+
+      {admision.prospecto.estado === "ADMITIDO" && (
+        <div className="mt-6 p-6 rounded-2xl bg-violet-500/10 border border-violet-500/20 text-center space-y-4">
+          <div className="mx-auto w-12 h-12 bg-violet-500/20 rounded-full flex items-center justify-center text-violet-500 mb-2">
+            <IconUserPlus size={24} />
+          </div>
+          <h3 className="font-bold text-lg text-violet-400">¡Prospecto Admitido!</h3>
+          <p className="text-sm text-muted-foreground">
+            El siguiente paso es convertir a este prospecto en un estudiante oficial para poder registrar su matrícula académica.
+          </p>
+          <Button
+            onClick={handleGenerateStudent}
+            disabled={isGenerating}
+            className="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold h-12 rounded-xl transition-all shadow-[0_0_20px_-5px_rgba(124,58,237,0.5)] hover:shadow-[0_0_30px_-5px_rgba(124,58,237,0.7)]"
+          >
+            {isGenerating ? (
+              <>
+                <IconLoader2 className="mr-2 h-5 w-5 animate-spin" />
+                Generando Estudiante...
+              </>
+            ) : (
+              <>
+                Generar Matrícula (Convertir a Estudiante)
+              </>
+            )}
+          </Button>
+        </div>
+      )}
+
+      {admision.prospecto.estado === "MATRICULADO" && (
+        <div className="mt-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-center">
+          <p className="text-sm font-bold text-emerald-400">
+            ✓ Este usuario ya ha sido convertido en Estudiante.
+          </p>
+        </div>
+      )}
     </div>
   )
 }

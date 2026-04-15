@@ -31,6 +31,7 @@ export function DeudasListClient({
   deudas,
   historial = [],
 }: DeudasListClientProps) {
+  console.log("🚀 ~ DeudasListClient ~ deudas:", deudas)
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [selectedDeuda, setSelectedDeuda] = useState<any>(null);
@@ -53,6 +54,7 @@ export function DeudasListClient({
   );
 
   const nextDeuda = deudas.length > 0 ? deudas[0] : null;
+  console.log("🚀 ~ DeudasListClient ~ nextDeuda:", nextDeuda)
 
   const stats = [
     {
@@ -73,7 +75,9 @@ export function DeudasListClient({
       iconColor: "text-warning",
       glowColor: "#f9731655", // tu color para el glow (CSS real)
       className: "shadow-lg",
-      description: `Monto: ${formatCurrency(nextDeuda.monto - Number(nextDeuda.montoPagado))}`,
+      description: nextDeuda
+        ? `Monto: ${formatCurrency(nextDeuda.monto - Number(nextDeuda.montoPagado))}`
+        : "No tienes pensiones pendientes",
     },
   ];
 

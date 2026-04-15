@@ -120,12 +120,13 @@ export async function getInstitucionesAction() {
 /**
  * Obtiene los niveles académicos (Grados/Secciones)
  */
-export async function getNivelesAcademicosAction(anio?: number) {
+export async function getNivelesAcademicosAction(anio?: number, nivelId?: string) {
   try {
     const niveles = await prisma.nivelAcademico.findMany({
       where: {
         activo: true,
         anioAcademico: anio,
+        nivelId: nivelId || undefined,
       },
       include: {
         grado: true,
@@ -379,6 +380,17 @@ export async function updateStudentAction(id: string, values: any) {
  */
 export async function deleteStudentAction(id: string) {
   try {
+    // Obtener imagen antes de eliminar para limpieza física
+    const student = await prisma.user.findUnique({
+      where: { id },
+      select: { image: true },
+    });
+
+    // Eliminar imagen física antes de borrar al estudiante
+    if (student?.image) {
+      await deleteFile(student.image);
+    }
+
     await prisma.user.delete({
       where: { id },
     });

@@ -122,3 +122,84 @@ export async function updateAdmisionResultAction(admisionId: string, values: any
     return { error: "No se pudo actualizar el resultado de la admisión" }
   }
 }
+
+/**
+ * Convierte un prospecto ADMITIDO en un Estudiante (User) y cambia su estado a MATRICULADO
+ */
+export async function convertProspectoToEstudianteAction(prospectoId: string) {
+  try {
+    const prospecto = await prisma.prospecto.findUnique({
+      where: { id: prospectoId }
+    })
+
+    if (!prospecto) {
+      return { error: "Prospecto no encontrado" }
+    }
+
+    if (prospecto.estado !== "ADMITIDO") {
+      return { error: "El prospecto debe estar en estado ADMITIDO para ser convertido a estudiante" }
+    }
+
+    // Buscar el estado ACTIVO para el usuario
+    const estadoActivo = await prisma.estadoUsuario.findFirst({
+      where: { codigo: "ACTIVO", institucionId: prospecto.institucionId }
+    })
+
+    // Fallback por si no encuentra el estado específico por institución
+    const estadoFallo = await prisma.estadoUsuario.findFirst({
+      where: { codigo: "ACTIVO" }
+    })
+
+    const estadoId = estadoActivo?.id || estadoFallo?.id;
+
+    if (!estadoId) {
+      return { error: "No se encontró un estado ACTIVO configurado en el sistema" }
+    }
+
+    // Hashear el DNI para usarlo como contraseña inicial
+    // Usamos un import dinámico de bcryptjs o podemos usar una contraseña genérica si bcrypt no está disponible aquí.
+    // Asumiendo que bcrypjs está instalado por su uso en students.ts
+    const bcrypt = await import("bcryptjs")
+    const hashedPassword = await bcrypt.hash(prospecto.dni || prospecto.nombre.toLowerCase().replace(/\s/g, ""), 10)
+
+    const result = await prisma.$transaction(async (tx) => {
+      // 1. Crear el usuario Estudiante
+      const newStudent = await tx.user.create({
+        data: {
+          name: prospecto.nombre,
+          apellidoPaterno: prospecto.apellidoPaterno,
+          apellidoMaterno: prospecto.apellidoMaterno,
+          email: prospecto.email || null,
+          telefono: prospecto.telefono,
+          direccion: prospecto.direccion,
+          dni: prospecto.dni || null,
+          fechaNacimiento: prospecto.fechaNacimiento,
+          role: "estudiante",
+          estadoId: estadoId,
+          institucionId: prospecto.institucionId,
+          password: hashedPassword
+        }
+      })
+
+      // 2. Actualizar estado del prospecto a MATRICULADO
+      await tx.prospecto.update({
+        where: { id: prospectoId },
+        data: { estado: "MATRICULADO" }
+      })
+
+      return newStudent
+    })
+
+    revalidatePath("/gestion/admisiones")
+    revalidatePath("/gestion/estudiantes")
+    revalidatePath("/gestion/matriculas")
+    
+    return { success: "Estudiante generado correctamente. Ahora puede iniciar su matrícula.", data: JSON.parse(JSON.stringify(result)) }
+  } catch (error: any) {
+    console.error("Error converting prospecto to student:", error)
+    if (error.code === "P2002") {
+      return { error: "Ya existe un usuario/estudiante con este DNI o Correo" }
+    }
+    return { error: "No se pudo convertir el prospecto a estudiante" }
+  }
+}

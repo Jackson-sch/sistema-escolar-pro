@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { StudentTableType } from "@/components/gestion/estudiantes/components/columns";
@@ -14,7 +14,7 @@ import {
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { cn } from "@/lib/utils";
 import { updateStudentAction } from "@/actions/students";
-import { toast } from "sonner";
+import { useAvatarUpload } from "@/hooks/use-avatar-upload";
 
 interface StudentProfileHeaderProps {
   student: StudentTableType;
@@ -23,93 +23,40 @@ interface StudentProfileHeaderProps {
 export function StudentProfileHeader({
   student: initialStudent,
 }: StudentProfileHeaderProps) {
-  const [student, setStudent] = useState(initialStudent);
-  const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const { copied, copy } = useCopyToClipboard();
 
-  const handleImageClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith("image/")) {
-      toast.error("Por favor, selecciona una imagen válida");
-      return;
-    }
-
-    if (file.size > 4 * 1024 * 1024) {
-      toast.error("La imagen es demasiado grande (máximo 4MB)");
-      return;
-    }
-
-    try {
-      setIsUploading(true);
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
+  const {
+    image: studentImage,
+    isUploading,
+    fileInputRef,
+    openFilePicker: handleImageClick,
+    handleFileChange,
+    handleDelete: handleDeleteImage,
+  } = useAvatarUpload({
+    initialImage: initialStudent.image,
+    onSave: async (imageUrl) => {
+      const result = await updateStudentAction(initialStudent.id, {
+        image: imageUrl,
       });
+      return result;
+    },
+  });
 
-      const data = await response.json();
-      if (data.error) throw new Error(data.error);
-
-      // 2. Actualizar en la base de datos
-      const result = await updateStudentAction(student.id, {
-        image: data.url,
-      });
-
-      if (result.error) {
-        throw new Error(result.error);
-      }
-      setStudent((prev) => ({ ...prev, image: data.url }));
-      toast.success("Imagen de perfil actualizada");
-    } catch (error: any) {
-      toast.error(error.message || "Error al subir la imagen");
-    } finally {
-      setIsUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    }
-  };
-
-  const handleDeleteImage = async () => {
-    try {
-      setIsUploading(true);
-      // Actualizamos base de datos
-      const result = await updateStudentAction(student.id, { image: null });
-
-      if (result.error) {
-        throw new Error(result.error);
-      }
-
-      setStudent((prev) => ({ ...prev, image: null }));
-      toast.success("Imagen de perfil eliminada");
-    } catch (error: any) {
-      toast.error(error.message || "Error al eliminar la imagen");
-    } finally {
-      setIsUploading(false);
-    }
-  };
 
   // Memoizar valores calculados para evitar recálculos innecesarios
   const initials = useMemo(() => {
-    return `${student.name?.[0] || ""}${student.apellidoPaterno?.[0] || ""}`;
-  }, [student.name, student.apellidoPaterno]);
+    return `${initialStudent.name?.[0] || ""}${initialStudent.apellidoPaterno?.[0] || ""}`;
+  }, [initialStudent.name, initialStudent.apellidoPaterno]);
 
   const fullName = useMemo(() => {
-    return `${student.name} ${student.apellidoPaterno} ${student.apellidoMaterno}`;
-  }, [student.name, student.apellidoPaterno, student.apellidoMaterno]);
+    return `${initialStudent.name} ${initialStudent.apellidoPaterno} ${initialStudent.apellidoMaterno}`;
+  }, [initialStudent.name, initialStudent.apellidoPaterno, initialStudent.apellidoMaterno]);
 
   // Color del estado con fallback seguro
-  const statusColor = student.estado?.color || "#6b7280";
+  const statusColor = initialStudent.estado?.color || "#6b7280";
 
   const handleCopyDni = () => {
-    copy(student.dni || "", "DNI copiado al portapapeles");
+    copy(initialStudent.dni || "", "DNI copiado al portapapeles");
   };
 
   return (
@@ -157,7 +104,7 @@ export function StudentProfileHeader({
 
           <div className="relative p-1 rounded-full bg-primary/80 backdrop-blur-sm shadow-xl overflow-visible">
             <Avatar className="size-16 md:size-20 border-2 border-background shadow-inner relative overflow-hidden">
-              <AvatarImage src={student.image || ""} className="object-cover" />
+              <AvatarImage src={studentImage ?? undefined} className="object-cover" />
               <AvatarFallback className="text-2xl md:text-3xl font-black bg-linear-to-br from-primary to-primary/50 text-white uppercase">
                 {initials}
               </AvatarFallback>
@@ -185,10 +132,10 @@ export function StudentProfileHeader({
             </button>
 
             {/* Botón de Borrar */}
-            {student.image && !isUploading && (
+            {studentImage && !isUploading && (
               <button
                 onClick={handleDeleteImage}
-                className="absolute -bottom-1 -left-1 size-7 rounded-full bg-destructive text-destructive-foreground border-2 border-background shadow-md flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-30"
+                className="absolute -bottom-1 -left-1 size-7 rounded-full bg-red-500 text-white border-2 border-background shadow-md flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-30"
                 title="Eliminar imagen"
               >
                 <IconTrash className="size-3.5" />
@@ -199,7 +146,7 @@ export function StudentProfileHeader({
             <div
               className="absolute top-0 right-0 size-3.5 rounded-full border-2 border-background shadow-sm z-30"
               style={{ backgroundColor: statusColor }}
-              aria-label={`Estado: ${student.estado?.nombre || "Desconocido"}`}
+              aria-label={`Estado: ${initialStudent.estado?.nombre || "Desconocido"}`}
               role="status"
             />
           </div>
@@ -229,7 +176,7 @@ export function StudentProfileHeader({
             )}
             role="button"
             tabIndex={0}
-            aria-label={`Copiar DNI: ${student.dni || "S/N"}`}
+            aria-label={`Copiar DNI: ${initialStudent.dni || "S/N"}`}
             aria-pressed={copied}
           >
             <div className="p-1 bg-background rounded-full shadow-xs group-hover:text-violet-600 transition-colors">
@@ -240,12 +187,12 @@ export function StudentProfileHeader({
               )}
             </div>
             <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground group-hover:text-foreground">
-              {student.dni || "S/N"}
+              {initialStudent.dni || "S/N"}
             </span>
           </Badge>
 
           {/* Badge de estado */}
-          {student.estado && (
+          {initialStudent.estado && (
             <Badge
               variant="outline"
               className="h-7 px-3 border shadow-none backdrop-blur-md transition-all hover:brightness-105"
@@ -255,7 +202,7 @@ export function StudentProfileHeader({
                 color: statusColor,
               }}
               role="badge"
-              aria-label={`Estado: ${student.estado.nombre}`}
+              aria-label={`Estado: ${initialStudent.estado.nombre}`}
             >
               <span className="text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5">
                 <span
@@ -263,7 +210,7 @@ export function StudentProfileHeader({
                   style={{ backgroundColor: statusColor }}
                   aria-hidden="true"
                 />
-                {student.estado.nombre}
+                {initialStudent.estado.nombre}
               </span>
             </Badge>
           )}

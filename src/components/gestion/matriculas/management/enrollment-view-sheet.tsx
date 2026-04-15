@@ -42,7 +42,7 @@ export function EnrollmentViewSheet({
         <SheetHeader className="space-y-4">
           <div className="flex items-start gap-4">
             <Avatar className="h-16 w-16 border-2 border-primary/20 shadow-lg bg-primary/20">
-              <AvatarImage src={enrollment.estudiante.image || ""} />
+              <AvatarImage src={enrollment.estudiante.image ?? undefined} />
               <AvatarFallback className="bg-primary/10 text-primary text-xl font-semibold">
                 {getInitials(
                   studentFullName,

@@ -4,6 +4,52 @@ import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
 import bcrypt from "bcryptjs";
 
+
+/**
+ * Obtiene datos básicos del usuario para el layout protegido.
+ */
+export async function getLayoutUserAction(userId: string) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        role: true,
+        mustChangePassword: true,
+        name: true,
+        apellidoPaterno: true,
+        apellidoMaterno: true,
+        email: true,
+      },
+    });
+    return { success: user ? JSON.parse(JSON.stringify(user)) : null };
+  } catch (error) {
+    console.error("Error fetching layout user:", error);
+    return { error: "No se pudo obtener el usuario" };
+  }
+}
+
+/**
+ * Obtiene el conteo de comprobantes pendientes filtrado por institución.
+ */
+export async function getPendingComprobantesCountAction(institucionId?: string) {
+  try {
+    const count = await prisma.comprobantePago.count({
+      where: {
+        estado: "PENDIENTE",
+        cronograma: {
+          estudiante: {
+            institucionId: institucionId || undefined,
+          },
+        },
+      },
+    });
+    return { success: count };
+  } catch (error) {
+    console.error("Error counting pending comprobantes:", error);
+    return { error: "No se pudo obtener el conteo de comprobantes" };
+  }
+}
+
 /**
  * Cambia la contraseña del usuario actual y quita el flag mustChangePassword
  */

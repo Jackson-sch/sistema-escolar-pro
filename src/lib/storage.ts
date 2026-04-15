@@ -71,16 +71,27 @@ export async function deleteFile(
   try {
     if (url.includes("cloudinary.com")) {
       // Eliminar de Cloudinary
-      await configureCloudinary();
+      const configured = await configureCloudinary();
+      if (!configured) {
+        console.warn("[Storage] No se pudo configurar Cloudinary para eliminar:", url);
+        return false;
+      }
 
       // Extraer public_id de la URL
       // Formato: https://res.cloudinary.com/cloud-name/image/upload/v12345/folder/public_id.jpg
-      const parts = url.split("/");
+      const decodedUrl = decodeURIComponent(url);
+      const parts = decodedUrl.split("/");
       const uploadIndex = parts.indexOf("upload");
-      if (uploadIndex === -1) return false;
+      if (uploadIndex === -1) {
+        console.warn("[Storage] No se encontró 'upload' en la URL:", url);
+        return false;
+      }
 
-      const publicIdWithExt = parts.slice(uploadIndex + 2).join("/");
-      const publicId = publicIdWithExt.split(".")[0];
+      // Saltar la versión (v12345) si existe
+      const afterUpload = parts.slice(uploadIndex + 1);
+      const startIndex = afterUpload[0]?.startsWith("v") ? 1 : 0;
+      const publicIdWithExt = afterUpload.slice(startIndex).join("/");
+      const publicId = publicIdWithExt.replace(/\.[^/.]+$/, ""); // Quitar extensión
 
       const result = await cloudinary.uploader.destroy(publicId);
       return result.result === "ok";
@@ -89,11 +100,12 @@ export async function deleteFile(
       const filename = url.replace("/uploads/", "");
       const filePath = join(process.cwd(), "public", "uploads", filename);
 
+      console.log("[Storage] Eliminando archivo local:", filePath);
       await unlink(filePath);
       return true;
     }
   } catch (error) {
-    console.error("Error al eliminar archivo físico:", error);
+    console.error("[Storage] Error al eliminar archivo físico:", error);
     return false;
   }
 

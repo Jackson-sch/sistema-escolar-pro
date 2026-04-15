@@ -18,6 +18,8 @@ export type AreaTableType = {
   orden: number | null
   color: string | null
   activa: boolean
+  nivelId: string | null
+  nivel: { id: string; nombre: string } | null
 }
 
 export const columns: ColumnDef<AreaTableType>[] = [
@@ -64,6 +66,20 @@ export const columns: ColumnDef<AreaTableType>[] = [
     ),
   },
   {
+    accessorKey: "nivelId",
+    header: "Nivel",
+    cell: ({ row }) => {
+      const area = row.original
+      return (
+        <span className="text-sm font-medium text-foreground">
+          {area.nivel?.nombre || "General"}
+        </span>
+      )
+    },
+    // We define this explicitly so TanStack table can filter against nivelId if needed
+    filterFn: "equals",
+  },
+  {
     accessorKey: "activa",
     header: "Estado",
     cell: ({ row }) => {
@@ -83,6 +99,6 @@ export const columns: ColumnDef<AreaTableType>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => <AreaRowActions row={row} />,
+    cell: ({ row, table }) => <AreaRowActions row={row} table={table} />,
   },
 ]

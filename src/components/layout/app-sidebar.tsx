@@ -59,7 +59,7 @@ const adminNavItems = [
   },
   {
     title: "Gestión Académica",
-    url: "/gestion/academico/carga-horaria",
+    url: "/gestion/academico/estructura",
     icon: IconSchool,
   },
   {

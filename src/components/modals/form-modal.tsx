@@ -9,14 +9,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import { ShineBorder } from "../ui/shine-border";
-import { FormModalProvider, useFormModal } from "./form-modal-context";
+import { ShineBorder } from "@/components/ui/shine-border";
+import { FormModalProvider, useFormModal } from "@/components/modals/form-modal-context";
 import { toast } from "sonner";
-import { SafeCloseDialog } from "./safe-close-dialog";
+import { SafeCloseDialog } from "@/components/modals/safe-close-dialog";
 import { useFormShortcuts } from "@/hooks/use-form-shortcuts";
 
 interface FormModalProps {
   title: string;
+  titleSpan?: string;
   description?: string;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
@@ -39,6 +40,7 @@ export function FormModal(props: FormModalProps) {
 
 function FormModalInner({
   title,
+  titleSpan,
   description,
   isOpen,
   onOpenChange,
@@ -93,9 +95,13 @@ function FormModalInner({
       >
         <ShineBorder shineColor={["#A07CFE", "#FE8FB5", "#FFBE7B"]} />
         <DialogHeader className={cn("p-6 pb-4 border-b", headerClassName)}>
-          <DialogTitle className="text-xl font-bold tracking-tight">
+          <div className="flex items-center gap-3">
+           <DialogTitle className="text-xl font-bold tracking-tight">
             {title}
-          </DialogTitle>
+          </DialogTitle> 
+            {titleSpan && <span className="hidden sm:inline-flex items-center text-[10px] font-mono bg-white/5 text-zinc-500 border border-white/[0.07] px-2 py-1 rounded-md shrink-0">{titleSpan}</span>}
+          </div>
+          
           {description && (
             <DialogDescription className="text-xs mt-1">
               {description}

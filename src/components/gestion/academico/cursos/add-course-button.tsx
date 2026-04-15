@@ -12,12 +12,14 @@ interface AddCourseButtonProps {
   areas: any[];
   nivelesAcademicos: any[];
   profesores: any[];
+  currentAnio: number;
 }
 
 export function AddCourseButton({
   areas,
   nivelesAcademicos,
   profesores,
+  currentAnio,
 }: AddCourseButtonProps) {
   const [open, setOpen] = useState(false);
 
@@ -35,7 +37,7 @@ export function AddCourseButton({
       <FormModal
         isOpen={open}
         onOpenChange={setOpen}
-        title={`Carga Académica ${new Date().getFullYear()}`}
+        title={`Carga Académica ${currentAnio}`}
         description="Asigne un docente y un ambiente de aprendizaje a una nueva asignatura de la malla."
         className="sm:max-w-xl"
       >
@@ -44,6 +46,7 @@ export function AddCourseButton({
           areas={areas}
           nivelesAcademicos={nivelesAcademicos}
           profesores={profesores}
+          currentAnio={currentAnio}
         />
       </FormModal>
     </>

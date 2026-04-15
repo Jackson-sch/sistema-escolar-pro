@@ -14,10 +14,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
+  getEvaluacionDetailAction,
   getNotasEvaluacionAction,
   getEstudiantesCursoAction,
 } from "@/actions/evaluations";
-import prisma from "@/lib/prisma";
 import { NotasForm } from "@/components/evaluaciones/notas/notas-form";
 
 interface NotasPageProps {
@@ -28,21 +28,8 @@ export default async function NotasPage({ params }: NotasPageProps) {
   const { evaluacionId } = await params;
 
   // Obtener la evaluación con todos sus datos relacionados
-  const evaluacion = await prisma.evaluacion.findUnique({
-    where: { id: evaluacionId },
-    include: {
-      tipoEvaluacion: true,
-      curso: {
-        include: {
-          areaCurricular: true,
-          nivelAcademico: {
-            include: { grado: true },
-          },
-        },
-      },
-      periodo: true,
-    },
-  });
+  const evaluacionRes = await getEvaluacionDetailAction(evaluacionId);
+  const evaluacion = evaluacionRes.data;
 
   if (!evaluacion) {
     notFound();

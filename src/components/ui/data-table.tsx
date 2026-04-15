@@ -81,6 +81,8 @@ interface DataTableProps<TData, TValue> {
   onPageIndexChange?: (pageIndex: number) => void;
   onPageSizeChange?: (pageSize: number) => void;
   showColumnVisibility?: boolean;
+  enableRowSelection?: boolean;
+  ignoredFilterColumns?: string[];
 }
 
 export function DataTable<TData, TValue>({
@@ -103,6 +105,8 @@ export function DataTable<TData, TValue>({
   onPageIndexChange,
   onPageSizeChange,
   showColumnVisibility = true,
+  enableRowSelection = true,
+  ignoredFilterColumns,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
@@ -124,7 +128,7 @@ export function DataTable<TData, TValue>({
         ? { pagination: { pageIndex, pageSize } }
         : {}),
     },
-    enableRowSelection: true,
+    enableRowSelection,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -157,6 +161,7 @@ export function DataTable<TData, TValue>({
   });
 
   const isFiltered = table.getState().columnFilters.some((f) => {
+    if (ignoredFilterColumns?.includes(f.id)) return false;
     const v = f.value;
     return Array.isArray(v) ? v.length > 0 : v !== "" && v != null;
   });
@@ -259,7 +264,6 @@ export function DataTable<TData, TValue>({
                 )}
               >
                 <IconFilterOff className="size-3.5" />
-                Limpiar
               </Button>
             )}
 
@@ -406,13 +410,22 @@ export function DataTable<TData, TValue>({
       {/* ── PAGINATION ──────────────────────────────────────────── */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-1">
         {/* Selection count */}
-        <p className="text-xs text-muted-foreground shrink-0">
-          <span className="font-semibold text-foreground">
-            {table.getFilteredSelectedRowModel().rows.length}
-          </span>{" "}
-          de <span className="font-semibold text-foreground">{totalRows}</span>{" "}
-          fila(s) seleccionadas
-        </p>
+        {enableRowSelection ? (
+          <p className="text-xs text-muted-foreground shrink-0">
+            <span className="font-semibold text-foreground">
+              {table.getFilteredSelectedRowModel().rows.length}
+            </span>{" "}
+            de{" "}
+            <span className="font-semibold text-foreground">{totalRows}</span>{" "}
+            fila(s) seleccionadas
+          </p>
+        ) : (
+          <p className="text-xs text-muted-foreground shrink-0">
+            Total de{" "}
+            <span className="font-semibold text-foreground">{totalRows}</span>{" "}
+            registros
+          </p>
+        )}
 
         <div className="flex flex-wrap items-center gap-4">
           {/* Rows per page */}
@@ -473,7 +486,7 @@ export function DataTable<TData, TValue>({
                     key={p}
                     onClick={() => table.setPageIndex(p as number)}
                     className={cn(
-                      "h-8 min-w-[2rem] rounded-lg px-2 text-xs font-medium transition-all duration-100",
+                      "h-8 min-w-8 rounded-lg px-2 text-xs font-medium transition-all duration-100",
                       (p as number) === pi
                         ? "bg-primary text-primary-foreground shadow-sm"
                         : "text-muted-foreground hover:bg-muted hover:text-foreground",

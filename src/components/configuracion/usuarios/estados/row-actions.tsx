@@ -1,21 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { MoreHorizontal, Edit, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Edit, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  ResponsiveRowActions,
+  ActionItem,
+} from "@/components/common/responsive-row-actions";
 import { FormModal } from "@/components/modals/form-modal";
+import { ConfirmModal } from "@/components/modals/confirm-modal";
+
 import { EstadoUsuarioForm } from "./estado-usuario-form";
 import { deleteUserStateAction } from "@/actions/user-states";
-import { toast } from "sonner";
-import { ConfirmModal } from "@/components/modals/confirm-modal";
 
 interface EstadoUsuarioRowActionsProps {
   row: any;
@@ -45,32 +42,27 @@ export function EstadoUsuarioRowActions({ row }: EstadoUsuarioRowActionsProps) {
     }
   };
 
+  const actions: ActionItem[] = [
+    {
+      icon: Edit as any,
+      label: "Editar",
+      onClick: () => setShowEditDialog(true),
+      variant: "ghost",
+    },
+    { isSeparator: true },
+    {
+      icon: Trash2 as any,
+      label: "Eliminar",
+      onClick: () => setShowDeleteDialog(true),
+      variant: "destructive",
+      disabled: state.sistemico,
+      tooltip: state.sistemico ? "Estado del sistema (protegido)" : "Eliminar estado",
+    },
+  ];
+
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Abrir menú</span>
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-          <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
-            <Edit className="mr-2 h-4 w-4" />
-            Editar
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            className="text-destructive focus:text-destructive"
-            onClick={() => setShowDeleteDialog(true)}
-            disabled={state.sistemico}
-          >
-            <Trash2 className="mr-2 h-4 w-4" />
-            Eliminar
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <ResponsiveRowActions actions={actions} label="Acciones" />
 
       <FormModal
         title="Editar Estado de Usuario"

@@ -1,13 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { IconPlus } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { FormModal } from "@/components/modals/form-modal";
 import { CompetencyForm } from "./competency-form";
 
-export function AddCompetencyButton() {
+export function AddCompetencyButton({ areaId, nivelId }: { areaId?: string; nivelId?: string }) {
   const [open, setOpen] = useState(false);
+
+  const router = useRouter();
 
   return (
     <>
@@ -21,12 +24,19 @@ export function AddCompetencyButton() {
 
       <FormModal
         title="Nueva Competencia"
-        description="Defina una nueva competencia curricular asociada a un área académica."
+        description="Defina una nueva competencia curricular asociada."
         isOpen={open}
         onOpenChange={setOpen}
         className="sm:max-w-md"
       >
-        <CompetencyForm onSuccess={() => setOpen(false)} />
+        <CompetencyForm 
+          defaultNivelId={nivelId}
+          defaultAreaId={areaId}
+          onSuccess={() => {
+            setOpen(false);
+            router.refresh();
+          }} 
+        />
       </FormModal>
     </>
   );

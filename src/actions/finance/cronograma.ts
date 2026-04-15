@@ -37,6 +37,7 @@ export const getCronogramaAction = createSafeAction(
             apellidoMaterno: true,
             codigoModular: true,
             dni: true,
+            image: true,
             codigoEstudiante: true,
             nivelAcademicoId: true,
             nivelAcademico: {

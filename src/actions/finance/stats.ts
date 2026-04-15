@@ -13,8 +13,6 @@ export const getEstadisticasCobranzaAction = createSafeAction(
     const institucionId = session.user.institucionId;
     const studentFilter = institucionId ? { institucionId } : {};
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
 
     const [
       totalStats,
@@ -35,7 +33,7 @@ export const getEstadisticasCobranzaAction = createSafeAction(
       prisma.cronogramaPago.count({
         where: {
           pagado: false,
-          fechaVencimiento: { lt: today },
+          fechaVencimiento: { lt: new Date() },
           estudiante: studentFilter,
         },
       }),

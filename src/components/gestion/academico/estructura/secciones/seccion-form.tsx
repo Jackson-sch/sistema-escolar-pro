@@ -6,10 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
 import {
-  IconBabyCarriage,
-  IconSchool,
-  IconCertificate,
-  IconBook,
   IconCheck,
   IconSelector,
   IconPlus,
@@ -46,8 +42,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { upsertSeccionAction } from "@/actions/academic-structure";
-import { colors, TURNO_OPTIONS } from "@/lib/constants";
+import { colors, TURNO_OPTIONS, NIVEL_ICON_MAP } from "@/lib/constants";
 import { useFormModal } from "@/components/modals/form-modal-context";
+import { LevelSegmentedControl } from "@/components/common/level-segmented-control";
 
 const formSchema = z.object({
   seccion: z.string().min(1, "La sección es requerida"),
@@ -64,12 +61,7 @@ const formSchema = z.object({
 
 type SeccionFormValues = z.infer<typeof formSchema>;
 
-// Map nivel names to icons for the segmented control
-const NIVEL_ICON_MAP: Record<string, React.ElementType> = {
-  INICIAL: IconBabyCarriage,
-  PRIMARIA: IconSchool,
-  SECUNDARIA: IconCertificate,
-};
+// (Removed local NIVEL_ICON_MAP - now centralized)
 
 interface SeccionFormProps {
   initialData?: any;
@@ -123,10 +115,9 @@ export function SeccionForm({
     () => grados.filter((g) => g.nivel.nombre === selectedNivel),
     [grados, selectedNivel],
   );
-
   const form = useForm<SeccionFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialData
+    defaultValues: initialData?.id || initialData?.seccion
       ? {
           seccion: initialData.seccion,
           gradoId: initialData.gradoId,
@@ -141,15 +132,15 @@ export function SeccionForm({
         }
       : {
           seccion: "",
-          gradoId: "",
+          gradoId: initialData?.gradoId || "",
           tutorId: "",
-          sedeId: "",
+          sedeId: sedes[0]?.id || "",
           capacidad: "30",
           aulaAsignada: "",
-          color: "",
+          color: colors[0],
           turno: "MANANA",
           anioAcademico: String(currentAnio || new Date().getFullYear()),
-          institucionId,
+          institucionId: institucionId,
         },
   });
 
@@ -203,33 +194,11 @@ export function SeccionForm({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
         {/* ── Nivel Segmented Control ── */}
-        <section className="space-y-2.5">
-          <FormLabel>Nivel Educativo</FormLabel>
-          <div className="flex p-1.5 bg-muted/50 rounded-xl gap-1 border border-border/40">
-            {niveles.map((nivel) => {
-              const Icon = NIVEL_ICON_MAP[nivel.toUpperCase()] || IconBook;
-              const isActive = selectedNivel === nivel;
-              return (
-                <button
-                  key={nivel}
-                  type="button"
-                  onClick={() => handleNivelChange(nivel)}
-                  className={cn(
-                    "flex-1 flex flex-col items-center justify-center py-3 px-2 rounded-lg cursor-pointer transition-all duration-200 gap-1.5",
-                    isActive
-                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
-                      : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
-                  )}
-                >
-                  <Icon className="size-5" />
-                  <span className="text-xs font-semibold tracking-wide">
-                    {nivel.toUpperCase()}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </section>
+        <LevelSegmentedControl
+          levels={niveles}
+          value={selectedNivel}
+          onChange={handleNivelChange}
+        />
 
         {/* ── Row 1: Grado + Sede ── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -184,12 +184,14 @@ export async function getSeccionesAction(filters?: {
   gradoId?: string;
   anioAcademico?: number;
   profesorId?: string;
+  institucionId?: string;
 }) {
   try {
     const secciones = await prisma.nivelAcademico.findMany({
       where: {
         gradoId: filters?.gradoId,
         anioAcademico: filters?.anioAcademico,
+        institucionId: filters?.institucionId,
         ...(filters?.profesorId
           ? {
               cursos: {
@@ -202,10 +204,10 @@ export async function getSeccionesAction(filters?: {
           : {}),
       },
       include: {
-        nivel: { select: { nombre: true } },
-        grado: { select: { nombre: true, codigo: true } },
-        tutor: { select: { name: true, apellidoPaterno: true, image: true } },
-        sede: { select: { nombre: true } },
+        nivel: { select: { id: true, nombre: true } },
+        grado: { select: { id: true, nombre: true, codigo: true, nivelId: true } },
+        tutor: { select: { id: true, name: true, apellidoPaterno: true, apellidoMaterno: true, image: true } },
+        sede: { select: { id: true, nombre: true } },
       },
       orderBy: [
         { nivel: { nombre: "asc" } },
@@ -319,6 +321,23 @@ export async function deleteSeccionAction(id: string) {
 }
 
 /**
+ * Asigna un tutor a una sección de forma rápida
+ */
+export async function assignTutorAction(seccionId: string, tutorId: string | null) {
+  try {
+    await prisma.nivelAcademico.update({
+      where: { id: seccionId },
+      data: { tutorId: tutorId || null },
+    });
+    revalidatePath(REVALIDATE_PATH);
+    return { success: tutorId ? "Tutor asignado correctamente" : "Tutor removido" };
+  } catch (error) {
+    console.error("Error assigning tutor:", error);
+    return { error: "No se pudo asignar el tutor" };
+  }
+}
+
+/**
  * Obtiene los años académicos únicos registrados en las secciones
  */
 export async function getAniosAcademicosAction() {
@@ -346,6 +365,7 @@ export async function getTutoresAction() {
         name: true,
         apellidoPaterno: true,
         apellidoMaterno: true,
+        image: true,
       },
       orderBy: { apellidoPaterno: "asc" },
     });

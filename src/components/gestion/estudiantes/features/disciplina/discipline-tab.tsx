@@ -185,7 +185,7 @@ export function DisciplineTab({ studentId }: DisciplineTabProps) {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Avatar className="size-6 border border-border/40">
-                        <AvatarImage src={item.especialista.image || ""} />
+                        <AvatarImage src={item.especialista.image ?? undefined} />
                         <AvatarFallback className="text-[8px] bg-violet-500/10 text-violet-500 font-bold">
                           {item.especialista.name?.[0]}
                           {item.especialista.apellidoPaterno?.[0]}

@@ -148,7 +148,7 @@ export async function deleteStaffAction(id: string) {
     // Proteger al usuario admin global
     const user = await prisma.user.findUnique({
       where: { id },
-      select: { email: true, cargo: { select: { codigo: true } } },
+      select: { email: true, image: true, cargo: { select: { codigo: true } } },
     });
 
     if (
@@ -156,6 +156,11 @@ export async function deleteStaffAction(id: string) {
       user?.cargo?.codigo === "ADMIN_GLOBAL"
     ) {
       return { error: "No se puede eliminar al Administrador del Sistema" };
+    }
+
+    // Eliminar imagen física antes de borrar al usuario
+    if (user?.image) {
+      await deleteFile(user.image);
     }
 
     await prisma.user.delete({

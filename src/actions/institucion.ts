@@ -30,15 +30,32 @@ export async function getInstitucionByIdAction(id?: string) {
     const institucion = await prisma.institucionEducativa.findFirst({
       where: { id: id || undefined },
       select: {
+        id: true,
         cicloEscolarActual: true,
         nombreInstitucion: true,
         logo: true,
       },
     });
-    return { success: institucion };
+    return { data: JSON.parse(JSON.stringify(institucion)) };
   } catch (error) {
     console.error("Error fetching institucion by id:", error);
     return { error: "No se pudieron obtener los datos de la institución" };
+  }
+}
+
+/**
+ * Obtiene las sedes de la institución
+ */
+export async function getSedesAction(institucionId?: string) {
+  try {
+    const sedes = await prisma.sede.findMany({
+      where: institucionId ? { institucionId } : undefined,
+      orderBy: { nombre: "asc" },
+    });
+    return { data: JSON.parse(JSON.stringify(sedes)) };
+  } catch (error) {
+    console.error("Error fetching sedes:", error);
+    return { error: "No se pudieron obtener las sedes" };
   }
 }
 

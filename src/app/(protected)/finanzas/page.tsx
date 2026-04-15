@@ -102,7 +102,7 @@ export default async function FinanzasPage() {
     <div className="flex flex-1 flex-col gap-4 sm:gap-6 p-0 sm:p-4 pt-0 @container/main">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-4 sm:px-2">
         <div>
-          <h1 className="text-xl sm:text-3xl font-bold tracking-tight text-primary">
+          <h1 className="text-xl sm:text-3xl font-bold tracking-tight">
             Gestión Financiera
           </h1>
           <p className="text-sm text-muted-foreground">

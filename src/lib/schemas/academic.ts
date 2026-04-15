@@ -6,9 +6,10 @@ export const CurricularAreaSchema = z.object({
   descripcion: z.string(),
   orden: z.number().int(),
   color: z.string(),
+  icono: z.string().optional().nullable(),
   activa: z.boolean(),
   creditos: z.number().int().nullable(),
-  nivelId: z.string(),
+  nivelId: z.string().min(1, "El nivel es requerido"),
   institucionId: z.string().min(1, "La institución es requerida"),
 })
 

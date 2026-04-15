@@ -35,22 +35,27 @@ interface CompetencyFormProps {
   id?: string;
   initialData?: any;
   onSuccess?: () => void;
+  defaultNivelId?: string;
+  defaultAreaId?: string;
 }
 
 export function CompetencyForm({
   id,
   initialData,
   onSuccess,
+  defaultNivelId,
+  defaultAreaId,
 }: CompetencyFormProps) {
   const [isPending, startTransition] = useTransition();
   const [areas, setAreas] = useState<any[]>([]);
   const { setIsDirty, setOnSubmit } = useFormModal();
 
   useEffect(() => {
-    getCurricularAreasAction().then((res) => {
+    // Si tenemos defaultNivelId, la accion devolvera solo las areas de ese nivel
+    getCurricularAreasAction(defaultNivelId).then((res) => {
       if (res.data) setAreas(res.data);
     });
-  }, []);
+  }, [defaultNivelId]);
 
   const form = useForm<CompetencyValues>({
     resolver: zodResolver(CompetencySchema),
@@ -58,14 +63,20 @@ export function CompetencyForm({
       ? {
           nombre: initialData.nombre,
           descripcion: initialData.descripcion || "",
-          areaCurricularId: initialData.areaCurricularId,
+          areaCurricularId: initialData.areaCurricularId || defaultAreaId || "",
         }
       : {
           nombre: "",
           descripcion: "",
-          areaCurricularId: "",
+          areaCurricularId: defaultAreaId || "",
         },
   });
+
+  useEffect(() => {
+    if (!initialData && defaultAreaId) {
+       form.setValue("areaCurricularId", defaultAreaId);
+    }
+  }, [defaultAreaId, initialData, form]);
 
   const onSubmit = (values: CompetencyValues) => {
     startTransition(() => {

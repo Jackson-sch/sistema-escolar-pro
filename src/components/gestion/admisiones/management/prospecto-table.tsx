@@ -116,6 +116,7 @@ export function ProspectoTable({
       onPageIndexChange={(index) => setPage(index + 1)}
       onPageSizeChange={setLimit}
       showColumnVisibility={false}
+      enableRowSelection={false}
     >
       {(table: any) => (
         <ProspectoFilters

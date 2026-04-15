@@ -60,7 +60,7 @@ export const columns: ColumnDef<EnrollmentTableType>[] = [
       return (
         <div className="flex items-center gap-3 py-1">
           <Avatar className="h-10 w-10 border-2 border-primary/20 shadow-md bg-primary/20">
-            <AvatarImage src={estudiante.image || ""} />
+            <AvatarImage src={estudiante.image ?? undefined} />
             <AvatarFallback className="bg-primary/2 text-primary font-bold text-xs">
               {initials}
             </AvatarFallback>

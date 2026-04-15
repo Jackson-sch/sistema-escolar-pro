@@ -4,9 +4,6 @@ import { useState, useTransition, useMemo, useCallback } from "react";
 import { useQueryState, parseAsString } from "nuqs";
 import { toast } from "sonner";
 import {
-  IconBabyCarriage,
-  IconSchool,
-  IconCertificate,
   IconBook,
   IconEdit,
   IconTrash,
@@ -27,19 +24,8 @@ import { deleteSeccionAction } from "@/actions/academic-structure";
 import type { SeccionTableType } from "./seccion-table";
 import { Button } from "@/components/ui/button";
 
-// ── Nivel icon mapping ──
-const NIVEL_ICON_MAP: Record<string, React.ElementType> = {
-  INICIAL: IconBabyCarriage,
-  PRIMARIA: IconSchool,
-  SECUNDARIA: IconCertificate,
-};
-
-// ── Default color per nivel (when section has no custom color) ──
-const NIVEL_COLOR_MAP: Record<string, string> = {
-  INICIAL: "#F59E0B",
-  PRIMARIA: "#3B82F6",
-  SECUNDARIA: "#10B981",
-};
+import { colors, NIVEL_ICON_MAP, NIVEL_COLOR_MAP } from "@/lib/constants";
+// (Removed local NIVEL_ICON_MAP and NIVEL_COLOR_MAP)
 
 // ── Turno styling ──
 const TURNO_MAP: Record<

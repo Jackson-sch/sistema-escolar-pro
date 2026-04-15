@@ -6,9 +6,10 @@ import { revalidatePath } from "next/cache";
 /**
  * Obtiene todas las áreas curriculares
  */
-export async function getCurricularAreasAction() {
+export async function getCurricularAreasAction(nivelId?: string) {
   try {
     const areas = await prisma.areaCurricular.findMany({
+      where: nivelId ? { nivelId } : undefined,
       include: {
         nivel: true,
       },
@@ -29,12 +30,14 @@ export async function getCurricularAreasAction() {
 export async function getCoursesAction(filters?: {
   anioAcademico?: number;
   profesorId?: string;
+  nivelId?: string;
 }) {
   try {
     const courses = await prisma.curso.findMany({
       where: {
         anioAcademico: filters?.anioAcademico,
         profesorId: filters?.profesorId || undefined,
+        nivelId: filters?.nivelId || undefined,
         activo: true,
       },
       include: {
@@ -45,6 +48,7 @@ export async function getCoursesAction(filters?: {
             name: true,
             apellidoPaterno: true,
             apellidoMaterno: true,
+            image: true,
           },
         },
         nivelAcademico: {
@@ -73,6 +77,7 @@ export async function upsertAreaAction(values: any, id?: string) {
       descripcion: values.descripcion || null,
       nivelId: values.nivelId === "" ? null : values.nivelId,
       color: values.color || "#3b82f6",
+      icono: values.icono || null,
       creditos: values.creditos === 0 ? null : values.creditos,
     };
 

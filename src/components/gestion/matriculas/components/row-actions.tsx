@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import {
-  IconDotsVertical,
   IconTrash,
   IconEye,
   IconReceipt,
@@ -10,15 +9,10 @@ import {
 import { Row } from "@tanstack/react-table";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  ResponsiveRowActions,
+  ActionItem,
+} from "@/components/common/responsive-row-actions";
 
 import { deleteEnrollmentAction } from "@/actions/enrollments";
 import { EnrollmentTableType } from "@/components/gestion/matriculas/components/columns";
@@ -55,35 +49,33 @@ export function EnrollmentRowActions({
     }
   };
 
+  const actions: ActionItem[] = [
+    {
+      icon: IconEye,
+      label: "Ver Constancia",
+      onClick: () => setShowViewSheet(true),
+      variant: "ghost",
+      className: "rounded-full",
+    },
+    {
+      icon: IconReceipt,
+      label: "Pagos Asociados",
+      onClick: () => setShowPaymentsSheet(true),
+      variant: "ghost",
+      className: "text-green-500 rounded-full",
+    },
+    { isSeparator: true },
+    {
+      icon: IconTrash,
+      label: "Anular Inscripción",
+      onClick: () => setShowConfirmModal(true),
+      className: "text-red-500 rounded-full",
+    },
+  ];
+
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Abrir menú</span>
-            <IconDotsVertical className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-[200px]">
-          <DropdownMenuLabel>Gestión de Matrícula</DropdownMenuLabel>
-          <DropdownMenuItem onClick={() => setShowViewSheet(true)}>
-            <IconEye className="mr-2 h-4 w-4 text-primary" />
-            Ver Constancia
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setShowPaymentsSheet(true)}>
-            <IconReceipt className="mr-2 h-4 w-4 text-green-500" />
-            Pagos Asociados
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={() => setShowConfirmModal(true)}
-            className="text-destructive focus:text-destructive"
-          >
-            <IconTrash className="mr-2 h-4 w-4" />
-            Anular Inscripción
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <ResponsiveRowActions actions={actions} label="Gestión de Matrícula" />
 
       <ConfirmModal
         isOpen={showConfirmModal}

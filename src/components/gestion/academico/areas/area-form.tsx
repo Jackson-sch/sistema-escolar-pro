@@ -26,26 +26,28 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { upsertAreaAction } from "@/actions/academic";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
 import { useFormModal } from "@/components/modals/form-modal-context";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { colors } from "@/lib/constants";
+import { IconPicker } from "@/components/ui/icon-picker";
 
 interface AreaFormProps {
   id?: string;
   initialData?: any;
   onSuccess?: () => void;
   institucionId: string;
+  niveles: { id: string; nombre: string }[];
+  defaultNivelId?: string;
 }
 
 export function AreaForm({
@@ -53,6 +55,8 @@ export function AreaForm({
   initialData,
   onSuccess,
   institucionId,
+  niveles,
+  defaultNivelId,
 }: AreaFormProps) {
   const [isPending, startTransition] = useTransition();
   const { setIsDirty, setOnSubmit } = useFormModal();
@@ -62,10 +66,14 @@ export function AreaForm({
     defaultValues: initialData
       ? {
           ...initialData,
+          nombre: initialData.nombre || "",
+          codigo: initialData.codigo || "",
           descripcion: initialData.descripcion || "",
+          orden: initialData.orden ?? 0,
           color: initialData.color || "#3b82f6",
+          icono: initialData.icono || "",
           creditos: initialData.creditos || 0,
-          nivelId: initialData.nivelId || "",
+          nivelId: initialData.nivelId || defaultNivelId || "",
           institucionId: initialData.institucionId || institucionId,
         }
       : {
@@ -74,12 +82,19 @@ export function AreaForm({
           descripcion: "",
           orden: 0,
           color: "#3b82f6",
+          icono: "",
           activa: true,
           creditos: 0,
-          nivelId: "",
+          nivelId: defaultNivelId || "",
           institucionId,
         },
   });
+
+  useEffect(() => {
+    if (!initialData && defaultNivelId) {
+      form.setValue("nivelId", defaultNivelId);
+    }
+  }, [defaultNivelId, initialData, form]);
 
   const { isDirty } = form.formState;
 
@@ -122,6 +137,35 @@ export function AreaForm({
                     />
                   </div>
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Nivel Educativo */}
+          <FormField
+            control={form.control}
+            name="nivelId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nivel Educativo</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger className="rounded-full">
+                      <SelectValue placeholder="Seleccione un nivel..." />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent className="rounded-xl">
+                    {niveles.map((nivel) => (
+                      <SelectItem key={nivel.id} value={nivel.id}>
+                        {nivel.nombre}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
@@ -221,6 +265,25 @@ export function AreaForm({
               </FormItem>
             )}
           />
+
+          {/* Selector de Icono */}
+          <FormField
+            control={form.control}
+            name="icono"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Icono Representativo</FormLabel>
+                <FormControl>
+                  <IconPicker
+                    value={field.value || ""}
+                    onChange={field.onChange}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
         </div>
         {/* Descripción */}
         <div className="pt-6 border-b border-muted pb-6">

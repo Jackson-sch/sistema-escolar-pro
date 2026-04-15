@@ -43,6 +43,7 @@ export async function upsertCompetencyAction(values: any, id?: string) {
     }
 
     revalidatePath(REVALIDATE_PATH)
+    revalidatePath("/gestion/academico/areas")
     return { success: "Competencia guardada" }
   } catch (error) {
     console.error("Error upserting competency:", error)
@@ -59,6 +60,7 @@ export async function deleteCompetencyAction(id: string) {
       where: { id }
     })
     revalidatePath(REVALIDATE_PATH)
+    revalidatePath("/gestion/academico/areas")
     return { success: "Competencia eliminada" }
   } catch (error) {
     console.error("Error deleting competency:", error)
@@ -85,6 +87,7 @@ export async function upsertCapacityAction(values: any, id?: string) {
     }
 
     revalidatePath(REVALIDATE_PATH)
+    revalidatePath("/gestion/academico/areas")
     return { success: "Capacidad guardada" }
   } catch (error) {
     console.error("Error upserting capacity:", error)
@@ -101,6 +104,7 @@ export async function deleteCapacityAction(id: string) {
       where: { id }
     })
     revalidatePath(REVALIDATE_PATH)
+    revalidatePath("/gestion/academico/areas")
     return { success: "Capacidad eliminada" }
   } catch (error) {
     console.error("Error deleting capacity:", error)
@@ -109,16 +113,50 @@ export async function deleteCapacityAction(id: string) {
 }
 
 /**
- * Obtener todas las áreas curriculares (para el select de configuración)
+ * Obtener todas las áreas curriculares, opcionalmente filtradas por nivel
  */
-export async function getCurricularAreasAction() {
+export async function getCurricularAreasAction(nivelId?: string) {
   try {
     const areas = await prisma.areaCurricular.findMany({
-      orderBy: { nombre: "asc" }
+      where: nivelId ? { nivelId } : undefined,
+      orderBy: { nombre: "asc" },
+      include: {
+        nivel: true,
+      }
     })
     return { data: areas }
   } catch (error) {
     console.error("Error fetching curricular areas:", error)
     return { error: "No se pudieron cargar las áreas" }
+  }
+}
+
+/**
+ * Obtener todas las competencias con sus capacidades de un nivel específico
+ */
+export async function getCompetenciesByNivelAction(nivelId: string) {
+  try {
+    const competencies = await prisma.competencia.findMany({
+      where: { 
+        areaCurricular: { 
+          nivelId 
+        } 
+      },
+      include: {
+        capacidades: true,
+        areaCurricular: {
+          select: {
+            nombre: true,
+            color: true,
+          }
+        }
+      },
+      orderBy: { createdAt: "asc" }
+    });
+    
+    return { data: competencies };
+  } catch (error) {
+    console.error("Error fetching competencies by nivel:", error);
+    return { error: "No se pudieron cargar las competencias para este nivel" };
   }
 }

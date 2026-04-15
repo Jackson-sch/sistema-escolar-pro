@@ -36,7 +36,7 @@ export default async function PersonalPage() {
     <div className="flex flex-1 flex-col gap-6 p-0 sm:p-4 pt-0 @container/main">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-4 sm:px-2">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-primary">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
             Gestión de Personal
           </h1>
           <p className="text-[10px] sm:text-xs text-muted-foreground">

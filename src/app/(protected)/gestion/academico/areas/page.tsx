@@ -1,32 +1,52 @@
-import { IconBook } from "@tabler/icons-react";
 import {
   getCurricularAreasAction,
   getInstitucionesAction,
 } from "@/actions/academic";
-import { columns } from "@/components/gestion/academico/areas/components/area-table-columns";
-import { AreaTable } from "@/components/gestion/academico/areas/area-table";
-import { AddAreaButton } from "@/components/gestion/academico/areas/add-area-button";
+import { getNivelesAction } from "@/actions/academic-structure";
+import { getCompetenciesByNivelAction } from "@/actions/competencies";
+import { MallaDashboard } from "@/components/gestion/academico/areas/malla-dashboard";
 
-export default async function AreasPage() {
-  const [{ data: areas = [] }, { data: instituciones = [] }] =
-    await Promise.all([getCurricularAreasAction(), getInstitucionesAction()]);
+export default async function AreasPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ nivel?: string; [key: string]: string | undefined }>;
+}) {
+  const resolvedSearchParams = await searchParams;
+  
+  const [
+    { data: instituciones = [] },
+    { data: niveles = [] }
+  ] = await Promise.all([
+    getInstitucionesAction(),
+    getNivelesAction()
+  ]);
 
-  // Obtener la primera institución disponible (usualmente solo hay una)
+  // Obtener la primera institución disponible
   const mainInstitucionId = instituciones[0]?.id || "";
+  
+  // Determinar qué nivel cargar por defecto
+  const activeNivelId = resolvedSearchParams.nivel || (niveles.length > 0 ? niveles[0].id : undefined);
+
+  // Cargar áreas y competencias sólo si hay un nivel seleccionado
+  let areas: any[] = [];
+  let competencies: any[] = [];
+  
+  if (activeNivelId) {
+    const [areasResult, competenciesResult] = await Promise.all([
+      getCurricularAreasAction(activeNivelId),
+      getCompetenciesByNivelAction(activeNivelId)
+    ]);
+    areas = areasResult.data || [];
+    competencies = competenciesResult.data || [];
+  }
 
   return (
-    <div className="space-y-4 px-2">
-      <div className="flex justify-between items-center px-2">
-        <p className="text-xs sm:text-sm text-muted-foreground">
-          Define las áreas curriculares para cada institución...
-        </p>
-        <AddAreaButton institucionId={mainInstitucionId} />
-      </div>
-
-      <AreaTable
-        columns={columns}
-        data={areas as any}
-        meta={{ institucionId: mainInstitucionId }}
+    <div className="w-full h-full max-h-screen">
+      <MallaDashboard 
+        niveles={niveles}
+        areas={areas}
+        competencies={competencies}
+        institucionId={mainInstitucionId}
       />
     </div>
   );

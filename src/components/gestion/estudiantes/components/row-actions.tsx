@@ -3,7 +3,6 @@
 import { useState } from "react";
 
 import {
-  IconDotsVertical,
   IconEdit,
   IconTrash,
   IconEye,
@@ -12,16 +11,11 @@ import {
 import { Row, Table } from "@tanstack/react-table";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { FormModal } from "@/components/modals/form-modal";
+import {
+  ResponsiveRowActions,
+  ActionItem,
+} from "@/components/common/responsive-row-actions";
 
 import { deleteStudentAction } from "@/actions/students";
 import { StudentForm } from "@/components/gestion/estudiantes/management/student-form";
@@ -71,59 +65,45 @@ export function RowActions({ row, table }: RowActionsProps) {
   const isEnrolled = !!student.matriculadoEsteAnio;
   const year = new Date().getFullYear();
 
+  const actions: ActionItem[] = [
+    {
+      icon: IconEye,
+      label: "Ver Expediente",
+      onClick: () => setShowViewSheet(true),
+      variant: "ghost",
+      className: "rounded-full",
+    },
+    ...(!isProfessor
+      ? ([
+          !isEnrolled && {
+            icon: IconFilePlus,
+            label: "Matricular Alumno",
+            onClick: () => setShowEnrollmentDialog(true),
+            variant: "ghost",
+            className: "text-emerald-500 rounded-full",
+          },
+          {
+            icon: IconEdit,
+            label: "Editar Datos",
+            onClick: () => setShowEditDialog(true),
+            variant: "ghost",
+            className: "text-blue-500 rounded-full",
+          },
+          { isSeparator: true },
+          {
+            icon: IconTrash,
+            label: "Dar de Baja",
+            onClick: () => setShowConfirmModal(true),
+            variant: "ghost",
+            className: "text-red-500 rounded-full",
+          },
+        ].filter(Boolean) as ActionItem[])
+      : []),
+  ];
+
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-muted">
-            <span className="sr-only">Abrir menú</span>
-            <IconDotsVertical className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align="end"
-          className="w-[180px] bg-background/95 backdrop-blur-xl border-border/40"
-        >
-          <DropdownMenuLabel className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest px-2 py-1.5">
-            Opciones
-          </DropdownMenuLabel>
-          <DropdownMenuItem
-            onClick={() => setShowViewSheet(true)}
-            className="text-[13px] py-2 cursor-pointer transition-colors"
-          >
-            <IconEye className="mr-2 h-4 w-4 text-violet-500" />
-            Ver Expediente
-          </DropdownMenuItem>
-          {!isProfessor && (
-            <>
-              {!isEnrolled && (
-                <DropdownMenuItem
-                  onClick={() => setShowEnrollmentDialog(true)}
-                  className="text-[13px] py-2 cursor-pointer transition-colors text-emerald-500 focus:text-emerald-500 focus:bg-emerald-500/10"
-                >
-                  <IconFilePlus className="mr-2 h-4 w-4" />
-                  Matricular Alumno
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuItem
-                onClick={() => setShowEditDialog(true)}
-                className="text-[13px] py-2 cursor-pointer transition-colors"
-              >
-                <IconEdit className="mr-2 h-4 w-4 text-blue-500" />
-                Editar Datos
-              </DropdownMenuItem>
-              <DropdownMenuSeparator className="bg-border/40" />
-              <DropdownMenuItem
-                onClick={() => setShowConfirmModal(true)}
-                className="text-[13px] py-2 cursor-pointer text-red-500 focus:text-red-500 focus:bg-red-500/10"
-              >
-                <IconTrash className="mr-2 h-4 w-4" />
-                Dar de Baja
-              </DropdownMenuItem>
-            </>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <ResponsiveRowActions actions={actions} label="Opciones" />
 
       <ConfirmModal
         isOpen={showConfirmModal}

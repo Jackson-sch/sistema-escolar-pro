@@ -2,16 +2,10 @@
 
 import * as React from "react";
 import { useQueryState, parseAsString, parseAsInteger } from "nuqs";
-import {
-  getCoreRowModel,
-  getPaginationRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
 import { DataTable } from "@/components/ui/data-table";
 import {
   IconCircleDashed,
   IconFilter,
-  IconReceipt,
   IconReceipt2,
   IconTable,
 } from "@tabler/icons-react";
@@ -35,7 +29,6 @@ import { ConfirmModal } from "@/components/modals/confirm-modal";
 import { anularPagoAction } from "@/actions/finance";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/formats";
-import { PAYMENT_STATUS_OPTIONS } from "@/lib/constants";
 import type { FormatoComprobante } from "@/lib/comprobante-constants";
 
 interface CronogramaTableProps {

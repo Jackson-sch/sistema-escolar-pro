@@ -1,25 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import {
-  IconDotsVertical,
-  IconEdit,
-  IconTrash,
-  IconPlus,
-  IconTarget,
-} from "@tabler/icons-react";
+import { IconEdit, IconTrash, IconPlus } from "@tabler/icons-react";
 import { Row } from "@tanstack/react-table";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  ResponsiveRowActions,
+  ActionItem,
+} from "@/components/common/responsive-row-actions";
 import { FormModal } from "@/components/modals/form-modal";
 import { ConfirmModal } from "@/components/modals/confirm-modal";
 
@@ -54,35 +43,33 @@ export function CompetencyRowActions({ row }: CompetencyRowActionsProps) {
     }
   };
 
+  const actions: ActionItem[] = [
+    {
+      icon: IconEdit,
+      label: "Editar Competencia",
+      onClick: () => setShowEditDialog(true),
+      variant: "ghost",
+      className: "text-blue-500",
+    },
+    {
+      icon: IconPlus,
+      label: "Añadir Capacidad",
+      onClick: () => setShowCapacityDialog(true),
+      variant: "ghost",
+      className: "text-emerald-500",
+    },
+    { isSeparator: true },
+    {
+      icon: IconTrash,
+      label: "Eliminar Competencia",
+      onClick: () => setShowConfirmModal(true),
+      variant: "destructive",
+    },
+  ];
+
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Abrir menú</span>
-            <IconDotsVertical className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-[200px]">
-          <DropdownMenuLabel>Gestión</DropdownMenuLabel>
-          <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
-            <IconEdit className="mr-2 h-4 w-4 text-blue-500" />
-            Editar Competencia
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setShowCapacityDialog(true)}>
-            <IconPlus className="mr-2 h-4 w-4 text-emerald-500" />
-            Añadir Capacidad
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={() => setShowConfirmModal(true)}
-            className="text-destructive focus:text-destructive"
-          >
-            <IconTrash className="mr-2 h-4 w-4" />
-            Eliminar Competencia
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <ResponsiveRowActions actions={actions} label="Gestión" />
 
       <ConfirmModal
         isOpen={showConfirmModal}

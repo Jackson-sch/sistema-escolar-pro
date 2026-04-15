@@ -27,37 +27,10 @@ export default function AcademicoLayout({
   const router = useRouter();
 
   const tabs = [
-    { label: "Niveles", value: "/gestion/academico/niveles", icon: IconSchool },
-    {
-      label: "Grados",
-      value: "/gestion/academico/grados",
-      icon: IconLayersSubtract,
-    },
-    {
-      label: "Secciones",
-      value: "/gestion/academico/secciones",
-      icon: IconUsersGroup,
-    },
-    {
-      label: "Malla Curricular",
-      value: "/gestion/academico/areas",
-      icon: IconBooks,
-    },
-    {
-      label: "Competencias",
-      value: "/gestion/academico/competencias",
-      icon: IconTarget,
-    },
-    {
-      label: "Carga Académica",
-      value: "/gestion/academico/carga-horaria",
-      icon: IconLayoutGrid,
-    },
-    {
-      label: "Horarios",
-      value: "/gestion/academico/horarios",
-      icon: IconClock,
-    },
+    { label: "Estructura Académica", value: "/gestion/academico/estructura", icon: IconSchool },
+    { label: "Malla Curricular", value: "/gestion/academico/areas", icon: IconBooks },
+    { label: "Carga Académica", value: "/gestion/academico/carga-horaria", icon: IconLayoutGrid },
+    { label: "Horarios", value: "/gestion/academico/horarios", icon: IconClock },
   ];
 
   const currentTab =

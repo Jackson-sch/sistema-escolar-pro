@@ -407,7 +407,6 @@ exports.Prisma.NivelAcademicoScalarFieldEnum = {
   capacidad: 'capacidad',
   capacidadMaxima: 'capacidadMaxima',
   aulaAsignada: 'aulaAsignada',
-  color: 'color',
   nivelId: 'nivelId',
   gradoId: 'gradoId',
   tutorId: 'tutorId',
@@ -417,7 +416,8 @@ exports.Prisma.NivelAcademicoScalarFieldEnum = {
   activo: 'activo',
   turno: 'turno',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  color: 'color'
 };
 
 exports.Prisma.SedeScalarFieldEnum = {
@@ -457,6 +457,7 @@ exports.Prisma.AreaCurricularScalarFieldEnum = {
   descripcion: 'descripcion',
   orden: 'orden',
   color: 'color',
+  icono: 'icono',
   activa: 'activa',
   competenciasTexto: 'competenciasTexto',
   institucionId: 'institucionId',

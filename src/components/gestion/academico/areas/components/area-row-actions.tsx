@@ -1,42 +1,36 @@
 "use client";
 
 import { useState } from "react";
-import {
-  IconDotsVertical,
-  IconEdit,
-  IconTrash,
-  IconBooks,
-} from "@tabler/icons-react";
-import { Row } from "@tanstack/react-table";
+import { IconEdit, IconTrash } from "@tabler/icons-react";
+import { Row, Table } from "@tanstack/react-table";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  ResponsiveRowActions,
+  ActionItem,
+} from "@/components/common/responsive-row-actions";
 import { FormModal } from "@/components/modals/form-modal";
+import { ConfirmModal } from "@/components/modals/confirm-modal";
 
 import { deleteAreaAction } from "@/actions/academic";
 import { AreaForm } from "../area-form";
 import { AreaTableType } from "./area-table-columns";
-import { ConfirmModal } from "@/components/modals/confirm-modal";
 
 interface AreaRowActionsProps {
   row: Row<AreaTableType>;
+  table: Table<AreaTableType>;
 }
 
-export function AreaRowActions({ row }: AreaRowActionsProps) {
+export function AreaRowActions({ row, table }: AreaRowActionsProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const area = row.original;
-  // Acceso seguro al institucionId desde los metadatos de la tabla
-  const institucionId = (row as any).table?.options?.meta?.institucionId || "";
+
+  // Acceso correcto a los metadatos de la tabla
+  const meta = table.options.meta as any;
+  const institucionId = meta?.institucionId || "";
+  const niveles = meta?.niveles || [];
 
   const onDelete = async () => {
     setIsDeleting(true);
@@ -52,31 +46,26 @@ export function AreaRowActions({ row }: AreaRowActionsProps) {
     }
   };
 
+  const actions: ActionItem[] = [
+    {
+      icon: IconEdit,
+      label: "Editar Área",
+      onClick: () => setShowEditDialog(true),
+      variant: "ghost",
+      className: "text-indigo-500",
+    },
+    { isSeparator: true },
+    {
+      icon: IconTrash,
+      label: "Eliminar Área",
+      onClick: () => setShowConfirmModal(true),
+      variant: "destructive",
+    },
+  ];
+
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Abrir menú</span>
-            <IconDotsVertical className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-[180px]">
-          <DropdownMenuLabel>Gestión</DropdownMenuLabel>
-          <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
-            <IconEdit className="mr-2 h-4 w-4 text-indigo-500" />
-            Editar Área
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={() => setShowConfirmModal(true)}
-            className="text-destructive focus:text-destructive"
-          >
-            <IconTrash className="mr-2 h-4 w-4" />
-            Eliminar Área
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <ResponsiveRowActions actions={actions} label="Gestión" />
 
       <ConfirmModal
         isOpen={showConfirmModal}
@@ -98,6 +87,7 @@ export function AreaRowActions({ row }: AreaRowActionsProps) {
           id={area.id}
           initialData={area}
           institucionId={institucionId}
+          niveles={niveles}
           onSuccess={() => setShowEditDialog(false)}
         />
       </FormModal>

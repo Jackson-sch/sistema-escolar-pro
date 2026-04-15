@@ -27,7 +27,7 @@ export default async function ComunicacionesPage() {
     <div className="flex flex-1 flex-col gap-6 p-4 pt-0 @container/main">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-2">
         <div>
-          <h1 className="text-xl sm:text-3xl font-bold tracking-tight text-primary">
+          <h1 className="text-xl sm:text-3xl font-bold">
             Portal de Comunicaciones
           </h1>
           <p className="text-[10px] sm:text-sm text-muted-foreground font-medium">

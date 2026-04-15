@@ -506,6 +506,7 @@ model AreaCurricular {
   descripcion       String?
   orden             Int?
   color             String?
+  icono             String?
   activa            Boolean              @default(true)
   competenciasTexto String?
   institucionId     String

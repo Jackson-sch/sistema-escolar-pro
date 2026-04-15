@@ -1,8 +1,14 @@
-/**
- * Constantes globales para opciones de selects y valores estáticos del sistema.
- */
-
-import { IconBuildingBank, IconCash, IconCircleDot, IconCreditCard, IconQrcode } from "@tabler/icons-react";
+import { 
+  IconBuildingBank, 
+  IconCash, 
+  IconCircleDot, 
+  IconCreditCard, 
+  IconQrcode,
+  IconBabyCarriage,
+  IconSchool,
+  IconCertificate,
+  IconBook
+} from "@tabler/icons-react";
 
 export const SEXO_OPTIONS = [
   { label: "Masculino", value: "MASCULINO" },
@@ -13,6 +19,7 @@ export const TURNO_OPTIONS = [
   { label: "Mañana", value: "MANANA" },
   { label: "Tarde", value: "TARDE" },
   { label: "Noche", value: "NOCHE" },
+  { label: "Continuo", value: "CONTINUO" },
 ] as const;
 
 export const STAFF_ROLE_OPTIONS = [
@@ -21,15 +28,31 @@ export const STAFF_ROLE_OPTIONS = [
 ] as const;
 
 export const ESCALA_MAGISTERIAL_OPTIONS = [
-  { label: "I Escala", value: "I" },
-  { label: "II Escala", value: "II" },
-  { label: "III Escala", value: "III" },
-  { label: "IV Escala", value: "IV" },
-  { label: "V Escala", value: "V" },
-  { label: "VI Escala", value: "VI" },
-  { label: "VII Escala", value: "VII" },
-  { label: "VIII Escala", value: "VIII" },
+  { label: "Escala I", value: "I" },
+  { label: "Escala II", value: "II" },
+  { label: "Escala III", value: "III" },
+  { label: "Escala IV", value: "IV" },
+  { label: "Escala V", value: "V" },
+  { label: "Escala VI", value: "VI" },
+  { label: "Escala VII", value: "VII" },
+  { label: "Escala VIII", value: "VIII" },
 ] as const;
+
+export const ESTADO_CIVIL_OPTIONS = [
+  { label: "Soltero(a)", value: "SOLTERO" },
+  { label: "Casado(a)", value: "CASADO" },
+  { label: "Viudo(a)", value: "VIUDO" },
+  { label: "Divorciado(a)", value: "DIVORCIADO" },
+  { label: "Conviviente", value: "CONVIVIENTE" },
+] as const;
+
+export const TIPO_CONTRATO_OPTIONS = [
+  { label: "Nombrado", value: "NOMBRADO" },
+  { label: "Contratado", value: "CONTRATADO" },
+  { label: "Practicante", value: "PRATICANTE" },
+  { label: "Suplente", value: "SUPLENTE" },
+] as const;
+
 
 export const PARENTESCO_OPTIONS = [
   { label: "Padre", value: "PADRE" },
@@ -62,12 +85,32 @@ export const MESES_OPTIONS = [
   { id: 6, nombre: "Julio" },
   { id: 7, nombre: "Agosto" },
   { id: 8, nombre: "Septiembre" },
-  { id: 9, nombre: "Octubre" },
-  { id: 10, nombre: "Noviembre" },
-  { id: 11, nombre: "Diciembre" },
+  { id: 10, nombre: "Octubre" },
+  { id: 11, nombre: "Noviembre" },
+  { id: 12, nombre: "Diciembre" },
 ] as const;
 
 export const GENERO_OPTIONS = SEXO_OPTIONS; // Alias para compatibilidad
+
+// ── Academic Levels ──────────────────────────────────────────────────────────
+export const NIVEL_KEYS = {
+  INICIAL: "INICIAL",
+  PRIMARIA: "PRIMARIA",
+  SECUNDARIA: "SECUNDARIA",
+} as const;
+
+export const NIVEL_ICON_MAP: Record<string, React.ElementType> = {
+  [NIVEL_KEYS.INICIAL]: IconBabyCarriage,
+  [NIVEL_KEYS.PRIMARIA]: IconSchool,
+  [NIVEL_KEYS.SECUNDARIA]: IconCertificate,
+  DEFAULT: IconBook,
+};
+
+export const NIVEL_COLOR_MAP: Record<string, string> = {
+  [NIVEL_KEYS.INICIAL]: "#F59E0B", // Amber
+  [NIVEL_KEYS.PRIMARIA]: "#3B82F6", // Blue
+  [NIVEL_KEYS.SECUNDARIA]: "#10B981", // Emerald
+};
 
 export const BLOQUES_HORARIO = [
   { inicio: "07:00", fin: "07:45", tipo: "clase" },

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { IconBooks } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
@@ -16,10 +17,14 @@ import { useComponentShortcuts } from "@/hooks/use-component-shortcuts";
 
 interface AddAreaButtonProps {
   institucionId: string;
+  niveles: { id: string; nombre: string }[];
 }
 
-export function AddAreaButton({ institucionId }: AddAreaButtonProps) {
+export function AddAreaButton({ institucionId, niveles }: AddAreaButtonProps) {
   const [open, setOpen] = useState(false);
+  const searchParams = useSearchParams();
+  const rawNivel = searchParams.get("nivel");
+  const nivelId = rawNivel && rawNivel !== "all" ? rawNivel : undefined;
 
   useComponentShortcuts({
     onNew: () => setOpen(true),
@@ -53,6 +58,8 @@ export function AddAreaButton({ institucionId }: AddAreaButtonProps) {
       >
         <AreaForm
           institucionId={institucionId}
+          niveles={niveles}
+          defaultNivelId={nivelId}
           onSuccess={() => setOpen(false)}
         />
       </FormModal>

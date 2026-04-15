@@ -1,12 +1,4 @@
 import { Suspense } from "react";
-import {
-  Shirt,
-  Package,
-  History,
-  Settings,
-  Plus,
-  LayoutGrid,
-} from "lucide-react";
 import { auth } from "@/auth";
 import {
   getCategoriasUniformesAction,
@@ -45,10 +37,10 @@ export default async function UniformesPage() {
   const ventas = ventasRes.data || [];
 
   return (
-    <div className="flex-1 space-y-8 p-8 pt-6 text-slate-900">
+    <div className="flex-1 space-y-8 p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight bg-linear-to-r from-slate-900 to-slate-500 bg-clip-text text-transparent">
+          <h2 className="text-3xl font-bold">
             Gestión de Uniformes
           </h2>
           <p className="text-slate-500">

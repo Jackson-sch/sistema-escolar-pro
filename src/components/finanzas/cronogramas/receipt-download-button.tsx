@@ -59,7 +59,7 @@ export const ReceiptDownloadButton = ({
       {({ loading }) => (
         <Button
           variant="outline"
-          className="w-full h-11 gap-2 font-medium"
+          className="w-full rounded-full gap-2 font-medium"
           disabled={loading}
         >
           <IconFileDownload className="size-4" />

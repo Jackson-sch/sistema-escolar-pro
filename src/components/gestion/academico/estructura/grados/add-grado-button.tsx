@@ -83,11 +83,13 @@ export function AddGradoButton({ niveles }: AddGradoButtonProps) {
   );
 }
 
-function GradoForm({
+export function GradoForm({
   niveles,
+  initialData,
   onSuccess,
 }: {
   niveles: { id: string; nombre: string }[];
+  initialData?: any;
   onSuccess: () => void;
 }) {
   const [isPending, startTransition] = useTransition();
@@ -95,12 +97,19 @@ function GradoForm({
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      nombre: "",
-      codigo: "",
-      orden: "1",
-      nivelId: "",
-    },
+    defaultValues: initialData 
+      ? {
+          nombre: initialData.nombre,
+          codigo: initialData.codigo,
+          orden: String(initialData.orden),
+          nivelId: initialData.nivelId,
+        }
+      : {
+          nombre: "",
+          codigo: "",
+          orden: "1",
+          nivelId: "",
+        },
   });
 
   const { isDirty } = form.formState;
@@ -119,7 +128,7 @@ function GradoForm({
         orden: parseInt(values.orden, 10),
       };
 
-      const res = await upsertGradoAction(formattedValues);
+      const res = await upsertGradoAction(formattedValues, initialData?.id);
       if (res.success) {
         toast.success(res.success);
         setIsDirty(false);
@@ -226,10 +235,11 @@ function GradoForm({
             className="w-full sm:w-auto rounded-full px-8"
             disabled={isPending}
           >
-            {isPending ? "Guardando..." : "Crear Grado"}
+            {isPending ? "Guardando..." : initialData ? "Guardar Cambios" : "Crear Grado"}
           </Button>
         </div>
       </form>
     </Form>
   );
 }
+

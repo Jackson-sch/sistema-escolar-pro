@@ -1,45 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import {
-  IconDotsVertical,
-  IconEdit,
-  IconTrash,
-  IconEye,
-  IconUser,
-  IconBriefcase,
-  IconMail,
-  IconPhone,
-  IconCertificate,
-  IconMapPin,
-} from "@tabler/icons-react";
+import { IconEdit, IconTrash, IconEye } from "@tabler/icons-react";
 import { Row, Table } from "@tanstack/react-table";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  ResponsiveRowActions,
+  ActionItem,
+} from "@/components/common/responsive-row-actions";
 import { FormModal } from "@/components/modals/form-modal";
 
 import { deleteStaffAction } from "@/actions/staff";
 import { StaffForm } from "@/components/gestion/personal/management/staff-form";
 import { StaffTableType } from "@/components/gestion/personal/components/columns";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
 import { ConfirmModal } from "@/components/modals/confirm-modal";
 import StaffProfile from "@/components/gestion/personal/management/staff-profile";
 
@@ -76,35 +50,41 @@ export function StaffRowActions({ row, table }: StaffRowActionsProps) {
     cargos: any[];
   };
 
+  const isAdminGlobal = staff.cargo?.codigo === "ADMIN_GLOBAL" || staff.email === "admin@colegio.edu.pe";
+
+  const actions: ActionItem[] = [
+    {
+      icon: IconEye,
+      label: "Perfil Profesional",
+      onClick: () => setShowViewSheet(true),
+      variant: "ghost",
+      className: "rounded-full",
+    },
+    // Hide Edit and Delete for admin global
+    ...(!isAdminGlobal
+      ? [
+          {
+            icon: IconEdit,
+            label: "Editar Datos",
+            onClick: () => setShowEditDialog(true),
+            variant: "ghost" as const,
+            className: "rounded-full text-blue-500",
+          },
+          { isSeparator: true as const },
+          {
+            icon: IconTrash,
+            label: "Dar de Baja",
+            onClick: () => setShowConfirmModal(true),
+            variant: "ghost" as const,
+            className: "rounded-full text-red-500",
+          },
+        ]
+      : []),
+  ];
+
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Abrir menú</span>
-            <IconDotsVertical className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-[180px]">
-          <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-          <DropdownMenuItem onClick={() => setShowViewSheet(true)}>
-            <IconEye className="mr-2 h-4 w-4 text-primary" />
-            Perfil Profesional
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
-            <IconEdit className="mr-2 h-4 w-4 text-blue-500" />
-            Editar Datos
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={() => setShowConfirmModal(true)}
-            className="text-destructive focus:text-destructive"
-          >
-            <IconTrash className="mr-2 h-4 w-4" />
-            Dar de Baja
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <ResponsiveRowActions actions={actions} label="Acciones" />
 
       <ConfirmModal
         isOpen={showConfirmModal}

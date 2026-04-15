@@ -44,36 +44,36 @@ export function AsistenciaTable({
         data.map((alumno, index) => (
           <div
             key={alumno.id}
-            className="flex flex-col md:grid md:grid-cols-12 gap-4 md:gap-3 items-start md:items-center bg-card/40 hover:bg-card/60 border border-border/40 p-3 md:p-2 rounded-2xl transition-all group shadow"
+            className="flex flex-col md:grid md:grid-cols-12 gap-3.5 md:gap-3 items-stretch md:items-center bg-card/40 hover:bg-card/60 border border-border/40 p-4 md:p-2.5 rounded-2xl transition-all group shadow-sm hover:shadow-md"
           >
-            {/* ID */}
-            <div className="hidden md:block col-span-1">
-              <span className="text-[10px] font-bold text-muted-foreground transition-colors">
+            {/* ID & Mobile Header */}
+            <div className="flex items-center justify-between md:col-span-1">
+              <span className="text-[10px] font-bold text-muted-foreground/40 transition-colors">
                 #{String(index + 1).padStart(2, "0")}
               </span>
             </div>
 
             {/* Estudiante */}
-            <div className="col-span-12 md:col-span-4 flex items-center gap-3 w-full">
-              <Avatar className="h-11 w-11 md:h-10 md:w-10 border border-primary/30 shadow-2xl ring-1 ring-primary/15 shrink-0">
+            <div className="md:col-span-4 flex items-center gap-3 w-full">
+              <Avatar className="h-10 w-10 md:h-9 md:w-9 border border-primary/20 shadow-sm shrink-0">
                 <AvatarImage src={alumno.image || ""} alt={alumno.name} />
-                <AvatarFallback className="bg-linear-to-br from-primary/30 to-primary/5 text-primary text-[10px] font-black uppercase">
+                <AvatarFallback className="bg-linear-to-br from-primary/20 to-primary/5 text-primary text-[10px] font-black uppercase">
                   {alumno.name?.[0]}
                   {alumno.apellidoPaterno?.[0]}
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col min-w-0 capitalize">
-                <span className="text-sm font-bold text-muted-foreground truncate leading-tight tracking-tight">
+                <span className="text-sm font-bold text-foreground/80 truncate leading-tight tracking-tight">
                   {alumno.apellidoPaterno} {alumno.apellidoMaterno}
                 </span>
-                <span className="text-[11px] font-bold text-muted-foreground tracking-tight">
+                <span className="text-[11px] font-medium text-muted-foreground tracking-tight">
                   {alumno.name}
                 </span>
               </div>
             </div>
 
             {/* Estado */}
-            <div className="col-span-12 md:col-span-3 flex justify-center w-full md:w-auto py-1">
+            <div className="md:col-span-3 flex justify-center w-full md:w-auto py-1.5 md:py-0 border-y border-border/5 md:border-0">
               <SegmentedControl
                 value={alumno.estado}
                 onChange={(v) => onEstadoChange(alumno.id, v)}
@@ -81,7 +81,7 @@ export function AsistenciaTable({
             </div>
 
             {/* Observaciones */}
-            <div className="col-span-12 md:col-span-4 w-full">
+            <div className="md:col-span-4 w-full">
               <div className="relative">
                 <Input
                   value={alumno.justificacion}
@@ -89,7 +89,7 @@ export function AsistenciaTable({
                     onJustificacionChange(alumno.id, e.target.value)
                   }
                   placeholder="Agregar nota..."
-                  className="bg-muted/20 border focus:border-primary/20 rounded-full h-10 md:h-9 text-xs placeholder:text-muted-foreground text-muted-foreground transition-all pl-4 w-full"
+                  className="bg-muted/10 border-border/40 focus:border-primary/30 rounded-xl h-9 text-xs placeholder:text-muted-foreground/40 text-muted-foreground transition-all pl-3.5 w-full"
                 />
               </div>
             </div>

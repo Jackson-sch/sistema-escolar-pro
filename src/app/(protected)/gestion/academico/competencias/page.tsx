@@ -1,29 +1,34 @@
 import {
   getCurricularAreasAction,
-  getCompetenciesByAreaAction,
+  getCompetenciesByNivelAction,
 } from "@/actions/competencies";
+import { getNivelesAction } from "@/actions/academic-structure";
 import { CompetencyTable } from "@/components/gestion/academico/competencias/competency-table";
 import { AddCompetencyButton } from "@/components/gestion/academico/competencias/add-competency-button";
 
-export default async function CompetenciesPage() {
-  const { data: areas = [] } = await getCurricularAreasAction();
+interface CompetenciesPageProps {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
 
-  // Fetch competencies for all areas to show in a unified table (standard design)
-  const allCompetenciesPromises = areas.map((area) =>
-    getCompetenciesByAreaAction(area.id),
-  );
-  const results = await Promise.all(allCompetenciesPromises);
+export default async function CompetenciesPage({ searchParams }: CompetenciesPageProps) {
+  const params = await searchParams;
+  const nivelId = typeof params.nivelId === "string" ? params.nivelId : undefined;
 
-  const allCompetencies = results.flatMap((res, index) =>
-    (res.data || []).map((comp) => ({
-      ...comp,
-      areaCurricularId: areas[index].id,
-      areaCurricular: {
-        nombre: areas[index].nombre,
-        color: areas[index].color,
-      },
-    })),
-  );
+  const [{ data: niveles = [] }] = await Promise.all([
+    getNivelesAction()
+  ]);
+
+  let allCompetencies: any[] = [];
+  let areas: any[] = [];
+
+  if (nivelId) {
+    const [{ data: fetchedAreas = [] }, { data: fetchedCompetencies = [] }] = await Promise.all([
+      getCurricularAreasAction(nivelId),
+      getCompetenciesByNivelAction(nivelId),
+    ]);
+    areas = fetchedAreas;
+    allCompetencies = fetchedCompetencies;
+  }
 
   return (
     <div className="space-y-4 px-2">
@@ -36,8 +41,9 @@ export default async function CompetenciesPage() {
       </div>
 
       <CompetencyTable
-        data={allCompetencies as any}
+        data={allCompetencies}
         areas={areas.map((a) => ({ id: a.id, nombre: a.nombre }))}
+        niveles={niveles}
       />
     </div>
   );

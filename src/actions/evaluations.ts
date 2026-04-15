@@ -81,6 +81,33 @@ export async function upsertPeriodoAction(values: any, id?: string) {
 // ==================== EVALUACIONES ====================
 
 /**
+ * Obtiene el detalle completo de una evaluación por ID (usado en la página de notas)
+ */
+export async function getEvaluacionDetailAction(evaluacionId: string) {
+  try {
+    const evaluacion = await prisma.evaluacion.findUnique({
+      where: { id: evaluacionId },
+      include: {
+        tipoEvaluacion: true,
+        curso: {
+          include: {
+            areaCurricular: true,
+            nivelAcademico: {
+              include: { grado: true },
+            },
+          },
+        },
+        periodo: true,
+      },
+    });
+    return { data: evaluacion ? JSON.parse(JSON.stringify(evaluacion)) : null };
+  } catch (error) {
+    console.error("Error fetching evaluacion detail:", error);
+    return { error: "No se pudo obtener el detalle de la evaluación" };
+  }
+}
+
+/**
  * Obtiene las evaluaciones de un curso
  */
 export async function getEvaluacionesAction(filters?: {

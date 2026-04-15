@@ -20,7 +20,7 @@ export function UniformTabs({ children }: UniformTabsProps) {
 
   return (
     <Tabs value={tab} onValueChange={setTab} className="space-y-6">
-      <div className="flex justify-between items-center bg-slate-100/50 p-1 rounded-xl w-fit">
+      <div className="flex justify-between items-center bg-card p-1 rounded-xl w-fit">
         <TabsList className="bg-transparent border-none">
           <TabsTrigger
             value="catalogo"

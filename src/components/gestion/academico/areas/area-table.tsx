@@ -1,8 +1,16 @@
 "use client";
 
+import * as React from "react";
 import { useQueryState, parseAsString, parseAsInteger } from "nuqs";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/ui/data-table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface AreaTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -19,6 +27,11 @@ export function AreaTable<TData, TValue>({
     "q",
     parseAsString.withDefault(""),
   );
+  
+  const [nivelId, setNivelId] = useQueryState(
+    "nivel",
+    parseAsString.withDefault("all")
+  );
 
   // Pagination states with nuqs
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
@@ -29,13 +42,22 @@ export function AreaTable<TData, TValue>({
 
   const clearFilters = () => {
     setSearchQuery("");
+    setNivelId("all");
     setPage(1);
   };
+
+  const niveles = meta?.niveles || [];
+
+  // Client-side filter for Nivel
+  const filteredData = React.useMemo(() => {
+    if (nivelId === "all") return data;
+    return data.filter((item: any) => item.nivelId === nivelId);
+  }, [data, nivelId]);
 
   return (
     <DataTable
       columns={columns}
-      data={data}
+      data={filteredData}
       searchPlaceholder="Buscar por nombre o código..."
       searchValue={searchQuery}
       onSearchChange={(value) => {
@@ -43,7 +65,7 @@ export function AreaTable<TData, TValue>({
         setPage(1);
       }}
       onClearFilters={clearFilters}
-      hasActiveFilters={searchQuery !== ""}
+      hasActiveFilters={searchQuery !== "" || nivelId !== "all"}
       meta={meta}
       // Controlled pagination
       pageIndex={page - 1}
@@ -51,6 +73,28 @@ export function AreaTable<TData, TValue>({
       onPageIndexChange={(index) => setPage(index + 1)}
       onPageSizeChange={setLimit}
       showColumnVisibility={false}
-    />
+    >
+      {() => (
+        <Select
+          value={nivelId}
+          onValueChange={(val) => {
+            setNivelId(val);
+            setPage(1);
+          }}
+        >
+          <SelectTrigger className="w-[180px] h-10 rounded-xl bg-background border-dashed">
+            <SelectValue placeholder="Todos los niveles" />
+          </SelectTrigger>
+          <SelectContent className="rounded-xl">
+            <SelectItem value="all">Todos los niveles</SelectItem>
+            {niveles.map((nivel: any) => (
+              <SelectItem key={nivel.id} value={nivel.id}>
+                {nivel.nombre}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
+    </DataTable>
   );
 }

@@ -44,6 +44,7 @@ interface CourseFormProps {
   areas: any[];
   nivelesAcademicos: any[];
   profesores: any[];
+  currentAnio?: number;
 }
 
 export function CourseForm({
@@ -53,6 +54,7 @@ export function CourseForm({
   areas,
   nivelesAcademicos,
   profesores,
+  currentAnio = new Date().getFullYear(),
 }: CourseFormProps) {
   const [isPending, startTransition] = useTransition();
   const { setIsDirty, setOnSubmit } = useFormModal();
@@ -71,7 +73,7 @@ export function CourseForm({
           nombre: "",
           codigo: "",
           descripcion: "",
-          anioAcademico: new Date().getFullYear(),
+          anioAcademico: currentAnio,
           horasSemanales: 2,
           creditos: 0,
           areaCurricularId: "",

@@ -84,7 +84,8 @@ export function EnrollmentTable<TData, TValue>({
   data,
   meta,
 }: EnrollmentTableProps<TData, TValue>) {
-  const currentYear = new Date().getFullYear();
+  // Use current academic year from meta or fallback to actual year
+  const currentYear = meta?.institucion?.cicloEscolarActual || new Date().getFullYear();
 
   // Estados con nuqs (persistidos en URL)
   const [searchQuery, setSearchQuery] = useQueryState(
@@ -107,6 +108,7 @@ export function EnrollmentTable<TData, TValue>({
     parseAsInteger.withDefault(10),
   );
 
+  // hasActiveFilters only when user changes from the DEFAULT current year or selects a status
   const hasActiveFilters =
     searchQuery !== "" || anioFilter !== currentYear || estadoFilter !== "ALL";
 
@@ -130,6 +132,7 @@ export function EnrollmentTable<TData, TValue>({
       }}
       onClearFilters={clearFilters}
       hasActiveFilters={hasActiveFilters}
+      ignoredFilterColumns={["anioAcademico", "estado"]}
       meta={meta}
       // Controlled pagination
       pageIndex={page - 1}

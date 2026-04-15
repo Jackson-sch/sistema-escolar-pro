@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import {
   IconCash,
-  IconX,
   IconPrinter,
   IconCircleCheck,
   IconLoader2,
@@ -11,12 +10,11 @@ import {
   IconCategory,
   IconReceipt2,
   IconNotes,
+  IconAlertTriangle,
 } from "@tabler/icons-react";
 import { formatCurrency, formatDate } from "@/lib/formats";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -114,9 +112,7 @@ export function PagoDialog({
   };
 
   const handleOpenChange = (newOpen: boolean) => {
-    if (!newOpen) {
-      resetForm();
-    }
+    if (!newOpen) resetForm();
     onOpenChange(newOpen);
   };
 
@@ -124,14 +120,24 @@ export function PagoDialog({
 
   const deudaCalculada =
     (Number(cronograma.monto) || 0) - (Number(cronograma.montoPagado) || 0);
-  const saldoRestante = Math.max(0, deudaCalculada - (Number(montoPago) || 0));
+  const montoCobrado = Number(montoPago) || 0;
+  const saldoRestante = Math.max(0, deudaCalculada - montoCobrado);
+  const isOverpaying = montoCobrado > deudaCalculada;
+  const progressPct = Math.min(100, (montoCobrado / deudaCalculada) * 100) || 0;
 
+  const initials =
+    (cronograma.estudiante.name[0] ?? "") +
+    (cronograma.estudiante.apellidoPaterno[0] ?? "");
+
+  console.log("🚀 ~ PagoDialog ~ cronograma:", cronograma);
   return (
     <FormModal
       isOpen={open}
       onOpenChange={handleOpenChange}
       title="Registrar Recaudación"
       className="sm:max-w-4xl custom-scrollbar"
+      titleSpan={`#${cronograma.id.slice(-8).toUpperCase()}`}
+      description={cronograma.concepto.nombre}
     >
       {isSuccess && lastPaymentData ? (
         <PagoSuccessView
@@ -142,124 +148,143 @@ export function PagoDialog({
           onClose={resetForm}
         />
       ) : (
-        <div className="flex flex-col h-full overflow-hidden">
-          {/* Header - Fixed */}
-          <div className="px-6 py-4 sm:px-8 sm:py-6 flex items-center justify-between border-b border-[#27272a] shrink-0 bg-[#09090b] z-20">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <DialogTitle className="text-lg sm:text-2xl font-bold tracking-tight text-white leading-none truncate">
-                  Registrar Recaudación
-                </DialogTitle>
-                <span className="text-[10px] font-mono bg-[#18181b] text-zinc-400 px-2 py-1 rounded shrink-0">
-                  ID: {cronograma.id.slice(-8).toUpperCase()}
-                </span>
-              </div>
-              <p className="text-zinc-400 mt-1 font-medium text-xs sm:text-sm truncate">
-                {cronograma.concepto.nombre}
-              </p>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => handleOpenChange(false)}
-              className="rounded-full size-10 hover:bg-[#18181b] text-zinc-400 transition-colors shrink-0 outline-none"
-              type="button"
-            >
-              <IconX className="size-6" />
-            </Button>
-          </div>
-
-          {/* Scrollable Area - Use flex-1 with overflow-y-auto and touch behavior */}
-          <div className="flex-1 overflow-y-auto overscroll-contain bg-[#09090b] outline-none select-none h-[calc(100svh-120px)] sm:h-auto">
+        <div className="flex flex-col h-full overflow-hidden bg-background rounded-md">
+          {/* ── Body ───────────────────────────────────── */}
+          <div className="flex-1 overflow-y-auto overscroll-contain outline-none h-[calc(100svh-120px)] sm:h-auto">
             <div className="flex flex-col md:flex-row min-h-min">
-              {/* Columna Izquierda: Info (5/12) */}
-              <div className="w-full md:w-5/12 p-6 sm:p-8 bg-zinc-900/40 border-b md:border-b-0 md:border-r border-[#27272a] space-y-6 sm:space-y-8 flex flex-col shrink-0">
-                <div className="space-y-4">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+              {/* ── LEFT: Student & Summary ─────────────── */}
+              <div className="w-full md:w-[42%] flex flex-col border-b md:border-b-0 md:border-r border-white/6 bg-white/1.5">
+                {/* Student card */}
+                <div className="p-6 sm:p-7 border-b border-white/6">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-zinc-600 mb-4">
                     Estudiante
                   </p>
-                  <div className="flex items-center gap-3">
-                    <Avatar className="size-10 sm:size-12 bg-blue-600/10 text-blue-500 border border-blue-500/20">
+                  <div className="flex items-center gap-4">
+                    <Avatar className="size-12 shrink-0 ring-2 ring-white/8">
                       <AvatarImage src="" />
-                      <AvatarFallback className="font-bold text-lg sm:text-xl uppercase">
-                        {cronograma.estudiante.name[0] +
-                          cronograma.estudiante.apellidoPaterno[0]}
+                      <AvatarFallback className="bg-linear-to-br from-blue-600/30 to-indigo-700/30 text-blue-300 font-bold text-base uppercase border border-blue-500/20">
+                        {initials}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="min-w-0 capitalize">
-                      <h2 className="text-base sm:text-lg font-bold text-white leading-tight truncate">
+                    <div className="min-w-0">
+                      <h2 className="text-sm font-bold text-white leading-tight truncate capitalize">
                         {cronograma.estudiante.apellidoPaterno}{" "}
                         {cronograma.estudiante.apellidoMaterno}
                       </h2>
-                      <p className="text-zinc-400 font-medium text-xs sm:text-sm truncate">
+                      <p className="text-zinc-500 text-xs truncate capitalize mt-0.5">
                         {cronograma.estudiante.name}
                       </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="p-5 sm:p-6 bg-[#18181b]/60 rounded-2xl border border-[#27272a] shadow-inner">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
-                    Deuda Total
+                {/* Deuda & progress */}
+                <div className="p-6 sm:p-7 border-b border-white/6">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-zinc-600 mb-3">
+                    Deuda pendiente
                   </p>
-                  <p className="text-3xl sm:text-4xl font-black font-mono text-white tracking-tighter mb-2 tabular-nums">
-                    {formatCurrency(deudaCalculada)}
-                  </p>
-                  {cronograma.fechaVencimiento && (
-                    <div className="flex items-center gap-1.5 text-rose-400 font-medium text-[10px] sm:text-xs">
-                      <IconCalendarEvent className="size-4 shrink-0" />
-                      <span>
-                        Vence: {formatDate(cronograma.fechaVencimiento)}
-                      </span>
+
+                  <div className="mb-4">
+                    <span className="text-4xl font-black font-mono text-white tracking-tighter tabular-nums">
+                      {formatCurrency(deudaCalculada)}
+                    </span>
+                    {cronograma.fechaVencimiento && (
+                      <div className="flex items-center gap-1.5 mt-2">
+                        <IconCalendarEvent className="size-3.5 text-rose-500 shrink-0" />
+                        <span className="text-rose-400 text-[11px] font-medium">
+                          Vence {formatDate(cronograma.fechaVencimiento)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Progress bar */}
+                  <div className="space-y-1.5">
+                    <div className="h-1.5 w-full rounded-full bg-white/6 overflow-hidden">
+                      <div
+                        className={cn(
+                          "h-full rounded-full transition-all duration-500",
+                          isOverpaying
+                            ? "bg-amber-500"
+                            : progressPct >= 100
+                              ? "bg-emerald-500"
+                              : "bg-blue-500",
+                        )}
+                        style={{ width: `${progressPct}%` }}
+                      />
                     </div>
-                  )}
+                    <p className="text-[10px] text-zinc-600 font-medium text-right">
+                      {progressPct.toFixed(0)}% del total
+                    </p>
+                  </div>
                 </div>
 
-                <div className="space-y-3 pt-6 border-t border-[#27272a] mt-auto">
-                  <div className="flex justify-between items-center text-xs sm:text-sm">
-                    <span className="text-zinc-500 font-medium">
-                      Monto cobrado
+                {/* Resumen financiero */}
+                <div className="p-6 sm:p-7 mt-auto space-y-3">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-zinc-600 mb-4">
+                    Resumen
+                  </p>
+
+                  <SummaryRow
+                    label="Monto a cobrar"
+                    value={formatCurrency(montoCobrado)}
+                    valueClass="text-white"
+                  />
+                  {Number(cronograma.moraAcumulada) > 0 && (
+                    <SummaryRow
+                      label="Mora acumulada"
+                      value={`+${formatCurrency(Number(cronograma.moraAcumulada))}`}
+                      valueClass="text-rose-400"
+                    />
+                  )}
+
+                  <div className="h-px bg-white/6 my-1" />
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-bold text-white">
+                      Saldo restante
                     </span>
-                    <span className="font-semibold text-white">
-                      {formatCurrency(Number(montoPago) || 0)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center text-xs sm:text-sm">
-                    <span className="text-zinc-500 font-medium">
-                      Descuento / Mora
-                    </span>
-                    <span className="font-semibold text-emerald-400">
-                      {formatCurrency(Number(cronograma.moraAcumulada) || 0)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center pt-3 border-t border-dashed border-[#27272a]">
-                    <span className="font-bold text-white text-sm sm:text-base">
-                      Saldo Restante
-                    </span>
-                    <span className="font-black text-blue-500 text-base sm:text-lg uppercase">
+                    <span
+                      className={cn(
+                        "text-base font-black font-mono tabular-nums",
+                        saldoRestante === 0
+                          ? "text-emerald-400"
+                          : isOverpaying
+                            ? "text-amber-400"
+                            : "text-blue-400",
+                      )}
+                    >
                       {formatCurrency(saldoRestante)}
                     </span>
                   </div>
+
+                  {isOverpaying && (
+                    <div className="flex items-center gap-2 mt-2 px-3 py-2 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+                      <IconAlertTriangle className="size-3.5 text-amber-400 shrink-0" />
+                      <p className="text-[11px] text-amber-400 font-medium">
+                        Monto supera la deuda total
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* Columna Derecha: Formulario (7/12) */}
-              <div className="w-full md:w-7/12 p-6 sm:p-8 space-y-6 bg-[#09090b]">
+              {/* ── RIGHT: Form ─────────────────────────── */}
+              <div className="w-full md:w-[58%] p-6 sm:p-8 bg-[#0a0a0f]">
                 <form
-                  className="space-y-6"
+                  className="space-y-5"
                   onSubmit={(e) => {
                     e.preventDefault();
                     handlePago();
                   }}
                 >
                   {/* Monto */}
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2 text-sm font-semibold text-zinc-300">
-                      <IconCash className="size-4 text-blue-500" />
-                      Monto a Cobrar
-                    </Label>
-                    <div className="relative">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 font-medium">
+                  <FieldWrapper
+                    icon={<IconCash className="size-3.5 text-blue-500" />}
+                    label="Monto a Cobrar"
+                  >
+                    <div className="relative group">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 text-sm font-semibold select-none">
                         S/
                       </span>
                       <Input
@@ -267,91 +292,99 @@ export function PagoDialog({
                         step="0.01"
                         value={montoPago}
                         onChange={(e) => setMontoPago(e.target.value)}
-                        className="w-full pl-10 pr-4 py-5 bg-[#18181b] border-[#27272a] rounded-full text-lg sm:text-xl font-bold text-white focus:ring-blue-600 focus:border-blue-600 transition-all border-none"
+                        className="w-full pl-10 pr-4 h-14 bg-white/4 border border-white/8 rounded-xl text-xl font-bold text-white focus-visible:ring-1 focus-visible:ring-blue-500/60 focus-visible:border-blue-500/40 hover:border-white/13 transition-colors placeholder:text-zinc-700"
+                        placeholder="0.00"
                       />
                     </div>
-                  </div>
+                  </FieldWrapper>
 
-                  {/* Método Pago */}
-                  <div className="space-y-3">
-                    <Label className="flex items-center gap-2 text-sm font-semibold text-zinc-300">
-                      <IconCategory className="size-4 text-blue-500" />
-                      Método de Pago
-                    </Label>
+                  {/* Método de Pago */}
+                  <FieldWrapper
+                    icon={<IconCategory className="size-3.5 text-blue-500" />}
+                    label="Método de Pago"
+                  >
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
-                      {METODOS.map((m) => (
-                        <button
-                          key={m.id}
-                          type="button"
-                          onClick={() => setMetodoPago(m.id)}
-                          className={cn(
-                            "flex flex-row sm:flex-col items-center justify-start sm:justify-center px-4 py-3 sm:p-2 border border-[#27272a] bg-[#18181b] rounded-xl transition-all duration-300 text-zinc-500 hover:border-blue-500/50 group gap-3 sm:gap-1 outline-none",
-                            metodoPago === m.id
-                              ? m.activeClass
-                              : m.hoverClass || "hover:border-blue-500/30",
-                          )}
-                        >
-                          <m.icon
+                      {METODOS.map((m) => {
+                        const isActive = metodoPago === m.id;
+                        return (
+                          <button
+                            key={m.id}
+                            type="button"
+                            onClick={() => setMetodoPago(m.id)}
                             className={cn(
-                              "size-5 sm:size-6 transition-colors shrink-0",
-                              metodoPago === m.id
-                                ? ""
-                                : "group-hover:text-blue-500",
+                              "relative flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-xl border transition-all duration-200 outline-none focus-visible:ring-1 focus-visible:ring-blue-500/60 overflow-hidden",
+                              isActive
+                                ? "border-blue-500/40 bg-blue-500/10 text-blue-300"
+                                : "border-white/7 bg-white/2.5 text-zinc-500 hover:border-white/14 hover:text-zinc-300 hover:bg-white/5",
                             )}
-                            strokeWidth={1.5}
-                          />
-                          <span className="text-[10px] font-bold uppercase tracking-tight truncate">
-                            {m.label}
-                          </span>
-                        </button>
-                      ))}
+                          >
+                            {isActive && (
+                              <div className="absolute inset-0 bg-linear-to-b from-blue-500/5 to-transparent pointer-events-none" />
+                            )}
+                            <m.icon
+                              className={cn(
+                                "size-5 transition-colors relative",
+                                isActive ? "text-blue-400" : "",
+                              )}
+                              strokeWidth={1.5}
+                            />
+                            <span className="text-[9px] font-bold uppercase tracking-tight relative leading-none text-center">
+                              {m.label}
+                            </span>
+                            {isActive && (
+                              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-px bg-blue-400/60" />
+                            )}
+                          </button>
+                        );
+                      })}
                     </div>
-                  </div>
+                  </FieldWrapper>
 
-                  {/* Comprobante */}
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2 text-sm font-semibold text-zinc-300">
-                      <IconReceipt2 className="size-4 text-blue-500" />
-                      Comprobante / Operación
-                    </Label>
+                  {/* N° Comprobante */}
+                  <FieldWrapper
+                    icon={<IconReceipt2 className="size-3.5 text-blue-500" />}
+                    label="N° Comprobante / Operación"
+                  >
                     <Input
                       placeholder="Ej. B001-000005"
                       type="text"
                       value={numeroBoleta}
                       onChange={(e) => setNumeroBoleta(e.target.value)}
-                      className="w-full py-5 bg-[#18181b] border-[#27272a] rounded-full text-white font-medium focus:ring-blue-600 focus:border-blue-600 text-sm sm:text-base border-none"
+                      className="h-11 bg-white/4 border border-white/8 rounded-xl text-white font-mono text-sm focus-visible:ring-1 focus-visible:ring-blue-500/60 focus-visible:border-blue-500/40 hover:border-white/13 transition-colors placeholder:text-zinc-700 tracking-wider"
                     />
-                  </div>
+                  </FieldWrapper>
 
                   {/* Observaciones */}
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2 text-sm font-semibold text-zinc-300">
-                      <IconNotes className="size-4 text-blue-500" />
-                      Observaciones (Opcional)
-                    </Label>
+                  <FieldWrapper
+                    icon={<IconNotes className="size-3.5 text-blue-500" />}
+                    label="Observaciones"
+                    optional
+                  >
                     <Textarea
-                      className="w-full px-4 py-3 bg-[#18181b] border-[#27272a] rounded-xl text-white focus:ring-blue-600 focus:border-blue-600 resize-none text-sm border-none"
-                      placeholder="Detalles adicionales..."
+                      className="bg-white/4 border border-white/8 rounded-xl text-white text-sm focus-visible:ring-1 focus-visible:ring-blue-500/60 focus-visible:border-blue-500/40 hover:border-white/13 transition-colors resize-none placeholder:text-zinc-700"
+                      placeholder="Detalles adicionales del cobro..."
                       rows={2}
                       value={observaciones}
                       onChange={(e) => setObservaciones(e.target.value)}
                     />
-                  </div>
+                  </FieldWrapper>
 
                   {/* Switch Impresión */}
-                  <div className="flex items-center justify-between p-4 bg-blue-600/5 rounded-xl border border-blue-600/20 group transition-colors hover:bg-blue-600/10 mb-4">
-                    <div className="flex items-center gap-3 pr-2">
-                      <IconPrinter
-                        className="size-5 text-blue-500 shrink-0"
-                        strokeWidth={2}
-                      />
-                      <div className="flex flex-col min-w-0">
-                        <span className="text-sm font-semibold text-white leading-none">
-                          Imprimir
-                        </span>
-                        <span className="text-[10px] text-zinc-500 mt-1 truncate">
-                          Generar PDF al confirmar
-                        </span>
+                  <div className="flex items-center justify-between px-4 py-3 bg-white/3 rounded-xl border border-white/7 hover:border-white/11 transition-colors group">
+                    <div className="flex items-center gap-3">
+                      <div className="size-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0">
+                        <IconPrinter
+                          className="size-3.5 text-blue-400"
+                          strokeWidth={2}
+                        />
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold text-zinc-300 leading-none">
+                          Generar comprobante
+                        </p>
+                        <p className="text-[10px] text-zinc-600 mt-0.5">
+                          Imprimir / descargar PDF al confirmar
+                        </p>
                       </div>
                     </div>
                     <Switch
@@ -361,33 +394,97 @@ export function PagoDialog({
                     />
                   </div>
 
-                  {/* Botón */}
-                  <Button
-                    size="lg"
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-6 px-6 rounded-xl shadow-lg shadow-blue-500/20 transition-all flex items-center justify-center gap-2 active:scale-[0.98] mt-6 shrink-0 outline-none"
+                  {/* Submit */}
+                  <button
                     type="submit"
                     disabled={isPending || !montoPago}
-                  >
-                    {isPending ? (
-                      <IconLoader2 className="size-6 animate-spin" />
-                    ) : (
-                      <>
-                        <span className="text-sm sm:text-base">
-                          CONFIRMAR COBRO
-                        </span>
-                        <IconCircleCheck
-                          className="size-5 sm:size-6"
-                          strokeWidth={2.5}
-                        />
-                      </>
+                    className={cn(
+                      "relative w-full h-12 rounded-xl font-bold text-sm tracking-wide overflow-hidden transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed",
+                      "bg-linear-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 hover:from-blue-500 hover:to-blue-400",
                     )}
-                  </Button>
+                  >
+                    {/* Shimmer */}
+                    {!isPending && (
+                      <span className="absolute inset-0 -translate-x-full animate-[shimmer_3s_infinite] bg-linear-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
+                    )}
+                    <span className="relative flex items-center justify-center gap-2.5">
+                      {isPending ? (
+                        <IconLoader2 className="size-5 animate-spin" />
+                      ) : (
+                        <>
+                          <IconCircleCheck
+                            className="size-5"
+                            strokeWidth={2.5}
+                          />
+                          CONFIRMAR COBRO
+                        </>
+                      )}
+                    </span>
+                  </button>
                 </form>
               </div>
             </div>
           </div>
+
+          {/* Keyframe for shimmer */}
+          <style>{`
+            @keyframes shimmer {
+              0% { transform: translateX(-100%); }
+              60%, 100% { transform: translateX(200%); }
+            }
+          `}</style>
         </div>
       )}
     </FormModal>
+  );
+}
+
+/* ─── Sub-components ─── */
+
+function FieldWrapper({
+  icon,
+  label,
+  optional = false,
+  children,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  optional?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-2">
+      <Label className="flex items-center gap-2 text-xs font-semibold text-zinc-400">
+        <span className="size-5 rounded-md bg-white/5 border border-white/7 flex items-center justify-center shrink-0">
+          {icon}
+        </span>
+        {label}
+        {optional && (
+          <span className="text-[10px] font-normal text-zinc-600 ml-auto">
+            Opcional
+          </span>
+        )}
+      </Label>
+      {children}
+    </div>
+  );
+}
+
+function SummaryRow({
+  label,
+  value,
+  valueClass,
+}: {
+  label: string;
+  value: string;
+  valueClass?: string;
+}) {
+  return (
+    <div className="flex items-center justify-between text-xs">
+      <span className="text-zinc-500">{label}</span>
+      <span className={cn("font-semibold tabular-nums font-mono", valueClass)}>
+        {value}
+      </span>
+    </div>
   );
 }

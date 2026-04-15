@@ -77,11 +77,13 @@ export function AddNivelButton({ institucionId }: AddNivelButtonProps) {
   );
 }
 
-function NivelForm({
+export function NivelForm({
   institucionId,
+  initialData,
   onSuccess,
 }: {
   institucionId: string;
+  initialData?: any;
   onSuccess: () => void;
 }) {
   const [isPending, startTransition] = useTransition();
@@ -89,10 +91,15 @@ function NivelForm({
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      nombre: "",
-      institucionId,
-    },
+    defaultValues: initialData 
+      ? {
+          nombre: initialData.nombre,
+          institucionId: initialData.institucionId,
+        }
+      : {
+          nombre: "",
+          institucionId,
+        },
   });
 
   const { isDirty } = form.formState;
@@ -108,7 +115,7 @@ function NivelForm({
         ...values,
         nombre: values.nombre.toUpperCase().trim(),
       };
-      const res = await upsertNivelAction(formattedValues);
+      const res = await upsertNivelAction(formattedValues, initialData?.id);
       if (res.success) {
         toast.success(res.success);
         setIsDirty(false);
@@ -154,10 +161,11 @@ function NivelForm({
             className="w-full sm:w-auto rounded-full px-8"
             disabled={isPending}
           >
-            {isPending ? "Guardando..." : "Crear Nivel"}
+            {isPending ? "Guardando..." : initialData ? "Guardar Cambios" : "Crear Nivel"}
           </Button>
         </div>
       </form>
     </Form>
   );
 }
+
