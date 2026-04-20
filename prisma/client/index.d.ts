@@ -273,6 +273,11 @@ export type FavoritoUniforme = $Result.DefaultSelection<Prisma.$FavoritoUniforme
  * 
  */
 export type CuentaBancaria = $Result.DefaultSelection<Prisma.$CuentaBancariaPayload>
+/**
+ * Model NotificationLog
+ * 
+ */
+export type NotificationLog = $Result.DefaultSelection<Prisma.$NotificationLogPayload>
 
 /**
  * Enums
@@ -282,7 +287,8 @@ export namespace $Enums {
   estudiante: 'estudiante',
   profesor: 'profesor',
   administrativo: 'administrativo',
-  padre: 'padre'
+  padre: 'padre',
+  super_admin: 'super_admin'
 };
 
 export type Role = (typeof Role)[keyof typeof Role]
@@ -436,6 +442,15 @@ export const TipoCuentaBancaria: {
 
 export type TipoCuentaBancaria = (typeof TipoCuentaBancaria)[keyof typeof TipoCuentaBancaria]
 
+
+export const TipoNotificacion: {
+  EMAIL: 'EMAIL',
+  SMS: 'SMS',
+  WHATSAPP: 'WHATSAPP'
+};
+
+export type TipoNotificacion = (typeof TipoNotificacion)[keyof typeof TipoNotificacion]
+
 }
 
 export type Role = $Enums.Role
@@ -501,6 +516,10 @@ export const EstadoVentaUniforme: typeof $Enums.EstadoVentaUniforme
 export type TipoCuentaBancaria = $Enums.TipoCuentaBancaria
 
 export const TipoCuentaBancaria: typeof $Enums.TipoCuentaBancaria
+
+export type TipoNotificacion = $Enums.TipoNotificacion
+
+export const TipoNotificacion: typeof $Enums.TipoNotificacion
 
 /**
  * ##  Prisma Client ʲˢ
@@ -1138,6 +1157,16 @@ export class PrismaClient<
     * ```
     */
   get cuentaBancaria(): Prisma.CuentaBancariaDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.notificationLog`: Exposes CRUD operations for the **NotificationLog** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more NotificationLogs
+    * const notificationLogs = await prisma.notificationLog.findMany()
+    * ```
+    */
+  get notificationLog(): Prisma.NotificationLogDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -1623,7 +1652,8 @@ export namespace Prisma {
     VentaUniforme: 'VentaUniforme',
     DetalleVentaUniforme: 'DetalleVentaUniforme',
     FavoritoUniforme: 'FavoritoUniforme',
-    CuentaBancaria: 'CuentaBancaria'
+    CuentaBancaria: 'CuentaBancaria',
+    NotificationLog: 'NotificationLog'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1639,7 +1669,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "cargo" | "estadoUsuario" | "tipoDocumento" | "tipoEvaluacion" | "historialEstadoUsuario" | "permiso" | "rolPermiso" | "usuarioPermiso" | "cargoPermiso" | "institucionEducativa" | "user" | "relacionFamiliar" | "account" | "verificationToken" | "passwordResetToken" | "nivel" | "grado" | "nivelAcademico" | "sede" | "periodoAcademico" | "areaCurricular" | "curso" | "horario" | "matricula" | "matriculaCurso" | "evaluacion" | "nota" | "asistencia" | "documento" | "pago" | "anuncio" | "evento" | "competencia" | "capacidad" | "prospecto" | "admision" | "fichaPsicopedagogica" | "logro" | "categoriaIncidente" | "conceptoPago" | "cronogramaPago" | "variableSistema" | "comprobantePago" | "politicaAsistencia" | "categoriaUniforme" | "uniforme" | "varianteUniforme" | "movimientoInventario" | "ventaUniforme" | "detalleVentaUniforme" | "favoritoUniforme" | "cuentaBancaria"
+      modelProps: "cargo" | "estadoUsuario" | "tipoDocumento" | "tipoEvaluacion" | "historialEstadoUsuario" | "permiso" | "rolPermiso" | "usuarioPermiso" | "cargoPermiso" | "institucionEducativa" | "user" | "relacionFamiliar" | "account" | "verificationToken" | "passwordResetToken" | "nivel" | "grado" | "nivelAcademico" | "sede" | "periodoAcademico" | "areaCurricular" | "curso" | "horario" | "matricula" | "matriculaCurso" | "evaluacion" | "nota" | "asistencia" | "documento" | "pago" | "anuncio" | "evento" | "competencia" | "capacidad" | "prospecto" | "admision" | "fichaPsicopedagogica" | "logro" | "categoriaIncidente" | "conceptoPago" | "cronogramaPago" | "variableSistema" | "comprobantePago" | "politicaAsistencia" | "categoriaUniforme" | "uniforme" | "varianteUniforme" | "movimientoInventario" | "ventaUniforme" | "detalleVentaUniforme" | "favoritoUniforme" | "cuentaBancaria" | "notificationLog"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -5491,6 +5521,80 @@ export namespace Prisma {
           }
         }
       }
+      NotificationLog: {
+        payload: Prisma.$NotificationLogPayload<ExtArgs>
+        fields: Prisma.NotificationLogFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.NotificationLogFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationLogPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.NotificationLogFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationLogPayload>
+          }
+          findFirst: {
+            args: Prisma.NotificationLogFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationLogPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.NotificationLogFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationLogPayload>
+          }
+          findMany: {
+            args: Prisma.NotificationLogFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationLogPayload>[]
+          }
+          create: {
+            args: Prisma.NotificationLogCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationLogPayload>
+          }
+          createMany: {
+            args: Prisma.NotificationLogCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.NotificationLogCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationLogPayload>[]
+          }
+          delete: {
+            args: Prisma.NotificationLogDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationLogPayload>
+          }
+          update: {
+            args: Prisma.NotificationLogUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationLogPayload>
+          }
+          deleteMany: {
+            args: Prisma.NotificationLogDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.NotificationLogUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.NotificationLogUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationLogPayload>[]
+          }
+          upsert: {
+            args: Prisma.NotificationLogUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationLogPayload>
+          }
+          aggregate: {
+            args: Prisma.NotificationLogAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateNotificationLog>
+          }
+          groupBy: {
+            args: Prisma.NotificationLogGroupByArgs<ExtArgs>
+            result: $Utils.Optional<NotificationLogGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.NotificationLogCountArgs<ExtArgs>
+            result: $Utils.Optional<NotificationLogCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -5651,6 +5755,7 @@ export namespace Prisma {
     detalleVentaUniforme?: DetalleVentaUniformeOmit
     favoritoUniforme?: FavoritoUniformeOmit
     cuentaBancaria?: CuentaBancariaOmit
+    notificationLog?: NotificationLogOmit
   }
 
   /* Types for Logging */
@@ -5948,6 +6053,7 @@ export namespace Prisma {
     tiposDocumento: number
     tiposEvaluacion: number
     users: number
+    notificationLogs: number
   }
 
   export type InstitucionEducativaCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5968,6 +6074,7 @@ export namespace Prisma {
     tiposDocumento?: boolean | InstitucionEducativaCountOutputTypeCountTiposDocumentoArgs
     tiposEvaluacion?: boolean | InstitucionEducativaCountOutputTypeCountTiposEvaluacionArgs
     users?: boolean | InstitucionEducativaCountOutputTypeCountUsersArgs
+    notificationLogs?: boolean | InstitucionEducativaCountOutputTypeCountNotificationLogsArgs
   }
 
   // Custom InputTypes
@@ -6100,6 +6207,13 @@ export namespace Prisma {
     where?: UserWhereInput
   }
 
+  /**
+   * InstitucionEducativaCountOutputType without action
+   */
+  export type InstitucionEducativaCountOutputTypeCountNotificationLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: NotificationLogWhereInput
+  }
+
 
   /**
    * Count Type UserCountOutputType
@@ -6135,6 +6249,7 @@ export namespace Prisma {
     ventasAprobadas: number
     ventasUniformeEstudiante: number
     ventasUniformePadre: number
+    notificationLogs: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -6167,6 +6282,7 @@ export namespace Prisma {
     ventasAprobadas?: boolean | UserCountOutputTypeCountVentasAprobadasArgs
     ventasUniformeEstudiante?: boolean | UserCountOutputTypeCountVentasUniformeEstudianteArgs
     ventasUniformePadre?: boolean | UserCountOutputTypeCountVentasUniformePadreArgs
+    notificationLogs?: boolean | UserCountOutputTypeCountNotificationLogsArgs
   }
 
   // Custom InputTypes
@@ -6381,6 +6497,13 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountVentasUniformePadreArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: VentaUniformeWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountNotificationLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: NotificationLogWhereInput
   }
 
 
@@ -18211,6 +18334,7 @@ export namespace Prisma {
     tiposDocumento?: boolean | InstitucionEducativa$tiposDocumentoArgs<ExtArgs>
     tiposEvaluacion?: boolean | InstitucionEducativa$tiposEvaluacionArgs<ExtArgs>
     users?: boolean | InstitucionEducativa$usersArgs<ExtArgs>
+    notificationLogs?: boolean | InstitucionEducativa$notificationLogsArgs<ExtArgs>
     _count?: boolean | InstitucionEducativaCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["institucionEducativa"]>
 
@@ -18323,6 +18447,7 @@ export namespace Prisma {
     tiposDocumento?: boolean | InstitucionEducativa$tiposDocumentoArgs<ExtArgs>
     tiposEvaluacion?: boolean | InstitucionEducativa$tiposEvaluacionArgs<ExtArgs>
     users?: boolean | InstitucionEducativa$usersArgs<ExtArgs>
+    notificationLogs?: boolean | InstitucionEducativa$notificationLogsArgs<ExtArgs>
     _count?: boolean | InstitucionEducativaCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type InstitucionEducativaIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -18353,6 +18478,7 @@ export namespace Prisma {
       tiposDocumento: Prisma.$TipoDocumentoPayload<ExtArgs>[]
       tiposEvaluacion: Prisma.$TipoEvaluacionPayload<ExtArgs>[]
       users: Prisma.$UserPayload<ExtArgs>[]
+      notificationLogs: Prisma.$NotificationLogPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -18793,6 +18919,7 @@ export namespace Prisma {
     tiposDocumento<T extends InstitucionEducativa$tiposDocumentoArgs<ExtArgs> = {}>(args?: Subset<T, InstitucionEducativa$tiposDocumentoArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TipoDocumentoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     tiposEvaluacion<T extends InstitucionEducativa$tiposEvaluacionArgs<ExtArgs> = {}>(args?: Subset<T, InstitucionEducativa$tiposEvaluacionArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TipoEvaluacionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     users<T extends InstitucionEducativa$usersArgs<ExtArgs> = {}>(args?: Subset<T, InstitucionEducativa$usersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    notificationLogs<T extends InstitucionEducativa$notificationLogsArgs<ExtArgs> = {}>(args?: Subset<T, InstitucionEducativa$notificationLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -19671,6 +19798,30 @@ export namespace Prisma {
   }
 
   /**
+   * InstitucionEducativa.notificationLogs
+   */
+  export type InstitucionEducativa$notificationLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationLog
+     */
+    select?: NotificationLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NotificationLog
+     */
+    omit?: NotificationLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationLogInclude<ExtArgs> | null
+    where?: NotificationLogWhereInput
+    orderBy?: NotificationLogOrderByWithRelationInput | NotificationLogOrderByWithRelationInput[]
+    cursor?: NotificationLogWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: NotificationLogScalarFieldEnum | NotificationLogScalarFieldEnum[]
+  }
+
+  /**
    * InstitucionEducativa without action
    */
   export type InstitucionEducativaDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -20490,6 +20641,7 @@ export namespace Prisma {
     ventasAprobadas?: boolean | User$ventasAprobadasArgs<ExtArgs>
     ventasUniformeEstudiante?: boolean | User$ventasUniformeEstudianteArgs<ExtArgs>
     ventasUniformePadre?: boolean | User$ventasUniformePadreArgs<ExtArgs>
+    notificationLogs?: boolean | User$notificationLogsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -20772,6 +20924,7 @@ export namespace Prisma {
     ventasAprobadas?: boolean | User$ventasAprobadasArgs<ExtArgs>
     ventasUniformeEstudiante?: boolean | User$ventasUniformeEstudianteArgs<ExtArgs>
     ventasUniformePadre?: boolean | User$ventasUniformePadreArgs<ExtArgs>
+    notificationLogs?: boolean | User$notificationLogsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -20825,6 +20978,7 @@ export namespace Prisma {
       ventasAprobadas: Prisma.$VentaUniformePayload<ExtArgs>[]
       ventasUniformeEstudiante: Prisma.$VentaUniformePayload<ExtArgs>[]
       ventasUniformePadre: Prisma.$VentaUniformePayload<ExtArgs>[]
+      notificationLogs: Prisma.$NotificationLogPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -21331,6 +21485,7 @@ export namespace Prisma {
     ventasAprobadas<T extends User$ventasAprobadasArgs<ExtArgs> = {}>(args?: Subset<T, User$ventasAprobadasArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VentaUniformePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     ventasUniformeEstudiante<T extends User$ventasUniformeEstudianteArgs<ExtArgs> = {}>(args?: Subset<T, User$ventasUniformeEstudianteArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VentaUniformePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     ventasUniformePadre<T extends User$ventasUniformePadreArgs<ExtArgs> = {}>(args?: Subset<T, User$ventasUniformePadreArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VentaUniformePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    notificationLogs<T extends User$notificationLogsArgs<ExtArgs> = {}>(args?: Subset<T, User$notificationLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -22619,6 +22774,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: VentaUniformeScalarFieldEnum | VentaUniformeScalarFieldEnum[]
+  }
+
+  /**
+   * User.notificationLogs
+   */
+  export type User$notificationLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationLog
+     */
+    select?: NotificationLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NotificationLog
+     */
+    omit?: NotificationLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationLogInclude<ExtArgs> | null
+    where?: NotificationLogWhereInput
+    orderBy?: NotificationLogOrderByWithRelationInput | NotificationLogOrderByWithRelationInput[]
+    cursor?: NotificationLogWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: NotificationLogScalarFieldEnum | NotificationLogScalarFieldEnum[]
   }
 
   /**
@@ -71885,6 +72064,1184 @@ export namespace Prisma {
 
 
   /**
+   * Model NotificationLog
+   */
+
+  export type AggregateNotificationLog = {
+    _count: NotificationLogCountAggregateOutputType | null
+    _min: NotificationLogMinAggregateOutputType | null
+    _max: NotificationLogMaxAggregateOutputType | null
+  }
+
+  export type NotificationLogMinAggregateOutputType = {
+    id: string | null
+    tipo: $Enums.TipoNotificacion | null
+    destinatario: string | null
+    asunto: string | null
+    mensaje: string | null
+    estado: string | null
+    error: string | null
+    institucionId: string | null
+    userId: string | null
+    createdAt: Date | null
+  }
+
+  export type NotificationLogMaxAggregateOutputType = {
+    id: string | null
+    tipo: $Enums.TipoNotificacion | null
+    destinatario: string | null
+    asunto: string | null
+    mensaje: string | null
+    estado: string | null
+    error: string | null
+    institucionId: string | null
+    userId: string | null
+    createdAt: Date | null
+  }
+
+  export type NotificationLogCountAggregateOutputType = {
+    id: number
+    tipo: number
+    destinatario: number
+    asunto: number
+    mensaje: number
+    estado: number
+    error: number
+    metadata: number
+    institucionId: number
+    userId: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type NotificationLogMinAggregateInputType = {
+    id?: true
+    tipo?: true
+    destinatario?: true
+    asunto?: true
+    mensaje?: true
+    estado?: true
+    error?: true
+    institucionId?: true
+    userId?: true
+    createdAt?: true
+  }
+
+  export type NotificationLogMaxAggregateInputType = {
+    id?: true
+    tipo?: true
+    destinatario?: true
+    asunto?: true
+    mensaje?: true
+    estado?: true
+    error?: true
+    institucionId?: true
+    userId?: true
+    createdAt?: true
+  }
+
+  export type NotificationLogCountAggregateInputType = {
+    id?: true
+    tipo?: true
+    destinatario?: true
+    asunto?: true
+    mensaje?: true
+    estado?: true
+    error?: true
+    metadata?: true
+    institucionId?: true
+    userId?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type NotificationLogAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which NotificationLog to aggregate.
+     */
+    where?: NotificationLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NotificationLogs to fetch.
+     */
+    orderBy?: NotificationLogOrderByWithRelationInput | NotificationLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: NotificationLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NotificationLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NotificationLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned NotificationLogs
+    **/
+    _count?: true | NotificationLogCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: NotificationLogMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: NotificationLogMaxAggregateInputType
+  }
+
+  export type GetNotificationLogAggregateType<T extends NotificationLogAggregateArgs> = {
+        [P in keyof T & keyof AggregateNotificationLog]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateNotificationLog[P]>
+      : GetScalarType<T[P], AggregateNotificationLog[P]>
+  }
+
+
+
+
+  export type NotificationLogGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: NotificationLogWhereInput
+    orderBy?: NotificationLogOrderByWithAggregationInput | NotificationLogOrderByWithAggregationInput[]
+    by: NotificationLogScalarFieldEnum[] | NotificationLogScalarFieldEnum
+    having?: NotificationLogScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: NotificationLogCountAggregateInputType | true
+    _min?: NotificationLogMinAggregateInputType
+    _max?: NotificationLogMaxAggregateInputType
+  }
+
+  export type NotificationLogGroupByOutputType = {
+    id: string
+    tipo: $Enums.TipoNotificacion
+    destinatario: string
+    asunto: string | null
+    mensaje: string
+    estado: string
+    error: string | null
+    metadata: JsonValue | null
+    institucionId: string | null
+    userId: string | null
+    createdAt: Date
+    _count: NotificationLogCountAggregateOutputType | null
+    _min: NotificationLogMinAggregateOutputType | null
+    _max: NotificationLogMaxAggregateOutputType | null
+  }
+
+  type GetNotificationLogGroupByPayload<T extends NotificationLogGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<NotificationLogGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof NotificationLogGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], NotificationLogGroupByOutputType[P]>
+            : GetScalarType<T[P], NotificationLogGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type NotificationLogSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tipo?: boolean
+    destinatario?: boolean
+    asunto?: boolean
+    mensaje?: boolean
+    estado?: boolean
+    error?: boolean
+    metadata?: boolean
+    institucionId?: boolean
+    userId?: boolean
+    createdAt?: boolean
+    institucion?: boolean | NotificationLog$institucionArgs<ExtArgs>
+    user?: boolean | NotificationLog$userArgs<ExtArgs>
+  }, ExtArgs["result"]["notificationLog"]>
+
+  export type NotificationLogSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tipo?: boolean
+    destinatario?: boolean
+    asunto?: boolean
+    mensaje?: boolean
+    estado?: boolean
+    error?: boolean
+    metadata?: boolean
+    institucionId?: boolean
+    userId?: boolean
+    createdAt?: boolean
+    institucion?: boolean | NotificationLog$institucionArgs<ExtArgs>
+    user?: boolean | NotificationLog$userArgs<ExtArgs>
+  }, ExtArgs["result"]["notificationLog"]>
+
+  export type NotificationLogSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tipo?: boolean
+    destinatario?: boolean
+    asunto?: boolean
+    mensaje?: boolean
+    estado?: boolean
+    error?: boolean
+    metadata?: boolean
+    institucionId?: boolean
+    userId?: boolean
+    createdAt?: boolean
+    institucion?: boolean | NotificationLog$institucionArgs<ExtArgs>
+    user?: boolean | NotificationLog$userArgs<ExtArgs>
+  }, ExtArgs["result"]["notificationLog"]>
+
+  export type NotificationLogSelectScalar = {
+    id?: boolean
+    tipo?: boolean
+    destinatario?: boolean
+    asunto?: boolean
+    mensaje?: boolean
+    estado?: boolean
+    error?: boolean
+    metadata?: boolean
+    institucionId?: boolean
+    userId?: boolean
+    createdAt?: boolean
+  }
+
+  export type NotificationLogOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tipo" | "destinatario" | "asunto" | "mensaje" | "estado" | "error" | "metadata" | "institucionId" | "userId" | "createdAt", ExtArgs["result"]["notificationLog"]>
+  export type NotificationLogInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    institucion?: boolean | NotificationLog$institucionArgs<ExtArgs>
+    user?: boolean | NotificationLog$userArgs<ExtArgs>
+  }
+  export type NotificationLogIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    institucion?: boolean | NotificationLog$institucionArgs<ExtArgs>
+    user?: boolean | NotificationLog$userArgs<ExtArgs>
+  }
+  export type NotificationLogIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    institucion?: boolean | NotificationLog$institucionArgs<ExtArgs>
+    user?: boolean | NotificationLog$userArgs<ExtArgs>
+  }
+
+  export type $NotificationLogPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "NotificationLog"
+    objects: {
+      institucion: Prisma.$InstitucionEducativaPayload<ExtArgs> | null
+      user: Prisma.$UserPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      tipo: $Enums.TipoNotificacion
+      destinatario: string
+      asunto: string | null
+      mensaje: string
+      estado: string
+      error: string | null
+      metadata: Prisma.JsonValue | null
+      institucionId: string | null
+      userId: string | null
+      createdAt: Date
+    }, ExtArgs["result"]["notificationLog"]>
+    composites: {}
+  }
+
+  type NotificationLogGetPayload<S extends boolean | null | undefined | NotificationLogDefaultArgs> = $Result.GetResult<Prisma.$NotificationLogPayload, S>
+
+  type NotificationLogCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<NotificationLogFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: NotificationLogCountAggregateInputType | true
+    }
+
+  export interface NotificationLogDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['NotificationLog'], meta: { name: 'NotificationLog' } }
+    /**
+     * Find zero or one NotificationLog that matches the filter.
+     * @param {NotificationLogFindUniqueArgs} args - Arguments to find a NotificationLog
+     * @example
+     * // Get one NotificationLog
+     * const notificationLog = await prisma.notificationLog.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends NotificationLogFindUniqueArgs>(args: SelectSubset<T, NotificationLogFindUniqueArgs<ExtArgs>>): Prisma__NotificationLogClient<$Result.GetResult<Prisma.$NotificationLogPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one NotificationLog that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {NotificationLogFindUniqueOrThrowArgs} args - Arguments to find a NotificationLog
+     * @example
+     * // Get one NotificationLog
+     * const notificationLog = await prisma.notificationLog.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends NotificationLogFindUniqueOrThrowArgs>(args: SelectSubset<T, NotificationLogFindUniqueOrThrowArgs<ExtArgs>>): Prisma__NotificationLogClient<$Result.GetResult<Prisma.$NotificationLogPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first NotificationLog that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationLogFindFirstArgs} args - Arguments to find a NotificationLog
+     * @example
+     * // Get one NotificationLog
+     * const notificationLog = await prisma.notificationLog.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends NotificationLogFindFirstArgs>(args?: SelectSubset<T, NotificationLogFindFirstArgs<ExtArgs>>): Prisma__NotificationLogClient<$Result.GetResult<Prisma.$NotificationLogPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first NotificationLog that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationLogFindFirstOrThrowArgs} args - Arguments to find a NotificationLog
+     * @example
+     * // Get one NotificationLog
+     * const notificationLog = await prisma.notificationLog.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends NotificationLogFindFirstOrThrowArgs>(args?: SelectSubset<T, NotificationLogFindFirstOrThrowArgs<ExtArgs>>): Prisma__NotificationLogClient<$Result.GetResult<Prisma.$NotificationLogPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more NotificationLogs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationLogFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all NotificationLogs
+     * const notificationLogs = await prisma.notificationLog.findMany()
+     * 
+     * // Get first 10 NotificationLogs
+     * const notificationLogs = await prisma.notificationLog.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const notificationLogWithIdOnly = await prisma.notificationLog.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends NotificationLogFindManyArgs>(args?: SelectSubset<T, NotificationLogFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a NotificationLog.
+     * @param {NotificationLogCreateArgs} args - Arguments to create a NotificationLog.
+     * @example
+     * // Create one NotificationLog
+     * const NotificationLog = await prisma.notificationLog.create({
+     *   data: {
+     *     // ... data to create a NotificationLog
+     *   }
+     * })
+     * 
+     */
+    create<T extends NotificationLogCreateArgs>(args: SelectSubset<T, NotificationLogCreateArgs<ExtArgs>>): Prisma__NotificationLogClient<$Result.GetResult<Prisma.$NotificationLogPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many NotificationLogs.
+     * @param {NotificationLogCreateManyArgs} args - Arguments to create many NotificationLogs.
+     * @example
+     * // Create many NotificationLogs
+     * const notificationLog = await prisma.notificationLog.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends NotificationLogCreateManyArgs>(args?: SelectSubset<T, NotificationLogCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many NotificationLogs and returns the data saved in the database.
+     * @param {NotificationLogCreateManyAndReturnArgs} args - Arguments to create many NotificationLogs.
+     * @example
+     * // Create many NotificationLogs
+     * const notificationLog = await prisma.notificationLog.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many NotificationLogs and only return the `id`
+     * const notificationLogWithIdOnly = await prisma.notificationLog.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends NotificationLogCreateManyAndReturnArgs>(args?: SelectSubset<T, NotificationLogCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationLogPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a NotificationLog.
+     * @param {NotificationLogDeleteArgs} args - Arguments to delete one NotificationLog.
+     * @example
+     * // Delete one NotificationLog
+     * const NotificationLog = await prisma.notificationLog.delete({
+     *   where: {
+     *     // ... filter to delete one NotificationLog
+     *   }
+     * })
+     * 
+     */
+    delete<T extends NotificationLogDeleteArgs>(args: SelectSubset<T, NotificationLogDeleteArgs<ExtArgs>>): Prisma__NotificationLogClient<$Result.GetResult<Prisma.$NotificationLogPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one NotificationLog.
+     * @param {NotificationLogUpdateArgs} args - Arguments to update one NotificationLog.
+     * @example
+     * // Update one NotificationLog
+     * const notificationLog = await prisma.notificationLog.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends NotificationLogUpdateArgs>(args: SelectSubset<T, NotificationLogUpdateArgs<ExtArgs>>): Prisma__NotificationLogClient<$Result.GetResult<Prisma.$NotificationLogPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more NotificationLogs.
+     * @param {NotificationLogDeleteManyArgs} args - Arguments to filter NotificationLogs to delete.
+     * @example
+     * // Delete a few NotificationLogs
+     * const { count } = await prisma.notificationLog.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends NotificationLogDeleteManyArgs>(args?: SelectSubset<T, NotificationLogDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more NotificationLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationLogUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many NotificationLogs
+     * const notificationLog = await prisma.notificationLog.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends NotificationLogUpdateManyArgs>(args: SelectSubset<T, NotificationLogUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more NotificationLogs and returns the data updated in the database.
+     * @param {NotificationLogUpdateManyAndReturnArgs} args - Arguments to update many NotificationLogs.
+     * @example
+     * // Update many NotificationLogs
+     * const notificationLog = await prisma.notificationLog.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more NotificationLogs and only return the `id`
+     * const notificationLogWithIdOnly = await prisma.notificationLog.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends NotificationLogUpdateManyAndReturnArgs>(args: SelectSubset<T, NotificationLogUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationLogPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one NotificationLog.
+     * @param {NotificationLogUpsertArgs} args - Arguments to update or create a NotificationLog.
+     * @example
+     * // Update or create a NotificationLog
+     * const notificationLog = await prisma.notificationLog.upsert({
+     *   create: {
+     *     // ... data to create a NotificationLog
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the NotificationLog we want to update
+     *   }
+     * })
+     */
+    upsert<T extends NotificationLogUpsertArgs>(args: SelectSubset<T, NotificationLogUpsertArgs<ExtArgs>>): Prisma__NotificationLogClient<$Result.GetResult<Prisma.$NotificationLogPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of NotificationLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationLogCountArgs} args - Arguments to filter NotificationLogs to count.
+     * @example
+     * // Count the number of NotificationLogs
+     * const count = await prisma.notificationLog.count({
+     *   where: {
+     *     // ... the filter for the NotificationLogs we want to count
+     *   }
+     * })
+    **/
+    count<T extends NotificationLogCountArgs>(
+      args?: Subset<T, NotificationLogCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], NotificationLogCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a NotificationLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationLogAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends NotificationLogAggregateArgs>(args: Subset<T, NotificationLogAggregateArgs>): Prisma.PrismaPromise<GetNotificationLogAggregateType<T>>
+
+    /**
+     * Group by NotificationLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationLogGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends NotificationLogGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: NotificationLogGroupByArgs['orderBy'] }
+        : { orderBy?: NotificationLogGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, NotificationLogGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetNotificationLogGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the NotificationLog model
+   */
+  readonly fields: NotificationLogFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for NotificationLog.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__NotificationLogClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    institucion<T extends NotificationLog$institucionArgs<ExtArgs> = {}>(args?: Subset<T, NotificationLog$institucionArgs<ExtArgs>>): Prisma__InstitucionEducativaClient<$Result.GetResult<Prisma.$InstitucionEducativaPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    user<T extends NotificationLog$userArgs<ExtArgs> = {}>(args?: Subset<T, NotificationLog$userArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the NotificationLog model
+   */
+  interface NotificationLogFieldRefs {
+    readonly id: FieldRef<"NotificationLog", 'String'>
+    readonly tipo: FieldRef<"NotificationLog", 'TipoNotificacion'>
+    readonly destinatario: FieldRef<"NotificationLog", 'String'>
+    readonly asunto: FieldRef<"NotificationLog", 'String'>
+    readonly mensaje: FieldRef<"NotificationLog", 'String'>
+    readonly estado: FieldRef<"NotificationLog", 'String'>
+    readonly error: FieldRef<"NotificationLog", 'String'>
+    readonly metadata: FieldRef<"NotificationLog", 'Json'>
+    readonly institucionId: FieldRef<"NotificationLog", 'String'>
+    readonly userId: FieldRef<"NotificationLog", 'String'>
+    readonly createdAt: FieldRef<"NotificationLog", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * NotificationLog findUnique
+   */
+  export type NotificationLogFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationLog
+     */
+    select?: NotificationLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NotificationLog
+     */
+    omit?: NotificationLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationLogInclude<ExtArgs> | null
+    /**
+     * Filter, which NotificationLog to fetch.
+     */
+    where: NotificationLogWhereUniqueInput
+  }
+
+  /**
+   * NotificationLog findUniqueOrThrow
+   */
+  export type NotificationLogFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationLog
+     */
+    select?: NotificationLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NotificationLog
+     */
+    omit?: NotificationLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationLogInclude<ExtArgs> | null
+    /**
+     * Filter, which NotificationLog to fetch.
+     */
+    where: NotificationLogWhereUniqueInput
+  }
+
+  /**
+   * NotificationLog findFirst
+   */
+  export type NotificationLogFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationLog
+     */
+    select?: NotificationLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NotificationLog
+     */
+    omit?: NotificationLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationLogInclude<ExtArgs> | null
+    /**
+     * Filter, which NotificationLog to fetch.
+     */
+    where?: NotificationLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NotificationLogs to fetch.
+     */
+    orderBy?: NotificationLogOrderByWithRelationInput | NotificationLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for NotificationLogs.
+     */
+    cursor?: NotificationLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NotificationLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NotificationLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of NotificationLogs.
+     */
+    distinct?: NotificationLogScalarFieldEnum | NotificationLogScalarFieldEnum[]
+  }
+
+  /**
+   * NotificationLog findFirstOrThrow
+   */
+  export type NotificationLogFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationLog
+     */
+    select?: NotificationLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NotificationLog
+     */
+    omit?: NotificationLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationLogInclude<ExtArgs> | null
+    /**
+     * Filter, which NotificationLog to fetch.
+     */
+    where?: NotificationLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NotificationLogs to fetch.
+     */
+    orderBy?: NotificationLogOrderByWithRelationInput | NotificationLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for NotificationLogs.
+     */
+    cursor?: NotificationLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NotificationLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NotificationLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of NotificationLogs.
+     */
+    distinct?: NotificationLogScalarFieldEnum | NotificationLogScalarFieldEnum[]
+  }
+
+  /**
+   * NotificationLog findMany
+   */
+  export type NotificationLogFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationLog
+     */
+    select?: NotificationLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NotificationLog
+     */
+    omit?: NotificationLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationLogInclude<ExtArgs> | null
+    /**
+     * Filter, which NotificationLogs to fetch.
+     */
+    where?: NotificationLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NotificationLogs to fetch.
+     */
+    orderBy?: NotificationLogOrderByWithRelationInput | NotificationLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing NotificationLogs.
+     */
+    cursor?: NotificationLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NotificationLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NotificationLogs.
+     */
+    skip?: number
+    distinct?: NotificationLogScalarFieldEnum | NotificationLogScalarFieldEnum[]
+  }
+
+  /**
+   * NotificationLog create
+   */
+  export type NotificationLogCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationLog
+     */
+    select?: NotificationLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NotificationLog
+     */
+    omit?: NotificationLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationLogInclude<ExtArgs> | null
+    /**
+     * The data needed to create a NotificationLog.
+     */
+    data: XOR<NotificationLogCreateInput, NotificationLogUncheckedCreateInput>
+  }
+
+  /**
+   * NotificationLog createMany
+   */
+  export type NotificationLogCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many NotificationLogs.
+     */
+    data: NotificationLogCreateManyInput | NotificationLogCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * NotificationLog createManyAndReturn
+   */
+  export type NotificationLogCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationLog
+     */
+    select?: NotificationLogSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the NotificationLog
+     */
+    omit?: NotificationLogOmit<ExtArgs> | null
+    /**
+     * The data used to create many NotificationLogs.
+     */
+    data: NotificationLogCreateManyInput | NotificationLogCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationLogIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * NotificationLog update
+   */
+  export type NotificationLogUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationLog
+     */
+    select?: NotificationLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NotificationLog
+     */
+    omit?: NotificationLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationLogInclude<ExtArgs> | null
+    /**
+     * The data needed to update a NotificationLog.
+     */
+    data: XOR<NotificationLogUpdateInput, NotificationLogUncheckedUpdateInput>
+    /**
+     * Choose, which NotificationLog to update.
+     */
+    where: NotificationLogWhereUniqueInput
+  }
+
+  /**
+   * NotificationLog updateMany
+   */
+  export type NotificationLogUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update NotificationLogs.
+     */
+    data: XOR<NotificationLogUpdateManyMutationInput, NotificationLogUncheckedUpdateManyInput>
+    /**
+     * Filter which NotificationLogs to update
+     */
+    where?: NotificationLogWhereInput
+    /**
+     * Limit how many NotificationLogs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * NotificationLog updateManyAndReturn
+   */
+  export type NotificationLogUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationLog
+     */
+    select?: NotificationLogSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the NotificationLog
+     */
+    omit?: NotificationLogOmit<ExtArgs> | null
+    /**
+     * The data used to update NotificationLogs.
+     */
+    data: XOR<NotificationLogUpdateManyMutationInput, NotificationLogUncheckedUpdateManyInput>
+    /**
+     * Filter which NotificationLogs to update
+     */
+    where?: NotificationLogWhereInput
+    /**
+     * Limit how many NotificationLogs to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationLogIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * NotificationLog upsert
+   */
+  export type NotificationLogUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationLog
+     */
+    select?: NotificationLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NotificationLog
+     */
+    omit?: NotificationLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationLogInclude<ExtArgs> | null
+    /**
+     * The filter to search for the NotificationLog to update in case it exists.
+     */
+    where: NotificationLogWhereUniqueInput
+    /**
+     * In case the NotificationLog found by the `where` argument doesn't exist, create a new NotificationLog with this data.
+     */
+    create: XOR<NotificationLogCreateInput, NotificationLogUncheckedCreateInput>
+    /**
+     * In case the NotificationLog was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<NotificationLogUpdateInput, NotificationLogUncheckedUpdateInput>
+  }
+
+  /**
+   * NotificationLog delete
+   */
+  export type NotificationLogDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationLog
+     */
+    select?: NotificationLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NotificationLog
+     */
+    omit?: NotificationLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationLogInclude<ExtArgs> | null
+    /**
+     * Filter which NotificationLog to delete.
+     */
+    where: NotificationLogWhereUniqueInput
+  }
+
+  /**
+   * NotificationLog deleteMany
+   */
+  export type NotificationLogDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which NotificationLogs to delete
+     */
+    where?: NotificationLogWhereInput
+    /**
+     * Limit how many NotificationLogs to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * NotificationLog.institucion
+   */
+  export type NotificationLog$institucionArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InstitucionEducativa
+     */
+    select?: InstitucionEducativaSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InstitucionEducativa
+     */
+    omit?: InstitucionEducativaOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InstitucionEducativaInclude<ExtArgs> | null
+    where?: InstitucionEducativaWhereInput
+  }
+
+  /**
+   * NotificationLog.user
+   */
+  export type NotificationLog$userArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+  /**
+   * NotificationLog without action
+   */
+  export type NotificationLogDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationLog
+     */
+    select?: NotificationLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the NotificationLog
+     */
+    omit?: NotificationLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationLogInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -72839,6 +74196,23 @@ export namespace Prisma {
   export type CuentaBancariaScalarFieldEnum = (typeof CuentaBancariaScalarFieldEnum)[keyof typeof CuentaBancariaScalarFieldEnum]
 
 
+  export const NotificationLogScalarFieldEnum: {
+    id: 'id',
+    tipo: 'tipo',
+    destinatario: 'destinatario',
+    asunto: 'asunto',
+    mensaje: 'mensaje',
+    estado: 'estado',
+    error: 'error',
+    metadata: 'metadata',
+    institucionId: 'institucionId',
+    userId: 'userId',
+    createdAt: 'createdAt'
+  };
+
+  export type NotificationLogScalarFieldEnum = (typeof NotificationLogScalarFieldEnum)[keyof typeof NotificationLogScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
@@ -73155,6 +74529,20 @@ export namespace Prisma {
    * Reference to a field of type 'TipoCuentaBancaria[]'
    */
   export type ListEnumTipoCuentaBancariaFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TipoCuentaBancaria[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'TipoNotificacion'
+   */
+  export type EnumTipoNotificacionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TipoNotificacion'>
+    
+
+
+  /**
+   * Reference to a field of type 'TipoNotificacion[]'
+   */
+  export type ListEnumTipoNotificacionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TipoNotificacion[]'>
     
   /**
    * Deep Input Types
@@ -73959,6 +75347,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoListRelationFilter
     tiposEvaluacion?: TipoEvaluacionListRelationFilter
     users?: UserListRelationFilter
+    notificationLogs?: NotificationLogListRelationFilter
   }
 
   export type InstitucionEducativaOrderByWithRelationInput = {
@@ -74006,6 +75395,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoOrderByRelationAggregateInput
     tiposEvaluacion?: TipoEvaluacionOrderByRelationAggregateInput
     users?: UserOrderByRelationAggregateInput
+    notificationLogs?: NotificationLogOrderByRelationAggregateInput
   }
 
   export type InstitucionEducativaWhereUniqueInput = Prisma.AtLeast<{
@@ -74056,6 +75446,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoListRelationFilter
     tiposEvaluacion?: TipoEvaluacionListRelationFilter
     users?: UserListRelationFilter
+    notificationLogs?: NotificationLogListRelationFilter
   }, "id" | "codigoModular" | "directorId">
 
   export type InstitucionEducativaOrderByWithAggregationInput = {
@@ -74238,6 +75629,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeListRelationFilter
     ventasUniformeEstudiante?: VentaUniformeListRelationFilter
     ventasUniformePadre?: VentaUniformeListRelationFilter
+    notificationLogs?: NotificationLogListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -74351,6 +75743,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeOrderByRelationAggregateInput
     ventasUniformeEstudiante?: VentaUniformeOrderByRelationAggregateInput
     ventasUniformePadre?: VentaUniformeOrderByRelationAggregateInput
+    notificationLogs?: NotificationLogOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -74467,6 +75860,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeListRelationFilter
     ventasUniformeEstudiante?: VentaUniformeListRelationFilter
     ventasUniformePadre?: VentaUniformeListRelationFilter
+    notificationLogs?: NotificationLogListRelationFilter
   }, "id" | "email" | "dni" | "codigoEstudiante" | "codigoSiagie" | "codigoModular">
 
   export type UserOrderByWithAggregationInput = {
@@ -78395,6 +79789,94 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"CuentaBancaria"> | Date | string
   }
 
+  export type NotificationLogWhereInput = {
+    AND?: NotificationLogWhereInput | NotificationLogWhereInput[]
+    OR?: NotificationLogWhereInput[]
+    NOT?: NotificationLogWhereInput | NotificationLogWhereInput[]
+    id?: StringFilter<"NotificationLog"> | string
+    tipo?: EnumTipoNotificacionFilter<"NotificationLog"> | $Enums.TipoNotificacion
+    destinatario?: StringFilter<"NotificationLog"> | string
+    asunto?: StringNullableFilter<"NotificationLog"> | string | null
+    mensaje?: StringFilter<"NotificationLog"> | string
+    estado?: StringFilter<"NotificationLog"> | string
+    error?: StringNullableFilter<"NotificationLog"> | string | null
+    metadata?: JsonNullableFilter<"NotificationLog">
+    institucionId?: StringNullableFilter<"NotificationLog"> | string | null
+    userId?: StringNullableFilter<"NotificationLog"> | string | null
+    createdAt?: DateTimeFilter<"NotificationLog"> | Date | string
+    institucion?: XOR<InstitucionEducativaNullableScalarRelationFilter, InstitucionEducativaWhereInput> | null
+    user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+  }
+
+  export type NotificationLogOrderByWithRelationInput = {
+    id?: SortOrder
+    tipo?: SortOrder
+    destinatario?: SortOrder
+    asunto?: SortOrderInput | SortOrder
+    mensaje?: SortOrder
+    estado?: SortOrder
+    error?: SortOrderInput | SortOrder
+    metadata?: SortOrderInput | SortOrder
+    institucionId?: SortOrderInput | SortOrder
+    userId?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    institucion?: InstitucionEducativaOrderByWithRelationInput
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type NotificationLogWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: NotificationLogWhereInput | NotificationLogWhereInput[]
+    OR?: NotificationLogWhereInput[]
+    NOT?: NotificationLogWhereInput | NotificationLogWhereInput[]
+    tipo?: EnumTipoNotificacionFilter<"NotificationLog"> | $Enums.TipoNotificacion
+    destinatario?: StringFilter<"NotificationLog"> | string
+    asunto?: StringNullableFilter<"NotificationLog"> | string | null
+    mensaje?: StringFilter<"NotificationLog"> | string
+    estado?: StringFilter<"NotificationLog"> | string
+    error?: StringNullableFilter<"NotificationLog"> | string | null
+    metadata?: JsonNullableFilter<"NotificationLog">
+    institucionId?: StringNullableFilter<"NotificationLog"> | string | null
+    userId?: StringNullableFilter<"NotificationLog"> | string | null
+    createdAt?: DateTimeFilter<"NotificationLog"> | Date | string
+    institucion?: XOR<InstitucionEducativaNullableScalarRelationFilter, InstitucionEducativaWhereInput> | null
+    user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+  }, "id">
+
+  export type NotificationLogOrderByWithAggregationInput = {
+    id?: SortOrder
+    tipo?: SortOrder
+    destinatario?: SortOrder
+    asunto?: SortOrderInput | SortOrder
+    mensaje?: SortOrder
+    estado?: SortOrder
+    error?: SortOrderInput | SortOrder
+    metadata?: SortOrderInput | SortOrder
+    institucionId?: SortOrderInput | SortOrder
+    userId?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: NotificationLogCountOrderByAggregateInput
+    _max?: NotificationLogMaxOrderByAggregateInput
+    _min?: NotificationLogMinOrderByAggregateInput
+  }
+
+  export type NotificationLogScalarWhereWithAggregatesInput = {
+    AND?: NotificationLogScalarWhereWithAggregatesInput | NotificationLogScalarWhereWithAggregatesInput[]
+    OR?: NotificationLogScalarWhereWithAggregatesInput[]
+    NOT?: NotificationLogScalarWhereWithAggregatesInput | NotificationLogScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"NotificationLog"> | string
+    tipo?: EnumTipoNotificacionWithAggregatesFilter<"NotificationLog"> | $Enums.TipoNotificacion
+    destinatario?: StringWithAggregatesFilter<"NotificationLog"> | string
+    asunto?: StringNullableWithAggregatesFilter<"NotificationLog"> | string | null
+    mensaje?: StringWithAggregatesFilter<"NotificationLog"> | string
+    estado?: StringWithAggregatesFilter<"NotificationLog"> | string
+    error?: StringNullableWithAggregatesFilter<"NotificationLog"> | string | null
+    metadata?: JsonNullableWithAggregatesFilter<"NotificationLog">
+    institucionId?: StringNullableWithAggregatesFilter<"NotificationLog"> | string | null
+    userId?: StringNullableWithAggregatesFilter<"NotificationLog"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"NotificationLog"> | Date | string
+  }
+
   export type CargoCreateInput = {
     id?: string
     codigo: string
@@ -79242,6 +80724,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionCreateNestedManyWithoutInstitucionInput
     users?: UserCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUncheckedCreateInput = {
@@ -79288,6 +80771,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionUncheckedCreateNestedManyWithoutInstitucionInput
     users?: UserUncheckedCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUpdateInput = {
@@ -79334,6 +80818,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUpdateManyWithoutInstitucionNestedInput
     users?: UserUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaUncheckedUpdateInput = {
@@ -79380,6 +80865,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUncheckedUpdateManyWithoutInstitucionNestedInput
     users?: UserUncheckedUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaCreateManyInput = {
@@ -79575,6 +81061,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -79684,6 +81171,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserUpdateInput = {
@@ -79793,6 +81281,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -79902,6 +81391,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -84210,6 +85700,102 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type NotificationLogCreateInput = {
+    id?: string
+    tipo: $Enums.TipoNotificacion
+    destinatario: string
+    asunto?: string | null
+    mensaje: string
+    estado?: string
+    error?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    institucion?: InstitucionEducativaCreateNestedOneWithoutNotificationLogsInput
+    user?: UserCreateNestedOneWithoutNotificationLogsInput
+  }
+
+  export type NotificationLogUncheckedCreateInput = {
+    id?: string
+    tipo: $Enums.TipoNotificacion
+    destinatario: string
+    asunto?: string | null
+    mensaje: string
+    estado?: string
+    error?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    institucionId?: string | null
+    userId?: string | null
+    createdAt?: Date | string
+  }
+
+  export type NotificationLogUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoNotificacionFieldUpdateOperationsInput | $Enums.TipoNotificacion
+    destinatario?: StringFieldUpdateOperationsInput | string
+    asunto?: NullableStringFieldUpdateOperationsInput | string | null
+    mensaje?: StringFieldUpdateOperationsInput | string
+    estado?: StringFieldUpdateOperationsInput | string
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    institucion?: InstitucionEducativaUpdateOneWithoutNotificationLogsNestedInput
+    user?: UserUpdateOneWithoutNotificationLogsNestedInput
+  }
+
+  export type NotificationLogUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoNotificacionFieldUpdateOperationsInput | $Enums.TipoNotificacion
+    destinatario?: StringFieldUpdateOperationsInput | string
+    asunto?: NullableStringFieldUpdateOperationsInput | string | null
+    mensaje?: StringFieldUpdateOperationsInput | string
+    estado?: StringFieldUpdateOperationsInput | string
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    institucionId?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NotificationLogCreateManyInput = {
+    id?: string
+    tipo: $Enums.TipoNotificacion
+    destinatario: string
+    asunto?: string | null
+    mensaje: string
+    estado?: string
+    error?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    institucionId?: string | null
+    userId?: string | null
+    createdAt?: Date | string
+  }
+
+  export type NotificationLogUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoNotificacionFieldUpdateOperationsInput | $Enums.TipoNotificacion
+    destinatario?: StringFieldUpdateOperationsInput | string
+    asunto?: NullableStringFieldUpdateOperationsInput | string | null
+    mensaje?: StringFieldUpdateOperationsInput | string
+    estado?: StringFieldUpdateOperationsInput | string
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NotificationLogUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoNotificacionFieldUpdateOperationsInput | $Enums.TipoNotificacion
+    destinatario?: StringFieldUpdateOperationsInput | string
+    asunto?: NullableStringFieldUpdateOperationsInput | string | null
+    mensaje?: StringFieldUpdateOperationsInput | string
+    estado?: StringFieldUpdateOperationsInput | string
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    institucionId?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -85045,6 +86631,12 @@ export namespace Prisma {
     none?: TipoEvaluacionWhereInput
   }
 
+  export type NotificationLogListRelationFilter = {
+    every?: NotificationLogWhereInput
+    some?: NotificationLogWhereInput
+    none?: NotificationLogWhereInput
+  }
+
   export type AreaCurricularOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -85102,6 +86694,10 @@ export namespace Prisma {
   }
 
   export type TipoEvaluacionOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type NotificationLogOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -88191,6 +89787,63 @@ export namespace Prisma {
     _max?: NestedEnumTipoCuentaBancariaFilter<$PrismaModel>
   }
 
+  export type EnumTipoNotificacionFilter<$PrismaModel = never> = {
+    equals?: $Enums.TipoNotificacion | EnumTipoNotificacionFieldRefInput<$PrismaModel>
+    in?: $Enums.TipoNotificacion[] | ListEnumTipoNotificacionFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TipoNotificacion[] | ListEnumTipoNotificacionFieldRefInput<$PrismaModel>
+    not?: NestedEnumTipoNotificacionFilter<$PrismaModel> | $Enums.TipoNotificacion
+  }
+
+  export type NotificationLogCountOrderByAggregateInput = {
+    id?: SortOrder
+    tipo?: SortOrder
+    destinatario?: SortOrder
+    asunto?: SortOrder
+    mensaje?: SortOrder
+    estado?: SortOrder
+    error?: SortOrder
+    metadata?: SortOrder
+    institucionId?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type NotificationLogMaxOrderByAggregateInput = {
+    id?: SortOrder
+    tipo?: SortOrder
+    destinatario?: SortOrder
+    asunto?: SortOrder
+    mensaje?: SortOrder
+    estado?: SortOrder
+    error?: SortOrder
+    institucionId?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type NotificationLogMinOrderByAggregateInput = {
+    id?: SortOrder
+    tipo?: SortOrder
+    destinatario?: SortOrder
+    asunto?: SortOrder
+    mensaje?: SortOrder
+    estado?: SortOrder
+    error?: SortOrder
+    institucionId?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type EnumTipoNotificacionWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TipoNotificacion | EnumTipoNotificacionFieldRefInput<$PrismaModel>
+    in?: $Enums.TipoNotificacion[] | ListEnumTipoNotificacionFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TipoNotificacion[] | ListEnumTipoNotificacionFieldRefInput<$PrismaModel>
+    not?: NestedEnumTipoNotificacionWithAggregatesFilter<$PrismaModel> | $Enums.TipoNotificacion
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTipoNotificacionFilter<$PrismaModel>
+    _max?: NestedEnumTipoNotificacionFilter<$PrismaModel>
+  }
+
   export type InstitucionEducativaCreateNestedOneWithoutCargosInput = {
     create?: XOR<InstitucionEducativaCreateWithoutCargosInput, InstitucionEducativaUncheckedCreateWithoutCargosInput>
     connectOrCreate?: InstitucionEducativaCreateOrConnectWithoutCargosInput
@@ -88993,6 +90646,13 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
   }
 
+  export type NotificationLogCreateNestedManyWithoutInstitucionInput = {
+    create?: XOR<NotificationLogCreateWithoutInstitucionInput, NotificationLogUncheckedCreateWithoutInstitucionInput> | NotificationLogCreateWithoutInstitucionInput[] | NotificationLogUncheckedCreateWithoutInstitucionInput[]
+    connectOrCreate?: NotificationLogCreateOrConnectWithoutInstitucionInput | NotificationLogCreateOrConnectWithoutInstitucionInput[]
+    createMany?: NotificationLogCreateManyInstitucionInputEnvelope
+    connect?: NotificationLogWhereUniqueInput | NotificationLogWhereUniqueInput[]
+  }
+
   export type AreaCurricularUncheckedCreateNestedManyWithoutInstitucionInput = {
     create?: XOR<AreaCurricularCreateWithoutInstitucionInput, AreaCurricularUncheckedCreateWithoutInstitucionInput> | AreaCurricularCreateWithoutInstitucionInput[] | AreaCurricularUncheckedCreateWithoutInstitucionInput[]
     connectOrCreate?: AreaCurricularCreateOrConnectWithoutInstitucionInput | AreaCurricularCreateOrConnectWithoutInstitucionInput[]
@@ -89110,6 +90770,13 @@ export namespace Prisma {
     connectOrCreate?: UserCreateOrConnectWithoutInstitucionInput | UserCreateOrConnectWithoutInstitucionInput[]
     createMany?: UserCreateManyInstitucionInputEnvelope
     connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+  }
+
+  export type NotificationLogUncheckedCreateNestedManyWithoutInstitucionInput = {
+    create?: XOR<NotificationLogCreateWithoutInstitucionInput, NotificationLogUncheckedCreateWithoutInstitucionInput> | NotificationLogCreateWithoutInstitucionInput[] | NotificationLogUncheckedCreateWithoutInstitucionInput[]
+    connectOrCreate?: NotificationLogCreateOrConnectWithoutInstitucionInput | NotificationLogCreateOrConnectWithoutInstitucionInput[]
+    createMany?: NotificationLogCreateManyInstitucionInputEnvelope
+    connect?: NotificationLogWhereUniqueInput | NotificationLogWhereUniqueInput[]
   }
 
   export type EnumTipoGestionFieldUpdateOperationsInput = {
@@ -89376,6 +91043,20 @@ export namespace Prisma {
     deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
   }
 
+  export type NotificationLogUpdateManyWithoutInstitucionNestedInput = {
+    create?: XOR<NotificationLogCreateWithoutInstitucionInput, NotificationLogUncheckedCreateWithoutInstitucionInput> | NotificationLogCreateWithoutInstitucionInput[] | NotificationLogUncheckedCreateWithoutInstitucionInput[]
+    connectOrCreate?: NotificationLogCreateOrConnectWithoutInstitucionInput | NotificationLogCreateOrConnectWithoutInstitucionInput[]
+    upsert?: NotificationLogUpsertWithWhereUniqueWithoutInstitucionInput | NotificationLogUpsertWithWhereUniqueWithoutInstitucionInput[]
+    createMany?: NotificationLogCreateManyInstitucionInputEnvelope
+    set?: NotificationLogWhereUniqueInput | NotificationLogWhereUniqueInput[]
+    disconnect?: NotificationLogWhereUniqueInput | NotificationLogWhereUniqueInput[]
+    delete?: NotificationLogWhereUniqueInput | NotificationLogWhereUniqueInput[]
+    connect?: NotificationLogWhereUniqueInput | NotificationLogWhereUniqueInput[]
+    update?: NotificationLogUpdateWithWhereUniqueWithoutInstitucionInput | NotificationLogUpdateWithWhereUniqueWithoutInstitucionInput[]
+    updateMany?: NotificationLogUpdateManyWithWhereWithoutInstitucionInput | NotificationLogUpdateManyWithWhereWithoutInstitucionInput[]
+    deleteMany?: NotificationLogScalarWhereInput | NotificationLogScalarWhereInput[]
+  }
+
   export type AreaCurricularUncheckedUpdateManyWithoutInstitucionNestedInput = {
     create?: XOR<AreaCurricularCreateWithoutInstitucionInput, AreaCurricularUncheckedCreateWithoutInstitucionInput> | AreaCurricularCreateWithoutInstitucionInput[] | AreaCurricularUncheckedCreateWithoutInstitucionInput[]
     connectOrCreate?: AreaCurricularCreateOrConnectWithoutInstitucionInput | AreaCurricularCreateOrConnectWithoutInstitucionInput[]
@@ -89612,6 +91293,20 @@ export namespace Prisma {
     update?: UserUpdateWithWhereUniqueWithoutInstitucionInput | UserUpdateWithWhereUniqueWithoutInstitucionInput[]
     updateMany?: UserUpdateManyWithWhereWithoutInstitucionInput | UserUpdateManyWithWhereWithoutInstitucionInput[]
     deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
+  }
+
+  export type NotificationLogUncheckedUpdateManyWithoutInstitucionNestedInput = {
+    create?: XOR<NotificationLogCreateWithoutInstitucionInput, NotificationLogUncheckedCreateWithoutInstitucionInput> | NotificationLogCreateWithoutInstitucionInput[] | NotificationLogUncheckedCreateWithoutInstitucionInput[]
+    connectOrCreate?: NotificationLogCreateOrConnectWithoutInstitucionInput | NotificationLogCreateOrConnectWithoutInstitucionInput[]
+    upsert?: NotificationLogUpsertWithWhereUniqueWithoutInstitucionInput | NotificationLogUpsertWithWhereUniqueWithoutInstitucionInput[]
+    createMany?: NotificationLogCreateManyInstitucionInputEnvelope
+    set?: NotificationLogWhereUniqueInput | NotificationLogWhereUniqueInput[]
+    disconnect?: NotificationLogWhereUniqueInput | NotificationLogWhereUniqueInput[]
+    delete?: NotificationLogWhereUniqueInput | NotificationLogWhereUniqueInput[]
+    connect?: NotificationLogWhereUniqueInput | NotificationLogWhereUniqueInput[]
+    update?: NotificationLogUpdateWithWhereUniqueWithoutInstitucionInput | NotificationLogUpdateWithWhereUniqueWithoutInstitucionInput[]
+    updateMany?: NotificationLogUpdateManyWithWhereWithoutInstitucionInput | NotificationLogUpdateManyWithWhereWithoutInstitucionInput[]
+    deleteMany?: NotificationLogScalarWhereInput | NotificationLogScalarWhereInput[]
   }
 
   export type AccountCreateNestedManyWithoutUserInput = {
@@ -89853,6 +91548,13 @@ export namespace Prisma {
     connect?: VentaUniformeWhereUniqueInput | VentaUniformeWhereUniqueInput[]
   }
 
+  export type NotificationLogCreateNestedManyWithoutUserInput = {
+    create?: XOR<NotificationLogCreateWithoutUserInput, NotificationLogUncheckedCreateWithoutUserInput> | NotificationLogCreateWithoutUserInput[] | NotificationLogUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: NotificationLogCreateOrConnectWithoutUserInput | NotificationLogCreateOrConnectWithoutUserInput[]
+    createMany?: NotificationLogCreateManyUserInputEnvelope
+    connect?: NotificationLogWhereUniqueInput | NotificationLogWhereUniqueInput[]
+  }
+
   export type AccountUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<AccountCreateWithoutUserInput, AccountUncheckedCreateWithoutUserInput> | AccountCreateWithoutUserInput[] | AccountUncheckedCreateWithoutUserInput[]
     connectOrCreate?: AccountCreateOrConnectWithoutUserInput | AccountCreateOrConnectWithoutUserInput[]
@@ -90066,6 +91768,13 @@ export namespace Prisma {
     connectOrCreate?: VentaUniformeCreateOrConnectWithoutPadreInput | VentaUniformeCreateOrConnectWithoutPadreInput[]
     createMany?: VentaUniformeCreateManyPadreInputEnvelope
     connect?: VentaUniformeWhereUniqueInput | VentaUniformeWhereUniqueInput[]
+  }
+
+  export type NotificationLogUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<NotificationLogCreateWithoutUserInput, NotificationLogUncheckedCreateWithoutUserInput> | NotificationLogCreateWithoutUserInput[] | NotificationLogUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: NotificationLogCreateOrConnectWithoutUserInput | NotificationLogCreateOrConnectWithoutUserInput[]
+    createMany?: NotificationLogCreateManyUserInputEnvelope
+    connect?: NotificationLogWhereUniqueInput | NotificationLogWhereUniqueInput[]
   }
 
   export type NullableEnumTurnoFieldUpdateOperationsInput = {
@@ -90540,6 +92249,20 @@ export namespace Prisma {
     deleteMany?: VentaUniformeScalarWhereInput | VentaUniformeScalarWhereInput[]
   }
 
+  export type NotificationLogUpdateManyWithoutUserNestedInput = {
+    create?: XOR<NotificationLogCreateWithoutUserInput, NotificationLogUncheckedCreateWithoutUserInput> | NotificationLogCreateWithoutUserInput[] | NotificationLogUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: NotificationLogCreateOrConnectWithoutUserInput | NotificationLogCreateOrConnectWithoutUserInput[]
+    upsert?: NotificationLogUpsertWithWhereUniqueWithoutUserInput | NotificationLogUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: NotificationLogCreateManyUserInputEnvelope
+    set?: NotificationLogWhereUniqueInput | NotificationLogWhereUniqueInput[]
+    disconnect?: NotificationLogWhereUniqueInput | NotificationLogWhereUniqueInput[]
+    delete?: NotificationLogWhereUniqueInput | NotificationLogWhereUniqueInput[]
+    connect?: NotificationLogWhereUniqueInput | NotificationLogWhereUniqueInput[]
+    update?: NotificationLogUpdateWithWhereUniqueWithoutUserInput | NotificationLogUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: NotificationLogUpdateManyWithWhereWithoutUserInput | NotificationLogUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: NotificationLogScalarWhereInput | NotificationLogScalarWhereInput[]
+  }
+
   export type AccountUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<AccountCreateWithoutUserInput, AccountUncheckedCreateWithoutUserInput> | AccountCreateWithoutUserInput[] | AccountUncheckedCreateWithoutUserInput[]
     connectOrCreate?: AccountCreateOrConnectWithoutUserInput | AccountCreateOrConnectWithoutUserInput[]
@@ -90964,6 +92687,20 @@ export namespace Prisma {
     update?: VentaUniformeUpdateWithWhereUniqueWithoutPadreInput | VentaUniformeUpdateWithWhereUniqueWithoutPadreInput[]
     updateMany?: VentaUniformeUpdateManyWithWhereWithoutPadreInput | VentaUniformeUpdateManyWithWhereWithoutPadreInput[]
     deleteMany?: VentaUniformeScalarWhereInput | VentaUniformeScalarWhereInput[]
+  }
+
+  export type NotificationLogUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<NotificationLogCreateWithoutUserInput, NotificationLogUncheckedCreateWithoutUserInput> | NotificationLogCreateWithoutUserInput[] | NotificationLogUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: NotificationLogCreateOrConnectWithoutUserInput | NotificationLogCreateOrConnectWithoutUserInput[]
+    upsert?: NotificationLogUpsertWithWhereUniqueWithoutUserInput | NotificationLogUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: NotificationLogCreateManyUserInputEnvelope
+    set?: NotificationLogWhereUniqueInput | NotificationLogWhereUniqueInput[]
+    disconnect?: NotificationLogWhereUniqueInput | NotificationLogWhereUniqueInput[]
+    delete?: NotificationLogWhereUniqueInput | NotificationLogWhereUniqueInput[]
+    connect?: NotificationLogWhereUniqueInput | NotificationLogWhereUniqueInput[]
+    update?: NotificationLogUpdateWithWhereUniqueWithoutUserInput | NotificationLogUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: NotificationLogUpdateManyWithWhereWithoutUserInput | NotificationLogUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: NotificationLogScalarWhereInput | NotificationLogScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutPadresTutoresInput = {
@@ -94018,6 +95755,42 @@ export namespace Prisma {
     update?: XOR<XOR<InstitucionEducativaUpdateToOneWithWhereWithoutCuentasBancariasInput, InstitucionEducativaUpdateWithoutCuentasBancariasInput>, InstitucionEducativaUncheckedUpdateWithoutCuentasBancariasInput>
   }
 
+  export type InstitucionEducativaCreateNestedOneWithoutNotificationLogsInput = {
+    create?: XOR<InstitucionEducativaCreateWithoutNotificationLogsInput, InstitucionEducativaUncheckedCreateWithoutNotificationLogsInput>
+    connectOrCreate?: InstitucionEducativaCreateOrConnectWithoutNotificationLogsInput
+    connect?: InstitucionEducativaWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutNotificationLogsInput = {
+    create?: XOR<UserCreateWithoutNotificationLogsInput, UserUncheckedCreateWithoutNotificationLogsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutNotificationLogsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type EnumTipoNotificacionFieldUpdateOperationsInput = {
+    set?: $Enums.TipoNotificacion
+  }
+
+  export type InstitucionEducativaUpdateOneWithoutNotificationLogsNestedInput = {
+    create?: XOR<InstitucionEducativaCreateWithoutNotificationLogsInput, InstitucionEducativaUncheckedCreateWithoutNotificationLogsInput>
+    connectOrCreate?: InstitucionEducativaCreateOrConnectWithoutNotificationLogsInput
+    upsert?: InstitucionEducativaUpsertWithoutNotificationLogsInput
+    disconnect?: InstitucionEducativaWhereInput | boolean
+    delete?: InstitucionEducativaWhereInput | boolean
+    connect?: InstitucionEducativaWhereUniqueInput
+    update?: XOR<XOR<InstitucionEducativaUpdateToOneWithWhereWithoutNotificationLogsInput, InstitucionEducativaUpdateWithoutNotificationLogsInput>, InstitucionEducativaUncheckedUpdateWithoutNotificationLogsInput>
+  }
+
+  export type UserUpdateOneWithoutNotificationLogsNestedInput = {
+    create?: XOR<UserCreateWithoutNotificationLogsInput, UserUncheckedCreateWithoutNotificationLogsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutNotificationLogsInput
+    upsert?: UserUpsertWithoutNotificationLogsInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutNotificationLogsInput, UserUpdateWithoutNotificationLogsInput>, UserUncheckedUpdateWithoutNotificationLogsInput>
+  }
+
   export type NestedStringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -94542,6 +96315,23 @@ export namespace Prisma {
     _max?: NestedEnumTipoCuentaBancariaFilter<$PrismaModel>
   }
 
+  export type NestedEnumTipoNotificacionFilter<$PrismaModel = never> = {
+    equals?: $Enums.TipoNotificacion | EnumTipoNotificacionFieldRefInput<$PrismaModel>
+    in?: $Enums.TipoNotificacion[] | ListEnumTipoNotificacionFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TipoNotificacion[] | ListEnumTipoNotificacionFieldRefInput<$PrismaModel>
+    not?: NestedEnumTipoNotificacionFilter<$PrismaModel> | $Enums.TipoNotificacion
+  }
+
+  export type NestedEnumTipoNotificacionWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TipoNotificacion | EnumTipoNotificacionFieldRefInput<$PrismaModel>
+    in?: $Enums.TipoNotificacion[] | ListEnumTipoNotificacionFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TipoNotificacion[] | ListEnumTipoNotificacionFieldRefInput<$PrismaModel>
+    not?: NestedEnumTipoNotificacionWithAggregatesFilter<$PrismaModel> | $Enums.TipoNotificacion
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTipoNotificacionFilter<$PrismaModel>
+    _max?: NestedEnumTipoNotificacionFilter<$PrismaModel>
+  }
+
   export type InstitucionEducativaCreateWithoutCargosInput = {
     id?: string
     codigoModular: string
@@ -94585,6 +96375,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionCreateNestedManyWithoutInstitucionInput
     users?: UserCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUncheckedCreateWithoutCargosInput = {
@@ -94630,6 +96421,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionUncheckedCreateNestedManyWithoutInstitucionInput
     users?: UserUncheckedCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaCreateOrConnectWithoutCargosInput = {
@@ -94765,6 +96557,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutCargoInput = {
@@ -94873,6 +96666,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutCargoInput = {
@@ -94939,6 +96733,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUpdateManyWithoutInstitucionNestedInput
     users?: UserUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaUncheckedUpdateWithoutCargosInput = {
@@ -94984,6 +96779,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUncheckedUpdateManyWithoutInstitucionNestedInput
     users?: UserUncheckedUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutInstitucionNestedInput
   }
 
   export type CargoPermisoUpsertWithWhereUniqueWithoutCargoInput = {
@@ -95152,6 +96948,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionCreateNestedManyWithoutInstitucionInput
     users?: UserCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUncheckedCreateWithoutEstadosUsuarioInput = {
@@ -95197,6 +96994,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionUncheckedCreateNestedManyWithoutInstitucionInput
     users?: UserUncheckedCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaCreateOrConnectWithoutEstadosUsuarioInput = {
@@ -95374,6 +97172,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutEstadoInput = {
@@ -95482,6 +97281,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutEstadoInput = {
@@ -95548,6 +97348,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUpdateManyWithoutInstitucionNestedInput
     users?: UserUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaUncheckedUpdateWithoutEstadosUsuarioInput = {
@@ -95593,6 +97394,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUncheckedUpdateManyWithoutInstitucionNestedInput
     users?: UserUncheckedUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutInstitucionNestedInput
   }
 
   export type HistorialEstadoUsuarioUpsertWithWhereUniqueWithoutEstadoAnteriorInput = {
@@ -95755,6 +97557,7 @@ export namespace Prisma {
     sedes?: SedeCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionCreateNestedManyWithoutInstitucionInput
     users?: UserCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUncheckedCreateWithoutTiposDocumentoInput = {
@@ -95800,6 +97603,7 @@ export namespace Prisma {
     sedes?: SedeUncheckedCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionUncheckedCreateNestedManyWithoutInstitucionInput
     users?: UserUncheckedCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaCreateOrConnectWithoutTiposDocumentoInput = {
@@ -95903,6 +97707,7 @@ export namespace Prisma {
     sedes?: SedeUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUpdateManyWithoutInstitucionNestedInput
     users?: UserUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaUncheckedUpdateWithoutTiposDocumentoInput = {
@@ -95948,6 +97753,7 @@ export namespace Prisma {
     sedes?: SedeUncheckedUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUncheckedUpdateManyWithoutInstitucionNestedInput
     users?: UserUncheckedUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutInstitucionNestedInput
   }
 
   export type EvaluacionCreateWithoutTipoEvaluacionInput = {
@@ -96041,6 +97847,7 @@ export namespace Prisma {
     sedes?: SedeCreateNestedManyWithoutInstitucionInput
     tiposDocumento?: TipoDocumentoCreateNestedManyWithoutInstitucionInput
     users?: UserCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUncheckedCreateWithoutTiposEvaluacionInput = {
@@ -96086,6 +97893,7 @@ export namespace Prisma {
     sedes?: SedeUncheckedCreateNestedManyWithoutInstitucionInput
     tiposDocumento?: TipoDocumentoUncheckedCreateNestedManyWithoutInstitucionInput
     users?: UserUncheckedCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaCreateOrConnectWithoutTiposEvaluacionInput = {
@@ -96185,6 +97993,7 @@ export namespace Prisma {
     sedes?: SedeUpdateManyWithoutInstitucionNestedInput
     tiposDocumento?: TipoDocumentoUpdateManyWithoutInstitucionNestedInput
     users?: UserUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaUncheckedUpdateWithoutTiposEvaluacionInput = {
@@ -96230,6 +98039,7 @@ export namespace Prisma {
     sedes?: SedeUncheckedUpdateManyWithoutInstitucionNestedInput
     tiposDocumento?: TipoDocumentoUncheckedUpdateManyWithoutInstitucionNestedInput
     users?: UserUncheckedUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutInstitucionNestedInput
   }
 
   export type UserCreateWithoutCambiosEstadoRealizadosInput = {
@@ -96338,6 +98148,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutCambiosEstadoRealizadosInput = {
@@ -96446,6 +98257,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutCambiosEstadoRealizadosInput = {
@@ -96578,6 +98390,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionCreateNestedManyWithoutInstitucionInput
     users?: UserCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUncheckedCreateWithoutHistorialEstadosInput = {
@@ -96623,6 +98436,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionUncheckedCreateNestedManyWithoutInstitucionInput
     users?: UserUncheckedCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaCreateOrConnectWithoutHistorialEstadosInput = {
@@ -96736,6 +98550,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutHistorialEstadosInput = {
@@ -96844,6 +98659,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutHistorialEstadosInput = {
@@ -96968,6 +98784,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCambiosEstadoRealizadosInput = {
@@ -97076,6 +98893,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type EstadoUsuarioUpsertWithoutHistorialEstadosAnterioresInput = {
@@ -97226,6 +99044,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUpdateManyWithoutInstitucionNestedInput
     users?: UserUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaUncheckedUpdateWithoutHistorialEstadosInput = {
@@ -97271,6 +99090,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUncheckedUpdateManyWithoutInstitucionNestedInput
     users?: UserUncheckedUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutInstitucionNestedInput
   }
 
   export type UserUpsertWithoutHistorialEstadosInput = {
@@ -97390,6 +99210,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutHistorialEstadosInput = {
@@ -97498,6 +99319,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type CargoPermisoCreateWithoutPermisoInput = {
@@ -97845,6 +99667,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutUsuarioPermisosInput = {
@@ -97953,6 +99776,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutUsuarioPermisosInput = {
@@ -98114,6 +99938,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutUsuarioPermisosInput = {
@@ -98222,6 +100047,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type CargoCreateWithoutPermisosInput = {
@@ -98760,6 +100586,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutInstitucionDirectorInput = {
@@ -98868,6 +100695,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutInstitucionDirectorInput = {
@@ -99365,6 +101193,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutInstitucionInput = {
@@ -99473,6 +101302,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutInstitucionInput = {
@@ -99482,6 +101312,42 @@ export namespace Prisma {
 
   export type UserCreateManyInstitucionInputEnvelope = {
     data: UserCreateManyInstitucionInput | UserCreateManyInstitucionInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type NotificationLogCreateWithoutInstitucionInput = {
+    id?: string
+    tipo: $Enums.TipoNotificacion
+    destinatario: string
+    asunto?: string | null
+    mensaje: string
+    estado?: string
+    error?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    user?: UserCreateNestedOneWithoutNotificationLogsInput
+  }
+
+  export type NotificationLogUncheckedCreateWithoutInstitucionInput = {
+    id?: string
+    tipo: $Enums.TipoNotificacion
+    destinatario: string
+    asunto?: string | null
+    mensaje: string
+    estado?: string
+    error?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    userId?: string | null
+    createdAt?: Date | string
+  }
+
+  export type NotificationLogCreateOrConnectWithoutInstitucionInput = {
+    where: NotificationLogWhereUniqueInput
+    create: XOR<NotificationLogCreateWithoutInstitucionInput, NotificationLogUncheckedCreateWithoutInstitucionInput>
+  }
+
+  export type NotificationLogCreateManyInstitucionInputEnvelope = {
+    data: NotificationLogCreateManyInstitucionInput | NotificationLogCreateManyInstitucionInput[]
     skipDuplicates?: boolean
   }
 
@@ -99823,6 +101689,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutInstitucionDirectorInput = {
@@ -99931,6 +101798,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type MovimientoInventarioUpsertWithWhereUniqueWithoutInstitucionInput = {
@@ -100257,6 +102125,39 @@ export namespace Prisma {
   export type UserUpdateManyWithWhereWithoutInstitucionInput = {
     where: UserScalarWhereInput
     data: XOR<UserUpdateManyMutationInput, UserUncheckedUpdateManyWithoutInstitucionInput>
+  }
+
+  export type NotificationLogUpsertWithWhereUniqueWithoutInstitucionInput = {
+    where: NotificationLogWhereUniqueInput
+    update: XOR<NotificationLogUpdateWithoutInstitucionInput, NotificationLogUncheckedUpdateWithoutInstitucionInput>
+    create: XOR<NotificationLogCreateWithoutInstitucionInput, NotificationLogUncheckedCreateWithoutInstitucionInput>
+  }
+
+  export type NotificationLogUpdateWithWhereUniqueWithoutInstitucionInput = {
+    where: NotificationLogWhereUniqueInput
+    data: XOR<NotificationLogUpdateWithoutInstitucionInput, NotificationLogUncheckedUpdateWithoutInstitucionInput>
+  }
+
+  export type NotificationLogUpdateManyWithWhereWithoutInstitucionInput = {
+    where: NotificationLogScalarWhereInput
+    data: XOR<NotificationLogUpdateManyMutationInput, NotificationLogUncheckedUpdateManyWithoutInstitucionInput>
+  }
+
+  export type NotificationLogScalarWhereInput = {
+    AND?: NotificationLogScalarWhereInput | NotificationLogScalarWhereInput[]
+    OR?: NotificationLogScalarWhereInput[]
+    NOT?: NotificationLogScalarWhereInput | NotificationLogScalarWhereInput[]
+    id?: StringFilter<"NotificationLog"> | string
+    tipo?: EnumTipoNotificacionFilter<"NotificationLog"> | $Enums.TipoNotificacion
+    destinatario?: StringFilter<"NotificationLog"> | string
+    asunto?: StringNullableFilter<"NotificationLog"> | string | null
+    mensaje?: StringFilter<"NotificationLog"> | string
+    estado?: StringFilter<"NotificationLog"> | string
+    error?: StringNullableFilter<"NotificationLog"> | string | null
+    metadata?: JsonNullableFilter<"NotificationLog">
+    institucionId?: StringNullableFilter<"NotificationLog"> | string | null
+    userId?: StringNullableFilter<"NotificationLog"> | string | null
+    createdAt?: DateTimeFilter<"NotificationLog"> | Date | string
   }
 
   export type AccountCreateWithoutUserInput = {
@@ -101010,6 +102911,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionCreateNestedManyWithoutInstitucionInput
     users?: UserCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUncheckedCreateWithoutDirectorInput = {
@@ -101055,6 +102957,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionUncheckedCreateNestedManyWithoutInstitucionInput
     users?: UserUncheckedCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaCreateOrConnectWithoutDirectorInput = {
@@ -101514,6 +103417,7 @@ export namespace Prisma {
     sedes?: SedeCreateNestedManyWithoutInstitucionInput
     tiposDocumento?: TipoDocumentoCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUncheckedCreateWithoutUsersInput = {
@@ -101559,6 +103463,7 @@ export namespace Prisma {
     sedes?: SedeUncheckedCreateNestedManyWithoutInstitucionInput
     tiposDocumento?: TipoDocumentoUncheckedCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionUncheckedCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaCreateOrConnectWithoutUsersInput = {
@@ -101764,6 +103669,42 @@ export namespace Prisma {
 
   export type VentaUniformeCreateManyPadreInputEnvelope = {
     data: VentaUniformeCreateManyPadreInput | VentaUniformeCreateManyPadreInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type NotificationLogCreateWithoutUserInput = {
+    id?: string
+    tipo: $Enums.TipoNotificacion
+    destinatario: string
+    asunto?: string | null
+    mensaje: string
+    estado?: string
+    error?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    institucion?: InstitucionEducativaCreateNestedOneWithoutNotificationLogsInput
+  }
+
+  export type NotificationLogUncheckedCreateWithoutUserInput = {
+    id?: string
+    tipo: $Enums.TipoNotificacion
+    destinatario: string
+    asunto?: string | null
+    mensaje: string
+    estado?: string
+    error?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    institucionId?: string | null
+    createdAt?: Date | string
+  }
+
+  export type NotificationLogCreateOrConnectWithoutUserInput = {
+    where: NotificationLogWhereUniqueInput
+    create: XOR<NotificationLogCreateWithoutUserInput, NotificationLogUncheckedCreateWithoutUserInput>
+  }
+
+  export type NotificationLogCreateManyUserInputEnvelope = {
+    data: NotificationLogCreateManyUserInput | NotificationLogCreateManyUserInput[]
     skipDuplicates?: boolean
   }
 
@@ -102258,6 +104199,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUpdateManyWithoutInstitucionNestedInput
     users?: UserUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaUncheckedUpdateWithoutDirectorInput = {
@@ -102303,6 +104245,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUncheckedUpdateManyWithoutInstitucionNestedInput
     users?: UserUncheckedUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutInstitucionNestedInput
   }
 
   export type LogroUpsertWithWhereUniqueWithoutEstudianteInput = {
@@ -102707,6 +104650,7 @@ export namespace Prisma {
     sedes?: SedeUpdateManyWithoutInstitucionNestedInput
     tiposDocumento?: TipoDocumentoUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaUncheckedUpdateWithoutUsersInput = {
@@ -102752,6 +104696,7 @@ export namespace Prisma {
     sedes?: SedeUncheckedUpdateManyWithoutInstitucionNestedInput
     tiposDocumento?: TipoDocumentoUncheckedUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUncheckedUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutInstitucionNestedInput
   }
 
   export type NivelAcademicoUpsertWithoutStudentsInput = {
@@ -102892,6 +104837,22 @@ export namespace Prisma {
     data: XOR<VentaUniformeUpdateManyMutationInput, VentaUniformeUncheckedUpdateManyWithoutPadreInput>
   }
 
+  export type NotificationLogUpsertWithWhereUniqueWithoutUserInput = {
+    where: NotificationLogWhereUniqueInput
+    update: XOR<NotificationLogUpdateWithoutUserInput, NotificationLogUncheckedUpdateWithoutUserInput>
+    create: XOR<NotificationLogCreateWithoutUserInput, NotificationLogUncheckedCreateWithoutUserInput>
+  }
+
+  export type NotificationLogUpdateWithWhereUniqueWithoutUserInput = {
+    where: NotificationLogWhereUniqueInput
+    data: XOR<NotificationLogUpdateWithoutUserInput, NotificationLogUncheckedUpdateWithoutUserInput>
+  }
+
+  export type NotificationLogUpdateManyWithWhereWithoutUserInput = {
+    where: NotificationLogScalarWhereInput
+    data: XOR<NotificationLogUpdateManyMutationInput, NotificationLogUncheckedUpdateManyWithoutUserInput>
+  }
+
   export type UserCreateWithoutPadresTutoresInput = {
     id?: string
     name?: string | null
@@ -102998,6 +104959,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutPadresTutoresInput = {
@@ -103106,6 +105068,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutPadresTutoresInput = {
@@ -103219,6 +105182,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutHijosDeTutorInput = {
@@ -103327,6 +105291,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutHijosDeTutorInput = {
@@ -103451,6 +105416,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPadresTutoresInput = {
@@ -103559,6 +105525,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUpsertWithoutHijosDeTutorInput = {
@@ -103678,6 +105645,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutHijosDeTutorInput = {
@@ -103786,6 +105754,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutAccountsInput = {
@@ -103894,6 +105863,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutAccountsInput = {
@@ -104002,6 +105972,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutAccountsInput = {
@@ -104126,6 +106097,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -104234,6 +106206,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutPasswordResetTokenInput = {
@@ -104342,6 +106315,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutPasswordResetTokenInput = {
@@ -104450,6 +106424,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutPasswordResetTokenInput = {
@@ -104574,6 +106549,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPasswordResetTokenInput = {
@@ -104682,6 +106658,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type AreaCurricularCreateWithoutNivelInput = {
@@ -104871,6 +106848,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionCreateNestedManyWithoutInstitucionInput
     users?: UserCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUncheckedCreateWithoutNivelesInput = {
@@ -104916,6 +106894,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionUncheckedCreateNestedManyWithoutInstitucionInput
     users?: UserUncheckedCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaCreateOrConnectWithoutNivelesInput = {
@@ -105236,6 +107215,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUpdateManyWithoutInstitucionNestedInput
     users?: UserUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaUncheckedUpdateWithoutNivelesInput = {
@@ -105281,6 +107261,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUncheckedUpdateManyWithoutInstitucionNestedInput
     users?: UserUncheckedUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutInstitucionNestedInput
   }
 
   export type NivelAcademicoUpsertWithWhereUniqueWithoutNivelInput = {
@@ -105887,6 +107868,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionCreateNestedManyWithoutInstitucionInput
     users?: UserCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUncheckedCreateWithoutNivelesAcademicosInput = {
@@ -105932,6 +107914,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionUncheckedCreateNestedManyWithoutInstitucionInput
     users?: UserUncheckedCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaCreateOrConnectWithoutNivelesAcademicosInput = {
@@ -106127,6 +108110,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutTutorDeInput = {
@@ -106235,6 +108219,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutTutorDeInput = {
@@ -106348,6 +108333,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutNivelAcademicoInput = {
@@ -106456,6 +108442,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutNivelAcademicoInput = {
@@ -106595,6 +108582,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUpdateManyWithoutInstitucionNestedInput
     users?: UserUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaUncheckedUpdateWithoutNivelesAcademicosInput = {
@@ -106640,6 +108628,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUncheckedUpdateManyWithoutInstitucionNestedInput
     users?: UserUncheckedUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutInstitucionNestedInput
   }
 
   export type NivelUpsertWithoutNivelesAcademicosInput = {
@@ -106853,6 +108842,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTutorDeInput = {
@@ -106961,6 +108951,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUpsertWithWhereUniqueWithoutNivelAcademicoInput = {
@@ -107076,6 +109067,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionCreateNestedManyWithoutInstitucionInput
     users?: UserCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUncheckedCreateWithoutSedesInput = {
@@ -107121,6 +109113,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionUncheckedCreateNestedManyWithoutInstitucionInput
     users?: UserUncheckedCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaCreateOrConnectWithoutSedesInput = {
@@ -107280,6 +109273,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUpdateManyWithoutInstitucionNestedInput
     users?: UserUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaUncheckedUpdateWithoutSedesInput = {
@@ -107325,6 +109319,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUncheckedUpdateManyWithoutInstitucionNestedInput
     users?: UserUncheckedUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutInstitucionNestedInput
   }
 
   export type VarianteUniformeUpsertWithWhereUniqueWithoutSedeInput = {
@@ -107467,6 +109462,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionCreateNestedManyWithoutInstitucionInput
     users?: UserCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUncheckedCreateWithoutPeriodosInput = {
@@ -107512,6 +109508,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionUncheckedCreateNestedManyWithoutInstitucionInput
     users?: UserUncheckedCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaCreateOrConnectWithoutPeriodosInput = {
@@ -107589,6 +109586,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUpdateManyWithoutInstitucionNestedInput
     users?: UserUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaUncheckedUpdateWithoutPeriodosInput = {
@@ -107634,6 +109632,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUncheckedUpdateManyWithoutInstitucionNestedInput
     users?: UserUncheckedUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaCreateWithoutAreasCurricularesInput = {
@@ -107679,6 +109678,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionCreateNestedManyWithoutInstitucionInput
     users?: UserCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUncheckedCreateWithoutAreasCurricularesInput = {
@@ -107724,6 +109724,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionUncheckedCreateNestedManyWithoutInstitucionInput
     users?: UserUncheckedCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaCreateOrConnectWithoutAreasCurricularesInput = {
@@ -107995,6 +109996,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUpdateManyWithoutInstitucionNestedInput
     users?: UserUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaUncheckedUpdateWithoutAreasCurricularesInput = {
@@ -108040,6 +110042,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUncheckedUpdateManyWithoutInstitucionNestedInput
     users?: UserUncheckedUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutInstitucionNestedInput
   }
 
   export type NivelUpsertWithoutAreasCurricularesInput = {
@@ -108349,6 +110352,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionCreateNestedManyWithoutInstitucionInput
     users?: UserCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUncheckedCreateWithoutCursosInput = {
@@ -108394,6 +110398,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionUncheckedCreateNestedManyWithoutInstitucionInput
     users?: UserUncheckedCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaCreateOrConnectWithoutCursosInput = {
@@ -108593,6 +110598,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutCursosImpartidosInput = {
@@ -108701,6 +110707,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutCursosImpartidosInput = {
@@ -109006,6 +111013,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUpdateManyWithoutInstitucionNestedInput
     users?: UserUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaUncheckedUpdateWithoutCursosInput = {
@@ -109051,6 +111059,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUncheckedUpdateManyWithoutInstitucionNestedInput
     users?: UserUncheckedUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutInstitucionNestedInput
   }
 
   export type NivelAcademicoUpsertWithoutCursosInput = {
@@ -109268,6 +111277,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCursosImpartidosInput = {
@@ -109376,6 +111386,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type EvaluacionUpsertWithWhereUniqueWithoutCursoInput = {
@@ -109672,6 +111683,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutMatriculasInput = {
@@ -109780,6 +111792,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutMatriculasInput = {
@@ -109979,6 +111992,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutMatriculasInput = {
@@ -110087,6 +112101,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type NivelAcademicoUpsertWithoutMatriculasInput = {
@@ -110356,6 +112371,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutCursosInscritosInput = {
@@ -110464,6 +112480,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutCursosInscritosInput = {
@@ -110690,6 +112707,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCursosInscritosInput = {
@@ -110798,6 +112816,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type CapacidadCreateWithoutEvaluacionesInput = {
@@ -111335,6 +113354,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutNotasInput = {
@@ -111443,6 +113463,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutNotasInput = {
@@ -111669,6 +113690,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutNotasInput = {
@@ -111777,6 +113799,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type EvaluacionUpsertWithoutNotasInput = {
@@ -111987,6 +114010,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutAsistenciasInput = {
@@ -112095,6 +114119,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutAsistenciasInput = {
@@ -112208,6 +114233,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutAsistenciasRegistradasInput = {
@@ -112316,6 +114342,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutAsistenciasRegistradasInput = {
@@ -112499,6 +114526,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAsistenciasInput = {
@@ -112607,6 +114635,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUpsertWithoutAsistenciasRegistradasInput = {
@@ -112726,6 +114755,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAsistenciasRegistradasInput = {
@@ -112834,6 +114864,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutDocumentosEmitidosInput = {
@@ -112942,6 +114973,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutDocumentosEmitidosInput = {
@@ -113050,6 +115082,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutDocumentosEmitidosInput = {
@@ -113163,6 +115196,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutDocumentosEstudianteInput = {
@@ -113271,6 +115305,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutDocumentosEstudianteInput = {
@@ -113434,6 +115469,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutDocumentosEmitidosInput = {
@@ -113542,6 +115578,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUpsertWithoutDocumentosEstudianteInput = {
@@ -113661,6 +115698,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutDocumentosEstudianteInput = {
@@ -113769,6 +115807,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type TipoDocumentoUpsertWithoutDocumentosInput = {
@@ -113957,6 +115996,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutPagosInput = {
@@ -114065,6 +116105,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutPagosInput = {
@@ -114230,6 +116271,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPagosInput = {
@@ -114338,6 +116380,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutAnunciosCreadosInput = {
@@ -114446,6 +116489,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutAnunciosCreadosInput = {
@@ -114554,6 +116598,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutAnunciosCreadosInput = {
@@ -114750,6 +116795,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAnunciosCreadosInput = {
@@ -114858,6 +116904,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type GradoUpsertWithWhereUniqueWithoutAnunciosInput = {
@@ -114998,6 +117045,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutEventosCreadosInput = {
@@ -115106,6 +117154,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutEventosCreadosInput = {
@@ -115302,6 +117351,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutEventosCreadosInput = {
@@ -115410,6 +117460,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type GradoUpsertWithWhereUniqueWithoutEventosInput = {
@@ -115772,6 +117823,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionCreateNestedManyWithoutInstitucionInput
     users?: UserCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUncheckedCreateWithoutProspectosInput = {
@@ -115817,6 +117869,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionUncheckedCreateNestedManyWithoutInstitucionInput
     users?: UserUncheckedCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaCreateOrConnectWithoutProspectosInput = {
@@ -115909,6 +117962,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUpdateManyWithoutInstitucionNestedInput
     users?: UserUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaUncheckedUpdateWithoutProspectosInput = {
@@ -115954,6 +118008,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUncheckedUpdateManyWithoutInstitucionNestedInput
     users?: UserUncheckedUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutInstitucionNestedInput
   }
 
   export type UserCreateWithoutAdmisionesAutorizadasInput = {
@@ -116062,6 +118117,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutAdmisionesAutorizadasInput = {
@@ -116170,6 +118226,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutAdmisionesAutorizadasInput = {
@@ -116335,6 +118392,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAdmisionesAutorizadasInput = {
@@ -116443,6 +118501,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type ProspectoUpsertWithoutAdmisionInput = {
@@ -116615,6 +118674,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutFichasEspecialistaInput = {
@@ -116723,6 +118783,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutFichasEspecialistaInput = {
@@ -116836,6 +118897,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutFichasEstudianteInput = {
@@ -116944,6 +119006,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutFichasEstudianteInput = {
@@ -117091,6 +119154,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutFichasEspecialistaInput = {
@@ -117199,6 +119263,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUpsertWithoutFichasEstudianteInput = {
@@ -117318,6 +119383,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutFichasEstudianteInput = {
@@ -117426,6 +119492,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutLogrosInput = {
@@ -117534,6 +119601,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutLogrosInput = {
@@ -117642,6 +119710,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutLogrosInput = {
@@ -117766,6 +119835,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutLogrosInput = {
@@ -117874,6 +119944,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type FichaPsicopedagogicaCreateWithoutCategoriaInput = {
@@ -117971,6 +120042,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionCreateNestedManyWithoutInstitucionInput
     users?: UserCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUncheckedCreateWithoutConceptosPagoInput = {
@@ -118016,6 +120088,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionUncheckedCreateNestedManyWithoutInstitucionInput
     users?: UserUncheckedCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaCreateOrConnectWithoutConceptosPagoInput = {
@@ -118117,6 +120190,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUpdateManyWithoutInstitucionNestedInput
     users?: UserUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaUncheckedUpdateWithoutConceptosPagoInput = {
@@ -118162,6 +120236,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUncheckedUpdateManyWithoutInstitucionNestedInput
     users?: UserUncheckedUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutInstitucionNestedInput
   }
 
   export type CronogramaPagoUpsertWithWhereUniqueWithoutConceptoInput = {
@@ -118353,6 +120428,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutCronogramaPagosInput = {
@@ -118461,6 +120537,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutCronogramaPagosInput = {
@@ -118729,6 +120806,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCronogramaPagosInput = {
@@ -118837,6 +120915,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type PagoUpsertWithWhereUniqueWithoutCronogramaPagoInput = {
@@ -119039,6 +121118,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutComprobantesEnviadosInput = {
@@ -119147,6 +121227,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutComprobantesEnviadosInput = {
@@ -119260,6 +121341,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutComprobantesVerificadosInput = {
@@ -119368,6 +121450,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutComprobantesVerificadosInput = {
@@ -119533,6 +121616,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutComprobantesEnviadosInput = {
@@ -119641,6 +121725,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUpsertWithoutComprobantesVerificadosInput = {
@@ -119760,6 +121845,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutComprobantesVerificadosInput = {
@@ -119868,6 +121954,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type InstitucionEducativaCreateWithoutPoliticasAsistenciaInput = {
@@ -119913,6 +122000,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionCreateNestedManyWithoutInstitucionInput
     users?: UserCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUncheckedCreateWithoutPoliticasAsistenciaInput = {
@@ -119958,6 +122046,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionUncheckedCreateNestedManyWithoutInstitucionInput
     users?: UserUncheckedCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaCreateOrConnectWithoutPoliticasAsistenciaInput = {
@@ -120056,6 +122145,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUpdateManyWithoutInstitucionNestedInput
     users?: UserUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaUncheckedUpdateWithoutPoliticasAsistenciaInput = {
@@ -120101,6 +122191,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUncheckedUpdateManyWithoutInstitucionNestedInput
     users?: UserUncheckedUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutInstitucionNestedInput
   }
 
   export type NivelUpsertWithoutPoliticasAsistenciaInput = {
@@ -120666,6 +122757,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionCreateNestedManyWithoutInstitucionInput
     users?: UserCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUncheckedCreateWithoutMovimientosInventarioInput = {
@@ -120711,6 +122803,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionUncheckedCreateNestedManyWithoutInstitucionInput
     users?: UserUncheckedCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaCreateOrConnectWithoutMovimientosInventarioInput = {
@@ -120807,6 +122900,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUpdateManyWithoutInstitucionNestedInput
     users?: UserUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaUncheckedUpdateWithoutMovimientosInventarioInput = {
@@ -120852,6 +122946,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUncheckedUpdateManyWithoutInstitucionNestedInput
     users?: UserUncheckedUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutInstitucionNestedInput
   }
 
   export type VarianteUniformeUpsertWithoutMovimientosInput = {
@@ -121027,6 +123122,7 @@ export namespace Prisma {
     usuarioPermisos?: UsuarioPermisoCreateNestedManyWithoutUsuarioInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutVentasAprobadasInput = {
@@ -121135,6 +123231,7 @@ export namespace Prisma {
     usuarioPermisos?: UsuarioPermisoUncheckedCreateNestedManyWithoutUsuarioInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutVentasAprobadasInput = {
@@ -121283,6 +123380,7 @@ export namespace Prisma {
     usuarioPermisos?: UsuarioPermisoCreateNestedManyWithoutUsuarioInput
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutVentasUniformeEstudianteInput = {
@@ -121391,6 +123489,7 @@ export namespace Prisma {
     usuarioPermisos?: UsuarioPermisoUncheckedCreateNestedManyWithoutUsuarioInput
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutVentasUniformeEstudianteInput = {
@@ -121504,6 +123603,7 @@ export namespace Prisma {
     usuarioPermisos?: UsuarioPermisoCreateNestedManyWithoutUsuarioInput
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutVentasUniformePadreInput = {
@@ -121612,6 +123712,7 @@ export namespace Prisma {
     usuarioPermisos?: UsuarioPermisoUncheckedCreateNestedManyWithoutUsuarioInput
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutVentasUniformePadreInput = {
@@ -121797,6 +123898,7 @@ export namespace Prisma {
     usuarioPermisos?: UsuarioPermisoUpdateManyWithoutUsuarioNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutVentasAprobadasInput = {
@@ -121905,6 +124007,7 @@ export namespace Prisma {
     usuarioPermisos?: UsuarioPermisoUncheckedUpdateManyWithoutUsuarioNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type CronogramaPagoUpsertWithoutVentaUniformeInput = {
@@ -122065,6 +124168,7 @@ export namespace Prisma {
     usuarioPermisos?: UsuarioPermisoUpdateManyWithoutUsuarioNestedInput
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutVentasUniformeEstudianteInput = {
@@ -122173,6 +124277,7 @@ export namespace Prisma {
     usuarioPermisos?: UsuarioPermisoUncheckedUpdateManyWithoutUsuarioNestedInput
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUpsertWithoutVentasUniformePadreInput = {
@@ -122292,6 +124397,7 @@ export namespace Prisma {
     usuarioPermisos?: UsuarioPermisoUpdateManyWithoutUsuarioNestedInput
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutVentasUniformePadreInput = {
@@ -122400,6 +124506,7 @@ export namespace Prisma {
     usuarioPermisos?: UsuarioPermisoUncheckedUpdateManyWithoutUsuarioNestedInput
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type SedeUpsertWithoutVentasUniformeInput = {
@@ -122746,6 +124853,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutFavoritosInput = {
@@ -122854,6 +124962,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
     ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutFavoritosInput = {
@@ -123015,6 +125124,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutFavoritosInput = {
@@ -123123,6 +125233,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type InstitucionEducativaCreateWithoutCuentasBancariasInput = {
@@ -123168,6 +125279,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionCreateNestedManyWithoutInstitucionInput
     users?: UserCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaUncheckedCreateWithoutCuentasBancariasInput = {
@@ -123213,6 +125325,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedCreateNestedManyWithoutInstitucionInput
     tiposEvaluacion?: TipoEvaluacionUncheckedCreateNestedManyWithoutInstitucionInput
     users?: UserUncheckedCreateNestedManyWithoutInstitucionInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutInstitucionInput
   }
 
   export type InstitucionEducativaCreateOrConnectWithoutCuentasBancariasInput = {
@@ -123274,6 +125387,7 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUpdateManyWithoutInstitucionNestedInput
     users?: UserUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutInstitucionNestedInput
   }
 
   export type InstitucionEducativaUncheckedUpdateWithoutCuentasBancariasInput = {
@@ -123319,6 +125433,659 @@ export namespace Prisma {
     tiposDocumento?: TipoDocumentoUncheckedUpdateManyWithoutInstitucionNestedInput
     tiposEvaluacion?: TipoEvaluacionUncheckedUpdateManyWithoutInstitucionNestedInput
     users?: UserUncheckedUpdateManyWithoutInstitucionNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutInstitucionNestedInput
+  }
+
+  export type InstitucionEducativaCreateWithoutNotificationLogsInput = {
+    id?: string
+    codigoModular: string
+    nombreInstitucion: string
+    nombreComercial?: string | null
+    tipoGestion: $Enums.TipoGestion
+    modalidad: $Enums.Modalidad
+    ugel: string
+    dre: string
+    ubigeo: string
+    direccion: string
+    distrito: string
+    provincia: string
+    departamento: string
+    telefono?: string | null
+    email?: string | null
+    sitioWeb?: string | null
+    resolucionCreacion?: string | null
+    fechaCreacion?: Date | string | null
+    resolucionActual?: string | null
+    logo?: string | null
+    cicloEscolarActual?: number
+    fechaInicioClases: Date | string
+    fechaFinClases: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    areasCurriculares?: AreaCurricularCreateNestedManyWithoutInstitucionInput
+    cargos?: CargoCreateNestedManyWithoutInstitucionInput
+    conceptosPago?: ConceptoPagoCreateNestedManyWithoutInstitucionInput
+    cuentasBancarias?: CuentaBancariaCreateNestedManyWithoutInstitucionInput
+    cursos?: CursoCreateNestedManyWithoutInstitucionInput
+    estadosUsuario?: EstadoUsuarioCreateNestedManyWithoutInstitucionInput
+    historialEstados?: HistorialEstadoUsuarioCreateNestedManyWithoutInstitucionInput
+    director?: UserCreateNestedOneWithoutInstitucionDirectorInput
+    movimientosInventario?: MovimientoInventarioCreateNestedManyWithoutInstitucionInput
+    niveles?: NivelCreateNestedManyWithoutInstitucionInput
+    nivelesAcademicos?: NivelAcademicoCreateNestedManyWithoutInstitucionInput
+    periodos?: PeriodoAcademicoCreateNestedManyWithoutInstitucionInput
+    politicasAsistencia?: PoliticaAsistenciaCreateNestedManyWithoutInstitucionInput
+    prospectos?: ProspectoCreateNestedManyWithoutInstitucionInput
+    sedes?: SedeCreateNestedManyWithoutInstitucionInput
+    tiposDocumento?: TipoDocumentoCreateNestedManyWithoutInstitucionInput
+    tiposEvaluacion?: TipoEvaluacionCreateNestedManyWithoutInstitucionInput
+    users?: UserCreateNestedManyWithoutInstitucionInput
+  }
+
+  export type InstitucionEducativaUncheckedCreateWithoutNotificationLogsInput = {
+    id?: string
+    codigoModular: string
+    nombreInstitucion: string
+    nombreComercial?: string | null
+    tipoGestion: $Enums.TipoGestion
+    modalidad: $Enums.Modalidad
+    ugel: string
+    dre: string
+    ubigeo: string
+    direccion: string
+    distrito: string
+    provincia: string
+    departamento: string
+    telefono?: string | null
+    email?: string | null
+    sitioWeb?: string | null
+    resolucionCreacion?: string | null
+    fechaCreacion?: Date | string | null
+    resolucionActual?: string | null
+    logo?: string | null
+    directorId?: string | null
+    cicloEscolarActual?: number
+    fechaInicioClases: Date | string
+    fechaFinClases: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    areasCurriculares?: AreaCurricularUncheckedCreateNestedManyWithoutInstitucionInput
+    cargos?: CargoUncheckedCreateNestedManyWithoutInstitucionInput
+    conceptosPago?: ConceptoPagoUncheckedCreateNestedManyWithoutInstitucionInput
+    cuentasBancarias?: CuentaBancariaUncheckedCreateNestedManyWithoutInstitucionInput
+    cursos?: CursoUncheckedCreateNestedManyWithoutInstitucionInput
+    estadosUsuario?: EstadoUsuarioUncheckedCreateNestedManyWithoutInstitucionInput
+    historialEstados?: HistorialEstadoUsuarioUncheckedCreateNestedManyWithoutInstitucionInput
+    movimientosInventario?: MovimientoInventarioUncheckedCreateNestedManyWithoutInstitucionInput
+    niveles?: NivelUncheckedCreateNestedManyWithoutInstitucionInput
+    nivelesAcademicos?: NivelAcademicoUncheckedCreateNestedManyWithoutInstitucionInput
+    periodos?: PeriodoAcademicoUncheckedCreateNestedManyWithoutInstitucionInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedCreateNestedManyWithoutInstitucionInput
+    prospectos?: ProspectoUncheckedCreateNestedManyWithoutInstitucionInput
+    sedes?: SedeUncheckedCreateNestedManyWithoutInstitucionInput
+    tiposDocumento?: TipoDocumentoUncheckedCreateNestedManyWithoutInstitucionInput
+    tiposEvaluacion?: TipoEvaluacionUncheckedCreateNestedManyWithoutInstitucionInput
+    users?: UserUncheckedCreateNestedManyWithoutInstitucionInput
+  }
+
+  export type InstitucionEducativaCreateOrConnectWithoutNotificationLogsInput = {
+    where: InstitucionEducativaWhereUniqueInput
+    create: XOR<InstitucionEducativaCreateWithoutNotificationLogsInput, InstitucionEducativaUncheckedCreateWithoutNotificationLogsInput>
+  }
+
+  export type UserCreateWithoutNotificationLogsInput = {
+    id?: string
+    name?: string | null
+    email?: string | null
+    password?: string | null
+    emailVerified?: Date | string | null
+    image?: string | null
+    role?: $Enums.Role
+    apellidoPaterno?: string | null
+    apellidoMaterno?: string | null
+    dni?: string | null
+    fechaNacimiento?: Date | string | null
+    sexo?: string | null
+    estadoCivil?: string | null
+    nacionalidad?: string | null
+    direccion?: string | null
+    ubigeo?: string | null
+    distrito?: string | null
+    provincia?: string | null
+    departamento?: string | null
+    telefono?: string | null
+    telefonoEmergencia?: string | null
+    codigoEstudiante?: string | null
+    codigoSiagie?: string | null
+    codigoModular?: string | null
+    numeroExpediente?: string | null
+    tipoSangre?: string | null
+    alergias?: string | null
+    condicionesMedicas?: string | null
+    contactoEmergencia?: string | null
+    area?: string | null
+    fechaIngreso?: Date | string | null
+    fechaSalida?: Date | string | null
+    numeroContrato?: string | null
+    turno?: $Enums.Turno | null
+    viveConPadres?: boolean | null
+    tipoVivienda?: string | null
+    serviciosBasicos?: string | null
+    transporteEscolar?: boolean | null
+    becario?: boolean | null
+    tipoBeca?: string | null
+    programaSocial?: string | null
+    especialidad?: string | null
+    titulo?: string | null
+    colegioProfesor?: string | null
+    fechaContratacion?: Date | string | null
+    tipoContrato?: string | null
+    escalaMagisterial?: string | null
+    ocupacion?: string | null
+    lugarTrabajo?: string | null
+    ingresoFamiliar?: string | null
+    gradoInstruccion?: string | null
+    mustChangePassword?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    medicamentos?: string | null
+    seguroMedico?: string | null
+    discapacidades?: string | null
+    carnetConadis?: string | null
+    restriccionesAlimenticias?: string | null
+    centroSaludPreferido?: string | null
+    peso?: number | null
+    talla?: number | null
+    parentescoContactoEmergencia?: string | null
+    nombreContactoEmergencia2?: string | null
+    telefonoContactoEmergencia2?: string | null
+    parentescoContactoEmergencia2?: string | null
+    paisNacimiento?: string | null
+    lugarNacimiento?: string | null
+    lenguaMaterna?: string | null
+    religion?: string | null
+    numeroHermanos?: number | null
+    accounts?: AccountCreateNestedManyWithoutUserInput
+    admisionesAutorizadas?: AdmisionCreateNestedManyWithoutAutorizadoPorInput
+    anunciosCreados?: AnuncioCreateNestedManyWithoutAutorInput
+    asistencias?: AsistenciaCreateNestedManyWithoutEstudianteInput
+    asistenciasRegistradas?: AsistenciaCreateNestedManyWithoutRegistradoPorInput
+    comprobantesEnviados?: ComprobantePagoCreateNestedManyWithoutPadreInput
+    comprobantesVerificados?: ComprobantePagoCreateNestedManyWithoutVerificadoPorInput
+    cronogramaPagos?: CronogramaPagoCreateNestedManyWithoutEstudianteInput
+    cursosImpartidos?: CursoCreateNestedManyWithoutProfesorInput
+    documentosEmitidos?: DocumentoCreateNestedManyWithoutEmisorInput
+    documentosEstudiante?: DocumentoCreateNestedManyWithoutEstudianteInput
+    eventosCreados?: EventoCreateNestedManyWithoutOrganizadorInput
+    favoritos?: FavoritoUniformeCreateNestedManyWithoutUserInput
+    fichasEspecialista?: FichaPsicopedagogicaCreateNestedManyWithoutEspecialistaInput
+    fichasEstudiante?: FichaPsicopedagogicaCreateNestedManyWithoutEstudianteInput
+    cambiosEstadoRealizados?: HistorialEstadoUsuarioCreateNestedManyWithoutCambiadoPorInput
+    historialEstados?: HistorialEstadoUsuarioCreateNestedManyWithoutUsuarioInput
+    institucionDirector?: InstitucionEducativaCreateNestedOneWithoutDirectorInput
+    logros?: LogroCreateNestedManyWithoutEstudianteInput
+    matriculas?: MatriculaCreateNestedManyWithoutEstudianteInput
+    cursosInscritos?: MatriculaCursoCreateNestedManyWithoutUserInput
+    tutorDe?: NivelAcademicoCreateNestedManyWithoutTutorInput
+    notas?: NotaCreateNestedManyWithoutEstudianteInput
+    pagos?: PagoCreateNestedManyWithoutEstudianteInput
+    passwordResetToken?: PasswordResetTokenCreateNestedOneWithoutUserInput
+    padresTutores?: RelacionFamiliarCreateNestedManyWithoutHijoInput
+    hijosDeTutor?: RelacionFamiliarCreateNestedManyWithoutPadreTutorInput
+    cargo?: CargoCreateNestedOneWithoutUsuariosInput
+    estado: EstadoUsuarioCreateNestedOneWithoutUsuariosInput
+    institucion?: InstitucionEducativaCreateNestedOneWithoutUsersInput
+    nivelAcademico?: NivelAcademicoCreateNestedOneWithoutStudentsInput
+    usuarioPermisos?: UsuarioPermisoCreateNestedManyWithoutUsuarioInput
+    ventasAprobadas?: VentaUniformeCreateNestedManyWithoutAprobadoPorInput
+    ventasUniformeEstudiante?: VentaUniformeCreateNestedManyWithoutEstudianteInput
+    ventasUniformePadre?: VentaUniformeCreateNestedManyWithoutPadreInput
+  }
+
+  export type UserUncheckedCreateWithoutNotificationLogsInput = {
+    id?: string
+    name?: string | null
+    email?: string | null
+    password?: string | null
+    emailVerified?: Date | string | null
+    image?: string | null
+    role?: $Enums.Role
+    apellidoPaterno?: string | null
+    apellidoMaterno?: string | null
+    dni?: string | null
+    fechaNacimiento?: Date | string | null
+    sexo?: string | null
+    estadoCivil?: string | null
+    nacionalidad?: string | null
+    direccion?: string | null
+    ubigeo?: string | null
+    distrito?: string | null
+    provincia?: string | null
+    departamento?: string | null
+    telefono?: string | null
+    telefonoEmergencia?: string | null
+    codigoEstudiante?: string | null
+    codigoSiagie?: string | null
+    codigoModular?: string | null
+    numeroExpediente?: string | null
+    tipoSangre?: string | null
+    alergias?: string | null
+    condicionesMedicas?: string | null
+    contactoEmergencia?: string | null
+    cargoId?: string | null
+    estadoId: string
+    area?: string | null
+    fechaIngreso?: Date | string | null
+    fechaSalida?: Date | string | null
+    numeroContrato?: string | null
+    nivelAcademicoId?: string | null
+    turno?: $Enums.Turno | null
+    viveConPadres?: boolean | null
+    tipoVivienda?: string | null
+    serviciosBasicos?: string | null
+    transporteEscolar?: boolean | null
+    becario?: boolean | null
+    tipoBeca?: string | null
+    programaSocial?: string | null
+    especialidad?: string | null
+    titulo?: string | null
+    colegioProfesor?: string | null
+    fechaContratacion?: Date | string | null
+    tipoContrato?: string | null
+    escalaMagisterial?: string | null
+    ocupacion?: string | null
+    lugarTrabajo?: string | null
+    ingresoFamiliar?: string | null
+    gradoInstruccion?: string | null
+    institucionId?: string | null
+    mustChangePassword?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    medicamentos?: string | null
+    seguroMedico?: string | null
+    discapacidades?: string | null
+    carnetConadis?: string | null
+    restriccionesAlimenticias?: string | null
+    centroSaludPreferido?: string | null
+    peso?: number | null
+    talla?: number | null
+    parentescoContactoEmergencia?: string | null
+    nombreContactoEmergencia2?: string | null
+    telefonoContactoEmergencia2?: string | null
+    parentescoContactoEmergencia2?: string | null
+    paisNacimiento?: string | null
+    lugarNacimiento?: string | null
+    lenguaMaterna?: string | null
+    religion?: string | null
+    numeroHermanos?: number | null
+    accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
+    admisionesAutorizadas?: AdmisionUncheckedCreateNestedManyWithoutAutorizadoPorInput
+    anunciosCreados?: AnuncioUncheckedCreateNestedManyWithoutAutorInput
+    asistencias?: AsistenciaUncheckedCreateNestedManyWithoutEstudianteInput
+    asistenciasRegistradas?: AsistenciaUncheckedCreateNestedManyWithoutRegistradoPorInput
+    comprobantesEnviados?: ComprobantePagoUncheckedCreateNestedManyWithoutPadreInput
+    comprobantesVerificados?: ComprobantePagoUncheckedCreateNestedManyWithoutVerificadoPorInput
+    cronogramaPagos?: CronogramaPagoUncheckedCreateNestedManyWithoutEstudianteInput
+    cursosImpartidos?: CursoUncheckedCreateNestedManyWithoutProfesorInput
+    documentosEmitidos?: DocumentoUncheckedCreateNestedManyWithoutEmisorInput
+    documentosEstudiante?: DocumentoUncheckedCreateNestedManyWithoutEstudianteInput
+    eventosCreados?: EventoUncheckedCreateNestedManyWithoutOrganizadorInput
+    favoritos?: FavoritoUniformeUncheckedCreateNestedManyWithoutUserInput
+    fichasEspecialista?: FichaPsicopedagogicaUncheckedCreateNestedManyWithoutEspecialistaInput
+    fichasEstudiante?: FichaPsicopedagogicaUncheckedCreateNestedManyWithoutEstudianteInput
+    cambiosEstadoRealizados?: HistorialEstadoUsuarioUncheckedCreateNestedManyWithoutCambiadoPorInput
+    historialEstados?: HistorialEstadoUsuarioUncheckedCreateNestedManyWithoutUsuarioInput
+    institucionDirector?: InstitucionEducativaUncheckedCreateNestedOneWithoutDirectorInput
+    logros?: LogroUncheckedCreateNestedManyWithoutEstudianteInput
+    matriculas?: MatriculaUncheckedCreateNestedManyWithoutEstudianteInput
+    cursosInscritos?: MatriculaCursoUncheckedCreateNestedManyWithoutUserInput
+    tutorDe?: NivelAcademicoUncheckedCreateNestedManyWithoutTutorInput
+    notas?: NotaUncheckedCreateNestedManyWithoutEstudianteInput
+    pagos?: PagoUncheckedCreateNestedManyWithoutEstudianteInput
+    passwordResetToken?: PasswordResetTokenUncheckedCreateNestedOneWithoutUserInput
+    padresTutores?: RelacionFamiliarUncheckedCreateNestedManyWithoutHijoInput
+    hijosDeTutor?: RelacionFamiliarUncheckedCreateNestedManyWithoutPadreTutorInput
+    usuarioPermisos?: UsuarioPermisoUncheckedCreateNestedManyWithoutUsuarioInput
+    ventasAprobadas?: VentaUniformeUncheckedCreateNestedManyWithoutAprobadoPorInput
+    ventasUniformeEstudiante?: VentaUniformeUncheckedCreateNestedManyWithoutEstudianteInput
+    ventasUniformePadre?: VentaUniformeUncheckedCreateNestedManyWithoutPadreInput
+  }
+
+  export type UserCreateOrConnectWithoutNotificationLogsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutNotificationLogsInput, UserUncheckedCreateWithoutNotificationLogsInput>
+  }
+
+  export type InstitucionEducativaUpsertWithoutNotificationLogsInput = {
+    update: XOR<InstitucionEducativaUpdateWithoutNotificationLogsInput, InstitucionEducativaUncheckedUpdateWithoutNotificationLogsInput>
+    create: XOR<InstitucionEducativaCreateWithoutNotificationLogsInput, InstitucionEducativaUncheckedCreateWithoutNotificationLogsInput>
+    where?: InstitucionEducativaWhereInput
+  }
+
+  export type InstitucionEducativaUpdateToOneWithWhereWithoutNotificationLogsInput = {
+    where?: InstitucionEducativaWhereInput
+    data: XOR<InstitucionEducativaUpdateWithoutNotificationLogsInput, InstitucionEducativaUncheckedUpdateWithoutNotificationLogsInput>
+  }
+
+  export type InstitucionEducativaUpdateWithoutNotificationLogsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    codigoModular?: StringFieldUpdateOperationsInput | string
+    nombreInstitucion?: StringFieldUpdateOperationsInput | string
+    nombreComercial?: NullableStringFieldUpdateOperationsInput | string | null
+    tipoGestion?: EnumTipoGestionFieldUpdateOperationsInput | $Enums.TipoGestion
+    modalidad?: EnumModalidadFieldUpdateOperationsInput | $Enums.Modalidad
+    ugel?: StringFieldUpdateOperationsInput | string
+    dre?: StringFieldUpdateOperationsInput | string
+    ubigeo?: StringFieldUpdateOperationsInput | string
+    direccion?: StringFieldUpdateOperationsInput | string
+    distrito?: StringFieldUpdateOperationsInput | string
+    provincia?: StringFieldUpdateOperationsInput | string
+    departamento?: StringFieldUpdateOperationsInput | string
+    telefono?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    sitioWeb?: NullableStringFieldUpdateOperationsInput | string | null
+    resolucionCreacion?: NullableStringFieldUpdateOperationsInput | string | null
+    fechaCreacion?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resolucionActual?: NullableStringFieldUpdateOperationsInput | string | null
+    logo?: NullableStringFieldUpdateOperationsInput | string | null
+    cicloEscolarActual?: IntFieldUpdateOperationsInput | number
+    fechaInicioClases?: DateTimeFieldUpdateOperationsInput | Date | string
+    fechaFinClases?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    areasCurriculares?: AreaCurricularUpdateManyWithoutInstitucionNestedInput
+    cargos?: CargoUpdateManyWithoutInstitucionNestedInput
+    conceptosPago?: ConceptoPagoUpdateManyWithoutInstitucionNestedInput
+    cuentasBancarias?: CuentaBancariaUpdateManyWithoutInstitucionNestedInput
+    cursos?: CursoUpdateManyWithoutInstitucionNestedInput
+    estadosUsuario?: EstadoUsuarioUpdateManyWithoutInstitucionNestedInput
+    historialEstados?: HistorialEstadoUsuarioUpdateManyWithoutInstitucionNestedInput
+    director?: UserUpdateOneWithoutInstitucionDirectorNestedInput
+    movimientosInventario?: MovimientoInventarioUpdateManyWithoutInstitucionNestedInput
+    niveles?: NivelUpdateManyWithoutInstitucionNestedInput
+    nivelesAcademicos?: NivelAcademicoUpdateManyWithoutInstitucionNestedInput
+    periodos?: PeriodoAcademicoUpdateManyWithoutInstitucionNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUpdateManyWithoutInstitucionNestedInput
+    prospectos?: ProspectoUpdateManyWithoutInstitucionNestedInput
+    sedes?: SedeUpdateManyWithoutInstitucionNestedInput
+    tiposDocumento?: TipoDocumentoUpdateManyWithoutInstitucionNestedInput
+    tiposEvaluacion?: TipoEvaluacionUpdateManyWithoutInstitucionNestedInput
+    users?: UserUpdateManyWithoutInstitucionNestedInput
+  }
+
+  export type InstitucionEducativaUncheckedUpdateWithoutNotificationLogsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    codigoModular?: StringFieldUpdateOperationsInput | string
+    nombreInstitucion?: StringFieldUpdateOperationsInput | string
+    nombreComercial?: NullableStringFieldUpdateOperationsInput | string | null
+    tipoGestion?: EnumTipoGestionFieldUpdateOperationsInput | $Enums.TipoGestion
+    modalidad?: EnumModalidadFieldUpdateOperationsInput | $Enums.Modalidad
+    ugel?: StringFieldUpdateOperationsInput | string
+    dre?: StringFieldUpdateOperationsInput | string
+    ubigeo?: StringFieldUpdateOperationsInput | string
+    direccion?: StringFieldUpdateOperationsInput | string
+    distrito?: StringFieldUpdateOperationsInput | string
+    provincia?: StringFieldUpdateOperationsInput | string
+    departamento?: StringFieldUpdateOperationsInput | string
+    telefono?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    sitioWeb?: NullableStringFieldUpdateOperationsInput | string | null
+    resolucionCreacion?: NullableStringFieldUpdateOperationsInput | string | null
+    fechaCreacion?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    resolucionActual?: NullableStringFieldUpdateOperationsInput | string | null
+    logo?: NullableStringFieldUpdateOperationsInput | string | null
+    directorId?: NullableStringFieldUpdateOperationsInput | string | null
+    cicloEscolarActual?: IntFieldUpdateOperationsInput | number
+    fechaInicioClases?: DateTimeFieldUpdateOperationsInput | Date | string
+    fechaFinClases?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    areasCurriculares?: AreaCurricularUncheckedUpdateManyWithoutInstitucionNestedInput
+    cargos?: CargoUncheckedUpdateManyWithoutInstitucionNestedInput
+    conceptosPago?: ConceptoPagoUncheckedUpdateManyWithoutInstitucionNestedInput
+    cuentasBancarias?: CuentaBancariaUncheckedUpdateManyWithoutInstitucionNestedInput
+    cursos?: CursoUncheckedUpdateManyWithoutInstitucionNestedInput
+    estadosUsuario?: EstadoUsuarioUncheckedUpdateManyWithoutInstitucionNestedInput
+    historialEstados?: HistorialEstadoUsuarioUncheckedUpdateManyWithoutInstitucionNestedInput
+    movimientosInventario?: MovimientoInventarioUncheckedUpdateManyWithoutInstitucionNestedInput
+    niveles?: NivelUncheckedUpdateManyWithoutInstitucionNestedInput
+    nivelesAcademicos?: NivelAcademicoUncheckedUpdateManyWithoutInstitucionNestedInput
+    periodos?: PeriodoAcademicoUncheckedUpdateManyWithoutInstitucionNestedInput
+    politicasAsistencia?: PoliticaAsistenciaUncheckedUpdateManyWithoutInstitucionNestedInput
+    prospectos?: ProspectoUncheckedUpdateManyWithoutInstitucionNestedInput
+    sedes?: SedeUncheckedUpdateManyWithoutInstitucionNestedInput
+    tiposDocumento?: TipoDocumentoUncheckedUpdateManyWithoutInstitucionNestedInput
+    tiposEvaluacion?: TipoEvaluacionUncheckedUpdateManyWithoutInstitucionNestedInput
+    users?: UserUncheckedUpdateManyWithoutInstitucionNestedInput
+  }
+
+  export type UserUpsertWithoutNotificationLogsInput = {
+    update: XOR<UserUpdateWithoutNotificationLogsInput, UserUncheckedUpdateWithoutNotificationLogsInput>
+    create: XOR<UserCreateWithoutNotificationLogsInput, UserUncheckedCreateWithoutNotificationLogsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutNotificationLogsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutNotificationLogsInput, UserUncheckedUpdateWithoutNotificationLogsInput>
+  }
+
+  export type UserUpdateWithoutNotificationLogsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    apellidoPaterno?: NullableStringFieldUpdateOperationsInput | string | null
+    apellidoMaterno?: NullableStringFieldUpdateOperationsInput | string | null
+    dni?: NullableStringFieldUpdateOperationsInput | string | null
+    fechaNacimiento?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sexo?: NullableStringFieldUpdateOperationsInput | string | null
+    estadoCivil?: NullableStringFieldUpdateOperationsInput | string | null
+    nacionalidad?: NullableStringFieldUpdateOperationsInput | string | null
+    direccion?: NullableStringFieldUpdateOperationsInput | string | null
+    ubigeo?: NullableStringFieldUpdateOperationsInput | string | null
+    distrito?: NullableStringFieldUpdateOperationsInput | string | null
+    provincia?: NullableStringFieldUpdateOperationsInput | string | null
+    departamento?: NullableStringFieldUpdateOperationsInput | string | null
+    telefono?: NullableStringFieldUpdateOperationsInput | string | null
+    telefonoEmergencia?: NullableStringFieldUpdateOperationsInput | string | null
+    codigoEstudiante?: NullableStringFieldUpdateOperationsInput | string | null
+    codigoSiagie?: NullableStringFieldUpdateOperationsInput | string | null
+    codigoModular?: NullableStringFieldUpdateOperationsInput | string | null
+    numeroExpediente?: NullableStringFieldUpdateOperationsInput | string | null
+    tipoSangre?: NullableStringFieldUpdateOperationsInput | string | null
+    alergias?: NullableStringFieldUpdateOperationsInput | string | null
+    condicionesMedicas?: NullableStringFieldUpdateOperationsInput | string | null
+    contactoEmergencia?: NullableStringFieldUpdateOperationsInput | string | null
+    area?: NullableStringFieldUpdateOperationsInput | string | null
+    fechaIngreso?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fechaSalida?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    numeroContrato?: NullableStringFieldUpdateOperationsInput | string | null
+    turno?: NullableEnumTurnoFieldUpdateOperationsInput | $Enums.Turno | null
+    viveConPadres?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    tipoVivienda?: NullableStringFieldUpdateOperationsInput | string | null
+    serviciosBasicos?: NullableStringFieldUpdateOperationsInput | string | null
+    transporteEscolar?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    becario?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    tipoBeca?: NullableStringFieldUpdateOperationsInput | string | null
+    programaSocial?: NullableStringFieldUpdateOperationsInput | string | null
+    especialidad?: NullableStringFieldUpdateOperationsInput | string | null
+    titulo?: NullableStringFieldUpdateOperationsInput | string | null
+    colegioProfesor?: NullableStringFieldUpdateOperationsInput | string | null
+    fechaContratacion?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipoContrato?: NullableStringFieldUpdateOperationsInput | string | null
+    escalaMagisterial?: NullableStringFieldUpdateOperationsInput | string | null
+    ocupacion?: NullableStringFieldUpdateOperationsInput | string | null
+    lugarTrabajo?: NullableStringFieldUpdateOperationsInput | string | null
+    ingresoFamiliar?: NullableStringFieldUpdateOperationsInput | string | null
+    gradoInstruccion?: NullableStringFieldUpdateOperationsInput | string | null
+    mustChangePassword?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    medicamentos?: NullableStringFieldUpdateOperationsInput | string | null
+    seguroMedico?: NullableStringFieldUpdateOperationsInput | string | null
+    discapacidades?: NullableStringFieldUpdateOperationsInput | string | null
+    carnetConadis?: NullableStringFieldUpdateOperationsInput | string | null
+    restriccionesAlimenticias?: NullableStringFieldUpdateOperationsInput | string | null
+    centroSaludPreferido?: NullableStringFieldUpdateOperationsInput | string | null
+    peso?: NullableFloatFieldUpdateOperationsInput | number | null
+    talla?: NullableFloatFieldUpdateOperationsInput | number | null
+    parentescoContactoEmergencia?: NullableStringFieldUpdateOperationsInput | string | null
+    nombreContactoEmergencia2?: NullableStringFieldUpdateOperationsInput | string | null
+    telefonoContactoEmergencia2?: NullableStringFieldUpdateOperationsInput | string | null
+    parentescoContactoEmergencia2?: NullableStringFieldUpdateOperationsInput | string | null
+    paisNacimiento?: NullableStringFieldUpdateOperationsInput | string | null
+    lugarNacimiento?: NullableStringFieldUpdateOperationsInput | string | null
+    lenguaMaterna?: NullableStringFieldUpdateOperationsInput | string | null
+    religion?: NullableStringFieldUpdateOperationsInput | string | null
+    numeroHermanos?: NullableIntFieldUpdateOperationsInput | number | null
+    accounts?: AccountUpdateManyWithoutUserNestedInput
+    admisionesAutorizadas?: AdmisionUpdateManyWithoutAutorizadoPorNestedInput
+    anunciosCreados?: AnuncioUpdateManyWithoutAutorNestedInput
+    asistencias?: AsistenciaUpdateManyWithoutEstudianteNestedInput
+    asistenciasRegistradas?: AsistenciaUpdateManyWithoutRegistradoPorNestedInput
+    comprobantesEnviados?: ComprobantePagoUpdateManyWithoutPadreNestedInput
+    comprobantesVerificados?: ComprobantePagoUpdateManyWithoutVerificadoPorNestedInput
+    cronogramaPagos?: CronogramaPagoUpdateManyWithoutEstudianteNestedInput
+    cursosImpartidos?: CursoUpdateManyWithoutProfesorNestedInput
+    documentosEmitidos?: DocumentoUpdateManyWithoutEmisorNestedInput
+    documentosEstudiante?: DocumentoUpdateManyWithoutEstudianteNestedInput
+    eventosCreados?: EventoUpdateManyWithoutOrganizadorNestedInput
+    favoritos?: FavoritoUniformeUpdateManyWithoutUserNestedInput
+    fichasEspecialista?: FichaPsicopedagogicaUpdateManyWithoutEspecialistaNestedInput
+    fichasEstudiante?: FichaPsicopedagogicaUpdateManyWithoutEstudianteNestedInput
+    cambiosEstadoRealizados?: HistorialEstadoUsuarioUpdateManyWithoutCambiadoPorNestedInput
+    historialEstados?: HistorialEstadoUsuarioUpdateManyWithoutUsuarioNestedInput
+    institucionDirector?: InstitucionEducativaUpdateOneWithoutDirectorNestedInput
+    logros?: LogroUpdateManyWithoutEstudianteNestedInput
+    matriculas?: MatriculaUpdateManyWithoutEstudianteNestedInput
+    cursosInscritos?: MatriculaCursoUpdateManyWithoutUserNestedInput
+    tutorDe?: NivelAcademicoUpdateManyWithoutTutorNestedInput
+    notas?: NotaUpdateManyWithoutEstudianteNestedInput
+    pagos?: PagoUpdateManyWithoutEstudianteNestedInput
+    passwordResetToken?: PasswordResetTokenUpdateOneWithoutUserNestedInput
+    padresTutores?: RelacionFamiliarUpdateManyWithoutHijoNestedInput
+    hijosDeTutor?: RelacionFamiliarUpdateManyWithoutPadreTutorNestedInput
+    cargo?: CargoUpdateOneWithoutUsuariosNestedInput
+    estado?: EstadoUsuarioUpdateOneRequiredWithoutUsuariosNestedInput
+    institucion?: InstitucionEducativaUpdateOneWithoutUsersNestedInput
+    nivelAcademico?: NivelAcademicoUpdateOneWithoutStudentsNestedInput
+    usuarioPermisos?: UsuarioPermisoUpdateManyWithoutUsuarioNestedInput
+    ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
+    ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
+    ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutNotificationLogsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    apellidoPaterno?: NullableStringFieldUpdateOperationsInput | string | null
+    apellidoMaterno?: NullableStringFieldUpdateOperationsInput | string | null
+    dni?: NullableStringFieldUpdateOperationsInput | string | null
+    fechaNacimiento?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sexo?: NullableStringFieldUpdateOperationsInput | string | null
+    estadoCivil?: NullableStringFieldUpdateOperationsInput | string | null
+    nacionalidad?: NullableStringFieldUpdateOperationsInput | string | null
+    direccion?: NullableStringFieldUpdateOperationsInput | string | null
+    ubigeo?: NullableStringFieldUpdateOperationsInput | string | null
+    distrito?: NullableStringFieldUpdateOperationsInput | string | null
+    provincia?: NullableStringFieldUpdateOperationsInput | string | null
+    departamento?: NullableStringFieldUpdateOperationsInput | string | null
+    telefono?: NullableStringFieldUpdateOperationsInput | string | null
+    telefonoEmergencia?: NullableStringFieldUpdateOperationsInput | string | null
+    codigoEstudiante?: NullableStringFieldUpdateOperationsInput | string | null
+    codigoSiagie?: NullableStringFieldUpdateOperationsInput | string | null
+    codigoModular?: NullableStringFieldUpdateOperationsInput | string | null
+    numeroExpediente?: NullableStringFieldUpdateOperationsInput | string | null
+    tipoSangre?: NullableStringFieldUpdateOperationsInput | string | null
+    alergias?: NullableStringFieldUpdateOperationsInput | string | null
+    condicionesMedicas?: NullableStringFieldUpdateOperationsInput | string | null
+    contactoEmergencia?: NullableStringFieldUpdateOperationsInput | string | null
+    cargoId?: NullableStringFieldUpdateOperationsInput | string | null
+    estadoId?: StringFieldUpdateOperationsInput | string
+    area?: NullableStringFieldUpdateOperationsInput | string | null
+    fechaIngreso?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fechaSalida?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    numeroContrato?: NullableStringFieldUpdateOperationsInput | string | null
+    nivelAcademicoId?: NullableStringFieldUpdateOperationsInput | string | null
+    turno?: NullableEnumTurnoFieldUpdateOperationsInput | $Enums.Turno | null
+    viveConPadres?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    tipoVivienda?: NullableStringFieldUpdateOperationsInput | string | null
+    serviciosBasicos?: NullableStringFieldUpdateOperationsInput | string | null
+    transporteEscolar?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    becario?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    tipoBeca?: NullableStringFieldUpdateOperationsInput | string | null
+    programaSocial?: NullableStringFieldUpdateOperationsInput | string | null
+    especialidad?: NullableStringFieldUpdateOperationsInput | string | null
+    titulo?: NullableStringFieldUpdateOperationsInput | string | null
+    colegioProfesor?: NullableStringFieldUpdateOperationsInput | string | null
+    fechaContratacion?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tipoContrato?: NullableStringFieldUpdateOperationsInput | string | null
+    escalaMagisterial?: NullableStringFieldUpdateOperationsInput | string | null
+    ocupacion?: NullableStringFieldUpdateOperationsInput | string | null
+    lugarTrabajo?: NullableStringFieldUpdateOperationsInput | string | null
+    ingresoFamiliar?: NullableStringFieldUpdateOperationsInput | string | null
+    gradoInstruccion?: NullableStringFieldUpdateOperationsInput | string | null
+    institucionId?: NullableStringFieldUpdateOperationsInput | string | null
+    mustChangePassword?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    medicamentos?: NullableStringFieldUpdateOperationsInput | string | null
+    seguroMedico?: NullableStringFieldUpdateOperationsInput | string | null
+    discapacidades?: NullableStringFieldUpdateOperationsInput | string | null
+    carnetConadis?: NullableStringFieldUpdateOperationsInput | string | null
+    restriccionesAlimenticias?: NullableStringFieldUpdateOperationsInput | string | null
+    centroSaludPreferido?: NullableStringFieldUpdateOperationsInput | string | null
+    peso?: NullableFloatFieldUpdateOperationsInput | number | null
+    talla?: NullableFloatFieldUpdateOperationsInput | number | null
+    parentescoContactoEmergencia?: NullableStringFieldUpdateOperationsInput | string | null
+    nombreContactoEmergencia2?: NullableStringFieldUpdateOperationsInput | string | null
+    telefonoContactoEmergencia2?: NullableStringFieldUpdateOperationsInput | string | null
+    parentescoContactoEmergencia2?: NullableStringFieldUpdateOperationsInput | string | null
+    paisNacimiento?: NullableStringFieldUpdateOperationsInput | string | null
+    lugarNacimiento?: NullableStringFieldUpdateOperationsInput | string | null
+    lenguaMaterna?: NullableStringFieldUpdateOperationsInput | string | null
+    religion?: NullableStringFieldUpdateOperationsInput | string | null
+    numeroHermanos?: NullableIntFieldUpdateOperationsInput | number | null
+    accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
+    admisionesAutorizadas?: AdmisionUncheckedUpdateManyWithoutAutorizadoPorNestedInput
+    anunciosCreados?: AnuncioUncheckedUpdateManyWithoutAutorNestedInput
+    asistencias?: AsistenciaUncheckedUpdateManyWithoutEstudianteNestedInput
+    asistenciasRegistradas?: AsistenciaUncheckedUpdateManyWithoutRegistradoPorNestedInput
+    comprobantesEnviados?: ComprobantePagoUncheckedUpdateManyWithoutPadreNestedInput
+    comprobantesVerificados?: ComprobantePagoUncheckedUpdateManyWithoutVerificadoPorNestedInput
+    cronogramaPagos?: CronogramaPagoUncheckedUpdateManyWithoutEstudianteNestedInput
+    cursosImpartidos?: CursoUncheckedUpdateManyWithoutProfesorNestedInput
+    documentosEmitidos?: DocumentoUncheckedUpdateManyWithoutEmisorNestedInput
+    documentosEstudiante?: DocumentoUncheckedUpdateManyWithoutEstudianteNestedInput
+    eventosCreados?: EventoUncheckedUpdateManyWithoutOrganizadorNestedInput
+    favoritos?: FavoritoUniformeUncheckedUpdateManyWithoutUserNestedInput
+    fichasEspecialista?: FichaPsicopedagogicaUncheckedUpdateManyWithoutEspecialistaNestedInput
+    fichasEstudiante?: FichaPsicopedagogicaUncheckedUpdateManyWithoutEstudianteNestedInput
+    cambiosEstadoRealizados?: HistorialEstadoUsuarioUncheckedUpdateManyWithoutCambiadoPorNestedInput
+    historialEstados?: HistorialEstadoUsuarioUncheckedUpdateManyWithoutUsuarioNestedInput
+    institucionDirector?: InstitucionEducativaUncheckedUpdateOneWithoutDirectorNestedInput
+    logros?: LogroUncheckedUpdateManyWithoutEstudianteNestedInput
+    matriculas?: MatriculaUncheckedUpdateManyWithoutEstudianteNestedInput
+    cursosInscritos?: MatriculaCursoUncheckedUpdateManyWithoutUserNestedInput
+    tutorDe?: NivelAcademicoUncheckedUpdateManyWithoutTutorNestedInput
+    notas?: NotaUncheckedUpdateManyWithoutEstudianteNestedInput
+    pagos?: PagoUncheckedUpdateManyWithoutEstudianteNestedInput
+    passwordResetToken?: PasswordResetTokenUncheckedUpdateOneWithoutUserNestedInput
+    padresTutores?: RelacionFamiliarUncheckedUpdateManyWithoutHijoNestedInput
+    hijosDeTutor?: RelacionFamiliarUncheckedUpdateManyWithoutPadreTutorNestedInput
+    usuarioPermisos?: UsuarioPermisoUncheckedUpdateManyWithoutUsuarioNestedInput
+    ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
+    ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
+    ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
   }
 
   export type CargoPermisoCreateManyCargoInput = {
@@ -123528,6 +126295,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCargoInput = {
@@ -123636,6 +126404,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateManyWithoutCargoInput = {
@@ -123986,6 +126755,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutEstadoInput = {
@@ -124094,6 +126864,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateManyWithoutEstadoInput = {
@@ -124716,6 +127487,19 @@ export namespace Prisma {
     lenguaMaterna?: string | null
     religion?: string | null
     numeroHermanos?: number | null
+  }
+
+  export type NotificationLogCreateManyInstitucionInput = {
+    id?: string
+    tipo: $Enums.TipoNotificacion
+    destinatario: string
+    asunto?: string | null
+    mensaje: string
+    estado?: string
+    error?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    userId?: string | null
+    createdAt?: Date | string
   }
 
   export type AreaCurricularUpdateWithoutInstitucionInput = {
@@ -125564,6 +128348,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutInstitucionInput = {
@@ -125672,6 +128457,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateManyWithoutInstitucionInput = {
@@ -125749,6 +128535,45 @@ export namespace Prisma {
     lenguaMaterna?: NullableStringFieldUpdateOperationsInput | string | null
     religion?: NullableStringFieldUpdateOperationsInput | string | null
     numeroHermanos?: NullableIntFieldUpdateOperationsInput | number | null
+  }
+
+  export type NotificationLogUpdateWithoutInstitucionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoNotificacionFieldUpdateOperationsInput | $Enums.TipoNotificacion
+    destinatario?: StringFieldUpdateOperationsInput | string
+    asunto?: NullableStringFieldUpdateOperationsInput | string | null
+    mensaje?: StringFieldUpdateOperationsInput | string
+    estado?: StringFieldUpdateOperationsInput | string
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneWithoutNotificationLogsNestedInput
+  }
+
+  export type NotificationLogUncheckedUpdateWithoutInstitucionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoNotificacionFieldUpdateOperationsInput | $Enums.TipoNotificacion
+    destinatario?: StringFieldUpdateOperationsInput | string
+    asunto?: NullableStringFieldUpdateOperationsInput | string | null
+    mensaje?: StringFieldUpdateOperationsInput | string
+    estado?: StringFieldUpdateOperationsInput | string
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NotificationLogUncheckedUpdateManyWithoutInstitucionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoNotificacionFieldUpdateOperationsInput | $Enums.TipoNotificacion
+    destinatario?: StringFieldUpdateOperationsInput | string
+    asunto?: NullableStringFieldUpdateOperationsInput | string | null
+    mensaje?: StringFieldUpdateOperationsInput | string
+    estado?: StringFieldUpdateOperationsInput | string
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type AccountCreateManyUserInput = {
@@ -126173,6 +128998,19 @@ export namespace Prisma {
     aprobadoEn?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+  }
+
+  export type NotificationLogCreateManyUserInput = {
+    id?: string
+    tipo: $Enums.TipoNotificacion
+    destinatario: string
+    asunto?: string | null
+    mensaje: string
+    estado?: string
+    error?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    institucionId?: string | null
+    createdAt?: Date | string
   }
 
   export type AccountUpdateWithoutUserInput = {
@@ -127485,6 +130323,45 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type NotificationLogUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoNotificacionFieldUpdateOperationsInput | $Enums.TipoNotificacion
+    destinatario?: StringFieldUpdateOperationsInput | string
+    asunto?: NullableStringFieldUpdateOperationsInput | string | null
+    mensaje?: StringFieldUpdateOperationsInput | string
+    estado?: StringFieldUpdateOperationsInput | string
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    institucion?: InstitucionEducativaUpdateOneWithoutNotificationLogsNestedInput
+  }
+
+  export type NotificationLogUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoNotificacionFieldUpdateOperationsInput | $Enums.TipoNotificacion
+    destinatario?: StringFieldUpdateOperationsInput | string
+    asunto?: NullableStringFieldUpdateOperationsInput | string | null
+    mensaje?: StringFieldUpdateOperationsInput | string
+    estado?: StringFieldUpdateOperationsInput | string
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    institucionId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NotificationLogUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tipo?: EnumTipoNotificacionFieldUpdateOperationsInput | $Enums.TipoNotificacion
+    destinatario?: StringFieldUpdateOperationsInput | string
+    asunto?: NullableStringFieldUpdateOperationsInput | string | null
+    mensaje?: StringFieldUpdateOperationsInput | string
+    estado?: StringFieldUpdateOperationsInput | string
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    institucionId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type AreaCurricularCreateManyNivelInput = {
     id?: string
     nombre: string
@@ -128606,6 +131483,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutNivelAcademicoInput = {
@@ -128714,6 +131592,7 @@ export namespace Prisma {
     ventasAprobadas?: VentaUniformeUncheckedUpdateManyWithoutAprobadoPorNestedInput
     ventasUniformeEstudiante?: VentaUniformeUncheckedUpdateManyWithoutEstudianteNestedInput
     ventasUniformePadre?: VentaUniformeUncheckedUpdateManyWithoutPadreNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateManyWithoutNivelAcademicoInput = {

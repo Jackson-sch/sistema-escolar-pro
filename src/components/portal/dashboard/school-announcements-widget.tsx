@@ -11,7 +11,9 @@ export default function SchoolAnnouncementsWidget({
   studentId: string;
 }) {
   return (
-    <Card className="p-6 flex flex-col h-full min-h-[300px]">
+    <Card className="p-6 flex flex-col h-full min-h-[300px] liquid-glass relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-t from-sky-500/5 to-transparent pointer-events-none" />
+      <div className="relative z-10 w-full h-full flex flex-col">
       <div className="flex flex-col @sm:flex-row @sm:items-center justify-between gap-4 mb-6">
         <h3 className="font-bold text-sm uppercase tracking-wider">
           Anuncios Escolares
@@ -50,6 +52,7 @@ export default function SchoolAnnouncementsWidget({
             No hay anuncios disponibles.
           </p>
         )}
+      </div>
       </div>
     </Card>
   );

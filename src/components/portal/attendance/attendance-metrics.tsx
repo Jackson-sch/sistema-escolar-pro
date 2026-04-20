@@ -59,8 +59,11 @@ export function AttendanceMetrics({ stats }: AttendanceMetricsProps) {
       {items.map((item, index) => (
         <Card
           key={index}
-          className="overflow-hidden border-border/50 bg-card/50 transition-all hover:shadow-lg hover:shadow-primary/5"
+          className="overflow-hidden border-border/50 liquid-glass transition-all hover:shadow-xl hover:shadow-primary/10 relative"
         >
+          {/* Subtle Glow decoration for premium feel */}
+          <div className="absolute top-0 right-0 w-20 h-20 bg-primary/10 rounded-full blur-2xl pointer-events-none" />
+
           <CardContent className="px-2">
             <div className="flex items-center gap-4">
               <div

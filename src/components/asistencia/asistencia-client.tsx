@@ -135,10 +135,10 @@ export function AsistenciaClient({
   const loadAsistencia = () => {
     if (!seccionId) return;
     startTransition(async () => {
-      const res = await getAsistenciaAction(seccionId, fecha);
-      if (res.data) {
-        setCursoId(res.cursoId || "");
-        const transformed = res.data.map((alumno: any) => {
+      const res = await getAsistenciaAction({ nivelAcademicoId: seccionId, fecha });
+      if (res.success) {
+        setCursoId(res.success.cursoId || "");
+        const transformed = res.success.data.map((alumno: any) => {
           const a = alumno.asistencias[0];
           let estado = "presente";
           if (a) {
@@ -203,7 +203,7 @@ export function AsistenciaClient({
       justificacion: a.justificacion,
     }));
     const res = await upsertAsistenciaAction(data);
-    if (res.success) toast.success(res.success);
+    if (res.success) toast.success("Asistencia guardada con éxito");
     if (res.error) toast.error(res.error);
     setIsSaving(false);
   };

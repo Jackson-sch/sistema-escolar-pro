@@ -1,6 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
+import { formatTitleCase } from "@/lib/formats";
 
 /**
  * Obtiene toda la información necesaria para generar una libreta de notas
@@ -139,14 +140,15 @@ export async function getGradeReportDataAction(
       data: {
         estudiante: {
           id: student.id,
-          nombreCompleto: `${student.apellidoPaterno} ${student.apellidoMaterno}, ${student.name}`,
+          nombreCompleto: formatTitleCase(`${student.apellidoPaterno} ${student.apellidoMaterno}, ${student.name}`),
           dni: student.dni,
           codigo: student.codigoEstudiante,
           grado: student.nivelAcademico?.grado.nombre || "N/A",
           seccion: student.nivelAcademico?.seccion || "N/A",
           nivel: student.nivelAcademico?.grado.nivel.nombre || "N/A",
-          institucion:
-            student.nivelAcademico?.institucion.nombreInstitucion || "N/A",
+          institucion: student.nivelAcademico?.institucion.nombreInstitucion || "I.E.",
+          institucionCompleta: student.nivelAcademico?.institucion,
+          logo: student.nivelAcademico?.institucion.logo,
         },
         periodos: allPeriodos,
         cursos: reporteMap,
@@ -265,9 +267,9 @@ export async function getQualitativeReportDataAction(
     return {
       data: {
         student: {
-          name: student.name,
-          apellidoPaterno: student.apellidoPaterno,
-          apellidoMaterno: student.apellidoMaterno,
+          name: formatTitleCase(student.name || ''),
+          apellidoPaterno: formatTitleCase(student.apellidoPaterno || ''),
+          apellidoMaterno: formatTitleCase(student.apellidoMaterno || ''),
           dni: student.dni,
           codigoEstudiante: student.codigoEstudiante,
           nivelAcademico: {

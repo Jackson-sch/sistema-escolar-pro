@@ -7,6 +7,7 @@ import {
   IconTrash,
   IconEye,
   IconFilePlus,
+  IconDownload,
 } from "@tabler/icons-react";
 import { Row, Table } from "@tanstack/react-table";
 import { toast } from "sonner";
@@ -72,6 +73,13 @@ export function RowActions({ row, table }: RowActionsProps) {
       onClick: () => setShowViewSheet(true),
       variant: "ghost",
       className: "rounded-full",
+    },
+    {
+      icon: IconDownload,
+      label: "Descargar Boleta",
+      onClick: () => window.open(`/api/documentos/boleta?estudianteId=${student.id}&anio=${year}`, '_blank'),
+      variant: "ghost",
+      className: "text-violet-500 rounded-full",
     },
     ...(!isProfessor
       ? ([

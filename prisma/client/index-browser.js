@@ -905,6 +905,20 @@ exports.Prisma.CuentaBancariaScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.NotificationLogScalarFieldEnum = {
+  id: 'id',
+  tipo: 'tipo',
+  destinatario: 'destinatario',
+  asunto: 'asunto',
+  mensaje: 'mensaje',
+  estado: 'estado',
+  error: 'error',
+  metadata: 'metadata',
+  institucionId: 'institucionId',
+  userId: 'userId',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -934,7 +948,8 @@ exports.Role = exports.$Enums.Role = {
   estudiante: 'estudiante',
   profesor: 'profesor',
   administrativo: 'administrativo',
-  padre: 'padre'
+  padre: 'padre',
+  super_admin: 'super_admin'
 };
 
 exports.TipoGestion = exports.$Enums.TipoGestion = {
@@ -1023,6 +1038,12 @@ exports.TipoCuentaBancaria = exports.$Enums.TipoCuentaBancaria = {
   BILLETERA_DIGITAL: 'BILLETERA_DIGITAL'
 };
 
+exports.TipoNotificacion = exports.$Enums.TipoNotificacion = {
+  EMAIL: 'EMAIL',
+  SMS: 'SMS',
+  WHATSAPP: 'WHATSAPP'
+};
+
 exports.Prisma.ModelName = {
   Cargo: 'Cargo',
   EstadoUsuario: 'EstadoUsuario',
@@ -1075,7 +1096,8 @@ exports.Prisma.ModelName = {
   VentaUniforme: 'VentaUniforme',
   DetalleVentaUniforme: 'DetalleVentaUniforme',
   FavoritoUniforme: 'FavoritoUniforme',
-  CuentaBancaria: 'CuentaBancaria'
+  CuentaBancaria: 'CuentaBancaria',
+  NotificationLog: 'NotificationLog'
 };
 
 /**

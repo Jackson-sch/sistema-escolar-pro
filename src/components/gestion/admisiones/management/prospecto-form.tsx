@@ -155,7 +155,7 @@ export function ProspectoForm({
   const onSubmit = async (values: z.infer<typeof prospectoSchema>) => {
     setLoading(true);
     try {
-      const res = await upsertProspectoAction(values, id);
+      const res = await upsertProspectoAction({ values, id });
       if (res.success) {
         toast.success(res.success);
         setIsDirty(false);

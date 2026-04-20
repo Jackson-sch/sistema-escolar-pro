@@ -29,8 +29,11 @@ export function DashboardContent({ data }: DashboardContentProps) {
       {/* Row 1: Academic Progress & Financial Status */}
       <div className="grid gap-6 @3xl:grid-cols-3">
         <div className="@3xl:col-span-2">
-          <Card className="p-6 h-full min-h-[400px]">
-            <AcademicProgressChart data={chartData} />
+          <Card className="p-6 h-full min-h-[400px] liquid-glass relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 pointer-events-none" />
+            <div className="relative z-10 w-full h-full">
+              <AcademicProgressChart data={chartData} />
+            </div>
           </Card>
         </div>
         <div className="@3xl:col-span-1">

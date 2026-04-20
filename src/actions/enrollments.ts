@@ -298,3 +298,114 @@ export async function getEnrollmentStatsAction() {
     return { error: "No se pudieron obtener las estadísticas de matrícula" };
   }
 }
+/**
+ * Promueve un grupo de estudiantes de una sección a otra de forma masiva
+ */
+export async function promoteStudentsAction(
+  studentIds: string[],
+  targetSeccionId: string,
+  targetYear: number,
+  isRepitente: boolean = false
+) {
+  const session = await auth();
+  if (!session?.user) return { error: "No autorizado" };
+
+  try {
+    const results = await prisma.$transaction(async (tx) => {
+      const processed = [];
+      const errors = [];
+
+      // Obtener el concepto de matrícula una sola vez para eficiencia
+      const conceptoMatricula = await tx.conceptoPago.findFirst({
+        where: {
+          nombre: { startsWith: "Matric", mode: "insensitive" },
+          institucionId: session.user.institucionId || undefined,
+          activo: true,
+        },
+      });
+
+      for (const studentId of studentIds) {
+        try {
+          // 1. Validar si ya está matriculado en el año destino
+          const existing = await tx.matricula.findUnique({
+            where: {
+              estudianteId_anioAcademico: {
+                estudianteId: studentId,
+                anioAcademico: targetYear,
+              },
+            },
+          });
+
+          if (existing) {
+            errors.push({ studentId, error: "Ya matriculado" });
+            continue;
+          }
+
+          // 2. Generar número de matrícula
+          const lastEnrollment = await tx.matricula.findFirst({
+            where: { anioAcademico: targetYear },
+            orderBy: { numeroMatricula: "desc" },
+            select: { numeroMatricula: true },
+          });
+
+          let nextNumber = 1;
+          if (lastEnrollment) {
+            const parts = lastEnrollment.numeroMatricula.split("-");
+            const lastNum = parseInt(parts[parts.length - 1]);
+            if (!isNaN(lastNum)) nextNumber = lastNum + 1;
+          }
+          const numeroMatricula = `MAT-${targetYear}-${String(nextNumber).padStart(5, "0")}`;
+
+          // 3. Crear matrícula
+          const enrollment = await tx.matricula.create({
+            data: {
+              numeroMatricula,
+              estudianteId: studentId,
+              nivelAcademicoId: targetSeccionId,
+              anioAcademico: targetYear,
+              esRepitente: isRepitente,
+              estado: "activo",
+            },
+          });
+
+          // 4. Actualizar usuario
+          await tx.user.update({
+            where: { id: studentId },
+            data: { nivelAcademicoId: targetSeccionId },
+          });
+
+          // 5. Generar deuda de matrícula
+          if (conceptoMatricula) {
+            await tx.cronogramaPago.create({
+              data: {
+                estudianteId: studentId,
+                conceptoId: conceptoMatricula.id,
+                monto: conceptoMatricula.montoSugerido,
+                fechaVencimiento: new Date(),
+                montoPagado: 0,
+                pagado: false,
+              },
+            });
+          }
+
+          processed.push(studentId);
+        } catch (e: any) {
+          errors.push({ studentId, error: e.message });
+        }
+      }
+
+      return { processed, errors };
+    });
+
+    revalidatePath("/gestion/matriculas");
+    revalidatePath("/gestion/estudiantes");
+    
+    return {
+      success: `Proceso completado. ${results.processed.length} estudiantes promovidos. ${results.errors.length} errores.`,
+      data: results,
+    };
+  } catch (error: any) {
+    console.error("Error in promoteStudentsAction:", error);
+    return { error: "No se pudo completar el proceso de promoción masiva" };
+  }
+}

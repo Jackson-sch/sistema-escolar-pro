@@ -19,6 +19,7 @@ export async function getLayoutUserAction(userId: string) {
         apellidoPaterno: true,
         apellidoMaterno: true,
         email: true,
+        institucionId: true,
       },
     });
     return { success: user ? JSON.parse(JSON.stringify(user)) : null };

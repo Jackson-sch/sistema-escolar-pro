@@ -1,27 +1,22 @@
 import {
-  IconMessage2,
-  IconCalendar,
-  IconSpeakerphone,
-  IconPlus,
-} from "@tabler/icons-react";
-import { getAnunciosAction, getEventosAction } from "@/actions/communications";
-import { AnnouncementList } from "@/components/comunicaciones/anuncios/announcement-list";
-import { EventCalendar } from "@/components/comunicaciones/eventos/event-calendar";
+  getAnunciosAction,
+  getEventosAction,
+} from "@/actions/communications";
 import { AddAnnouncementButton } from "@/components/comunicaciones/anuncios/add-announcement-button";
 import { AddEventButton } from "@/components/comunicaciones/eventos/add-event-button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ComunicacionesView } from "@/components/comunicaciones/comunicaciones-view";
 
 import { auth } from "@/auth";
+
+export const dynamic = "force-dynamic";
 
 export default async function ComunicacionesPage() {
   const session = await auth();
   const isProfessor = session?.user?.role === "profesor";
   const profesorId = session?.user?.id;
 
-  const [{ data: anuncios = [] }, { data: eventos = [] }] = await Promise.all([
-    getAnunciosAction(),
-    getEventosAction(),
-  ]);
+  const [{ success: anuncios = [] }, { success: eventos = [] }] =
+    await Promise.all([getAnunciosAction(), getEventosAction()]);
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 pt-0 @container/main">
@@ -43,30 +38,7 @@ export default async function ComunicacionesPage() {
         </div>
       </div>
 
-      <Tabs defaultValue="anuncios" className="w-full">
-        <TabsList className="bg-muted/50 p-1 h-auto shadow-inner border border-border/40 mb-6 rounded-full">
-          <TabsTrigger
-            value="anuncios"
-            className="px-8 py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm gap-2 font-bold text-xs rounded-full"
-          >
-            <IconSpeakerphone className="size-4" /> Anuncios
-          </TabsTrigger>
-          <TabsTrigger
-            value="eventos"
-            className="px-8 py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm gap-2 font-bold text-xs rounded-full"
-          >
-            <IconCalendar className="size-4" /> Calendario
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="anuncios" className="mt-0 outline-none">
-          <AnnouncementList initialAnuncios={anuncios as any} />
-        </TabsContent>
-
-        <TabsContent value="eventos" className="mt-0 outline-none">
-          <EventCalendar initialEventos={eventos as any} />
-        </TabsContent>
-      </Tabs>
+      <ComunicacionesView anuncios={anuncios as any} eventos={eventos as any} />
     </div>
   );
 }

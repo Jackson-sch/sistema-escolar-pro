@@ -83,14 +83,10 @@ export function EventForm({ onSuccess, initialData, id }: EventFormProps) {
   const onSubmit = async (values: z.infer<typeof eventSchema>) => {
     setLoading(true);
     try {
-      const res = await upsertEventoAction(
-        {
-          ...values,
-          fechaInicio: values.fechaInicio,
-          fechaFin: values.fechaFin,
-        },
+      const res = await upsertEventoAction({
+        ...values,
         id,
-      );
+      });
       if (res.success) {
         toast.success(res.success);
         setIsDirty(false);

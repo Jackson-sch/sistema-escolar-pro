@@ -23,8 +23,8 @@ export default async function PortalHorarioPage({
   }
 
   // 1. Obtener hijos del padre
-  const hijosRes = await getParentStudentsAction(session.user.id);
-  const hijos = hijosRes.data || [];
+  const hijosRes = await getParentStudentsAction({});
+  const hijos = hijosRes.success || [];
 
   if (hijos.length === 0) {
     return (
@@ -48,8 +48,8 @@ export default async function PortalHorarioPage({
   const selectedHijoId = hijoId || hijos[0].id;
 
   // 3. Obtener horario
-  const scheduleRes = await getStudentScheduleAction(selectedHijoId);
-  const horarios = scheduleRes.data || [];
+  const scheduleRes = await getStudentScheduleAction({ estudianteId: selectedHijoId });
+  const horarios = scheduleRes.success || [];
 
   return (
     <div className="flex flex-1 flex-col gap-8 p-4 sm:p-10 pt-0 animate-in fade-in duration-700 max-w-[1400px] w-full mx-auto">

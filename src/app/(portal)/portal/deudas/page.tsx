@@ -22,7 +22,7 @@ export default async function DeudasPage({
 
   // Obtener datos vía server action
   const [deudasRes, bancosRes] = await Promise.all([
-    getDeudasPortalAction(session.user.id, params.hijoId),
+    getDeudasPortalAction({ hijoId: params.hijoId }),
     getBankAccountsAction({ onlyActive: true }),
   ]);
 
@@ -31,7 +31,7 @@ export default async function DeudasPage({
     deudas = [],
     historial = [],
     selectedHijoId: hijoSeleccionado,
-  } = deudasRes.data || {};
+  } = (deudasRes.success as any) || {};
 
   const bancos = (bancosRes as any).success || [];
 

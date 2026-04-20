@@ -2,7 +2,8 @@
 
 import { useQueryState, parseAsString } from "nuqs";
 import { IconClipboardList, IconReportAnalytics } from "@tabler/icons-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { AnimatedTabs } from "@/components/ui/animated-tabs";
 
 interface EvaluacionesTabsProps {
   children: {
@@ -17,25 +18,27 @@ export function EvaluacionesTabs({ children }: EvaluacionesTabsProps) {
     parseAsString.withDefault("evaluaciones"),
   );
 
+  const tabs = [
+    {
+      id: "evaluaciones",
+      label: "Evaluaciones",
+      icon: <IconClipboardList className="size-4" />,
+    },
+    {
+      id: "reportes",
+      label: "Reportes",
+      icon: <IconReportAnalytics className="size-4" />,
+    },
+  ];
+
   return (
     <Tabs value={tab} onValueChange={setTab}>
-      <TabsList className="flex flex-wrap sm:flex-nowrap h-auto sm:h-12 mb-2 sm:ml-2 bg-muted/50 p-1 shadow-inner border justify-start rounded-full">
-        <TabsTrigger
-          value="evaluaciones"
-          className="flex-1 sm:flex-initial gap-2 text-xs sm:text-sm px-3 sm:px-6 py-2 rounded-full"
-        >
-          <IconClipboardList className="size-4" />
-          <span>Evaluaciones</span>
-        </TabsTrigger>
-
-        <TabsTrigger
-          value="reportes"
-          className="flex-1 sm:flex-initial gap-2 text-xs sm:text-sm px-3 sm:px-6 py-2 rounded-full"
-        >
-          <IconReportAnalytics className="size-4" />
-          <span>Reportes</span>
-        </TabsTrigger>
-      </TabsList>
+      <AnimatedTabs
+        tabs={tabs}
+        activeTab={tab}
+        onTabChange={setTab}
+        className="mb-6 ml-2"
+      />
 
       <TabsContent value="evaluaciones" className="space-y-4">
         {children.evaluaciones}

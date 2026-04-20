@@ -2,8 +2,8 @@ import { auth } from "@/auth"
 import { z } from "zod"
 
 export type ActionState<T> =
-  | { success: T; error?: never }
-  | { error: string; success?: never }
+  | { success: T; error?: never; data?: any }
+  | { error: string; success?: never; data?: any }
 
 /**
  * Crea una acción segura con validación de esquema, autenticación y autorización opcional.

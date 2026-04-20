@@ -106,7 +106,7 @@ export function AnnouncementForm({
         resumen: values.resumen || null,
       };
 
-      const res = await upsertAnuncioAction(cleanedValues, id);
+      const res = await upsertAnuncioAction({ ...cleanedValues, id });
       if (res.success) {
         toast.success(res.success);
         setIsDirty(false);

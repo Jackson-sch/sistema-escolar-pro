@@ -11,6 +11,8 @@ import { getLayoutUserAction, getPendingComprobantesCountAction } from "@/action
 import { CommandPalette } from "@/components/common/command-palette";
 import { SiteFooter } from "@/components/layout/site-footer";
 
+export const dynamic = "force-dynamic";
+
 export default async function ProtectedLayout({
   children,
 }: {
@@ -32,9 +34,18 @@ export default async function ProtectedLayout({
     redirect("/cambiar-password");
   }
 
+  if (user?.role === "super_admin") {
+    redirect("/admin");
+  }
+
   if (user?.role === "padre") {
     // Si es padre, debe ir al portal
     redirect("/portal");
+  }
+
+  // Verificar si un administrador necesita crear su institución
+  if (user?.role === "administrativo" && !user?.institucionId) {
+    redirect("/onboarding/institucion");
   }
 
   // Obtener conteo de comprobantes pendientes y datos generales
@@ -49,8 +60,8 @@ export default async function ProtectedLayout({
   const institucionData = institucionRes.data;
 
   const contextData = {
-    estadisticasGenerales: stats.success,
-    resumenFinanciero: financeStats.success,
+    estadisticasGenerales: (stats as any).success,
+    resumenFinanciero: (financeStats as any).success,
     timestamp: new Date().toISOString(),
   };
 

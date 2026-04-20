@@ -14,14 +14,18 @@ export default async function PortalLayout({
 }) {
   const session = await auth();
 
-  // Verificar que el usuario está autenticado
+  // Verificar que el usuario está autenticado y es un padre
   if (!session?.user?.id) {
     redirect("/login");
   }
 
+  if (session.user.role !== "padre") {
+    redirect("/");
+  }
+
   // Verificar si debe cambiar la contraseña
-  const userRes = await getParentUserAction(session.user.id);
-  const user = userRes.data;
+  const userRes = await getParentUserAction({});
+  const user = userRes.success;
 
   if (user?.mustChangePassword) {
     redirect("/cambiar-password");
@@ -30,7 +34,7 @@ export default async function PortalLayout({
   const institucionRes = await getInstitucionByIdAction(
     session.user.institucionId || undefined,
   );
-  const institucionData = institucionRes.success;
+  const institucionData = institucionRes.data;
 
   return (
     <div className="[--header-height:calc(var(--spacing)*14)]">

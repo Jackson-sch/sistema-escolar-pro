@@ -64,20 +64,42 @@ export async function analizarRendimientoAcademico(estudianteId: string) {
 }
 
 /**
- * Genera feedback automático para una calificación
+ * Genera feedback automático para una calificación basado en competencias (Escala Peruana AD-C)
  */
 export async function generarFeedbackNota(data: {
   estudianteNombre: string;
   materia: string;
-  nota: number;
+  competencia?: string;
+  nota: string | number;
   tipoEvaluacion: string;
 }) {
   const model = await getGeminiModel();
 
+  const prompt = `Actúa como un docente experto y empático. Genera un reporte de retroalimentación académico formal dirigido a los PADRES DE FAMILIA del estudiante ${data.estudianteNombre}.
+  
+Contexto:
+- Materia: ${data.materia}
+- Competencia Evaluada: ${data.competencia || "Competencias generales del curso"}
+- Evaluación: ${data.tipoEvaluacion}
+- Calificación obtenida: ${data.nota} (Escala: AD/A/B/C)
+
+Instrucciones:
+1. El tono debe ser FORMAL y profesional, dirigiéndose a los padres sobre el progreso de su hijo(a).
+2. Debes referirte explícitamente a la COMPETENCIA mencionada.
+3. Considera la escala literal:
+   - AD (Logro Destacado): Felicitar por superar las expectativas y sugerir retos de mayor complejidad.
+   - A (Logro Esperado): Reconocer el buen desempeño y sugerir precisiones para alcanzar la excelencia.
+   - B (En Proceso): Identificar avances parciales y recomendar acompañamiento específico o refuerzo.
+   - C (En Inicio): Ser motivador pero claro sobre las dificultades, sugiriendo un plan de apoyo inmediato.
+4. Máximo 3 oraciones cortas pero impactantes.
+5. ESTRICTAMENTE EN ESPAÑOL.
+
+Evita frases genéricas. Sé específico con la competencia.`;
+
   const { text } = await generateText({
     model,
-    system: "Eres un docente motivador y profesional. Tu objetivo es dar retroalimentación personalizada a un estudiante basado en su nota. Si la nota es alta, felicita y sugiere desafíos. Si es baja, motiva y sugiere áreas de mejora sin ser desanimador.",
-    prompt: `Genera un feedback corto (2-3 oraciones) para el estudiante ${data.estudianteNombre} que obtuvo una nota de ${data.nota} en su ${data.tipoEvaluacion} de ${data.materia}.`,
+    system: "Eres un mentor educativo experto en el currículo nacional peruano. Tu objetivo es redactar informes de desempeño para padres de familia que sean pedagógicamente útiles, constructivos y precisos.",
+    prompt,
   });
 
   return text;

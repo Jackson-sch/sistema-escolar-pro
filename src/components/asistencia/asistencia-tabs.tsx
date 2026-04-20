@@ -7,7 +7,8 @@ import {
   IconQrcode,
   IconClockCog,
 } from "@tabler/icons-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { AnimatedTabs } from "@/components/ui/animated-tabs";
 
 interface AsistenciaTabsProps {
   children: {
@@ -26,22 +27,22 @@ export function AsistenciaTabs({ children }: AsistenciaTabsProps) {
 
   const tabs = [
     {
-      value: "registro",
+      id: "registro",
       label: "Registro Diario",
       icon: <IconClipboardText className="size-4" />,
     },
     {
-      value: "reportes",
+      id: "reportes",
       label: "Reportes",
       icon: <IconChartBar className="size-4" />,
     },
     {
-      value: "scanner",
+      id: "scanner",
       label: "Scanner QR",
       icon: <IconQrcode className="size-4" />,
     },
     {
-      value: "politicas",
+      id: "politicas",
       label: "Políticas",
       icon: <IconClockCog className="size-4" />,
     },
@@ -49,18 +50,12 @@ export function AsistenciaTabs({ children }: AsistenciaTabsProps) {
 
   return (
     <Tabs value={tab} onValueChange={setTab}>
-      <TabsList className="flex flex-wrap sm:flex-nowrap h-auto sm:ml-2 bg-muted/50 shadow-inner border justify-start rounded-full">
-        {tabs.map((t) => (
-          <TabsTrigger
-            key={t.value}
-            value={t.value}
-            className="flex-1 sm:flex-initial gap-2 text-xs sm:text-sm px-3 sm:px-6 py-2 rounded-full"
-          >
-            {t.icon}
-            <span>{t.label}</span>
-          </TabsTrigger>
-        ))}
-      </TabsList>
+      <AnimatedTabs
+        tabs={tabs}
+        activeTab={tab}
+        onTabChange={setTab}
+        className="mb-6 ml-2"
+      />
 
       <TabsContent value="registro" className="space-y-4">
         {children.registro}

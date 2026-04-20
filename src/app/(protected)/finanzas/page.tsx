@@ -53,6 +53,15 @@ async function FinanzasContent() {
   const formatoComprobante = (formatoRes.data?.valor ||
     "A4") as FormatoComprobante;
 
+  // Extraer niveles únicos de las secciones
+  const nivelesMap = new Map();
+  secciones.forEach((s: any) => {
+    if (s.nivel && !nivelesMap.has(s.nivel.id)) {
+      nivelesMap.set(s.nivel.id, s.nivel);
+    }
+  });
+  const niveles = Array.from(nivelesMap.values());
+
   return (
     <FinanzasTabs>
       {{
@@ -65,9 +74,9 @@ async function FinanzasContent() {
               <div className="flex-1 flex justify-end items-center gap-2 order-1 sm:order-2">
                 <BulkActionsButton
                   conceptos={conceptos}
-                  secciones={secciones}
+                  niveles={niveles}
                 />
-                <AddPensionButton conceptos={conceptos} secciones={secciones} />
+                <AddPensionButton conceptos={conceptos} niveles={niveles} />
               </div>
             </div>
             <CronogramaTable

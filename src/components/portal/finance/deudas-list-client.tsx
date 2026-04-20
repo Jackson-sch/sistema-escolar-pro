@@ -109,7 +109,7 @@ export function DeudasListClient({
         </div>
 
         {/* Desktop View: Table */}
-        <div className="hidden md:block rounded-[1.5rem] border border-border bg-card overflow-hidden shadow-2xl">
+        <div className="hidden md:block rounded-[1.5rem] border border-white/10 dark:border-white/5 liquid-glass overflow-hidden shadow-2xl">
           <div className="overflow-x-auto">
             <Table className="w-full text-left border-collapse">
               <TableHeader>
@@ -200,7 +200,7 @@ export function DeudasListClient({
         {/* Mobile View: Cards */}
         <div className="md:hidden space-y-4">
           {deudas.length === 0 ? (
-            <div className="p-12 text-center text-muted-foreground/60 font-medium italic bg-[#0f111a] rounded-[1.25rem] border border-border/40">
+            <div className="p-12 text-center text-muted-foreground/60 font-medium italic liquid-glass rounded-[1.25rem] border border-white/5">
               No se encontraron pensiones pendientes.
             </div>
           ) : (
@@ -211,9 +211,12 @@ export function DeudasListClient({
               return (
                 <div
                   key={deuda.id}
-                  className="p-6 rounded-[1.25rem] border border-border/40 bg-[#0f111a] space-y-6 shadow-xl"
+                  className="p-6 rounded-[1.25rem] border border-white/5 liquid-glass space-y-6 shadow-xl relative overflow-hidden"
                 >
-                  <div className="flex justify-between items-start gap-4">
+                  {/* Subtle Glow decoration for premium feel */}
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
+                  
+                  <div className="flex justify-between items-start gap-4 relative z-10">
                     <div className="min-w-0">
                       <p className="font-bold text-lg text-white/90 uppercase tracking-tight leading-tight truncate">
                         {deuda.concepto.nombre}

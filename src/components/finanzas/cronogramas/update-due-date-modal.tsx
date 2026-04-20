@@ -38,19 +38,14 @@ interface UpdateDueDateModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   conceptos: { id: string; nombre: string }[];
-  secciones: {
-    id: string;
-    seccion: string;
-    grado: { nombre: string };
-    nivel: { nombre: string };
-  }[];
+  niveles: { id: string; nombre: string }[];
 }
 
 export function UpdateDueDateModal({
   isOpen,
   onOpenChange,
   conceptos,
-  secciones,
+  niveles,
 }: UpdateDueDateModalProps) {
   const [isPending, startTransition] = useTransition();
 
@@ -58,7 +53,7 @@ export function UpdateDueDateModal({
     defaultValues: {
       conceptoId: "",
       nuevaFecha: new Date(),
-      nivelAcademicoId: "all",
+      nivelId: "all",
     },
   });
 
@@ -67,10 +62,10 @@ export function UpdateDueDateModal({
       const payload = {
         conceptoId: values.conceptoId,
         nuevaFecha: values.nuevaFecha.toISOString(),
-        nivelAcademicoId:
-          values.nivelAcademicoId === "all"
+        nivelId:
+          values.nivelId === "all"
             ? undefined
-            : values.nivelAcademicoId,
+            : values.nivelId,
       };
 
       const res = await updateCronogramaFechaMasivoAction(payload);
@@ -174,7 +169,7 @@ export function UpdateDueDateModal({
 
           <FormField
             control={form.control}
-            name="nivelAcademicoId"
+            name="nivelId"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-[10px] font-bold uppercase tracking-wider ml-1 text-muted-foreground/70">
@@ -190,20 +185,19 @@ export function UpdateDueDateModal({
                     <SelectItem value="all" className="rounded-xl">
                       Toda la institución
                     </SelectItem>
-                    {secciones.map((s) => (
+                    {niveles.map((n) => (
                       <SelectItem
-                        key={s.id}
-                        value={s.id}
+                        key={n.id}
+                        value={n.id}
                         className="rounded-xl"
                       >
-                        {s.nivel.nombre} - {s.grado.nombre} "{s.seccion}"
+                        {n.nombre}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
                 <FormDescription className="text-xs ml-1">
-                  Deja en "Toda la institución" para actualizar todas las
-                  secciones.
+                  Deja en "Toda la institución" para actualizar todos los niveles.
                 </FormDescription>
               </FormItem>
             )}

@@ -113,6 +113,7 @@ export const getResumenDeudaAction = createSafeAction(
       },
     };
   },
+  { roles: ["administrativo"] }
 );
 
 /**

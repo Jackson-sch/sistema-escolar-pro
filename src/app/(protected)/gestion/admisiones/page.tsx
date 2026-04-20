@@ -6,16 +6,22 @@ import { AddProspectoButton } from "@/components/gestion/admisiones/components/a
 
 import { Suspense } from "react";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdmisionesPage() {
   const [
-    { data: prospectos = [] },
-    { data: grados = [] },
-    { data: instituciones = [] },
+    prospectosRes,
+    gradosRes,
+    institucionesRes,
   ] = await Promise.all([
-    getProspectosAction(),
+    getProspectosAction({}),
     getGradosAction(),
     getInstitucionesAction(),
   ]);
+
+  const prospectos = prospectosRes.success || [];
+  const grados = (gradosRes as any).success || (gradosRes as any).data || [];
+  const instituciones = (institucionesRes as any).success || (institucionesRes as any).data || [];
 
   return (
     <div className="flex flex-1 flex-col gap-8 p-0 sm:p-6 pt-0">

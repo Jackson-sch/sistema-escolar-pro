@@ -112,7 +112,7 @@ export const createCronogramaMasivoAction = createSafeAction(
       where: {
         role: "estudiante",
         institucionId,
-        nivelAcademicoId: values.nivelAcademicoId || undefined,
+        nivelAcademico: values.nivelId ? { nivelId: values.nivelId } : undefined,
         // Solo estudiantes con matrícula activa en el año actual
         matriculas: {
           some: {
@@ -186,7 +186,7 @@ export const createCronogramaMasivoAction = createSafeAction(
 export const deleteCronogramaMasivoAction = createSafeAction(
   z.object({
     conceptoId: z.string(),
-    nivelAcademicoId: z.string().optional(),
+    nivelId: z.string().optional(),
   }),
   async (values, session) => {
     const institucionId = session.user.institucionId;
@@ -197,7 +197,7 @@ export const deleteCronogramaMasivoAction = createSafeAction(
       montoPagado: 0,
       estudiante: {
         institucionId,
-        nivelAcademicoId: values.nivelAcademicoId,
+        nivelAcademico: values.nivelId ? { nivelId: values.nivelId } : undefined,
       },
     };
 
@@ -222,7 +222,7 @@ export const updateCronogramaFechaMasivoAction = createSafeAction(
   z.object({
     conceptoId: z.string(),
     nuevaFecha: z.union([z.date(), z.string()]),
-    nivelAcademicoId: z.string().optional(),
+    nivelId: z.string().optional(),
   }),
   async (values, session) => {
     const institucionId = session.user.institucionId;
@@ -233,7 +233,7 @@ export const updateCronogramaFechaMasivoAction = createSafeAction(
       pagado: false,
       estudiante: {
         institucionId,
-        nivelAcademicoId: values.nivelAcademicoId,
+        nivelAcademico: values.nivelId ? { nivelId: values.nivelId } : undefined,
       },
     };
 
@@ -262,7 +262,7 @@ export const updateCronogramaFechaMasivoAction = createSafeAction(
 export const applyBulkMoraAction = createSafeAction(
   z.object({
     conceptoId: z.string().optional(),
-    nivelAcademicoId: z.string().optional(),
+    nivelId: z.string().optional(),
   }),
   async (filters, session) => {
     const institucionId = session.user.institucionId;
@@ -276,7 +276,7 @@ export const applyBulkMoraAction = createSafeAction(
         conceptoId: filters.conceptoId || undefined,
         estudiante: {
           institucionId,
-          nivelAcademicoId: filters.nivelAcademicoId || undefined,
+          nivelAcademico: filters.nivelId ? { nivelId: filters.nivelId } : undefined,
         },
       },
       include: {

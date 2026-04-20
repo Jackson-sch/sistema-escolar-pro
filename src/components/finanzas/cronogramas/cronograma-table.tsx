@@ -241,7 +241,7 @@ export function CronogramaTable({
         );
       if (estadoFilter === "VOIDED")
         result = result.filter((item) =>
-          item.pagos?.some((p: any) => p.pago.estado === "anulado"),
+          item.pagos?.some((p: any) => p.estado === "anulado"),
         );
     }
 

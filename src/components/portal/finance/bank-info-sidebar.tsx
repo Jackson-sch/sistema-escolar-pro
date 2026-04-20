@@ -78,12 +78,15 @@ function BankCardCollapsible({
 
   return (
     <div
-      className={`overflow-hidden rounded-[1.25rem] border transition-all duration-300 ${
+      className={`relative overflow-hidden rounded-[1.25rem] transition-all duration-300 liquid-glass ${
         isMain
-          ? "border-primary/30 bg-primary/5 shadow-lg shadow-primary/5"
-          : "border-border bg-card shadow-lg"
+          ? "border border-primary/50 shadow-2xl shadow-primary/20"
+          : "border border-white/10 dark:border-white/5 shadow-xl"
       }`}
     >
+      {isMain && (
+        <div className="absolute top-0 -left-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl animate-blob" />
+      )}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex w-full items-center justify-between p-5 text-left transition-colors hover:bg-white/5"

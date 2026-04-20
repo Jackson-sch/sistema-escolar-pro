@@ -1,95 +1,12 @@
-"use client"
-
 import React from 'react'
-import { Text, View, StyleSheet } from '@react-pdf/renderer'
-import { DocumentWrapper, pdfStyles } from './document-wrapper'
-
-const boletaStyles = StyleSheet.create({
-  sectionTitle: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    backgroundColor: '#f8fafc',
-    padding: 6,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    color: '#0f172a',
-    textTransform: 'uppercase',
-    marginTop: 10,
-  },
-  studentInfo: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 10,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#f1f5f9',
-    borderRadius: 8,
-  },
-  infoItem: {
-    width: '50%',
-    marginBottom: 6,
-  },
-  label: {
-    fontSize: 7,
-    color: '#64748b',
-    fontWeight: 'bold',
-    textTransform: 'uppercase',
-  },
-  value: {
-    fontSize: 9,
-    fontWeight: 'bold',
-    color: '#0f172a',
-  },
-  table: {
-    marginTop: 15,
-  },
-  tableHeader: {
-    flexDirection: 'row',
-    backgroundColor: '#0f172a',
-    color: 'white',
-    padding: 8,
-    fontSize: 8,
-    fontWeight: 'bold',
-    borderRadius: 4,
-  },
-  tableRow: {
-    flexDirection: 'row',
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#f1f5f9',
-    paddingVertical: 8,
-    paddingHorizontal: 4,
-    minHeight: 30,
-    alignItems: 'center',
-  },
-  areaCell: { width: '35%' },
-  competencyCell: { width: '45%' },
-  gradeCell: { width: '20%', textAlign: 'center' },
-  areaText: {
-    fontSize: 8,
-    fontWeight: 'bold',
-    color: '#0f172a',
-  },
-  compText: {
-    fontSize: 7,
-    color: '#475569',
-  },
-  gradeText: {
-    fontSize: 10,
-    fontWeight: 'black',
-  },
-  gradeAD: { color: '#059669' },
-  gradeA: { color: '#2563eb' },
-  gradeB: { color: '#d97706' },
-  gradeC: { color: '#dc2626' },
-  summarySection: {
-    marginTop: 20,
-    padding: 10,
-    backgroundColor: '#f8fafc',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-  }
-})
+import { Text, View } from '@react-pdf/renderer'
+import { DocumentWrapper } from './document-wrapper'
+import { Heading } from '@/components/pdfx/heading/pdfx-heading'
+import { KeyValue } from '@/components/pdfx/key-value/pdfx-key-value'
+import { Table, TableHeader, TableBody, TableRow, TableCell } from '@/components/pdfx/table/pdfx-table'
+import { Stack } from '@/components/pdfx/stack/pdfx-stack'
+import { Divider } from '@/components/pdfx/divider/pdfx-divider'
+import { formatTitleCase } from '@/lib/formats'
 
 interface BoletaNotasPDFProps {
   student: {
@@ -113,6 +30,16 @@ interface BoletaNotasPDFProps {
   verificationCode?: string
 }
 
+const getGradeColor = (grade?: string) => {
+  switch (grade) {
+    case 'AD': return '#059669' // Success
+    case 'A': return '#2563eb'  // Primary/Info
+    case 'B': return '#d97706'  // Warning
+    case 'C': return '#dc2626'  // Destructive
+    default: return '#64748b'
+  }
+}
+
 export const BoletaNotasPDF = ({
   student,
   notas,
@@ -121,18 +48,7 @@ export const BoletaNotasPDF = ({
   institucion,
   verificationCode
 }: BoletaNotasPDFProps) => {
-  const studentFull = `${student.apellidoPaterno} ${student.apellidoMaterno}, ${student.name}`
-
-  // Lógica de colores para notas literales
-  const getGradeStyle = (grade?: string) => {
-    switch (grade) {
-      case 'AD': return [boletaStyles.gradeText, boletaStyles.gradeAD]
-      case 'A': return [boletaStyles.gradeText, boletaStyles.gradeA]
-      case 'B': return [boletaStyles.gradeText, boletaStyles.gradeB]
-      case 'C': return [boletaStyles.gradeText, boletaStyles.gradeC]
-      default: return boletaStyles.gradeText
-    }
-  }
+  const studentFull = formatTitleCase(`${student.apellidoPaterno} ${student.apellidoMaterno}, ${student.name}`)
 
   return (
     <DocumentWrapper
@@ -143,71 +59,71 @@ export const BoletaNotasPDF = ({
       verificationCode={verificationCode}
     >
       {/* Datos del Estudiante */}
-      <View style={boletaStyles.studentInfo}>
-        <View style={boletaStyles.infoItem}>
-          <Text style={boletaStyles.label}>Estudiante</Text>
-          <Text style={boletaStyles.value}>{studentFull}</Text>
-        </View>
-        <View style={boletaStyles.infoItem}>
-          <Text style={boletaStyles.label}>DNI / Código</Text>
-          <Text style={boletaStyles.value}>{student.dni} {student.codigoEstudiante && `/ ${student.codigoEstudiante}`}</Text>
-        </View>
-        <View style={boletaStyles.infoItem}>
-          <Text style={boletaStyles.label}>Nivel / Grado</Text>
-          <Text style={boletaStyles.value}>
-            {student.nivelAcademico?.grado?.nivel?.nombre || '-'} - {student.nivelAcademico?.grado?.nombre || '-'}
-          </Text>
-        </View>
-        <View style={boletaStyles.infoItem}>
-          <Text style={boletaStyles.label}>Sección / Periodo</Text>
-          <Text style={boletaStyles.value}>"{student.nivelAcademico.seccion}" / {periodoNombre}</Text>
-        </View>
-      </View>
+      <Stack direction="vertical" gap="md" style={{ marginBottom: 20 }}>
+        <Heading level={4}>Datos del Estudiante</Heading>
+        <KeyValue
+          size="sm"
+          divided
+          direction="horizontal"
+          items={[
+            { key: 'Estudiante:', value: studentFull },
+            { key: 'DNI / Código:', value: `${student.dni} ${student.codigoEstudiante ? `/ ${student.codigoEstudiante}` : ''}` },
+            { key: 'Nivel / Grado:', value: `${student.nivelAcademico?.grado?.nivel?.nombre || '-'} - ${student.nivelAcademico?.grado?.nombre || '-'}` },
+            { key: 'Sección / Periodo:', value: `"${student.nivelAcademico.seccion}" / ${periodoNombre}` },
+          ]}
+        />
+      </Stack>
 
-      <Text style={boletaStyles.sectionTitle}>Resultados Académicos por Competencia</Text>
+      <Divider spacing="md" />
 
       {/* Tabla de Calificaciones */}
-      <View style={boletaStyles.table}>
-        <View style={boletaStyles.tableHeader}>
-          <Text style={boletaStyles.areaCell}>Área Curricular</Text>
-          <Text style={boletaStyles.competencyCell}>Competencia Evaluada</Text>
-          <Text style={boletaStyles.gradeCell}>Calificación</Text>
-        </View>
-
-        {notas.map((n, i) => (
-          <View key={i} style={boletaStyles.tableRow}>
-            <View style={boletaStyles.areaCell}>
-              <Text style={boletaStyles.areaText}>{n.area}</Text>
-            </View>
-            <View style={boletaStyles.competencyCell}>
-              <Text style={boletaStyles.compText}>{n.competencia}</Text>
-            </View>
-            <View style={boletaStyles.gradeCell}>
-              <Text style={getGradeStyle(n.notaLiteral)}>
-                {n.valor !== undefined ? `${Math.round(n.valor)} - ` : ''}{n.notaLiteral || '-'}
-              </Text>
-            </View>
-          </View>
-        ))}
-      </View>
+      <Stack direction="vertical" gap="md" style={{ marginBottom: 20 }}>
+        <Heading level={4}>Resultados Académicos por Competencia</Heading>
+        <Table variant="bordered" zebraStripe>
+          <TableHeader>
+            <TableRow header>
+              <TableCell width="35%">Área Curricular</TableCell>
+              <TableCell width="45%">Competencia Evaluada</TableCell>
+              <TableCell width="20%" align="center">Calificación</TableCell>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {notas.map((n, i) => (
+              <TableRow key={i}>
+                <TableCell width="35%">
+                  <Text style={{ fontSize: 9, fontWeight: 'bold' }}>{n.area}</Text>
+                </TableCell>
+                <TableCell width="45%">
+                  <Text style={{ fontSize: 8, color: '#4b5563' }}>{n.competencia}</Text>
+                </TableCell>
+                <TableCell width="20%" align="center">
+                  <Text style={{ fontSize: 10, fontWeight: 'bold', color: getGradeColor(n.notaLiteral) }}>
+                    {n.valor !== undefined ? `${Math.round(n.valor)} - ` : ''}{n.notaLiteral || '-'}
+                  </Text>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Stack>
 
       {/* Resumen Final */}
-      <View style={boletaStyles.summarySection}>
-        <Text style={[boletaStyles.label, { marginBottom: 4 }]}>Apreciación del Tutor / Observaciones</Text>
-        <Text style={{ fontSize: 8, color: '#475569', minHeight: 40 }}>
-          ________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________
-        </Text>
-      </View>
+      <Stack direction="vertical" gap="sm" style={{ marginTop: 20, padding: 12, backgroundColor: '#f8fafc', borderRadius: 8, borderWidth: 1, borderColor: '#e2e8f0' }}>
+        <Heading level={6} color="mutedForeground" transform="uppercase">Apreciación del Tutor / Observaciones</Heading>
+        <View style={{ minHeight: 60, borderBottomWidth: 0.5, borderBottomColor: '#cbd5e1', borderStyle: 'dashed', marginTop: 8 }} />
+      </Stack>
 
-      <View style={{ marginTop: 20, flexDirection: 'row', justifyContent: 'space-between' }}>
-        <View style={{ width: '40%', borderTopWidth: 1, borderTopColor: '#0f172a', paddingTop: 6, alignItems: 'center' }}>
-          <Text style={{ fontSize: 8, fontWeight: 'bold' }}>FIRMA DEL TUTOR</Text>
-        </View>
-        <View style={{ width: '40%', borderTopWidth: 1, borderTopColor: '#0f172a', paddingTop: 6, alignItems: 'center' }}>
-          <Text style={{ fontSize: 8, fontWeight: 'bold' }}>FIRMA DEL DIRECTOR</Text>
-        </View>
-      </View>
-
+      {/* Firmas */}
+      <Stack direction="horizontal" justify="between" style={{ marginTop: 60 }}>
+        <Stack direction="vertical" align="center" style={{ width: '40%' }}>
+          <Divider color="#0f172a" />
+          <Heading level={6} weight="bold" style={{ marginTop: 4 }}>FIRMA DEL TUTOR</Heading>
+        </Stack>
+        <Stack direction="vertical" align="center" style={{ width: '40%' }}>
+          <Divider color="#0f172a" />
+          <Heading level={6} weight="bold" style={{ marginTop: 4 }}>FIRMA DEL DIRECTOR</Heading>
+        </Stack>
+      </Stack>
     </DocumentWrapper>
   )
 }

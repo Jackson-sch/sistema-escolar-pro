@@ -25,11 +25,11 @@ export default async function NuevoComprobantePage({
   let cronogramaPrecargado = null;
 
   if (params.cronogramaId) {
-    const cronoRes = await getCronogramaDetailAction(
-      params.cronogramaId,
-      session.user.id,
-    );
-    const cronograma = cronoRes.data;
+    const cronoRes = await getCronogramaDetailAction({
+      cronogramaId: params.cronogramaId,
+      padreId: session.user.id,
+    });
+    const cronograma = cronoRes.success;
 
     if (cronograma) {
       cronogramaPrecargado = {
@@ -42,8 +42,8 @@ export default async function NuevoComprobantePage({
   }
 
   // Obtener todas las deudas de los hijos para el selector
-  const deudasRes = await getAllPendingDeudasAction(session.user.id);
-  const relaciones = deudasRes.data || [];
+  const deudasRes = await getAllPendingDeudasAction({ padreId: session.user.id });
+  const relaciones = deudasRes.success || [];
 
   const opcionesDeuda = relaciones.flatMap((r: any) =>
     r.hijo.cronogramaPagos.map((c: any) => ({

@@ -29,26 +29,21 @@ interface DeleteCronogramasModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   conceptos: { id: string; nombre: string }[];
-  secciones: {
-    id: string;
-    seccion: string;
-    grado: { nombre: string };
-    nivel: { nombre: string };
-  }[];
+  niveles: { id: string; nombre: string }[];
 }
 
 export function DeleteCronogramasModal({
   isOpen,
   onOpenChange,
   conceptos,
-  secciones,
+  niveles,
 }: DeleteCronogramasModalProps) {
   const [isPending, startTransition] = useTransition();
 
   const form = useForm({
     defaultValues: {
       conceptoId: "",
-      nivelAcademicoId: "all",
+      nivelId: "all",
     },
   });
 
@@ -56,10 +51,10 @@ export function DeleteCronogramasModal({
     startTransition(async () => {
       const payload = {
         conceptoId: values.conceptoId,
-        nivelAcademicoId:
-          values.nivelAcademicoId === "all"
+        nivelId:
+          values.nivelId === "all"
             ? undefined
-            : values.nivelAcademicoId,
+            : values.nivelId,
       };
 
       const res = await deleteCronogramaMasivoAction(payload);
@@ -122,7 +117,7 @@ export function DeleteCronogramasModal({
 
           <FormField
             control={form.control}
-            name="nivelAcademicoId"
+            name="nivelId"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-[10px] font-bold uppercase tracking-wider ml-1 text-muted-foreground/70">
@@ -138,20 +133,19 @@ export function DeleteCronogramasModal({
                     <SelectItem value="all" className="rounded-xl">
                       Toda la institución
                     </SelectItem>
-                    {secciones.map((s) => (
+                    {niveles.map((n) => (
                       <SelectItem
-                        key={s.id}
-                        value={s.id}
+                        key={n.id}
+                        value={n.id}
                         className="rounded-xl"
                       >
-                        {s.nivel.nombre} - {s.grado.nombre} "{s.seccion}"
+                        {n.nombre}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
                 <FormDescription className="text-xs ml-1">
-                  Deja en "Toda la institución" para eliminar de todas las
-                  secciones.
+                  Deja en "Toda la institución" para eliminar de todos los niveles.
                 </FormDescription>
               </FormItem>
             )}

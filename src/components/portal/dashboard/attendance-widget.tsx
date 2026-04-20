@@ -6,7 +6,9 @@ export default function AttendanceWidget({
   attendancePercentage: number;
 }) {
   return (
-    <Card className="flex flex-col p-6 h-full min-h-[300px]">
+    <Card className="flex flex-col p-6 h-full min-h-[300px] liquid-glass relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-t from-emerald-500/5 to-transparent pointer-events-none" />
+      <div className="relative z-10 w-full h-full flex flex-col">
       <h3 className="font-bold text-sm uppercase tracking-wider mb-6">
         Asistencia
       </h3>
@@ -45,6 +47,7 @@ export default function AttendanceWidget({
             : "Asistencia regular"}
           "
         </p>
+      </div>
       </div>
     </Card>
   );

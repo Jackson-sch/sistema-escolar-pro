@@ -9,13 +9,17 @@ import {
   RechazarComprobanteSchema 
 } from "@/lib/schemas/comprobantes";
 import { z } from "zod";
+import { sendEmailAction } from "@/actions/email";
+import { sendSmsAction } from "@/actions/sms";
+
 
 /**
  * Obtiene las deudas pendientes de los hijos de un padre
  */
 export const getDeudaHijosAction = createSafeAction(
-  z.object({ padreId: z.string() }),
-  async ({ padreId }) => {
+  z.object({ padreId: z.string().optional() }), // Lo dejamos opcional para retrocompatibilidad de cliente, pero se ignora
+  async (_, session) => {
+    const padreId = session.user.id;
     const relaciones = await prisma.relacionFamiliar.findMany({
       where: { padreTutorId: padreId },
       include: {
@@ -98,8 +102,9 @@ export const createComprobanteAction = createSafeAction(
  * Obtiene los comprobantes de un padre
  */
 export const getComprobantesAction = createSafeAction(
-  z.object({ padreId: z.string() }),
-  async ({ padreId }) => {
+  z.object({ padreId: z.string().optional() }),
+  async (_, session) => {
+    const padreId = session.user.id;
     const comprobantes = await prisma.comprobantePago.findMany({
       where: { padreId },
       include: {
@@ -183,7 +188,8 @@ export const aprobarComprobanteAction = createSafeAction(
             concepto: true,
             estudiante: true,
           }
-        } 
+        },
+        padre: true
       },
     });
 
@@ -252,6 +258,25 @@ export const aprobarComprobanteAction = createSafeAction(
     revalidatePath("/finanzas/verificacion");
     revalidatePath("/finanzas");
 
+    // Enviar notificación por correo (asíncrono, no bloquea el retorno de la acción)
+    if (comprobante.padre?.email) {
+      sendEmailAction({
+        to: comprobante.padre.email,
+        subject: "Pago Verificado y Aprobado",
+        nombre: `${comprobante.padre.name} ${comprobante.padre.apellidoPaterno || ''}`.trim(),
+        mensaje: `Su pago por el concepto de "${comprobante.cronograma.concepto.nombre}" (S/ ${montoComprobante}) ha sido verificado y aprobado. Se ha registrado bajo la boleta: ${numeroBoleta}.`,
+        accionLabel: "Ver Historial en el Portal",
+        accionUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/portal/finanzas`
+      }).catch(err => console.error("Error enviando email comprobante:", err));
+    }
+
+    if (comprobante.padre?.telefono) {
+      sendSmsAction({
+        to: comprobante.padre.telefono,
+        mensaje: `Su pago de S/${montoComprobante} ha sido aprobado. Boleta: ${numeroBoleta}. Gracias.`
+      }).catch(err => console.error("Error enviando sms comprobante:", err));
+    }
+
     return { success: "Comprobante aprobado exitosamente" };
   },
   { roles: ["administrativo"] }
@@ -273,6 +298,10 @@ export const rechazarComprobanteAction = createSafeAction(
             institucionId: institucionId || undefined
           }
         }
+      },
+      include: {
+        cronograma: { include: { concepto: true } },
+        padre: true
       }
     });
 
@@ -292,6 +321,25 @@ export const rechazarComprobanteAction = createSafeAction(
 
     revalidatePath("/portal");
     revalidatePath("/finanzas/verificacion");
+
+    // Enviar notificación de rechazo
+    if (comprobante.padre?.email) {
+      sendEmailAction({
+        to: comprobante.padre.email,
+        subject: "Atención: Comprobante de Pago Rechazado",
+        nombre: `${comprobante.padre.name} ${comprobante.padre.apellidoPaterno || ''}`.trim(),
+        mensaje: `La verificación de su pago para "${comprobante.cronograma.concepto.nombre}" ha sido rechazada. Motivo: ${motivo}. Por favor, revise y vuelva a intentarlo o comuníquese con secretaría.`,
+        accionLabel: "Ir a Mis Finanzas",
+        accionUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/portal/finanzas`
+      }).catch(err => console.error("Error enviando email rechazo:", err));
+    }
+
+    if (comprobante.padre?.telefono) {
+      sendSmsAction({
+        to: comprobante.padre.telefono,
+        mensaje: `Su comprobante de pago fue devuelto/rechazado. Motivo: ${motivo}. Revise el portal.`
+      }).catch(err => console.error("Error enviando sms rechazo:", err));
+    }
 
     return { success: "Comprobante rechazado correctamente" };
   },

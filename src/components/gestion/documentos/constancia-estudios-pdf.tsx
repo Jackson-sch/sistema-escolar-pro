@@ -1,31 +1,10 @@
-"use client"
-
 import React from 'react'
-import { Text, View, StyleSheet } from '@react-pdf/renderer'
-import { DocumentWrapper, pdfStyles } from './document-wrapper'
-
-const certStyles = StyleSheet.create({
-  content: {
-    marginTop: 40,
-    fontSize: 12,
-    textAlign: 'justify',
-  },
-  signatureSection: {
-    marginTop: 80,
-    alignItems: 'center',
-  },
-  signatureLine: {
-    width: 200,
-    borderTopWidth: 1,
-    borderTopColor: '#0f172a',
-    marginTop: 10,
-  },
-  datePlace: {
-    marginTop: 40,
-    textAlign: 'right',
-    fontSize: 11,
-  }
-})
+import { Text, View } from '@react-pdf/renderer'
+import { DocumentWrapper } from './document-wrapper'
+import { Heading } from '@/components/pdfx/heading/pdfx-heading'
+import { Stack } from '@/components/pdfx/stack/pdfx-stack'
+import { Divider } from '@/components/pdfx/divider/pdfx-divider'
+import { formatTitleCase } from '@/lib/formats'
 
 interface ConstanciaEstudiosPDFProps {
   student: {
@@ -50,7 +29,7 @@ export const ConstanciaEstudiosPDF = ({
   institucion,
   verificationCode
 }: ConstanciaEstudiosPDFProps) => {
-  const studentFull = `${student.apellidoPaterno} ${student.apellidoMaterno}, ${student.name}`
+  const studentFull = formatTitleCase(`${student.apellidoPaterno} ${student.apellidoMaterno}, ${student.name}`)
   const date = new Date()
   const dateStr = `${date.getDate()} de ${date.toLocaleString('es-PE', { month: 'long' })} de ${date.getFullYear()}`
 
@@ -62,38 +41,45 @@ export const ConstanciaEstudiosPDF = ({
       institucion={institucion}
       verificationCode={verificationCode}
     >
-      <View style={certStyles.content}>
-        <Text>
-          EL QUE SUSCRIBE, DIRECTOR DE LA INSTITUCIÓN EDUCATIVA "{institucion.nombreInstitucion.toUpperCase()}", HACE CONSTAR QUE:
+      <Stack direction="vertical" gap="lg" style={{ marginTop: 20 }}>
+        <Text style={{ fontSize: 11, textAlign: 'justify', lineHeight: 1.8 }}>
+          EL QUE SUSCRIBE, DIRECTOR DE LA INSTITUCIÓN EDUCATIVA <Text style={{ fontWeight: 'bold' }}>"{institucion.nombreInstitucion.toUpperCase()}"</Text>, HACE CONSTAR QUE:
         </Text>
 
-        <Text style={{ marginTop: 25 }}>
-          El(la) estudiante <Text style={{ fontWeight: 'bold' }}>{studentFull.toUpperCase()}</Text>, identificado(a) con DNI N° {student.dni}, se encuentra matriculado(a) en nuestra institución educativa en el:
+        <Text style={{ fontSize: 11, textAlign: 'justify', lineHeight: 1.8 }}>
+          El(la) estudiante <Text style={{ fontWeight: 'bold' }}>{studentFull}</Text>, identificado(a) con DNI N° {student.dni}, se encuentra matriculado(a) en nuestra institución educativa en el:
         </Text>
 
-        <Text style={{ marginTop: 20, textAlign: 'center', fontWeight: 'bold', fontSize: 13 }}>
-          {(student.nivelAcademico?.grado?.nombre || '-').toUpperCase()} DE {(student.nivelAcademico?.nivel?.nombre || '-').toUpperCase()} - SECCIÓN "{(student.nivelAcademico?.seccion || '-').toUpperCase()}"
-        </Text>
+        <View style={{ padding: 15, backgroundColor: '#f8fafc', borderRadius: 6, borderWidth: 1, borderColor: '#e2e8f0', marginVertical: 10 }}>
+          <Heading level={4} align="center" weight="bold" noMargin>
+            {(student.nivelAcademico?.grado?.nombre || '-').toUpperCase()} DE {(student.nivelAcademico?.nivel?.nombre || '-').toUpperCase()}
+          </Heading>
+          <Heading level={5} align="center" noMargin color="mutedForeground">
+            SECCIÓN "{(student.nivelAcademico?.seccion || '-').toUpperCase()}"
+          </Heading>
+        </View>
 
-        <Text style={{ marginTop: 20 }}>
+        <Text style={{ fontSize: 11, textAlign: 'justify', lineHeight: 1.8 }}>
           Correspondiente al Año Académico {anioAcademico}, habiendo cumplido con los requisitos exigidos por las normas legales vigentes.
         </Text>
 
-        <Text style={{ marginTop: 20 }}>
+        <Text style={{ fontSize: 11, textAlign: 'justify', lineHeight: 1.8 }}>
           Se expide la presente constancia a solicitud de la parte interesada para los fines que estime conveniente.
         </Text>
-      </View>
 
-      <View style={certStyles.datePlace}>
-        <Text>Ciudad, {dateStr}</Text>
-      </View>
+        <Text style={{ marginTop: 24, textAlign: 'right', fontSize: 11 }}>
+          Ciudad, {dateStr}
+        </Text>
 
-      <View style={certStyles.signatureSection}>
-        <View style={certStyles.signatureLine} />
-        <Text style={{ fontSize: 10, fontWeight: 'bold' }}>EL DIRECTOR</Text>
-        <Text style={{ fontSize: 8, color: '#64748b' }}>{institucion.nombreInstitucion}</Text>
-      </View>
-
+        {/* Firma */}
+        <Stack direction="vertical" align="center" style={{ marginTop: 60 }}>
+          <View style={{ width: 200 }}>
+            <Divider color="#0f172a" />
+            <Heading level={6} align="center" weight="bold" style={{ marginTop: 4 }}>EL DIRECTOR</Heading>
+            <Text style={{ fontSize: 8, color: '#64748b', textAlign: 'center' }}>{institucion.nombreInstitucion}</Text>
+          </View>
+        </Stack>
+      </Stack>
     </DocumentWrapper>
   )
 }

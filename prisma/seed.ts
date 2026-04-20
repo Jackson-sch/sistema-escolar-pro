@@ -212,7 +212,7 @@ async function main() {
     }
   }
 
-  // 5. Usuario Administrador Inicial
+  // 5. Usuario Administrador Inicial (SIN institución - se asigna en onboarding)
   console.log("- Sembrando Usuario Administrador...");
   const hashedPassword = await bcrypt.hash("admin123", 10);
 
@@ -222,7 +222,6 @@ async function main() {
       password: hashedPassword,
       cargoId: cargoAdmin.id,
       estadoId: estadoActivo.id,
-      institucionId: institucion.id,
     },
     create: {
       email: "admin@colegio.edu.pe",
@@ -232,7 +231,6 @@ async function main() {
       dni: "00000000",
       cargoId: cargoAdmin.id,
       estadoId: estadoActivo.id,
-      institucionId: institucion.id,
     },
   });
 
@@ -279,6 +277,15 @@ async function main() {
     },
     { nombre: "Seguimiento", descripcion: "Continuación de casos previos" },
   ];
+
+  for (const cat of categoriasIncidente) {
+    await (prisma as any).categoriaIncidente.upsert({
+      where: { nombre: cat.nombre },
+      update: {},
+      create: cat,
+    });
+  }
+
 
   // 8. Áreas Curriculares y Competencias (Malla Curricular)
   console.log("- Sembrando Malla Curricular (Áreas y Competencias)...");

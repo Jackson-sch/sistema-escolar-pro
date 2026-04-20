@@ -20,6 +20,7 @@ import {
   IconChartBar,
   IconHeartHandshake,
   IconShirt,
+  IconUserCircle,
 } from "@tabler/icons-react";
 
 import { NavMain } from "@/components/layout/nav-main";
@@ -61,6 +62,10 @@ const adminNavItems = [
     title: "Gestión Académica",
     url: "/gestion/academico/estructura",
     icon: IconSchool,
+    items: [
+      { title: "Estructura Base", url: "/gestion/academico/estructura" },
+      { title: "Cierre y Promociones", url: "/gestion/academico/promociones" },
+    ],
   },
   {
     title: "Personal",
@@ -90,6 +95,10 @@ const adminNavItems = [
     title: "Comunicaciones",
     url: "/comunicaciones",
     icon: IconMessage2,
+    items: [
+      { title: "Enviar Mensaje", url: "/comunicaciones" },
+      { title: "Logs de Auditoría", url: "/gestion/comunicaciones/logs" },
+    ],
   },
   {
     title: "Uniformes",

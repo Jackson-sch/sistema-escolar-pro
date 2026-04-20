@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface AnimatedTabsProps {
-  tabs: { id: string; label: string }[];
+  tabs: { id: string; label: string; icon?: React.ReactNode }[];
   activeTab: string;
   onTabChange: (id: string) => void;
   className?: string;
@@ -31,7 +31,7 @@ export function AnimatedTabs({
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
             className={cn(
-              "relative px-4 py-2 text-sm font-medium transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+              "relative px-4 py-2 text-sm font-medium transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex items-center gap-2",
               isActive
                 ? "dark:text-white text-zinc-900"
                 : "text-zinc-400 dark:hover:text-zinc-200 hover:text-zinc-900",
@@ -63,6 +63,7 @@ export function AnimatedTabs({
                 <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-1/4 dark:bg-white/10 bg-zinc-900/10 blur-md rounded-full" />
               </motion.div>
             )}
+            {tab.icon && <span className="relative z-10">{tab.icon}</span>}
             <span className="relative z-10">{tab.label}</span>
           </button>
         );

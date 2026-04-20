@@ -82,7 +82,7 @@ export const isVencido = (fecha: string, pagado?: boolean) =>
   new Date(fecha) < new Date() && !pagado;
 
 /* ─── Status config ─── */
-type StatusKey = "pagado" | "vencido" | "parcial" | "pendiente";
+type StatusKey = "pagado" | "vencido" | "parcial" | "pendiente" | "anulado";
 
 const STATUS_CONFIG: Record<
   StatusKey,
@@ -115,6 +115,13 @@ const STATUS_CONFIG: Record<
     text: "text-zinc-400",
     bg: "bg-zinc-500/10 border-zinc-500/20",
     icon: IconClockHour4,
+  },
+  anulado: {
+    label: "Anulado",
+    dot: "bg-purple-500",
+    text: "text-purple-400",
+    bg: "bg-purple-500/10 border-purple-500/20",
+    icon: IconX,
   },
 };
 
@@ -290,16 +297,19 @@ export const getCronogramaColumns = (meta: {
       </span>
     ),
     cell: ({ row }) => {
-      const { pagado, montoPagado, fechaVencimiento } = row.original;
+      const { pagado, montoPagado, fechaVencimiento, pagos } = row.original;
       const vencido = isVencido(fechaVencimiento, pagado);
+      const hasAnulado = pagos?.some((p: any) => p.estado === "anulado");
 
       const status: StatusKey = pagado
         ? "pagado"
-        : vencido
-          ? "vencido"
-          : montoPagado > 0
-            ? "parcial"
-            : "pendiente";
+        : hasAnulado
+          ? "anulado"
+          : vencido
+            ? "vencido"
+            : montoPagado > 0
+              ? "parcial"
+              : "pendiente";
 
       return <StatusBadge status={status} />;
     },

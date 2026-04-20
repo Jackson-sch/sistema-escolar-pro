@@ -23,9 +23,15 @@ export default async function PortalDashboardPage({
   }
 
   const result = await getParentDashboardDataAction({
-    padreId: session.user.id,
     estudianteId: hijoId,
   });
+
+  // Type assertion or check to fix inferred '{}' issue
+  const data = result.success as {
+    hijos: any[];
+    currentStudent: any;
+    stats: any;
+  };
 
   if (result.error || !result.success) {
     return (
@@ -37,7 +43,7 @@ export default async function PortalDashboardPage({
     );
   }
 
-  const { hijos, currentStudent, stats } = result.success;
+  const { hijos, currentStudent, stats } = data;
 
   if (hijos.length === 0) {
     return (

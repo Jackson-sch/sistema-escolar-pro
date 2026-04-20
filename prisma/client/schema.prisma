@@ -220,6 +220,7 @@ model InstitucionEducativa {
   tiposDocumento        TipoDocumento[]
   tiposEvaluacion       TipoEvaluacion[]
   users                 User[]
+  notificationLogs      NotificationLog[]        @relation("InstitucionNotifications")
 }
 
 model User {
@@ -333,6 +334,7 @@ model User {
   ventasAprobadas               VentaUniforme[]          @relation("VentasAprobadas")
   ventasUniformeEstudiante      VentaUniforme[]          @relation("VentasUniformeEstudiante")
   ventasUniformePadre           VentaUniforme[]          @relation("VentasUniformePadre")
+  notificationLogs              NotificationLog[]        @relation("UserNotifications")
 
   @@index([cargoId])
   @@index([estadoId])
@@ -1112,6 +1114,7 @@ enum Role {
   profesor
   administrativo
   padre
+  super_admin
 }
 
 enum TipoGestion {
@@ -1216,4 +1219,32 @@ enum EstadoVentaUniforme {
 enum TipoCuentaBancaria {
   BANCO
   BILLETERA_DIGITAL
+}
+
+enum TipoNotificacion {
+  EMAIL
+  SMS
+  WHATSAPP
+}
+
+model NotificationLog {
+  id            String           @id @default(cuid())
+  tipo          TipoNotificacion
+  destinatario  String
+  asunto        String?
+  mensaje       String
+  estado        String           @default("SENT") // SENT, FAILED
+  error         String?
+  metadata      Json?
+  institucionId String?
+  userId        String?
+  createdAt     DateTime         @default(now())
+
+  institucion InstitucionEducativa? @relation("InstitucionNotifications", fields: [institucionId], references: [id])
+  user        User?                 @relation("UserNotifications", fields: [userId], references: [id])
+
+  @@index([institucionId])
+  @@index([userId])
+  @@index([createdAt])
+  @@index([tipo])
 }

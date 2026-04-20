@@ -40,10 +40,10 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 
 interface AddPensionButtonProps {
   conceptos: { id: string; nombre: string; montoSugerido: number }[]
-  secciones: { id: string; seccion: string; grado: { nombre: string }; nivel: { nombre: string } }[]
+  niveles: { id: string; nombre: string }[]
 }
 
-export function AddPensionButton({ conceptos, secciones }: AddPensionButtonProps) {
+export function AddPensionButton({ conceptos, niveles }: AddPensionButtonProps) {
   const [open, setOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
 
@@ -52,7 +52,7 @@ export function AddPensionButton({ conceptos, secciones }: AddPensionButtonProps
       conceptoId: "",
       monto: 0,
       fechaVencimiento: new Date(),
-      nivelAcademicoId: "all",
+      nivelId: "all",
     },
   })
 
@@ -71,7 +71,7 @@ export function AddPensionButton({ conceptos, secciones }: AddPensionButtonProps
         ...values,
         monto: Number(values.monto),
         fechaVencimiento: values.fechaVencimiento.toISOString(),
-        nivelAcademicoId: values.nivelAcademicoId === "all" ? undefined : values.nivelAcademicoId
+        nivelId: values.nivelId === "all" ? undefined : values.nivelId
       }
 
       const res = await createCronogramaMasivoAction(payload)
@@ -81,7 +81,7 @@ export function AddPensionButton({ conceptos, secciones }: AddPensionButtonProps
           ...form.getValues(),
           conceptoId: "",
           monto: 0,
-          nivelAcademicoId: "all"
+          nivelId: "all"
         })
         setOpen(false)
       }
@@ -215,7 +215,7 @@ export function AddPensionButton({ conceptos, secciones }: AddPensionButtonProps
 
               <FormField
                 control={form.control}
-                name="nivelAcademicoId"
+                name="nivelId"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="flex items-center gap-2">
@@ -235,15 +235,15 @@ export function AddPensionButton({ conceptos, secciones }: AddPensionButtonProps
                             Toda la Institución
                           </div>
                         </SelectItem>
-                        {secciones.map((s) => (
-                          <SelectItem key={s.id} value={s.id}>
-                            {s.nivel.nombre} - {s.grado.nombre} "{s.seccion}"
+                        {niveles.map((n) => (
+                          <SelectItem key={n.id} value={n.id}>
+                            {n.nombre}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                     <FormDescription className="text-xs">
-                      Selecciona un aula específica o aplica a todos los alumnos matriculados activos.
+                      Selecciona un nivel académico o aplica a todos los alumnos matriculados activos.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

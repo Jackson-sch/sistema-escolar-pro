@@ -30,17 +30,12 @@ import { ApplyMoraModal } from "./apply-mora-modal";
 
 interface BulkActionsButtonProps {
   conceptos: { id: string; nombre: string }[];
-  secciones: {
-    id: string;
-    seccion: string;
-    grado: { nombre: string };
-    nivel: { nombre: string };
-  }[];
+  niveles: { id: string; nombre: string }[];
 }
 
 export function BulkActionsButton({
   conceptos,
-  secciones,
+  niveles,
 }: BulkActionsButtonProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
@@ -100,21 +95,21 @@ export function BulkActionsButton({
         isOpen={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         conceptos={conceptos}
-        secciones={secciones}
+        niveles={niveles}
       />
 
       <UpdateDueDateModal
         isOpen={updateDialogOpen}
         onOpenChange={setUpdateDialogOpen}
         conceptos={conceptos}
-        secciones={secciones}
+        niveles={niveles}
       />
 
       <ApplyMoraModal
         isOpen={moraDialogOpen}
         onOpenChange={setMoraDialogOpen}
         conceptos={conceptos}
-        secciones={secciones}
+        niveles={niveles}
       />
     </>
   );

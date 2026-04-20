@@ -27,8 +27,8 @@ export default async function PortalComunicacionesPage({
   }
 
   // 1. Obtener hijos del padre
-  const hijosRes = await getParentStudentsAction(session.user.id);
-  const hijos = hijosRes.data || [];
+  const hijosRes = await getParentStudentsAction({ padreId: session.user.id });
+  const hijos = hijosRes.success || [];
 
   if (hijos.length === 0) {
     return (
@@ -61,10 +61,12 @@ export default async function PortalComunicacionesPage({
     const docentesRes = await getDirectorioDocentesAction();
     docentes = docentesRes.data || [];
   } else {
-    commsRes = await getPortalCommunicationsAction(selectedHijoId);
+    commsRes = await getPortalCommunicationsAction({
+      estudianteId: selectedHijoId,
+    });
   }
 
-  const { anuncios = [], eventos = [] } = commsRes.data || {};
+  const { anuncios = [], eventos = [] } = commsRes.success || {};
 
   return (
     <div className="flex-1 flex flex-col gap-8 p-4 sm:p-10 pt-0 animate-in fade-in duration-700">
@@ -89,7 +91,7 @@ export default async function PortalComunicacionesPage({
             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4 px-2">
               Estudiante Actual
             </p>
-            <StudentSelector students={hijos} orientation="vertical" />
+            <StudentSelector students={hijos as any} orientation="vertical" />
           </div>
 
           <div className="hidden xl:flex flex-col gap-1">

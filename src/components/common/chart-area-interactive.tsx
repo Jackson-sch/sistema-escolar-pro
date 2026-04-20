@@ -51,12 +51,14 @@ export function ChartAreaInteractive({ data = [] }: ChartAreaInteractiveProps) {
   const filteredData = React.useMemo(() => {
     if (!data.length) return [];
 
-    const lastDate = new Date(data[data.length - 1].date);
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
     let daysToSubtract = 90;
     if (timeRange === "30d") daysToSubtract = 30;
     if (timeRange === "7d") daysToSubtract = 7;
 
-    const startDate = new Date(lastDate);
+    const startDate = new Date(now);
     startDate.setDate(startDate.getDate() - daysToSubtract);
 
     return data.filter((item) => new Date(item.date) >= startDate);
@@ -67,7 +69,7 @@ export function ChartAreaInteractive({ data = [] }: ChartAreaInteractiveProps) {
       <CardHeader>
         <CardTitle>Tendencia de Recaudación</CardTitle>
         <CardDescription>
-          Ingresos mensuales por pagos de pensiones y otros conceptos.
+          Historial diario de ingresos por pensiones y otros conceptos.
         </CardDescription>
         <CardAction>
           <ToggleGroup
@@ -131,7 +133,9 @@ export function ChartAreaInteractive({ data = [] }: ChartAreaInteractiveProps) {
               tickMargin={8}
               minTickGap={32}
               tickFormatter={(value) => {
-                const date = new Date(value);
+                // Parseamos como hora local para evitar el desfase de zona horaria (UTC -> Local)
+                const [year, month, day] = value.split("-").map(Number);
+                const date = new Date(year, month - 1, day);
                 return date.toLocaleDateString("es-PE", {
                   month: "short",
                   day: "numeric",
@@ -150,7 +154,9 @@ export function ChartAreaInteractive({ data = [] }: ChartAreaInteractiveProps) {
               content={
                 <ChartTooltipContent
                   labelFormatter={(value) => {
-                    return new Date(value).toLocaleDateString("es-PE", {
+                    const [year, month, day] = value.split("-").map(Number);
+                    const date = new Date(year, month - 1, day);
+                    return date.toLocaleDateString("es-PE", {
                       month: "long",
                       day: "numeric",
                       year: "numeric",
@@ -162,7 +168,7 @@ export function ChartAreaInteractive({ data = [] }: ChartAreaInteractiveProps) {
             />
             <Area
               dataKey="revenue"
-              type="natural"
+              type="monotone"
               fill="url(#fillRevenue)"
               stroke="var(--color-revenue)"
               strokeWidth={2}

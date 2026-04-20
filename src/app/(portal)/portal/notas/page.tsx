@@ -13,7 +13,8 @@ import { NotasFilter } from "@/components/portal/academic/notas-filter";
 import { NotasStatsSummary } from "@/components/portal/academic/notas-stats-summary";
 import { TeacherCommentCard } from "@/components/portal/academic/teacher-comment-card";
 import { Card } from "@/components/ui/card";
-import { IconUser, IconBookOff } from "@tabler/icons-react";
+import { IconUser, IconBookOff, IconFileDownload } from "@tabler/icons-react";
+import { Button } from "@/components/ui/button";
 
 interface NotasPageProps {
   searchParams: Promise<{ hijoId?: string; periodoId?: string }>;
@@ -30,8 +31,8 @@ export default async function PortalNotasPage({
   }
 
   // 1. Obtener hijos del padre
-  const hijosRes = await getParentStudentsAction(session.user.id);
-  const hijos = hijosRes.data || [];
+  const hijosRes = await getParentStudentsAction({ padreId: session.user.id });
+  const hijos = hijosRes.success || [];
 
   if (hijos.length === 0) {
     return (
@@ -70,18 +71,18 @@ export default async function PortalNotasPage({
     instituciones[0]?.cicloEscolarActual || new Date().getFullYear();
 
   // 4. Obtener periodos académicos
-  const periodosRes = await getPeriodosAction(currentYear);
-  const periodos = periodosRes.data || [];
+  const periodosRes = await getPeriodosAction({ anioEscolar: currentYear });
+  const periodos = periodosRes.success || [];
 
   // 5. Periodo seleccionado (URL o el primero activo)
   const selectedPeriodoId = periodoId || periodos[0]?.id;
 
   // 6. Obtener notas
-  const resNotas = await getResumenNotasEstudianteAction(
-    selectedHijoId,
-    selectedPeriodoId === "all" ? undefined : selectedPeriodoId,
-  );
-  const notasPorCurso = resNotas.data || {};
+  const resNotas = await getResumenNotasEstudianteAction({
+    estudianteId: selectedHijoId,
+    periodoId: selectedPeriodoId === "all" ? undefined : selectedPeriodoId,
+  });
+  const notasPorCurso = resNotas.success || {};
   const cursosGrupos = Object.values(notasPorCurso);
 
   // 7. Calcular estadísticas para el resumen
@@ -92,24 +93,24 @@ export default async function PortalNotasPage({
       : 0;
 
   // 7. Calcular ranking real
-  const rankingRes = await getRankingEstudianteAction(
-    selectedHijoId,
-    selectedPeriodoId === "all" ? undefined : selectedPeriodoId,
-    currentYear,
-  );
-  const rankingData = rankingRes.data || { posicion: 0, total: 0 };
+  const rankingRes = await getRankingEstudianteAction({
+    estudianteId: selectedHijoId,
+    periodoId: selectedPeriodoId === "all" ? undefined : selectedPeriodoId,
+    anioEscolar: currentYear,
+  });
+  const rankingData = (rankingRes.success as any) || { posicion: 0, total: 0 };
   const rankingStr =
     rankingData.total > 0
       ? `#${rankingData.posicion.toString().padStart(2, "0")} de ${rankingData.total}`
       : "---";
 
   // 8. Calcular asistencia real
-  const asistenciaRes = await getAsistenciaEstudianteAction(
-    selectedHijoId,
-    selectedPeriodoId === "all" ? undefined : selectedPeriodoId,
-    currentYear,
-  );
-  const asistenciaData = asistenciaRes.data || { porcentaje: 0 };
+  const asistenciaRes = await getAsistenciaEstudianteAction({
+    estudianteId: selectedHijoId,
+    periodoId: selectedPeriodoId === "all" ? undefined : selectedPeriodoId,
+    anioEscolar: currentYear,
+  });
+  const asistenciaData = asistenciaRes.success || { porcentaje: 0 };
   const asistenciaReal = asistenciaData.porcentaje;
 
   // 8. Extraer comentarios para el rotador
@@ -153,7 +154,7 @@ export default async function PortalNotasPage({
 
         {/* Panel de Control Integrado (Arriba bajo el título) */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-6 items-start">
-          <div className="bg-card/40 backdrop-blur-xl border border-border/40 p-4 rounded-[2rem] shadow-sm">
+          <div className="bg-card/40 backdrop-blur-xl border border-border/40 p-4 rounded-[2rem] shadow-sm space-y-4">
             <NotasFilter
               hijos={hijos}
               periodos={periodos.map((p: any) => ({
@@ -163,6 +164,23 @@ export default async function PortalNotasPage({
               currentHijoId={selectedHijoId}
               currentPeriodoId={selectedPeriodoId}
             />
+
+            <div className="pt-2 border-t border-border/20 flex justify-end">
+              <Button 
+                asChild
+                variant="outline"
+                className="rounded-2xl gap-2 font-bold px-6 border-primary/20 hover:bg-primary/5 hover:text-primary transition-all shadow-sm"
+              >
+                <a 
+                  href={`/api/documentos/boleta?estudianteId=${selectedHijoId}&anio=${currentYear}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <IconFileDownload size={18} />
+                  Descargar Boleta Oficial ({currentYear})
+                </a>
+              </Button>
+            </div>
           </div>
           <div className="h-full">
             <TeacherCommentCard comments={displayComments} className="h-full" />

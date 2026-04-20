@@ -56,6 +56,24 @@ export function formatTime(date: string | Date, pattern = "HH:mm:ss"): string {
 
 // --- Helpers ---
 /**
+ * Capitaliza un texto (Title Case). 
+ * Útil para nombres de estudiantes.
+ * Ejemplo: "sebastián espinola" -> "Sebastián Espinola"
+ */
+export function formatTitleCase(text: string): string {
+  if (!text) return "";
+  
+  return text
+    .toLowerCase()
+    .split(/\s+/)
+    .map(word => {
+      if (word.length === 0) return "";
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .join(" ");
+}
+
+/**
  * Obtiene las iniciales a partir de un nombre y un apellido
  */
 export function getInitials(nombre: string, apellido: string): string {

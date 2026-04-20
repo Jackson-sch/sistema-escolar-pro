@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   IconCircleCheck,
   IconCreditCard,
@@ -9,6 +10,7 @@ import {
 } from "@tabler/icons-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 
 interface ActivityItem {
   id: string;
@@ -21,9 +23,10 @@ interface ActivityItem {
 
 interface RecentActivityProps {
   activities: ActivityItem[];
+  className?: string;
 }
 
-export function RecentActivity({ activities }: RecentActivityProps) {
+export function RecentActivity({ activities, className }: RecentActivityProps) {
   const getIcon = (type: string) => {
     switch (type) {
       case "matricula":
@@ -38,52 +41,57 @@ export function RecentActivity({ activities }: RecentActivityProps) {
   };
 
   return (
-    <Card className="h-full">
-      <CardHeader>
-        <CardTitle className="text-lg font-bold">Actividad Reciente</CardTitle>
-        <CardDescription>
+    <Card className={cn("liquid-glass border-none flex flex-col overflow-hidden group", className)}>
+      <CardHeader className="pb-4 relative z-10">
+        <CardTitle className="text-lg font-black tracking-tight">Actividad Reciente</CardTitle>
+        <CardDescription className="text-xs font-medium">
           Últimos eventos registrados en el sistema.
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="relative space-y-4 before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-linear-to-b before:from-transparent before:via-slate-200/50 before:to-transparent">
-          {activities.length > 0 ? (
-            activities.map((activity, idx) => (
-              <div
-                key={activity.id + idx}
-                className="relative flex items-start gap-4 pb-2"
-              >
-                <div className="z-10 flex size-10 shrink-0 items-center justify-center rounded-full border bg-background shadow-sm">
-                  {getIcon(activity.type)}
-                </div>
-                <div className="flex flex-col gap-1">
-                  <span className="text-sm font-semibold">
-                    {activity.title}
-                  </span>
-                  <span className="text-xs text-muted-foreground line-clamp-1">
-                    {activity.description}
-                  </span>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="text-[10px] bg-secondary px-1.5 py-0.5 rounded text-secondary-foreground font-medium">
-                      {activity.user}
+      <CardContent className="flex-1 min-h-0 pb-0 relative z-10">
+        <ScrollArea className="h-full pr-4 pb-6">
+          <div className="relative space-y-5 before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-linear-to-b before:from-transparent before:via-muted/50 before:to-transparent">
+            {activities.length > 0 ? (
+              activities.map((activity, idx) => (
+                <div
+                  key={activity.id + idx}
+                  className="relative flex items-start gap-4 transition-all duration-300 hover:translate-x-1"
+                >
+                  <div className="z-10 flex size-10 shrink-0 items-center justify-center rounded-full border bg-background/50 backdrop-blur-md shadow-sm border-white/10 group-hover:border-primary/20 transition-colors">
+                    {getIcon(activity.type)}
+                  </div>
+                  <div className="flex flex-col gap-1 min-w-0">
+                    <span className="text-sm font-bold truncate leading-tight">
+                      {activity.title}
                     </span>
-                    <span className="text-[10px] text-muted-foreground">
-                      {formatDistanceToNow(new Date(activity.date), {
-                        addSuffix: true,
-                        locale: es,
-                      })}
+                    <span className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed font-medium">
+                      {activity.description}
                     </span>
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                        {activity.user}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground/70 font-medium italic">
+                        {formatDistanceToNow(new Date(activity.date), {
+                          addSuffix: true,
+                          locale: es,
+                        })}
+                      </span>
+                    </div>
                   </div>
                 </div>
+              ))
+            ) : (
+              <div className="text-center py-10 text-muted-foreground italic text-sm">
+                No hay actividad reciente registrada.
               </div>
-            ))
-          ) : (
-            <div className="text-center py-6 text-muted-foreground italic text-sm">
-              No hay actividad reciente registrada.
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        </ScrollArea>
       </CardContent>
+
+      {/* Subtle Background Glow */}
+      <div className="absolute -bottom-10 -right-10 size-40 bg-primary/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
     </Card>
   );
 }

@@ -25,8 +25,8 @@ export default async function PortalAsistenciaPage({
   }
 
   // 1. Obtener hijos del padre
-  const hijosRes = await getParentStudentsAction(session.user.id);
-  const hijos = hijosRes.data || [];
+  const hijosRes = await getParentStudentsAction({ padreId: session.user.id });
+  const hijos = hijosRes.success || [];
 
   if (hijos.length === 0) {
     return (
@@ -56,12 +56,12 @@ export default async function PortalAsistenciaPage({
   const currentYear = anio ? parseInt(anio) : now.getFullYear();
 
   // 4. Obtener asistencias
-  const attendanceRes = await getStudentMonthAttendanceAction(
-    selectedHijoId,
-    currentMonth,
-    currentYear,
-  );
-  const asistencias = attendanceRes.data || [];
+  const attendanceRes = await getStudentMonthAttendanceAction({
+    estudianteId: selectedHijoId,
+    mes: currentMonth,
+    anio: currentYear,
+  });
+  const asistencias = attendanceRes.success || [];
 
   // 5. Calcular estadísticas para el mes
   const stats = {
@@ -99,7 +99,7 @@ export default async function PortalAsistenciaPage({
       <AttendanceMetrics stats={stats} />
 
       <AttendanceCalendar
-        asistencias={asistencias}
+        asistencias={asistencias as any}
         currentDate={new Date(currentYear, currentMonth, 1)}
       />
 

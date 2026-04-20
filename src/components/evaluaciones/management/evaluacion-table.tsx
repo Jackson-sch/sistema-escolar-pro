@@ -189,7 +189,7 @@ export function EvaluacionTable({ data, meta }: EvaluacionTableProps) {
     if (!selectedEvaluacion) return;
     setIsDeleting(true);
     try {
-      const res = await deleteEvaluacionAction(selectedEvaluacion.id);
+      const res = await deleteEvaluacionAction({ id: selectedEvaluacion.id });
       if (res.success) {
         toast.success(res.success);
         setShowDeleteModal(false);

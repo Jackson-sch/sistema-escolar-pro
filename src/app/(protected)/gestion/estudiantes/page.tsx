@@ -35,7 +35,7 @@ export default async function EstudiantesPage() {
     getInstitucionAction(),
   ]);
 
-  const periodoAcademico = institucion?.cicloEscolarActual;
+  const periodoAcademico = institucion?.cicloEscolarActual || new Date().getFullYear();
   const session = await auth();
   const isProfessor = session?.user?.role === "profesor";
 

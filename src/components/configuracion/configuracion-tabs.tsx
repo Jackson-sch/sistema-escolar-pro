@@ -3,6 +3,12 @@
 import { useQueryState, parseAsString } from "nuqs";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { AnimatedTabs } from "@/components/ui/animated-tabs";
+import { 
+  IconSchool, 
+  IconMapPin, 
+  IconBuildingBank, 
+  IconVariable 
+} from "@tabler/icons-react";
 
 interface ConfiguracionTabsProps {
   children: {
@@ -20,10 +26,10 @@ export function ConfiguracionTabs({ children }: ConfiguracionTabsProps) {
   );
 
   const TABS = [
-    { id: "datos", label: "Datos Institucionales" },
-    { id: "sedes", label: "Sedes" },
-    { id: "variables", label: "Variables de Sistema" },
-    { id: "bancos", label: "Cuentas y Pagos" },
+    { id: "datos", label: "Datos Institucionales", icon: <IconSchool className="size-4" /> },
+    { id: "sedes", label: "Sedes", icon: <IconMapPin className="size-4" /> },
+    { id: "variables", label: "Variables de Sistema", icon: <IconVariable className="size-4" /> },
+    { id: "bancos", label: "Cuentas y Pagos", icon: <IconBuildingBank className="size-4" /> },
   ];
 
   return (

@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { AnnouncementCard } from "@/components/portal/dashboard/announcement-card";
 import { EventCard } from "@/components/portal/dashboard/event-card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { AnimatedTabs } from "@/components/ui/animated-tabs";
 import { Card } from "@/components/ui/card";
 import { IconMessage2Off, IconCalendarOff } from "@tabler/icons-react";
 
@@ -21,35 +22,26 @@ export function ComunicacionesDashboardClient({
   const pinnedAnnouncement = anuncios.find((a: any) => a.fijado);
   const otherAnnouncements = anuncios.filter((a: any) => !a.fijado);
 
+  const tabs = [
+    { id: "todo", label: "Todo" },
+    { id: "academico", label: "Académico" },
+    { id: "eventos", label: "Eventos" },
+  ];
+
   return (
     <>
       {/* Contenido Principal (Feed) */}
       <section className="flex-1 space-y-8 min-w-0">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <div className="flex items-center justify-between border-b border-border pb-4 mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border pb-4 mb-8 gap-4">
             <h2 className="text-xl font-bold text-foreground">
               Comunicaciones
             </h2>
-            <TabsList className="h-9 bg-transparent p-0 flex gap-2">
-              <TabsTrigger
-                value="todo"
-                className="rounded-full px-4 text-xs font-semibold data-[state=active]:bg-secondary/80 data-[state=active]:text-secondary-foreground data-[state=active]:shadow-sm data-[state=inactive]:bg-transparent data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:bg-muted"
-              >
-                Todo
-              </TabsTrigger>
-              <TabsTrigger
-                value="academico"
-                className="rounded-full px-4 text-xs font-semibold data-[state=active]:bg-secondary/80 data-[state=active]:text-secondary-foreground data-[state=active]:shadow-sm data-[state=inactive]:bg-transparent data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:bg-muted"
-              >
-                Académico
-              </TabsTrigger>
-              <TabsTrigger
-                value="eventos"
-                className="rounded-full px-4 text-xs font-semibold data-[state=active]:bg-secondary/80 data-[state=active]:text-secondary-foreground data-[state=active]:shadow-sm data-[state=inactive]:bg-transparent data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:bg-muted"
-              >
-                Eventos
-              </TabsTrigger>
-            </TabsList>
+            <AnimatedTabs
+              tabs={tabs}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+            />
           </div>
 
           <TabsContent value="todo" className="mt-0 outline-none w-full">

@@ -20,12 +20,12 @@ export default async function BoletasPage() {
   }
 
   // Obtener datos vía server action
-  const boletasRes = await getBoletasPortalAction(session.user.id);
+  const boletasRes = await getBoletasPortalAction({});
   const {
     institucion,
     relaciones = [],
     comprobantesAprobados = [],
-  } = boletasRes.data || {};
+  } = boletasRes.success || {};
 
   const institucionData = institucion
     ? {

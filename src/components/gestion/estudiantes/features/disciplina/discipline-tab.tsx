@@ -47,8 +47,8 @@ export function DisciplineTab({ studentId }: DisciplineTabProps) {
 
   const loadHistory = async () => {
     setLoading(true);
-    const res = await getStudentPsychHistoryAction(studentId);
-    if (res.data) setHistory(res.data);
+    const res = await getStudentPsychHistoryAction({ studentId });
+    if (res.success) setHistory(res.success);
     setLoading(false);
   };
 
@@ -60,7 +60,7 @@ export function DisciplineTab({ studentId }: DisciplineTabProps) {
     if (!deletingId) return;
     setIsDeleting(true);
     try {
-      const res = await deletePsychopedagogicalAction(deletingId);
+      const res = await deletePsychopedagogicalAction({ id: deletingId });
       if (res.success) {
         toast.success(res.success);
         setDeletingId(null);

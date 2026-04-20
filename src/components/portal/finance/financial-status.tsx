@@ -22,7 +22,7 @@ export function FinancialStatus({ payments }: FinancialStatusProps) {
   const upcomingAmount = payments.upcoming[0]?.monto || 0;
 
   return (
-    <Card className="overflow-hidden shadow-2xl h-full flex flex-col @container">
+    <Card className="overflow-hidden shadow-2xl h-full flex flex-col @container liquid-glass border-white/10 relative">
       <CardContent className="p-6 flex flex-col gap-6 h-full">
         <h3 className="font-bold text-sm uppercase tracking-wider">
           Estado Financiero

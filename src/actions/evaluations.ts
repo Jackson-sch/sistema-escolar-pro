@@ -2,6 +2,10 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { serialize } from "@/lib/dto";
+import { createSafeAction } from "@/lib/safe-action";
+import { z } from "zod";
+import { auth } from "@/auth";
 
 const REVALIDATE_PATH = "/evaluaciones";
 
@@ -10,246 +14,318 @@ const REVALIDATE_PATH = "/evaluaciones";
 /**
  * Obtiene los tipos de evaluación
  */
-export async function getTiposEvaluacionAction() {
-  try {
-    const tipos = await prisma.tipoEvaluacion.findMany({
-      where: { activo: true },
-      orderBy: { nombre: "asc" },
-    });
-    return { data: JSON.parse(JSON.stringify(tipos)) };
-  } catch (error) {
-    console.error("Error fetching tipos:", error);
-    return { error: "No se pudieron obtener los tipos de evaluación" };
+export const getTiposEvaluacionAction = createSafeAction(
+  z.object({}),
+  async () => {
+    try {
+      const tipos = await prisma.tipoEvaluacion.findMany({
+        where: { activo: true },
+        orderBy: { nombre: "asc" },
+      });
+      return { success: serialize(tipos) };
+    } catch (error) {
+      console.error("Error fetching tipos:", error);
+      return { error: "No se pudieron obtener los tipos de evaluación" };
+    }
   }
-}
+);
 
 // ==================== PERIODOS ACADÉMICOS ====================
 
 /**
  * Obtiene los periodos académicos
  */
-export async function getPeriodosAction(anioEscolar?: number) {
-  try {
-    const periodos = await prisma.periodoAcademico.findMany({
-      where: anioEscolar ? { anioEscolar, activo: true } : { activo: true },
-      orderBy: { fechaInicio: "asc" },
-    });
-    return { data: JSON.parse(JSON.stringify(periodos)) };
-  } catch (error) {
-    console.error("Error fetching periodos:", error);
-    return { error: "No se pudieron obtener los periodos" };
+export const getPeriodosAction = createSafeAction(
+  z.object({ anioEscolar: z.number().optional() }).optional(),
+  async (filters, session) => {
+    try {
+      const periodos = await prisma.periodoAcademico.findMany({
+        where: {
+          ...(filters?.anioEscolar ? { anioEscolar: filters.anioEscolar } : {}),
+          activo: true,
+          institucionId: session.user.institucionId || undefined,
+        },
+        orderBy: { fechaInicio: "asc" },
+      });
+      return { success: serialize(periodos) };
+    } catch (error) {
+      console.error("Error fetching periodos:", error);
+      return { error: "No se pudieron obtener los periodos" };
+    }
   }
-}
+);
 
 /**
  * Crea o actualiza un periodo académico
  */
-export async function upsertPeriodoAction(values: any, id?: string) {
-  try {
-    const data = {
-      ...values,
-      fechaInicio: new Date(values.fechaInicio),
-      fechaFin: new Date(values.fechaFin),
-      numero: parseInt(values.numero),
-      anioEscolar: parseInt(values.anioEscolar),
-    };
+export const upsertPeriodoAction = createSafeAction(
+  z.object({
+    values: z.any(),
+    id: z.string().optional()
+  }),
+  async ({ values, id }, session) => {
+    try {
+      const data = {
+        ...values,
+        fechaInicio: new Date(values.fechaInicio),
+        fechaFin: new Date(values.fechaFin),
+        numero: parseInt(values.numero),
+        anioEscolar: parseInt(values.anioEscolar),
+        institucionId: session.user.institucionId || values.institucionId
+      };
 
-    if (id) {
-      const periodo = await prisma.periodoAcademico.update({
-        where: { id },
-        data,
-      });
-      revalidatePath("/evaluaciones");
-      return {
-        success: "Periodo actualizado",
-        data: JSON.parse(JSON.stringify(periodo)),
-      };
-    } else {
-      const periodo = await prisma.periodoAcademico.create({ data });
-      revalidatePath("/evaluaciones");
-      return {
-        success: "Periodo creado",
-        data: JSON.parse(JSON.stringify(periodo)),
-      };
+      if (id) {
+        // Validar pertenencia
+        const existing = await prisma.periodoAcademico.findUnique({
+          where: { id, institucionId: session.user.institucionId || undefined }
+        });
+        if (!existing) return { error: "Periodo no encontrado o sin permisos" };
+
+        const periodo = await prisma.periodoAcademico.update({
+          where: { id },
+          data,
+        });
+        revalidatePath("/evaluaciones");
+        return {
+          success: "Periodo actualizado",
+          data: serialize(periodo),
+        };
+      } else {
+        const periodo = await prisma.periodoAcademico.create({ data });
+        revalidatePath("/evaluaciones");
+        return {
+          success: "Periodo creado",
+          data: serialize(periodo),
+        };
+      }
+    } catch (error) {
+      console.error("Error upserting periodo:", error);
+      return { error: "No se pudo procesar el periodo" };
     }
-  } catch (error) {
-    console.error("Error upserting periodo:", error);
-    return { error: "No se pudo procesar el periodo" };
-  }
-}
+  },
+  { roles: ["administrativo"] }
+);
 
 // ==================== EVALUACIONES ====================
 
 /**
  * Obtiene el detalle completo de una evaluación por ID (usado en la página de notas)
  */
-export async function getEvaluacionDetailAction(evaluacionId: string) {
-  try {
-    const evaluacion = await prisma.evaluacion.findUnique({
-      where: { id: evaluacionId },
-      include: {
-        tipoEvaluacion: true,
-        curso: {
-          include: {
-            areaCurricular: true,
-            nivelAcademico: {
-              include: { grado: true },
+export const getEvaluacionDetailAction = createSafeAction(
+  z.object({ evaluacionId: z.string() }),
+  async ({ evaluacionId }, session) => {
+    try {
+      const evaluacion = await prisma.evaluacion.findUnique({
+        where: { id: evaluacionId },
+        include: {
+          tipoEvaluacion: true,
+          curso: {
+            include: {
+              areaCurricular: true,
+              nivelAcademico: {
+                include: { grado: true },
+              },
             },
           },
+          periodo: true,
         },
-        periodo: true,
-      },
-    });
-    return { data: evaluacion ? JSON.parse(JSON.stringify(evaluacion)) : null };
-  } catch (error) {
-    console.error("Error fetching evaluacion detail:", error);
-    return { error: "No se pudo obtener el detalle de la evaluación" };
+      });
+
+      if (!evaluacion) return { success: null };
+
+      // Validar acceso institucional
+      if (evaluacion.curso.nivelAcademico.institucionId !== session.user.institucionId) {
+          return { error: "No tiene permiso para ver esta evaluación" };
+      }
+
+      return { success: serialize(evaluacion) };
+    } catch (error) {
+      console.error("Error fetching evaluacion detail:", error);
+      return { error: "No se pudo obtener el detalle de la evaluación" };
+    }
   }
-}
+);
 
 /**
  * Obtiene las evaluaciones de un curso
  */
-export async function getEvaluacionesAction(filters?: {
-  cursoId?: string;
-  periodoId?: string;
-  tipoEvaluacionId?: string;
-  profesorId?: string;
-}) {
-  try {
-    const evaluaciones = await prisma.evaluacion.findMany({
-      where: {
-        cursoId: filters?.cursoId || undefined,
-        periodoId: filters?.periodoId || undefined,
-        tipoEvaluacionId: filters?.tipoEvaluacionId || undefined,
-        activa: true,
-        curso: filters?.profesorId
-          ? { profesorId: filters.profesorId }
-          : undefined,
-      },
-      include: {
-        tipoEvaluacion: true,
-        curso: {
-          include: {
-            areaCurricular: true,
-            nivelAcademico: {
-              include: { grado: true },
+export const getEvaluacionesAction = createSafeAction(
+  z.object({
+    cursoId: z.string().optional(),
+    periodoId: z.string().optional(),
+    tipoEvaluacionId: z.string().optional(),
+    profesorId: z.string().optional(),
+  }).optional(),
+  async (filters, session) => {
+    try {
+      const evaluaciones = await prisma.evaluacion.findMany({
+        where: {
+          cursoId: filters?.cursoId || undefined,
+          periodoId: filters?.periodoId || undefined,
+          tipoEvaluacionId: filters?.tipoEvaluacionId || undefined,
+          activa: true,
+          curso: {
+            nivelAcademico: { institucionId: session.user.institucionId || undefined },
+            ...(filters?.profesorId ? { profesorId: filters.profesorId } : {}),
+          },
+        },
+        include: {
+          tipoEvaluacion: true,
+          curso: {
+            include: {
+              areaCurricular: true,
+              nivelAcademico: {
+                include: { grado: true },
+              },
             },
           },
-        },
-        periodo: true,
-        capacidad: {
-          include: {
-            competencia: true,
+          periodo: true,
+          capacidad: {
+            include: {
+              competencia: true,
+            },
           },
+          _count: { select: { notas: true } },
         },
-        _count: { select: { notas: true } },
-      },
-      orderBy: { fecha: "desc" },
-    });
-    return { data: JSON.parse(JSON.stringify(evaluaciones)) };
-  } catch (error) {
-    console.error("Error fetching evaluaciones:", error);
-    return { error: "No se pudieron obtener las evaluaciones" };
+        orderBy: { fecha: "desc" },
+      });
+      return { success: serialize(evaluaciones) };
+    } catch (error) {
+      console.error("Error fetching evaluaciones:", error);
+      return { error: "No se pudieron obtener las evaluaciones" };
+    }
   }
-}
+);
 
 /**
  * Crea o actualiza una evaluación
  */
-export async function upsertEvaluacionAction(values: any, id?: string) {
-  try {
-    const data = {
-      ...values,
-      peso: parseFloat(values.peso),
-      notaMinima: values.notaMinima ? parseFloat(values.notaMinima) : null,
-      fecha: new Date(values.fecha),
-      fechaLimite: values.fechaLimite ? new Date(values.fechaLimite) : null,
-      capacidadId: values.capacidadId || null,
-    };
+export const upsertEvaluacionAction = createSafeAction(
+  z.object({
+    values: z.any(),
+    id: z.string().optional()
+  }),
+  async ({ values, id }, session) => {
+    try {
+      const data = {
+        ...values,
+        peso: parseFloat(values.peso),
+        notaMinima: values.notaMinima ? parseFloat(values.notaMinima) : null,
+        fecha: new Date(values.fecha),
+        fechaLimite: values.fechaLimite ? new Date(values.fechaLimite) : null,
+        capacidadId: values.capacidadId || null,
+      };
 
-    if (id) {
-      const evaluacion = await prisma.evaluacion.update({
-        where: { id },
-        data,
-      });
-      revalidatePath(REVALIDATE_PATH);
-      return {
-        success: "Evaluación actualizada",
-        data: JSON.parse(JSON.stringify(evaluacion)),
-      };
-    } else {
-      const evaluacion = await prisma.evaluacion.create({ data });
-      revalidatePath(REVALIDATE_PATH);
-      return {
-        success: "Evaluación creada",
-        data: JSON.parse(JSON.stringify(evaluacion)),
-      };
+      if (id) {
+        // Validar pertenencia vía curso
+        const existing = await prisma.evaluacion.findUnique({
+          where: { id },
+          include: { curso: { include: { nivelAcademico: true } } }
+        });
+
+        if (!existing || existing.curso.nivelAcademico.institucionId !== session.user.institucionId) {
+            return { error: "Evaluación no encontrada o sin permisos" };
+        }
+
+        const evaluacion = await prisma.evaluacion.update({
+          where: { id },
+          data,
+        });
+        revalidatePath(REVALIDATE_PATH);
+        return {
+          success: "Evaluación actualizada",
+          data: serialize(evaluacion),
+        };
+      } else {
+        const evaluacion = await prisma.evaluacion.create({ data });
+        revalidatePath(REVALIDATE_PATH);
+        return {
+          success: "Evaluación creada",
+          data: serialize(evaluacion),
+        };
+      }
+    } catch (error) {
+      console.error("Error upserting evaluacion:", error);
+      return { error: "No se pudo procesar la evaluación" };
     }
-  } catch (error) {
-    console.error("Error upserting evaluacion:", error);
-    return { error: "No se pudo procesar la evaluación" };
-  }
-}
+  },
+  { roles: ["administrativo", "profesor"] }
+);
 
 /**
  * Obtiene las capacidades vinculadas a un curso (vía su área curricular)
  */
-export async function getCapacidadesByCursoAction(cursoId: string) {
-  try {
-    const curso = await prisma.curso.findUnique({
-      where: { id: cursoId },
-      include: {
-        areaCurricular: {
-          include: {
-            competencias: {
-              include: { capacidades: true },
+export const getCapacidadesByCursoAction = createSafeAction(
+  z.object({ cursoId: z.string() }),
+  async ({ cursoId }, session) => {
+    try {
+      const curso = await prisma.curso.findUnique({
+        where: { id: cursoId, nivelAcademico: { institucionId: session.user.institucionId || undefined } },
+        include: {
+          areaCurricular: {
+            include: {
+              competencias: {
+                include: { capacidades: true },
+              },
             },
           },
         },
-      },
-    });
+      });
 
-    if (!curso?.areaCurricular) return { data: [] };
+      if (!curso?.areaCurricular) return { success: [] };
 
-    const capacidades = curso.areaCurricular.competencias.flatMap((comp) =>
-      comp.capacidades.map((cap) => ({
-        ...cap,
-        competenciaNombre: comp.nombre,
-      })),
-    );
+      const capacidades = curso.areaCurricular.competencias.flatMap((comp) =>
+        comp.capacidades.map((cap) => ({
+          ...cap,
+          competenciaNombre: comp.nombre,
+        })),
+      );
 
-    return { data: JSON.parse(JSON.stringify(capacidades)) };
-  } catch (error) {
-    console.error("Error fetching capacities by course:", error);
-    return { error: "No se pudieron obtener las capacidades" };
+      return { success: serialize(capacidades) };
+    } catch (error) {
+      console.error("Error fetching capacities by course:", error);
+      return { error: "No se pudieron obtener las capacidades" };
+    }
   }
-}
+);
 
 /**
  * Elimina una evaluación (soft delete)
  */
-export async function deleteEvaluacionAction(id: string) {
-  try {
-    // Verificar si tiene notas registradas
-    const notas = await prisma.nota.count({ where: { evaluacionId: id } });
-    if (notas > 0) {
-      return {
-        error: `No se puede eliminar: tiene ${notas} notas registradas`,
-      };
-    }
+export const deleteEvaluacionAction = createSafeAction(
+  z.object({ id: z.string() }),
+  async ({ id }, session) => {
+    try {
+      const existing = await prisma.evaluacion.findUnique({
+        where: { id },
+        include: { curso: { include: { nivelAcademico: true } } }
+      });
 
-    await prisma.evaluacion.update({
-      where: { id },
-      data: { activa: false },
-    });
-    revalidatePath(REVALIDATE_PATH);
-    return { success: "Evaluación eliminada" };
-  } catch (error) {
-    console.error("Error deleting evaluacion:", error);
-    return { error: "No se pudo eliminar la evaluación" };
-  }
-}
+      if (!existing || existing.curso.nivelAcademico.institucionId !== session.user.institucionId) {
+        return { error: "Evaluación no encontrada o sin permisos" };
+      }
+
+      // Verificar si tiene notas registradas
+      const notas = await prisma.nota.count({ where: { evaluacionId: id } });
+      if (notas > 0) {
+        return {
+          error: `No se puede eliminar: tiene ${notas} notas registradas`,
+        };
+      }
+
+      await prisma.evaluacion.update({
+        where: { id },
+        data: { activa: false },
+      });
+      revalidatePath(REVALIDATE_PATH);
+      return { success: "Evaluación eliminada" };
+    } catch (error) {
+      console.error("Error deleting evaluacion:", error);
+      return { error: "No se pudo eliminar la evaluación" };
+    }
+  },
+  { roles: ["administrativo"] }
+);
 
 // ==================== NOTAS ====================
 
@@ -273,7 +349,7 @@ export async function getNotasEvaluacionAction(evaluacionId: string) {
       },
       orderBy: { estudiante: { apellidoPaterno: "asc" } },
     });
-    return { data: JSON.parse(JSON.stringify(notas)) };
+    return { data: serialize(notas) };
   } catch (error) {
     console.error("Error fetching notas:", error);
     return { error: "No se pudieron obtener las notas" };
@@ -311,7 +387,7 @@ export async function getEstudiantesCursoAction(cursoId: string) {
       orderBy: { apellidoPaterno: "asc" },
     });
 
-    return { data: JSON.parse(JSON.stringify(estudiantes)) };
+    return { data: serialize(estudiantes) };
   } catch (error) {
     console.error("Error fetching estudiantes:", error);
     return { error: "No se pudieron obtener los estudiantes" };
@@ -321,86 +397,122 @@ export async function getEstudiantesCursoAction(cursoId: string) {
 /**
  * Registra o actualiza una nota
  */
-export async function upsertNotaAction(values: {
-  estudianteId: string;
-  evaluacionId: string;
-  cursoId: string;
-  valor: number;
-  valorLiteral?: string;
-  comentario?: string;
-}) {
-  try {
-    // Si se envía valorLiteral, mapeamos a valor numérico para promedios si es necesario
-    let valorFinal = values.valor;
-    if (values.valorLiteral) {
-      const mapping: Record<string, number> = {
-        AD: 20,
-        A: 17,
-        B: 13,
-        C: 10,
-      };
-      if (mapping[values.valorLiteral]) {
-        valorFinal = mapping[values.valorLiteral];
-      }
-    }
+export const upsertNotaAction = createSafeAction(
+  z.object({
+    estudianteId: z.string(),
+    evaluacionId: z.string(),
+    cursoId: z.string(),
+    valor: z.number(),
+    valorLiteral: z.string().optional(),
+    comentario: z.string().optional(),
+  }),
+  async (values, session) => {
+    try {
+      // SEGURIDAD: Validar que el profesor tiene acceso
+      if (session.user.role === "profesor") {
+        const evaluacion = await prisma.evaluacion.findUnique({
+          where: { id: values.evaluacionId },
+          include: { curso: true }
+        });
+        
+        if (!evaluacion || evaluacion.cursoId !== values.cursoId) {
+            return { error: "Inconsistencia en datos de evaluación" };
+        }
 
-    const nota = await prisma.nota.upsert({
-      where: {
-        estudianteId_evaluacionId: {
+        const asignacion = await prisma.curso.findFirst({
+          where: {
+            id: values.cursoId,
+            profesorId: session.user.id,
+          }
+        });
+
+        if (!asignacion) {
+          return { error: "No tiene permiso para registrar notas en este curso" };
+        }
+      } else if (session.user.role !== "administrativo") {
+        return { error: "No autorizado" };
+      }
+
+      let valorFinal = values.valor;
+      if (values.valorLiteral) {
+        const mapping: Record<string, number> = {
+          AD: 20,
+          A: 17,
+          B: 13,
+          C: 10,
+        };
+        if (mapping[values.valorLiteral]) {
+          valorFinal = mapping[values.valorLiteral];
+        }
+      }
+
+      const nota = await prisma.nota.upsert({
+        where: {
+          estudianteId_evaluacionId: {
+            estudianteId: values.estudianteId,
+            evaluacionId: values.evaluacionId,
+          },
+        },
+        update: {
+          valor: valorFinal,
+          valorLiteral: values.valorLiteral,
+          comentario: values.comentario,
+        },
+        create: {
           estudianteId: values.estudianteId,
           evaluacionId: values.evaluacionId,
+          cursoId: values.cursoId,
+          valor: valorFinal,
+          valorLiteral: values.valorLiteral,
+          comentario: values.comentario,
         },
-      },
-      update: {
-        valor: valorFinal,
-        valorLiteral: values.valorLiteral,
-        comentario: values.comentario,
-      },
-      create: {
-        estudianteId: values.estudianteId,
-        evaluacionId: values.evaluacionId,
-        cursoId: values.cursoId,
-        valor: valorFinal,
-        valorLiteral: values.valorLiteral,
-        comentario: values.comentario,
-      },
-    });
+      });
 
-    revalidatePath(REVALIDATE_PATH);
-    return {
-      success: "Nota registrada",
-      data: JSON.parse(JSON.stringify(nota)),
-    };
-  } catch (error) {
-    console.error("Error upserting nota:", error);
-    return { error: "No se pudo registrar la nota" };
-  }
-}
+      revalidatePath(REVALIDATE_PATH);
+      return {
+        success: "Nota registrada",
+        data: serialize(nota),
+      };
+    } catch (error) {
+      console.error("Error upserting nota:", error);
+      return { error: "No se pudo registrar la nota" };
+    }
+  },
+  { roles: ["administrativo", "profesor"] }
+);
 
 /**
  * Registra notas masivamente para una evaluación
  */
-export async function registrarNotasMasivasAction(
-  evaluacionId: string,
-  cursoId: string,
-  notas: {
-    estudianteId: string;
-    valor: number;
-    valorLiteral?: string;
-    comentario?: string;
-  }[],
-) {
-  try {
-    const results = await Promise.all(
-      notas.map((nota) => {
-        // Mapear valor literal si existe para cálculos de promedio consistentes
+export const registrarNotasMasivasAction = createSafeAction(
+  z.object({
+    evaluacionId: z.string(),
+    cursoId: z.string(),
+    notas: z.array(z.object({
+      estudianteId: z.string(),
+      valor: z.number(),
+      valorLiteral: z.string().optional(),
+      comentario: z.string().optional(),
+    })),
+  }),
+  async ({ evaluacionId, cursoId, notas }, session) => {
+    try {
+      // SEGURIDAD: Validar acceso
+      if (session.user.role === "profesor") {
+          const asignacion = await prisma.curso.findFirst({
+            where: {
+              id: cursoId,
+              profesorId: session.user.id,
+            }
+          });
+          if (!asignacion) return { error: "No tiene permiso para este curso" };
+      }
+
+      const operations = notas.map((nota) => {
         let valorFinal = nota.valor;
         if (nota.valorLiteral) {
           const mapping: Record<string, number> = {
-            AD: 20,
-            A: 17,
-            B: 13,
-            C: 10,
+            AD: 20, A: 17, B: 13, C: 10,
           };
           if (mapping[nota.valorLiteral]) {
             valorFinal = mapping[nota.valorLiteral];
@@ -428,205 +540,224 @@ export async function registrarNotasMasivasAction(
             comentario: nota.comentario,
           },
         });
-      }),
-    );
+      });
 
-    revalidatePath(REVALIDATE_PATH);
-    return { success: `${results.length} notas registradas correctamente` };
-  } catch (error) {
-    console.error("Error registrando notas masivas:", error);
-    return { error: "Error al registrar las notas" };
-  }
-}
+      const results = await prisma.$transaction(operations);
+      revalidatePath(REVALIDATE_PATH);
+      return { success: `${results.length} notas registradas correctamente` };
+    } catch (error) {
+      console.error("Error registrando notas masivas:", error);
+      return { error: "Error al registrar las notas" };
+    }
+  },
+  { roles: ["administrativo", "profesor"] }
+);
 
 /**
  * Obtiene el resumen de notas de un estudiante
  */
-export async function getResumenNotasEstudianteAction(
-  estudianteId: string,
-  periodoId?: string,
-) {
-  try {
-    const notas = await prisma.nota.findMany({
-      where: {
-        estudianteId,
-        evaluacion: periodoId ? { periodoId } : undefined,
-      },
-      include: {
-        evaluacion: {
-          include: {
-            tipoEvaluacion: true,
-            periodo: true,
+export const getResumenNotasEstudianteAction = createSafeAction(
+  z.object({
+    estudianteId: z.string(),
+    periodoId: z.string().optional(),
+  }),
+  async ({ estudianteId, periodoId }, session) => {
+    try {
+      // SEGURIDAD: Validar acceso (Admin, Profesor o Padre)
+      const esAdminProfesor = ["administrativo", "profesor"].includes(session.user.role || "");
+      const esPadre = await prisma.relacionFamiliar.findFirst({
+        where: { padreTutorId: session.user.id, hijoId: estudianteId }
+      });
+
+      if (!esAdminProfesor && !esPadre && session.user.id !== estudianteId) {
+        return { error: "No tiene permiso para ver estas notas" };
+      }
+
+      const notas = await prisma.nota.findMany({
+        where: {
+          estudianteId,
+          evaluacion: periodoId ? { periodoId } : undefined,
+          estudiante: { institucionId: session.user.institucionId || undefined },
+        },
+        include: {
+          evaluacion: {
+            include: {
+              tipoEvaluacion: true,
+              periodo: true,
+            },
+          },
+          curso: {
+            include: { areaCurricular: true },
           },
         },
-        curso: {
-          include: { areaCurricular: true },
-        },
-      },
-      orderBy: { fechaRegistro: "desc" },
-    });
+        orderBy: { fechaRegistro: "desc" },
+      });
 
-    // Agrupar por curso
-    const notasPorCurso = notas.reduce((acc: any, nota) => {
-      const cursoId = nota.cursoId;
-      if (!acc[cursoId]) {
-        acc[cursoId] = {
-          curso: nota.curso,
-          notas: [],
-          promedio: 0,
-        };
-      }
-      acc[cursoId].notas.push(nota);
-      return acc;
-    }, {});
+      // Agrupar por curso
+      const notasPorCurso = notas.reduce((acc: any, nota) => {
+        const cursoId = nota.cursoId;
+        if (!acc[cursoId]) {
+          acc[cursoId] = {
+            curso: nota.curso,
+            notas: [],
+            promedio: 0,
+          };
+        }
+        acc[cursoId].notas.push(nota);
+        return acc;
+      }, {});
 
-    // Calcular promedios
-    Object.values(notasPorCurso).forEach((grupo: any) => {
-      const sum = grupo.notas.reduce((acc: number, n: any) => acc + n.valor, 0);
-      grupo.promedio = grupo.notas.length > 0 ? sum / grupo.notas.length : 0;
-    });
+      // Calcular promedios
+      Object.values(notasPorCurso).forEach((grupo: any) => {
+        const sum = grupo.notas.reduce((acc: number, n: any) => acc + n.valor, 0);
+        grupo.promedio = grupo.notas.length > 0 ? sum / grupo.notas.length : 0;
+      });
 
-    return { data: JSON.parse(JSON.stringify(notasPorCurso)) };
-  } catch (error) {
-    console.error("Error fetching resumen:", error);
-    return { error: "No se pudo obtener el resumen de notas" };
+      return { success: serialize(notasPorCurso) };
+    } catch (error) {
+      console.error("Error fetching resumen:", error);
+      return { error: "No se pudo obtener el resumen de notas" };
+    }
   }
-}
+);
 
 /**
  * Calcula el ranking de un estudiante dentro de su sección (nivel académico)
  */
-export async function getRankingEstudianteAction(
-  estudianteId: string,
-  periodoId?: string,
-  anioEscolar: number = new Date().getFullYear(),
-) {
-  try {
-    // 1. Obtener la sección del estudiante
-    const estudiante = await prisma.user.findUnique({
-      where: { id: estudianteId },
-      select: { nivelAcademicoId: true },
-    });
+export const getRankingEstudianteAction = createSafeAction(
+  z.object({
+    estudianteId: z.string(),
+    periodoId: z.string().optional(),
+    anioEscolar: z.number().optional()
+  }),
+  async ({ estudianteId, periodoId, anioEscolar }, session) => {
+    try {
+      const anio = anioEscolar || new Date().getFullYear();
+      
+      // SEGURIDAD: Validar acceso institutional
+      const estudiante = await prisma.user.findUnique({
+        where: { id: estudianteId, institucionId: session.user.institucionId || undefined },
+        select: { nivelAcademicoId: true },
+      });
 
-    if (!estudiante?.nivelAcademicoId) {
-      return { data: { posicion: 0, total: 0 } };
-    }
+      if (!estudiante?.nivelAcademicoId) {
+        return { success: { posicion: 0, total: 0, promedioEstudiante: 0 } };
+      }
 
-    // 2. Obtener todos los estudiantes de la misma sección
-    const compañeros = await prisma.user.findMany({
-      where: {
-        nivelAcademicoId: estudiante.nivelAcademicoId,
-        role: "estudiante",
-      },
-      select: { id: true, name: true },
-    });
+      // 2. Obtener todos los estudiantes de la misma sección
+      const compañeros = await prisma.user.findMany({
+        where: {
+          nivelAcademicoId: estudiante.nivelAcademicoId,
+          role: "estudiante",
+        },
+        select: { id: true, name: true },
+      });
 
-    if (compañeros.length === 0) {
-      return { data: { posicion: 1, total: 1 } };
-    }
+      if (compañeros.length === 0) {
+        return { success: { posicion: 1, total: 1, promedioEstudiante: 0 } };
+      }
 
-    // 3. Obtener todas las notas de todos los alumnos de la sección para el periodo/año
-    const notasSeccion = await prisma.nota.findMany({
-      where: {
-        estudianteId: { in: compañeros.map((c) => c.id) },
-        evaluacion: {
-          periodo: {
-            anioEscolar,
-            id: periodoId || undefined,
+      // 3. Obtener todas las notas de todos los alumnos de la sección
+      const promediosDb = await prisma.nota.groupBy({
+        by: ["estudianteId"],
+        where: {
+          estudianteId: { in: compañeros.map((c) => c.id) },
+          evaluacion: {
+            periodo: {
+              anioEscolar: anio,
+              id: periodoId || undefined,
+            },
           },
         },
-      },
-      select: { valor: true, estudianteId: true },
-    });
+        _avg: { valor: true },
+      });
 
-    // 4. Calcular el promedio de cada estudiante
-    const promediosEstudiantes = compañeros.map((comp) => {
-      const notasComp = notasSeccion.filter((n) => n.estudianteId === comp.id);
-      const promedio =
-        notasComp.length > 0
-          ? notasComp.reduce((acc, current) => acc + current.valor, 0) /
-            notasComp.length
-          : 0;
-      return { id: comp.id, promedio };
-    });
+      // 4. Mapear promedios
+      const promediosEstudiantes = compañeros.map((comp) => {
+        const dbAvg = promediosDb.find((p) => p.estudianteId === comp.id);
+        return { id: comp.id, promedio: dbAvg?._avg.valor || 0 };
+      });
 
-    // 5. Ordenar por promedio descendente
-    const rankingOrdenado = promediosEstudiantes.sort(
-      (a, b) => b.promedio - a.promedio,
-    );
+      // 5. Ordenar por promedio descendente
+      const rankingOrdenado = promediosEstudiantes.sort(
+        (a, b) => b.promedio - a.promedio,
+      );
 
-    // 6. Encontrar posición del estudiante actual
-    const index = rankingOrdenado.findIndex((r) => r.id === estudianteId);
-    const posicion = index !== -1 ? index + 1 : rankingOrdenado.length;
+      // 6. Encontrar posición del estudiante actual
+      const index = rankingOrdenado.findIndex((r) => r.id === estudianteId);
+      const posicion = index !== -1 ? index + 1 : rankingOrdenado.length;
 
-    return {
-      data: {
-        posicion,
-        total: rankingOrdenado.length,
-        promedioEstudiante: rankingOrdenado[index]?.promedio || 0,
-      },
-    };
-  } catch (error) {
-    console.error("Error calculando ranking:", error);
-    return { error: "No se pudo calcular el ranking" };
+      return {
+        success: {
+          posicion,
+          total: rankingOrdenado.length,
+          promedioEstudiante: rankingOrdenado[index]?.promedio || 0,
+        },
+      };
+    } catch (error) {
+      console.error("Error calculando ranking:", error);
+      return { error: "No se pudo calcular el ranking" };
+    }
   }
-}
+);
 
 /**
  * Calcula el porcentaje de asistencia de un estudiante
  */
-export async function getAsistenciaEstudianteAction(
-  estudianteId: string,
-  periodoId?: string,
-  anioEscolar: number = new Date().getFullYear(),
-) {
-  try {
-    let whereClause: any = {
-      estudianteId,
-    };
+export const getAsistenciaEstudianteAction = createSafeAction(
+  z.object({
+    estudianteId: z.string(),
+    periodoId: z.string().optional(),
+    anioEscolar: z.number().optional()
+  }),
+  async ({ estudianteId, periodoId, anioEscolar }, session) => {
+    try {
+      const anio = anioEscolar || new Date().getFullYear();
+      let whereClause: any = {
+        estudianteId,
+        estudiante: { institucionId: session.user.institucionId || undefined }
+      };
 
-    // Si hay periodo, filtramos por fechas del periodo
-    if (periodoId) {
-      const periodo = await prisma.periodoAcademico.findUnique({
-        where: { id: periodoId },
-        select: { fechaInicio: true, fechaFin: true },
-      });
+      if (periodoId) {
+        const periodo = await prisma.periodoAcademico.findUnique({
+          where: { id: periodoId },
+          select: { fechaInicio: true, fechaFin: true },
+        });
 
-      if (periodo) {
+        if (periodo) {
+          whereClause.fecha = {
+            gte: periodo.fechaInicio,
+            lte: periodo.fechaFin,
+          };
+        }
+      } else {
+        const fechaInicioAnio = new Date(anio, 0, 1);
+        const fechaFinAnio = new Date(anio, 11, 31);
         whereClause.fecha = {
-          gte: periodo.fechaInicio,
-          lte: periodo.fechaFin,
+          gte: fechaInicioAnio,
+          lte: fechaFinAnio,
         };
       }
-    } else {
-      // Si no hay periodo (Todos), filtramos por el año escolar
-      const fechaInicioAnio = new Date(anioEscolar, 0, 1);
-      const fechaFinAnio = new Date(anioEscolar, 11, 31);
-      whereClause.fecha = {
-        gte: fechaInicioAnio,
-        lte: fechaFinAnio,
+
+      const asistencias = await prisma.asistencia.findMany({
+        where: whereClause,
+        select: { presente: true },
+      });
+
+      const totalDias = asistencias.length;
+      const diasPresente = asistencias.filter((a) => a.presente).length;
+      const porcentaje = totalDias > 0 ? (diasPresente / totalDias) * 100 : 0;
+
+      return {
+        success: {
+          porcentaje: parseFloat(porcentaje.toFixed(1)),
+          totalDias,
+          diasPresente,
+        },
       };
+    } catch (error) {
+      console.error("Error calculando asistencia:", error);
+      return { error: "No se pudo calcular la asistencia" };
     }
-
-    const asistencias = await prisma.asistencia.findMany({
-      where: whereClause,
-      select: { presente: true },
-    });
-
-    const totalDias = asistencias.length;
-    const diasPresente = asistencias.filter((a) => a.presente).length;
-
-    const porcentaje = totalDias > 0 ? (diasPresente / totalDias) * 100 : 0;
-
-    return {
-      data: {
-        porcentaje: parseFloat(porcentaje.toFixed(1)),
-        totalDias,
-        diasPresente,
-      },
-    };
-  } catch (error) {
-    console.error("Error calculando asistencia:", error);
-    return { error: "No se pudo calcular la asistencia" };
   }
-}
+);

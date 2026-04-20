@@ -84,14 +84,14 @@ export function EvaluacionForm({
 
   const loadCapacidades = async (cursoId: string) => {
     setLoadingCapacidades(true);
-    const res = await getCapacidadesByCursoAction(cursoId);
-    if (res.data) setCapacidades(res.data);
+    const res = await getCapacidadesByCursoAction({ cursoId });
+    if (res.success) setCapacidades(res.success);
     setLoadingCapacidades(false);
   };
 
   const onSubmit = (values: any) => {
     startTransition(async () => {
-      const res = await upsertEvaluacionAction(values, initialData?.id);
+      const res = await upsertEvaluacionAction({ values, id: initialData?.id });
       if (res.success) {
         toast.success(res.success);
         setIsDirty(false);

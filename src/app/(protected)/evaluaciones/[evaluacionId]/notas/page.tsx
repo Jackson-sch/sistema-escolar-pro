@@ -28,8 +28,8 @@ export default async function NotasPage({ params }: NotasPageProps) {
   const { evaluacionId } = await params;
 
   // Obtener la evaluación con todos sus datos relacionados
-  const evaluacionRes = await getEvaluacionDetailAction(evaluacionId);
-  const evaluacion = evaluacionRes.data;
+  const evaluacionRes = await getEvaluacionDetailAction({ evaluacionId });
+  const evaluacion = evaluacionRes.success;
 
   if (!evaluacion) {
     notFound();
@@ -167,9 +167,11 @@ export default async function NotasPage({ params }: NotasPageProps) {
         <NotasForm
           evaluacionId={evaluacionId}
           cursoId={evaluacion.cursoId}
-          estudiantes={estudiantes}
+          estudiantes={estudiantes as any}
           notasExistentes={notasMap}
           escala={evaluacion.escalaCalificacion}
+          cursoNombre={evaluacion.curso.nombre}
+          evaluacionNombre={evaluacion.nombre}
         />
       </section>
     </div>

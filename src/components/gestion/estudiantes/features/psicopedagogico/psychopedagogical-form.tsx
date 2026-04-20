@@ -98,8 +98,8 @@ export function PsychopedagogicalForm({
   });
 
   const loadCategories = async () => {
-    const res = await getIncidentCategoriesAction();
-    if (res.data) setCategories(res.data);
+    const res = await getIncidentCategoriesAction({});
+    if (res.success) setCategories(res.success);
   };
 
   useEffect(() => {
@@ -108,7 +108,7 @@ export function PsychopedagogicalForm({
 
   const onSubmit = (values: PsychValues) => {
     startTransition(async () => {
-      const res = await upsertPsychopedagogicalAction(values, initialData?.id);
+      const res = await upsertPsychopedagogicalAction({ values, id: initialData?.id });
       if (res.error) toast.error(res.error);
       if (res.success) {
         toast.success(res.success);

@@ -73,11 +73,11 @@ export function AdmisionFlow({ admision, onSuccess }: AdmisionFlowProps) {
     setLoading(true)
     try {
       const { estadoFinal, ...data } = values
-      const res = await updateAdmisionResultAction(
-        admision.id,
-        data,
-        estadoFinal as any
-      )
+      const res = await updateAdmisionResultAction({
+        admisionId: admision.id,
+        values: data,
+        finalStatus: estadoFinal as any
+      })
 
       if (res.success) {
         toast.success(res.success)
@@ -93,7 +93,7 @@ export function AdmisionFlow({ admision, onSuccess }: AdmisionFlowProps) {
   const handleGenerateStudent = async () => {
     setIsGenerating(true)
     try {
-      const res = await convertProspectoToEstudianteAction(admision.prospectoId)
+      const res = await convertProspectoToEstudianteAction({ prospectoId: admision.prospectoId })
       if (res.success) {
         toast.success(res.success)
         router.push("/gestion/matriculas")

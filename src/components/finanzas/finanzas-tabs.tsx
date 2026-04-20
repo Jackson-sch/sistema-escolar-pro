@@ -2,7 +2,8 @@
 
 import { useQueryState, parseAsString } from "nuqs"
 import { IconReceipt, IconUsers, IconChartBar } from "@tabler/icons-react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsContent } from "@/components/ui/tabs"
+import { AnimatedTabs } from "@/components/ui/animated-tabs"
 
 interface FinanzasTabsProps {
   children: {
@@ -18,22 +19,32 @@ export function FinanzasTabs({ children }: FinanzasTabsProps) {
     parseAsString.withDefault("cronograma")
   )
 
+  const tabs = [
+    {
+      id: "cronograma",
+      label: "Cronograma",
+      icon: <IconUsers className="size-4" />,
+    },
+    {
+      id: "conceptos",
+      label: "Conceptos",
+      icon: <IconReceipt className="size-4" />,
+    },
+    {
+      id: "reportes",
+      label: "Reportes",
+      icon: <IconChartBar className="size-4" />,
+    },
+  ];
+
   return (
     <Tabs value={tab} onValueChange={setTab}>
-      <TabsList className="flex flex-wrap sm:flex-nowrap h-auto sm:h-12 max-w-lg mb-6 ml-0 sm:ml-2 bg-muted/50 p-1 shadow-inner border justify-start rounded-full">
-        <TabsTrigger value="cronograma" className="flex-1 sm:flex-initial gap-2 text-xs sm:text-sm px-3 sm:px-6 py-2 rounded-full">
-          <IconUsers className="size-4" />
-          Cronograma
-        </TabsTrigger>
-        <TabsTrigger value="conceptos" className="flex-1 sm:flex-initial gap-2 text-xs sm:text-sm px-3 sm:px-6 py-2 rounded-full">
-          <IconReceipt className="size-4" />
-          Conceptos
-        </TabsTrigger>
-        <TabsTrigger value="reportes" className="flex-1 sm:flex-initial gap-2 text-xs sm:text-sm px-3 sm:px-6 py-2 rounded-full">
-          <IconChartBar className="size-4" />
-          Reportes
-        </TabsTrigger>
-      </TabsList>
+      <AnimatedTabs
+        tabs={tabs}
+        activeTab={tab}
+        onTabChange={setTab}
+        className="mb-6 ml-2"
+      />
 
       <TabsContent value="cronograma" className="space-y-4 px-2">
         {children.cronograma}

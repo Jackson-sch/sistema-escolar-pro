@@ -22,8 +22,8 @@ export default async function PortalDisciplinaPage({
   }
 
   // 1. Obtener hijos del padre
-  const hijosRes = await getParentStudentsAction(session.user.id);
-  const hijos = hijosRes.data || [];
+  const hijosRes = await getParentStudentsAction({ padreId: session.user.id });
+  const hijos = hijosRes.success || [];
 
   if (hijos.length === 0) {
     return (
@@ -48,9 +48,10 @@ export default async function PortalDisciplinaPage({
   const selectedHijoId = hijoId || hijos[0].id;
 
   // 3. Obtener registros disciplinarios visibles
-  const disciplineRes =
-    await getStudentDisciplineRecordsForParentAction(selectedHijoId);
-  const records = disciplineRes.data || [];
+  const disciplineRes = await getStudentDisciplineRecordsForParentAction({
+    studentId: selectedHijoId,
+  });
+  const records = disciplineRes.success || [];
 
   return (
     <div className="flex flex-1 flex-col gap-8 p-4 sm:p-10 pt-0 animate-in fade-in duration-700">

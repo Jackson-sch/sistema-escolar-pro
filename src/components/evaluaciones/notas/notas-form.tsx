@@ -31,6 +31,8 @@ interface NotasFormProps {
   estudiantes: EstudianteType[];
   notasExistentes: Record<string, NotaData>;
   escala?: "VIGESIMAL" | "LITERAL" | "DESCRIPTIVA";
+  cursoNombre?: string;
+  evaluacionNombre?: string;
 }
 
 export function NotasForm({
@@ -39,6 +41,8 @@ export function NotasForm({
   estudiantes,
   notasExistentes,
   escala = "VIGESIMAL",
+  cursoNombre = "Curso",
+  evaluacionNombre = "Evaluación",
 }: NotasFormProps) {
   const [notas, setNotas] = useState<Record<string, NotaData>>(notasExistentes);
   const [search, setSearch] = useState("");
@@ -89,11 +93,19 @@ export function NotasForm({
   };
 
   const { messages, sendMessage, status, setMessages } = useChat({
+    api: "/api/chat",
+    body: {
+      context: {
+        type: "FEEDBACK",
+        curso: cursoNombre,
+        evaluacion: evaluacionNombre,
+      },
+    },
     onFinish: () => {
       setActiveStudentId(null);
       toast.success("Feedback completado");
     },
-  });
+  } as any);
 
   const isStreaming = status === "streaming" || status === "submitted";
   const [activeStudentId, setActiveStudentId] = useState<string | null>(null);
@@ -152,13 +164,15 @@ export function NotasForm({
     setActiveStudentId(est.id);
     setMessages([]);
 
-    sendMessage({
-      text: `Genera un breve comentario (máximo 3 líneas) para el reporte académico de:
-        Nombre: ${est.name} ${est.apellidoPaterno}
-        Calificación: ${
+    (sendMessage as any)({
+      text: `Genera un reporte de retroalimentación formal para el padre de familia sobre el desempeño de:
+        Alumno: ${est.name} ${est.apellidoPaterno}
+        Calificación obtenida en ${evaluacionNombre}: ${
           notaData.valorLiteral ? notaData.valorLiteral : notaData.valor + "/20"
         }
-        El tono debe ser profesional y alentador.`,
+        Materia: ${cursoNombre}.
+        
+        Recuerda mencionar la competencia evaluada [${evaluacionNombre}] y dar recomendaciones constructivas. Solo en español.`,
     });
   };
 
@@ -178,11 +192,11 @@ export function NotasForm({
     }
 
     startTransition(async () => {
-      const res = await registrarNotasMasivasAction(
+      const res = await registrarNotasMasivasAction({
         evaluacionId,
         cursoId,
-        notasArray as any,
-      );
+        notas: notasArray as any,
+      });
       if (res.success) toast.success(res.success);
       if (res.error) toast.error(res.error);
     });

@@ -23,22 +23,27 @@ export default async function EvaluacionesPage() {
   // Obtener año actual desde la institución o fecha
   const initialInstituciones = await getInstitucionesAction();
   const currentYear =
-    initialInstituciones.data?.[0]?.cicloEscolarActual ||
+    (initialInstituciones as any).success?.[0]?.cicloEscolarActual ||
+    (initialInstituciones as any).data?.[0]?.cicloEscolarActual ||
     new Date().getFullYear();
 
   const [
-    { data: evaluaciones = [] },
-    { data: tipos = [] },
-    { data: periodos = [] },
-    { data: cursos = [] },
-    { data: instituciones = [] },
+    evaluacionesRes,
+    tiposRes,
+    periodosRes,
+    cursosRes,
   ] = await Promise.all([
     getEvaluacionesAction({ profesorId }),
-    getTiposEvaluacionAction(),
-    getPeriodosAction(currentYear),
+    getTiposEvaluacionAction({}),
+    getPeriodosAction({ anioEscolar: currentYear }),
     getCoursesAction({ anioAcademico: currentYear, profesorId }),
-    Promise.resolve(initialInstituciones),
   ]);
+
+  const evaluaciones = (evaluacionesRes as any).success || (evaluacionesRes as any).data || [];
+  const tipos = (tiposRes as any).success || (tiposRes as any).data || [];
+  const periodos = (periodosRes as any).success || (periodosRes as any).data || [];
+  const cursos = (cursosRes as any).success || (cursosRes as any).data || [];
+  const instituciones = (initialInstituciones as any).success || (initialInstituciones as any).data || [];
 
   const institucionId = instituciones[0]?.id || "";
   const hayPeriodos = periodos.length > 0;
