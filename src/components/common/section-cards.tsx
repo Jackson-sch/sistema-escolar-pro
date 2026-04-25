@@ -55,8 +55,12 @@ export function SectionCards({ stats, isLoading }: SectionCardsProps) {
       value: formatCurrency(stats?.totalOverdue || 0),
       sub: "Deuda vencida acumulada",
       icon: IconAlertTriangle,
-      trend: (stats?.totalOverdue || 0) > 1000 ? ("down" as const) : ("neutral" as const),
-      trendLabel: (stats?.totalOverdue || 0) > 0 ? "Requiere gestión" : "En orden",
+      trend:
+        (stats?.totalOverdue || 0) > 1000
+          ? ("down" as const)
+          : ("neutral" as const),
+      trendLabel:
+        (stats?.totalOverdue || 0) > 0 ? "Requiere gestión" : "En orden",
       accent: "from-red-600 to-rose-600",
       light: "bg-red-500/10 text-red-600 dark:text-red-400",
       ring: "ring-red-500/20",
@@ -66,8 +70,12 @@ export function SectionCards({ stats, isLoading }: SectionCardsProps) {
       value: `${stats?.attendanceRate?.toFixed(1) ?? "0"}%`,
       sub: "Monitor en tiempo real",
       icon: IconCalendarCheck,
-      trend: (stats?.attendanceRate ?? 0) >= 90 ? ("up" as const) : ("down" as const),
-      trendLabel: (stats?.attendanceRate ?? 0) >= 90 ? "Excelente" : "Seguimiento",
+      trend:
+        (stats?.attendanceRate ?? 0) >= 90
+          ? ("up" as const)
+          : ("down" as const),
+      trendLabel:
+        (stats?.attendanceRate ?? 0) >= 90 ? "Excelente" : "Seguimiento",
       accent: "from-emerald-600 to-teal-600",
       light: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
       ring: "ring-emerald-500/20",
@@ -92,14 +100,14 @@ export function SectionCards({ stats, isLoading }: SectionCardsProps) {
           key={card.title}
           className={cn(
             "liquid-glass group relative flex flex-col justify-between rounded-3xl p-6 transition-all duration-500",
-            "hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1.5"
+            "hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1.5",
           )}
         >
           {/* Animated Blob Background */}
           <div
             className={cn(
               "absolute -top-12 -right-12 size-32 rounded-full blur-3xl opacity-20 transition-opacity duration-500 group-hover:opacity-40 animate-blob",
-              card.accent
+              card.accent,
             )}
           />
 
@@ -108,7 +116,7 @@ export function SectionCards({ stats, isLoading }: SectionCardsProps) {
               <div
                 className={cn(
                   "flex size-12 items-center justify-center rounded-2xl border border-white/10 shadow-inner",
-                  card.light
+                  card.light,
                 )}
               >
                 <card.icon className="size-6" />
@@ -165,7 +173,7 @@ function TrendBadge({
     <span
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-bold shadow-sm",
-        config.cls
+        config.cls,
       )}
     >
       <Icon className="size-3.5" />

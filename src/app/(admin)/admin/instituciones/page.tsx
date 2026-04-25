@@ -42,8 +42,8 @@ export default async function AdminInstitucionesPage({
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {instituciones.map((inst: any) => (
           <div key={inst.id} className="group rounded-3xl bg-zinc-900 border border-white/5 overflow-hidden transition-all hover:border-white/10 hover:shadow-2xl hover:shadow-black">
-             <div className="h-24 bg-gradient-to-r from-zinc-800 to-zinc-900 p-6 flex items-start justify-between relative overflow-hidden">
-                <div className="absolute inset-0 bg-white/[0.02] mix-blend-overlay" />
+             <div className="h-24 bg-linear-to-r from-zinc-800 to-zinc-900 p-6 flex items-start justify-between relative overflow-hidden">
+                <div className="absolute inset-0 bg-white/2 mix-blend-overlay" />
                 <div className="size-16 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 flex items-center justify-center relative z-10">
                    {inst.logo ? (
                      <img src={inst.logo} alt={inst.nombreInstitucion} className="size-12 object-contain" />

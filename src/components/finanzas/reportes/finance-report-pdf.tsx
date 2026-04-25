@@ -13,6 +13,7 @@ import { Divider } from "@/components/pdfx/divider/pdfx-divider";
 import { Stack } from "@/components/pdfx/stack/pdfx-stack";
 import { PageHeader } from "@/components/pdfx/page-header/pdfx-page-header";
 import { PageFooter } from "@/components/pdfx/page-footer/pdfx-page-footer";
+import { toTitleCase } from "@/lib/utils";
 
 interface FinanceReportPDFProps {
   data: {
@@ -24,24 +25,59 @@ interface FinanceReportPDFProps {
     topDeudores: any[];
     fecha: string;
   };
+  institucion: {
+    nombreInstitucion: string;
+    direccion?: string;
+    telefono?: string;
+    codigoModular?: string;
+    dre?: string;
+    ugel?: string;
+    logo?: string;
+    lema?: string;
+    email?: string;
+  };
 }
 
-export const FinanceReportPDF = ({ data }: FinanceReportPDFProps) => {
+export const FinanceReportPDF = ({ data, institucion }: FinanceReportPDFProps) => {
   const formatValue = (val: number) =>
     `S/ ${val.toLocaleString("es-PE", { minimumFractionDigits: 2 })}`;
+
+  const institucionNombre = toTitleCase(institucion.nombreInstitucion);
+  
+  const subHeaderParts = [
+    institucion.lema ? `"${institucion.lema}"` : null,
+    institucion.dre ? `DRE: ${institucion.dre}` : null,
+    institucion.ugel ? `UGEL: ${institucion.ugel}` : null,
+    institucion.codigoModular ? `CÓD. MODULAR: ${institucion.codigoModular}` : null,
+  ].filter(Boolean);
+
+  const subHeader = subHeaderParts.length > 0 
+    ? subHeaderParts.join(' | ') 
+    : institucion.direccion;
 
   return (
     <Document title="Reporte Financiero">
       <Page size="A4" style={{ padding: 48, fontFamily: 'Helvetica' }}>
-        {/* HEADER */}
+        {/* HEADER ESTANDARIZADO */}
         <PageHeader
-          title="REPORTE FINANCIERO"
-          subtitle="EduPeru Pro - Gestión Institucional"
-          rightText="Estado de Caja"
+          title={institucionNombre}
+          subtitle={subHeader}
+          rightText="REPORTE FINANCIERO"
           rightSubText={`Generado: ${data.fecha}`}
-          variant="simple"
-          marginBottom={30}
+          variant="two-column"
+          address={institucion.direccion}
+          phone={institucion.telefono ? `Teléfono: ${institucion.telefono}` : undefined}
+          email={institucion.email ? `Email: ${institucion.email}` : undefined}
+          marginBottom={20}
+          logo={institucion.logo}
         />
+
+        {/* Dirección secundaria si hay subheader informativo */}
+        {subHeaderParts.length > 0 && (
+          <Text style={{ fontSize: 7, color: '#64748b', marginTop: -15, marginBottom: 20, textAlign: 'left' }}>
+            {institucion.direccion}
+          </Text>
+        )}
 
         {/* KPIs */}
         <Stack direction="vertical" gap="lg">

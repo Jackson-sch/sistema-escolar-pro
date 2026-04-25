@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { getNextComprobanteAction } from "@/actions/finance";
 import { IAReminderButton } from "./ia-reminder-button";
 import Image from "next/image";
-import { cn } from "@/lib/utils";
+import { cn, toTitleCase } from "@/lib/utils";
 
 const DownloadWrapper = dynamic(
   () =>
@@ -31,10 +31,10 @@ const DownloadWrapper = dynamic(
       <Button
         variant="ghost"
         size="sm"
-        className="h-7 w-7 p-0 rounded-lg opacity-50"
+        className="h-8 w-8 p-0 rounded-xl opacity-50"
         disabled
       >
-        <IconFileDownload className="size-3.5" />
+        <IconFileDownload className="size-4" />
       </Button>
     ),
   },
@@ -89,38 +89,38 @@ const STATUS_CONFIG: Record<
   { label: string; dot: string; text: string; bg: string; icon: React.ElementType }
 > = {
   pagado: {
-    label: "Pagado",
+    label: "PAGADO",
     dot: "bg-emerald-500",
-    text: "text-emerald-400",
+    text: "text-emerald-600 dark:text-emerald-400",
     bg: "bg-emerald-500/10 border-emerald-500/20",
     icon: IconCheck,
   },
   vencido: {
-    label: "Vencido",
+    label: "VENCIDO",
     dot: "bg-rose-500",
-    text: "text-rose-400",
+    text: "text-rose-600 dark:text-rose-400",
     bg: "bg-rose-500/10 border-rose-500/20",
     icon: IconAlertTriangle,
   },
   parcial: {
-    label: "Parcial",
+    label: "PARCIAL",
     dot: "bg-amber-500",
-    text: "text-amber-400",
+    text: "text-amber-600 dark:text-amber-400",
     bg: "bg-amber-500/10 border-amber-500/20",
     icon: IconMinus,
   },
   pendiente: {
-    label: "Pendiente",
-    dot: "bg-zinc-500",
-    text: "text-zinc-400",
-    bg: "bg-zinc-500/10 border-zinc-500/20",
+    label: "PENDIENTE",
+    dot: "bg-blue-500",
+    text: "text-blue-600 dark:text-blue-400",
+    bg: "bg-blue-500/10 border-blue-500/20",
     icon: IconClockHour4,
   },
   anulado: {
-    label: "Anulado",
-    dot: "bg-purple-500",
-    text: "text-purple-400",
-    bg: "bg-purple-500/10 border-purple-500/20",
+    label: "ANULADO",
+    dot: "bg-zinc-500",
+    text: "text-zinc-600 dark:text-zinc-400",
+    bg: "bg-zinc-500/10 border-zinc-500/20",
     icon: IconX,
   },
 };
@@ -129,16 +129,16 @@ function StatusBadge({ status }: { status: StatusKey }) {
   const cfg = STATUS_CONFIG[status];
   const Icon = cfg.icon;
   return (
-    <span
+    <Badge
       className={cn(
-        "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-semibold uppercase tracking-wide",
+        "inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-[9px] font-black tracking-widest transition-all hover:scale-105 shadow-sm",
         cfg.bg,
         cfg.text,
       )}
     >
-      <Icon className="size-3" strokeWidth={2.5} />
+      <div className={cn("size-1.5 rounded-full shadow-xs animate-pulse", cfg.dot)} />
       {cfg.label}
-    </span>
+    </Badge>
   );
 }
 
@@ -156,14 +156,10 @@ export const getCronogramaColumns = (meta: {
     id: "estudiante",
     accessorFn: (row) =>
       `${row.estudiante.dni || ""} ${row.estudiante.name} ${row.estudiante.apellidoPaterno} ${row.estudiante.apellidoMaterno}`,
-    header: () => (
-      <span className="text-[10px] font-bold uppercase text-zinc-500">
-        Estudiante
-      </span>
-    ),
+    header: "Estudiante",
     cell: ({ row }) => {
       const { estudiante } = row.original;
-      const fullName = `${estudiante.apellidoPaterno} ${estudiante.apellidoMaterno}, ${estudiante.name}`;
+      const fullName = toTitleCase(`${estudiante.apellidoPaterno} ${estudiante.apellidoMaterno}, ${estudiante.name}`);
       const nivel =
         estudiante.matriculas?.[0]?.nivelAcademico ??
         estudiante.nivelAcademico;
@@ -172,33 +168,30 @@ export const getCronogramaColumns = (meta: {
         (estudiante.name[0] ?? "") + (estudiante.apellidoPaterno[0] ?? "");
 
       return (
-        <div className="flex items-center gap-3 py-0.5">
-          {/* Avatar */}
-          <div className="size-8 rounded-lg shrink-0 ring-1 ring-white/8 overflow-hidden">
+        <div className="flex items-center gap-4 group">
+          <div className="relative size-10 rounded-xl overflow-hidden ring-1 ring-border/40 bg-muted/40 shadow-xs transition-all group-hover:ring-primary/40 group-hover:shadow-md">
             {estudiante.image ? (
               <Image
                 src={estudiante.image}
                 alt={fullName}
-                width={32}
-                height={32}
-                className="object-cover w-full h-full"
+                fill
+                className="object-cover transition-transform group-hover:scale-110"
               />
             ) : (
-              <div className="w-full h-full bg-linear-to-br from-blue-600/20 to-indigo-700/20 flex items-center justify-center text-blue-400 font-bold text-[11px] uppercase">
+              <div className="w-full h-full bg-linear-to-br from-primary/10 to-primary/5 flex items-center justify-center text-primary font-black text-xs uppercase">
                 {initials}
               </div>
             )}
           </div>
 
-          {/* Info */}
           <div className="flex flex-col min-w-0">
-            <span className="font-semibold text-sm text-white truncate capitalize leading-snug">
+            <span className="font-bold text-sm text-foreground truncate group-hover:text-primary transition-colors">
               {fullName}
             </span>
-            <span className="text-[11px] text-zinc-500 truncate leading-snug">
+            <span className="text-[10px] text-muted-foreground font-black tracking-tighter uppercase opacity-60">
               {nivel
                 ? `${nivel.nivel.nombre} · ${nivel.grado.nombre} "${nivel.seccion}"`
-                : estudiante.codigoEstudiante ?? "Sin nivel asignado"}
+                : estudiante.codigoEstudiante ?? "SIN NIVEL"}
             </span>
           </div>
         </div>
@@ -209,17 +202,13 @@ export const getCronogramaColumns = (meta: {
   /* ── Concepto ── */
   {
     accessorKey: "concepto.nombre",
-    header: () => (
-      <span className="text-[10px] font-bold uppercase text-zinc-500">
-        Concepto
-      </span>
-    ),
+    header: "Concepto",
     cell: ({ row }) => (
       <Badge
         variant="outline"
-        className="gap-1.5 text-[11px] font-medium text-zinc-400 bg-white/4 border-white/7 truncate"
+        className="gap-2 text-[10px] font-black uppercase tracking-widest bg-background/40 border-border/40 px-3 py-1 rounded-lg"
       >
-        <IconReceipt className="size-3 text-zinc-600 shrink-0" />
+        <IconReceipt className="size-3.5 text-primary opacity-60" />
         {row.original.concepto.nombre}
       </Badge>
     ),
@@ -228,11 +217,7 @@ export const getCronogramaColumns = (meta: {
   /* ── Monto ── */
   {
     id: "monto",
-    header: () => (
-      <span className="text-[10px] font-bold uppercase text-zinc-500">
-        Monto
-      </span>
-    ),
+    header: "Monto",
     cell: ({ row }) => {
       const { monto, montoPagado, pagado } = row.original;
       const pendiente = Number(monto) - Number(montoPagado);
@@ -240,17 +225,17 @@ export const getCronogramaColumns = (meta: {
 
       return (
         <div className="flex flex-col gap-0.5">
-          <span className="font-bold text-sm text-white font-mono tabular-nums">
+          <span className="font-black text-sm tabular-nums tracking-tighter">
             {formatCurrency(Number(monto))}
           </span>
           {!pagado && pendiente > 0 && (
-            <span className="text-[10px] font-semibold text-rose-400 font-mono">
+            <span className="text-[10px] font-black text-red-500/80 tabular-nums uppercase">
               − {formatCurrency(pendiente)}
             </span>
           )}
           {hasAbono && (
-            <span className="text-[10px] text-zinc-600 font-mono">
-              Abonado {formatCurrency(Number(montoPagado))}
+            <span className="text-[9px] font-black text-muted-foreground uppercase opacity-60">
+              ABONADO {formatCurrency(Number(montoPagado))}
             </span>
           )}
         </div>
@@ -261,27 +246,25 @@ export const getCronogramaColumns = (meta: {
   /* ── Fecha ── */
   {
     id: "vencimiento",
-    header: () => (
-      <span className="text-[10px] font-bold uppercase text-zinc-500">
-        Vencimiento
-      </span>
-    ),
+    header: "Vencimiento",
     cell: ({ row }) => {
       const fecha = row.original.fechaVencimiento;
       const vencido = isVencido(fecha, row.original.pagado);
 
       return (
-        <div className="flex items-center gap-1.5">
-          {vencido && (
-            <IconAlertTriangle className="size-3.5 text-rose-500 shrink-0" />
+        <div className="flex items-center gap-2">
+          {vencido ? (
+            <IconAlertTriangle className="size-4 text-red-500 animate-pulse" />
+          ) : (
+            <IconClockHour4 className="size-4 text-muted-foreground opacity-40" />
           )}
           <span
             className={cn(
-              "text-[12px] font-medium",
-              vencido ? "text-rose-400" : "text-zinc-400",
+              "text-xs font-black tracking-tighter tabular-nums",
+              vencido ? "text-red-500" : "text-muted-foreground",
             )}
           >
-            {formatDate(fecha)}
+            {formatDate(fecha).toUpperCase()}
           </span>
         </div>
       );
@@ -291,11 +274,7 @@ export const getCronogramaColumns = (meta: {
   /* ── Estado ── */
   {
     id: "estado",
-    header: () => (
-      <span className="text-[10px] font-bold uppercase text-zinc-500">
-        Estado
-      </span>
-    ),
+    header: "Estado",
     cell: ({ row }) => {
       const { pagado, montoPagado, fechaVencimiento, pagos } = row.original;
       const vencido = isVencido(fechaVencimiento, pagado);
@@ -327,7 +306,7 @@ export const getCronogramaColumns = (meta: {
         if (!ultimoPago) return null;
 
         return (
-          <div className="flex items-center gap-1.5 justify-end">
+          <div className="flex items-center gap-1 justify-end">
             <DownloadWrapper
               pago={{
                 numeroBoleta: ultimoPago.numeroBoleta,
@@ -349,13 +328,16 @@ export const getCronogramaColumns = (meta: {
                 direccion: meta.institucion?.direccion,
                 telefono: meta.institucion?.telefono,
                 ruc: meta.institucion?.codigoModular,
+                dre: meta.institucion?.dre,
+                ugel: meta.institucion?.ugel,
+                logo: meta.institucion?.logo,
               }}
               fileName={`Recibo-${ultimoPago.numeroBoleta}.pdf`}
             />
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 w-7 p-0 rounded-lg text-zinc-600 hover:text-rose-400 hover:bg-rose-500/10 transition-all"
+              className="h-8 w-8 p-0 rounded-xl text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-all"
               onClick={() => {
                 meta.setSelectedPago({
                   id: ultimoPago.id,
@@ -367,18 +349,18 @@ export const getCronogramaColumns = (meta: {
               }}
               title="Anular Pago"
             >
-              <IconX className="size-3.5" />
+              <IconX className="size-4" />
             </Button>
           </div>
         );
       }
 
       return (
-        <div className="flex items-center gap-1.5 justify-end">
+        <div className="flex items-center gap-2 justify-end">
           <IAReminderButton cronograma={row.original} />
           <Button
             size="sm"
-            className="h-7 px-3 gap-1.5 text-[11px] font-bold uppercase tracking-wide rounded-lg bg-blue-600 hover:bg-blue-500 text-white shadow-sm shadow-blue-500/20 transition-all"
+            className="h-9 px-5 gap-2 text-[10px] font-black uppercase tracking-widest rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 transition-all active:scale-95"
             onClick={async () => {
               meta.setSelectedCronograma(row.original);
               meta.setMontoPago(
@@ -391,11 +373,11 @@ export const getCronogramaColumns = (meta: {
               meta.setShowPagoDialog(true);
             }}
           >
-            <IconCash className="size-3.5" />
+            <IconCash className="size-4" />
             Cobrar
           </Button>
         </div>
       );
     },
   },
-];
+];

@@ -251,7 +251,17 @@ export async function deleteCourseAction(id: string) {
 export async function getInstitucionesAction() {
   try {
     const instituciones = await prisma.institucionEducativa.findMany({
-      select: { id: true, nombreInstitucion: true, cicloEscolarActual: true },
+      select: { 
+        id: true, 
+        nombreInstitucion: true, 
+        cicloEscolarActual: true,
+        codigoModular: true,
+        dre: true,
+        ugel: true,
+        direccion: true,
+        telefono: true,
+        logo: true,
+      },
     });
     return { data: JSON.parse(JSON.stringify(instituciones)) };
   } catch (error) {

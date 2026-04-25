@@ -175,6 +175,7 @@ function createPageHeaderStyles(t: PdfxTheme) {
       marginRight: spacing[4],
       width: 48,
       height: 48,
+      flexShrink: 0,
     },
     logoContent: {
       flex: 1,

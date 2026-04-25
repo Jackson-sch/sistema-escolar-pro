@@ -30,6 +30,7 @@ import { anularPagoAction } from "@/actions/finance";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/formats";
 import type { FormatoComprobante } from "@/lib/comprobante-constants";
+import { Badge } from "@/components/ui/badge";
 
 interface CronogramaTableProps {
   data: CronogramaTableType[];
@@ -61,78 +62,65 @@ function CronogramaFilters({
     <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full">
       <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 flex-1">
         <Select value={seccionFilter} onValueChange={meta.setSeccionFilter}>
-          <SelectTrigger className="w-full h-9 sm:h-10 bg-background border-border/40 sm:border-primary/10 rounded-full text-[11px] sm:text-xs font-medium transition-all focus:ring-primary/20">
+          <SelectTrigger className="w-full h-10 bg-background/50 border-border/40 rounded-full text-xs font-black uppercase tracking-wider transition-all focus:ring-2 focus:ring-primary/20 hover:bg-background/80">
             <div className="flex items-center gap-2 truncate">
-              <IconFilter className="size-3 sm:size-3.5 opacity-60 shrink-0" />
+              <IconFilter className="size-4 opacity-40 shrink-0" />
               <SelectValue placeholder="Sección" />
             </div>
           </SelectTrigger>
-          <SelectContent className="border-border/40 bg-background/95 backdrop-blur-xl">
-            <SelectItem value="all" className="text-[11px] sm:text-xs">
-              Todas las secciones
+          <SelectContent className="border-border/40 bg-background/95 backdrop-blur-xl rounded-2xl">
+            <SelectItem value="all" className="text-xs font-bold">
+              TODAS LAS SECCIONES
             </SelectItem>
             {seccionesDisponibles.map(([id, label]) => (
               <SelectItem
                 key={id}
                 value={id}
-                className="text-[11px] sm:text-xs"
+                className="text-xs"
               >
-                {label}
+                {label.toUpperCase()}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
 
         <Select value={estadoFilter} onValueChange={meta.setEstadoFilter}>
-          <SelectTrigger className="w-full h-9 sm:h-10 bg-background border-border/40 sm:border-primary/10 rounded-full text-[11px] sm:text-xs font-medium transition-all focus:ring-primary/20">
+          <SelectTrigger className="w-full h-10 bg-background/50 border-border/40 rounded-full text-xs font-black uppercase tracking-wider transition-all focus:ring-2 focus:ring-primary/20 hover:bg-background/80">
             <div className="flex items-center gap-2 truncate">
-              <IconCircleDashed className="size-3 sm:size-3.5 opacity-60 shrink-0" />
+              <IconCircleDashed className="size-4 opacity-40 shrink-0" />
               <SelectValue placeholder="Estado" />
             </div>
           </SelectTrigger>
-          <SelectContent className="border-border/40 bg-background/95 backdrop-blur-xl">
-            <SelectItem value="all" className="text-[11px] sm:text-xs">
-              Todos los estados
+          <SelectContent className="border-border/40 bg-background/95 backdrop-blur-xl rounded-2xl">
+            <SelectItem value="all" className="text-xs font-bold">
+              TODOS LOS ESTADOS
             </SelectItem>
-            <SelectItem value="PAID" className="text-[11px] sm:text-xs">
-              Pagado
-            </SelectItem>
-            <SelectItem value="PENDING" className="text-[11px] sm:text-xs">
-              Pendiente
-            </SelectItem>
-            <SelectItem value="EXPIRED" className="text-[11px] sm:text-xs">
-              Vencido
-            </SelectItem>
-            <SelectItem
-              value="PARTIALLY_PAID"
-              className="text-[11px] sm:text-xs"
-            >
-              Parcial
-            </SelectItem>
-            <SelectItem value="VOIDED" className="text-[11px] sm:text-xs">
-              Anulado
-            </SelectItem>
+            <SelectItem value="PAID" className="text-xs">PAGADO</SelectItem>
+            <SelectItem value="PENDING" className="text-xs">PENDIENTE</SelectItem>
+            <SelectItem value="EXPIRED" className="text-xs text-red-500 font-bold">VENCIDO</SelectItem>
+            <SelectItem value="PARTIALLY_PAID" className="text-xs">PARCIAL</SelectItem>
+            <SelectItem value="VOIDED" className="text-xs opacity-50">ANULADO</SelectItem>
           </SelectContent>
         </Select>
 
         <Select value={conceptoFilter} onValueChange={meta.setConceptoFilter}>
-          <SelectTrigger className="w-full h-9 sm:h-10 bg-background border-border/40 sm:border-primary/10 rounded-full text-[11px] sm:text-xs font-medium transition-all focus:ring-primary/20 xs:col-span-2 sm:col-span-1 lg:col-span-1">
+          <SelectTrigger className="w-full h-10 bg-background/50 border-border/40 rounded-full text-xs font-black uppercase tracking-wider transition-all focus:ring-2 focus:ring-primary/20 hover:bg-background/80 xs:col-span-2 sm:col-span-1 lg:col-span-1">
             <div className="flex items-center gap-2 truncate">
-              <IconReceipt2 className="size-3 sm:size-3.5 opacity-60 shrink-0" />
+              <IconReceipt2 className="size-4 opacity-40 shrink-0" />
               <SelectValue placeholder="Concepto" />
             </div>
           </SelectTrigger>
-          <SelectContent className="border-border/40 bg-background/95 backdrop-blur-xl">
-            <SelectItem value="all" className="text-[11px] sm:text-xs">
-              Todos los conceptos
+          <SelectContent className="border-border/40 bg-background/95 backdrop-blur-xl rounded-2xl">
+            <SelectItem value="all" className="text-xs font-bold">
+              TODOS LOS CONCEPTOS
             </SelectItem>
             {conceptos.map((c) => (
               <SelectItem
                 key={c.id}
                 value={c.id}
-                className="text-[11px] sm:text-xs"
+                className="text-xs"
               >
-                {c.nombre}
+                {c.nombre.toUpperCase()}
               </SelectItem>
             ))}
           </SelectContent>
@@ -282,19 +270,11 @@ export function CronogramaTable({
   return (
     <div className="space-y-3 sm:space-y-4">
       {/* Acciones de la tabla */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 px-1">
-        <div className="flex flex-col gap-0.5">
-          <h3 className="text-sm font-bold text-foreground/80 flex items-center gap-2">
-            Resultados
-            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-              {filteredData.length} registros
-            </span>
-          </h3>
-        </div>
+      <div className="flex justify-end items-center px-2">
         <Button
           variant="outline"
           size="sm"
-          className="h-9 px-3 w-full sm:w-auto border-emerald-500/20 text-emerald-600 hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-all rounded-xl sm:rounded-full gap-2 shadow-sm font-semibold text-xs"
+          className="h-10 px-6 w-full sm:w-auto border-emerald-500/20 text-emerald-600 bg-emerald-500/5 hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-all rounded-xl font-black text-[10px] uppercase tracking-widest gap-2 shadow-sm"
           title="Exportar a Excel"
           onClick={() =>
             exportToExcel(
@@ -305,7 +285,7 @@ export function CronogramaTable({
           }
         >
           <IconTable className="size-4" />
-          <span>Exportar Excel</span>
+          <span>Exportar Data</span>
         </Button>
       </div>
 

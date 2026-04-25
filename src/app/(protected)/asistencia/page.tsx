@@ -56,7 +56,7 @@ export default async function AsistenciaPage() {
           </div>
         }
       >
-        <AsistenciaTabs>
+        <AsistenciaTabs isProfessor={isProfessor}>
           {{
             registro: (
               <Suspense fallback={<div>Cargando panel de asistencia...</div>}>

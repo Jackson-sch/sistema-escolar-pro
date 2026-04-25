@@ -20,16 +20,7 @@ export default async function HorariosPage(props: {
   ])
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-4 pt-0 @container/main">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-2">
-        <div>
-          <h1 className="text-xl sm:text-3xl font-bold tracking-tight">Gestión de Horarios</h1>
-          <p className="text-[10px] sm:text-sm text-muted-foreground font-medium">
-            Organiza las horas de clase por sección y evita traslapes de docentes.
-          </p>
-        </div>
-      </div>
-
+    <div className="flex flex-1 flex-col gap-4 @container/main">
       <ScheduleManager
         secciones={secciones as any}
         allCourses={courses as any}

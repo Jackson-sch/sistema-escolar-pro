@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     return new NextResponse("No autorizado", { status: 401 });
   }
 
-  const { searchParams } = new URL(req.url);
+  const { searchParams, origin } = new URL(req.url);
   const estudianteId = searchParams.get('estudianteId');
   const anio = parseInt(searchParams.get('anio') || new Date().getFullYear().toString(), 10);
 
@@ -141,6 +141,7 @@ export async function GET(req: NextRequest) {
         institucionCompleta: estudiante.institucion,
         logo: estudiante.institucion.logo,
       },
+      origin,
       periodos: periodosDelAnio,
       cursos: cursosFormateados,
       anioAcademico: cicloScolar,

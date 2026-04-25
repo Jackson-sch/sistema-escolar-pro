@@ -5,13 +5,13 @@ import {
   IconPlus,
   IconTrash,
   IconClock,
-  IconCheck,
-  IconX,
-  IconHourglass,
-  IconLayersIntersect,
+  IconPencil,
   IconAlertTriangle,
   IconSettings,
-  IconUser,
+  IconSchool,
+  IconCheck,
+  IconX,
+  IconChevronRight,
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 import {
@@ -21,15 +21,238 @@ import {
 } from "@/actions/attendance-policy";
 import { getNivelesAction } from "@/actions/academic-structure";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { FormModal } from "@/components/modals/form-modal";
 import { PoliticaFormFields } from "./politica-form-fields";
 import { cn } from "@/lib/utils";
 import { useConfirm } from "@/hooks/use-confirm";
-import { TimeGauge } from "./time-gauge";
-import HeaderStats from "./header-stats";
-import EmptyCard from "./empty-card";
 import { formatDate } from "@/lib/formats";
+
+// ─── Helpers ────────────────────────────────────────────────────────────────
+
+function getNivelColor(nombre?: string) {
+  if (!nombre) return "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300";
+  if (nombre.includes("Inicial"))
+    return "bg-teal-50 text-teal-700 border border-teal-200 dark:bg-teal-900/30 dark:text-teal-300 dark:border-teal-800";
+  if (nombre.includes("Primaria"))
+    return "bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800";
+  if (nombre.includes("Secundaria"))
+    return "bg-violet-50 text-violet-700 border border-violet-200 dark:bg-violet-900/30 dark:text-violet-300 dark:border-violet-800";
+  return "bg-slate-100 text-slate-600 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700";
+}
+
+function getNivelDot(nombre?: string) {
+  if (!nombre) return "bg-slate-400";
+  if (nombre.includes("Inicial")) return "bg-teal-400";
+  if (nombre.includes("Primaria")) return "bg-blue-400";
+  if (nombre.includes("Secundaria")) return "bg-violet-400";
+  return "bg-slate-400";
+}
+
+function formatTime(time: string) {
+  const [h, m] = time.split(":");
+  return { h, m };
+}
+
+// ─── Stat Pill ───────────────────────────────────────────────────────────────
+
+function StatPill({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: string | number;
+  accent?: string;
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center px-5 py-2.5 rounded-xl bg-muted/40 border border-border/50 min-w-[80px]">
+      <span className={cn("text-xl font-black tabular-nums leading-none", accent ?? "text-foreground")}>
+        {value}
+      </span>
+      <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold mt-1">
+        {label}
+      </span>
+    </div>
+  );
+}
+
+// ─── Policy Card ─────────────────────────────────────────────────────────────
+
+function PoliticaCard({
+  p,
+  onEdit,
+  onDelete,
+}: {
+  p: any;
+  onEdit: (p: any) => void;
+  onDelete: (id: string) => void;
+}) {
+  const entry = formatTime(p.horaEntrada);
+  const exit = p.horaSalida ? formatTime(p.horaSalida) : null;
+
+  return (
+    <div
+      className={cn(
+        "group relative flex flex-col rounded-2xl border bg-card overflow-hidden transition-all duration-300",
+        "hover:border-border hover:shadow-sm",
+        p.activo
+          ? "border-border/60"
+          : "border-border/30 opacity-55 grayscale-40"
+      )}
+    >
+
+      {/* Header */}
+      <div className="px-5 pt-4 pb-3 flex items-start justify-between gap-3">
+        <div className="flex-1 min-w-0">
+          <p className="font-bold text-[13px] text-foreground leading-tight truncate">
+            {p.nombre}
+          </p>
+          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+            <span
+              className={cn(
+                "inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md px-2 py-0.5",
+                getNivelColor(p.nivel?.nombre)
+              )}
+            >
+              <span className={cn("size-1.5 rounded-full", getNivelDot(p.nivel?.nombre))} />
+              {p.nivel?.nombre ?? "General"}
+            </span>
+            {p.turno && (
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground bg-muted/60 rounded-md px-2 py-0.5 border border-border/50">
+                {p.turno}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Status badge */}
+        <div
+          className={cn(
+            "shrink-0 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider rounded-full px-2.5 py-1",
+            p.activo
+              ? "bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800"
+              : "bg-muted text-muted-foreground border border-border"
+          )}
+        >
+          {p.activo ? (
+            <IconCheck className="size-2.5" />
+          ) : (
+            <IconX className="size-2.5" />
+          )}
+          {p.activo ? "Activo" : "Inactivo"}
+        </div>
+      </div>
+
+      {/* Time Display */}
+      <div className="px-5 py-3 border-t border-border/50 grid grid-cols-2 gap-3">
+        {/* Entry */}
+        <div className="flex flex-col gap-0.5">
+          <span className="text-[9px] font-black uppercase tracking-[0.15em] text-muted-foreground">
+            Ingreso
+          </span>
+          <div className="flex items-baseline gap-0.5">
+            <span className="text-3xl font-black tabular-nums leading-none text-foreground">
+              {entry.h}
+            </span>
+            <span className="text-lg font-black text-muted-foreground leading-none mb-0.5">
+              :{entry.m}
+            </span>
+          </div>
+        </div>
+
+        {/* Exit */}
+        {exit && (
+          <div className="flex flex-col gap-0.5">
+            <span className="text-[9px] font-black uppercase tracking-[0.15em] text-muted-foreground">
+              Salida
+            </span>
+            <div className="flex items-baseline gap-0.5">
+              <span className="text-3xl font-black tabular-nums leading-none text-foreground">
+                {exit.h}
+              </span>
+              <span className="text-lg font-black text-muted-foreground leading-none mb-0.5">
+                :{exit.m}
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Tolerance */}
+      <div className="px-5 py-3 border-t border-border/50">
+        <div
+          className={cn(
+            "flex items-center gap-3 rounded-xl px-3.5 py-2.5",
+            p.tolerancia === 0
+              ? "bg-muted/40 border border-border/50"
+              : p.tolerancia <= 5
+              ? "bg-amber-50 border border-amber-200 dark:bg-amber-900/20 dark:border-amber-800"
+              : "bg-red-50 border border-red-200 dark:bg-red-900/20 dark:border-red-800"
+          )}
+        >
+          <IconAlertTriangle
+            className={cn(
+              "size-4 shrink-0",
+              p.tolerancia === 0
+                ? "text-muted-foreground"
+                : p.tolerancia <= 5
+                ? "text-amber-500"
+                : "text-red-500"
+            )}
+          />
+          <div>
+            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
+              Tolerancia
+            </p>
+            <p className="text-base font-black leading-none text-foreground">
+              {p.tolerancia === 0 ? (
+                <span className="text-muted-foreground text-sm">Sin margen</span>
+              ) : (
+                <>
+                  <span
+                    className={cn(
+                      p.tolerancia <= 5 ? "text-amber-600 dark:text-amber-400" : "text-red-600 dark:text-red-400"
+                    )}
+                  >
+                    +{p.tolerancia}
+                  </span>{" "}
+                  <span className="text-sm font-semibold text-muted-foreground">min</span>
+                </>
+              )}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="mt-auto px-5 py-3 border-t border-border/50 flex items-center justify-between">
+        <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
+          {formatDate(p.updatedAt || p.createdAt, "dd MMM")}
+        </span>
+
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => onDelete(p.id)}
+            className="size-8 rounded-lg flex items-center justify-center text-muted-foreground opacity-0 group-hover:opacity-100 transition-all hover:bg-destructive/10 hover:text-destructive"
+          >
+            <IconTrash className="size-3.5" />
+          </button>
+
+          <button
+            onClick={() => onEdit(p)}
+            className="flex items-center gap-1.5 h-8 px-3 rounded-lg bg-foreground text-background text-[11px] font-bold uppercase tracking-wide transition-all hover:opacity-80 active:scale-95"
+          >
+            <IconPencil className="size-3" />
+            Editar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 
 export function PoliticasAsistenciaClient({
   anioAcademico = 2026,
@@ -43,7 +266,6 @@ export function PoliticasAsistenciaClient({
   const [isSaving, setIsSaving] = useState(false);
   const [editingPolitica, setEditingPolitica] = useState<any>(null);
 
-  // Form states
   const [nombre, setNombre] = useState("");
   const [nivelId, setNivelId] = useState<string>("all");
   const [turno, setTurno] = useState<string>("all");
@@ -68,10 +290,9 @@ export function PoliticasAsistenciaClient({
         getPoliticasAsistenciaAction(),
         getNivelesAction(),
       ]);
-
       if (politicasRes.data) setPoliticas(politicasRes.data);
       if (nivelesRes.data) setNiveles(nivelesRes.data);
-    } catch (err) {
+    } catch {
       toast.error("Error al cargar datos");
     } finally {
       setIsLoading(false);
@@ -106,7 +327,6 @@ export function PoliticasAsistenciaClient({
       toast.error("Por favor complete los campos obligatorios");
       return;
     }
-
     setIsSaving(true);
     try {
       const res = await savePoliticaAsistenciaAction({
@@ -119,7 +339,6 @@ export function PoliticasAsistenciaClient({
         tolerancia,
         activo,
       });
-
       if (res.success) {
         toast.success("Política guardada con éxito");
         setIsDialogOpen(false);
@@ -127,7 +346,7 @@ export function PoliticasAsistenciaClient({
       } else {
         toast.error(res.error || "Error al guardar");
       }
-    } catch (err) {
+    } catch {
       toast.error("Error de conexión");
     } finally {
       setIsSaving(false);
@@ -137,7 +356,6 @@ export function PoliticasAsistenciaClient({
   const handleDelete = async (id: string) => {
     const ok = await confirm();
     if (!ok) return;
-
     try {
       const res = await deletePoliticaAsistenciaAction(id);
       if (res.success) {
@@ -146,172 +364,125 @@ export function PoliticasAsistenciaClient({
       } else {
         toast.error(res.error || "Error al eliminar");
       }
-    } catch (err) {
+    } catch {
       toast.error("Error de conexión");
     }
   };
 
+  const activasCount = politicas.filter((p) => p.activo).length;
+  const toleranciaPromedio =
+    politicas.length > 0
+      ? Math.round(politicas.reduce((a, p) => a + p.tolerancia, 0) / politicas.length)
+      : 0;
+
   return (
-    <div className="space-y-8 animate-in fade-in duration-700">
-      {/* Header Section */}
+    <div className="space-y-8">
+      {/* ── Page Header ── */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div className="space-y-2">
-          <h1 className="text-4xl font-black tracking-tight text-foreground drop-shadow-sm">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-muted-foreground text-xs font-semibold uppercase tracking-widest mb-2">
+            <IconSchool className="size-3.5" />
+            <span>Ciclo Lectivo {anioAcademico}</span>
+          </div>
+          <h1 className="text-3xl font-black tracking-tight text-foreground">
             Reglas de Ingreso
           </h1>
-          <p className="max-w-xl text-sm leading-relaxed text-muted-foreground/80">
-            Gestione de forma modular los horarios de entrada y márgenes de
-            tolerancia por nivel educativo para el ciclo lectivo {anioAcademico}
-            .
+          <p className="text-sm text-muted-foreground max-w-md leading-relaxed">
+            Horarios y tolerancias por nivel educativo para el ciclo {anioAcademico}.
           </p>
         </div>
 
-        {/* Header Stats */}
-        <div className="hidden md:flex flex-wrap gap-4">
-          <HeaderStats politicas={politicas} />
+        <div className="flex items-end gap-3">
+          {/* Stats */}
+          {!isLoading && politicas.length > 0 && (
+            <div className="flex items-center gap-2">
+              <StatPill label="Total" value={politicas.length} />
+              <StatPill
+                label="Activas"
+                value={activasCount}
+                accent="text-emerald-600 dark:text-emerald-400"
+              />
+              <StatPill
+                label="Tolerancia"
+                value={`${toleranciaPromedio}m`}
+                accent="text-amber-600 dark:text-amber-400"
+              />
+            </div>
+          )}
+
+          <Button
+            onClick={() => handleOpenDialog()}
+            className="h-10 px-4 rounded-xl font-bold text-sm gap-2 shrink-0"
+          >
+            <IconPlus className="size-4" />
+            Nueva Regla
+          </Button>
         </div>
       </div>
 
-      {/* Grid Section */}
-      <div className="grid grid-cols-1 gap-8">
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-32 text-muted-foreground animate-pulse">
-            <IconClock className="size-16 mb-4 opacity-10 animate-spin-slow" />
-            <p className="font-bold tracking-widest uppercase text-xs">
-              Sincronizando Políticas...
+      {/* ── Content ── */}
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center py-32 gap-4 text-muted-foreground">
+          <div className="relative size-12">
+            <IconClock className="size-12 opacity-10" />
+            <div className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-blue-500/40" />
+          </div>
+          <p className="text-xs font-bold uppercase tracking-widest opacity-50">
+            Cargando políticas…
+          </p>
+        </div>
+      ) : politicas.length === 0 ? (
+        /* ── Empty State ── */
+        <div className="flex flex-col items-center justify-center py-24 gap-6 rounded-2xl border-2 border-dashed border-border/40 bg-muted/10">
+          <div className="size-16 rounded-2xl bg-muted/40 flex items-center justify-center border border-border/50">
+            <IconClock className="size-7 text-muted-foreground" />
+          </div>
+          <div className="text-center space-y-1">
+            <p className="font-bold text-foreground">Sin reglas configuradas</p>
+            <p className="text-sm text-muted-foreground">
+              Crea tu primera política de ingreso para este ciclo.
             </p>
           </div>
-        ) : politicas.length === 0 ? (
-          <EmptyCard handleOpenDialog={handleOpenDialog} />
-          
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {politicas.map((p) => (
-              <Card
-                key={p.id}
-                className={cn(
-                  "relative group flex flex-col overflow-hidden bg-card/50 transition-all duration-500 hover:border-blue-500/50 hover:shadow-[0_0_50px_rgba(59,130,246,0.15)]",
-                  !p.activo && "opacity-60 grayscale",
-                )}
-              >
-                {/* Status Indicator */}
-                <div className="absolute top-6 right-6 z-10">
-                  {p.activo ? (
-                    <div className="flex size-6 items-center justify-center rounded-full bg-blue-500/20 text-blue-500 border border-blue-500/30">
-                      <IconCheck className="size-3.5" />
-                    </div>
-                  ) : (
-                    <div className="flex size-6 items-center justify-center rounded-full bg-muted/20 text-muted-foreground border border-muted/30">
-                      <IconX className="size-3.5" />
-                    </div>
-                  )}
-                </div>
+          <Button
+            onClick={() => handleOpenDialog()}
+            variant="outline"
+            className="gap-2 rounded-xl font-semibold"
+          >
+            <IconPlus className="size-4" />
+            Agregar primera regla
+          </Button>
+        </div>
+      ) : (
+        /* ── Grid ── */
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {politicas.map((p) => (
+            <PoliticaCard
+              key={p.id}
+              p={p}
+              onEdit={handleOpenDialog}
+              onDelete={handleDelete}
+            />
+          ))}
 
-                <CardHeader>
-                  <div className="flex items-center gap-4">
-                    <div className="flex size-14 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-500 border border-blue-500/20 shadow-[0_0_30px_rgba(59,130,246,0.1)]">
-                      {p.nivel?.nombre.includes("Inicial") ? (
-                        <span className="text-2xl">
-                          <IconUser />
-                        </span>
-                      ) : p.nivel?.nombre.includes("Primaria") ? (
-                        <span className="text-2xl">
-                          <IconUser />
-                        </span>
-                      ) : (
-                        <span className="text-2xl">
-                          <IconUser />
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <CardTitle className="text-lg font-black black:text-white decoration-blue-500/30">
-                        {p.nombre}
-                      </CardTitle>
-                      <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">
-                        {p.nivel?.nombre || "Nivel General"}
-                        {p.turno && ` • ${p.turno}`}
-                      </p>
-                    </div>
-                  </div>
-                </CardHeader>
+          {/* Add card */}
+          <button
+            onClick={() => handleOpenDialog()}
+            className={cn(
+              "group flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-border/30 min-h-[260px]",
+              "hover:border-foreground/20 hover:bg-muted/20 transition-all duration-300"
+            )}
+          >
+            <div className="size-10 rounded-xl bg-muted/40 flex items-center justify-center border border-border/40 group-hover:bg-muted/80 group-hover:scale-110 transition-all">
+              <IconPlus className="size-5 text-muted-foreground" />
+            </div>
+            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground group-hover:text-foreground transition-colors">
+              Nueva Regla
+            </span>
+          </button>
+        </div>
+      )}
 
-                <CardContent className="flex-1 px-8 pb-4">
-                  <div className="flex flex-col items-center">
-                    {/* Time Gauge */}
-                    <div>
-                      <TimeGauge
-                        time={p.horaEntrada}
-                        label="INGRESO"
-                        percentage={85} // Stylized
-                      />
-                    </div>
-
-                    {/* Tolerance Alert Box */}
-                    <div className="w-full rounded-2xl bg-blue-500/5 border border-blue-500/10 p-4 flex items-center gap-4 group/box transition-colors hover:bg-blue-500/10">
-                      <div className="flex size-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500 border border-blue-500/20">
-                        <IconAlertTriangle className="size-5" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-xs font-black text-muted-foreground tracking-widest uppercase">
-                          Tolerancia Máx.
-                        </p>
-                        <p className="text-lg font-black black:text-white">
-                          <span className="text-blue-500">{p.tolerancia}</span>{" "}
-                          min
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-
-                {/* Footer Actions */}
-                <div className="mt-2 border-t border-muted px-8 pt-4 flex items-center justify-between">
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
-                    ACT.{" "}
-                    {formatDate(p.updatedAt || p.createdAt, "dd MMM")}
-                  </p>
-
-                  <div className="flex items-center gap-2">
-                    {/* Delete hidden by default, visible on hover */}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDelete(p.id)}
-                      className="size-9 rounded-full text-destructive opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/10"
-                    >
-                      <IconTrash className="size-4" />
-                    </Button>
-
-                    <Button
-                      onClick={() => handleOpenDialog(p)}
-                      variant="secondary"
-                      className="h-9 px-4 rounded-xl font-bold text-xs gap-2 bg-blue-500 text-white hover:bg-blue-600 transition-all shadow-[0_4px_15px_rgba(59,130,246,0.3)] hover:shadow-[0_6px_20px_rgba(59,130,246,0.4)] hover:-translate-y-0.5"
-                    >
-                      <IconSettings className="size-3.5" />
-                      Configurar
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            ))}
-
-            {/* New Rule Placeholder Card */}
-            <button
-              onClick={() => handleOpenDialog()}
-              className="group relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#2a262433] h-full min-h-[400px] hover:border-blue-500/50 hover:bg-blue-500/2 transition-all duration-500"
-            >
-              <div className="flex size-16 items-center justify-center rounded-full bg-muted/10 text-muted-foreground group-hover:bg-blue-500/10 group-hover:text-blue-500 transition-all duration-500 shadow-inner">
-                <IconPlus className="size-8 group-hover:scale-110 transition-transform" />
-              </div>
-              <p className="mt-4 font-black text-sm uppercase tracking-widest text-muted-foreground transition-colors">
-                Nueva Regla
-              </p>
-            </button>
-          </div>
-        )}
-      </div>
-
+      {/* ── Modal ── */}
       <FormModal
         isOpen={isDialogOpen}
         onOpenChange={setIsDialogOpen}
@@ -337,21 +508,21 @@ export function PoliticasAsistenciaClient({
           setActivo={setActivo}
         />
 
-        <div className="flex justify-end gap-3 pt-4 border-t">
+        <div className="flex justify-end gap-2 pt-4 border-t">
           <Button
             variant="ghost"
             onClick={() => setIsDialogOpen(false)}
             disabled={isSaving}
-            className="rounded-full"
+            className="rounded-xl"
           >
             Cancelar
           </Button>
           <Button
             onClick={handleSave}
             disabled={isSaving}
-            className="rounded-full"
+            className="rounded-xl min-w-[120px]"
           >
-            {isSaving ? "Guardando..." : "Guardar Cambios"}
+            {isSaving ? "Guardando…" : "Guardar cambios"}
           </Button>
         </div>
       </FormModal>

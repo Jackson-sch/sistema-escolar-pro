@@ -48,6 +48,7 @@ import { AsistenciaTable } from "./asistencia-table";
 import { Input } from "../ui/input";
 import { NIVEL_ICON_MAP } from "@/lib/constants";
 import { Progress } from "@/components/ui/progress";
+import { AnimatedTabs } from "@/components/ui/animated-tabs";
 
 interface AsistenciaClientProps {
   initialSecciones: any[];
@@ -467,7 +468,7 @@ export function AsistenciaClient({
         </div>
 
         {/* ── Content Area ──────────────────────────────────────────────────── */}
-        {seccionId && totalAlumnos > 0 ? (
+        {seccionId ? (
           <div className="flex-1 flex flex-col">
 
             {/* Metrics Bar: Progress + Live Summary */}
@@ -538,30 +539,26 @@ export function AsistenciaClient({
 
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   {/* Filter Tabs */}
-                  <div className="flex items-center gap-0.5 rounded-xl border bg-muted/40 p-0.5 overflow-x-auto no-scrollbar">
-                    {filterTabs.map((tab) => (
-                      <button
-                        key={tab.id}
-                        onClick={() => setFilterStatus(tab.id)}
-                        className={cn(
-                          "flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[10px] lg:text-[11px] font-bold transition-all duration-150 whitespace-nowrap",
-                          filterStatus === tab.id
-                            ? "bg-background text-foreground shadow-sm"
-                            : "text-muted-foreground hover:text-foreground",
-                        )}
-                      >
-                        {tab.label}
+                  <AnimatedTabs
+                    layoutId="status-filter-tabs"
+                    tabs={filterTabs.map(tab => ({
+                      id: tab.id,
+                      label: tab.label,
+                      icon: (
                         <span className={cn(
-                          "rounded-full px-1.5 py-0.5 text-[9px] font-black leading-none",
+                          "ml-1 rounded-full px-1.5 py-0.5 text-[9px] font-black leading-none",
                           filterStatus === tab.id
-                            ? "bg-primary/10 text-primary"
+                            ? "bg-primary/20 text-primary"
                             : "bg-muted text-muted-foreground",
                         )}>
                           {tab.count}
                         </span>
-                      </button>
-                    ))}
-                  </div>
+                      )
+                    }))}
+                    activeTab={filterStatus}
+                    onTabChange={setFilterStatus}
+                    className="bg-muted/40 border-none"
+                  />
 
                   {/* Actions */}
                   <div className="flex items-center gap-2 ml-auto sm:ml-0">
@@ -632,18 +629,14 @@ export function AsistenciaClient({
                   ? "Selecciona un nivel para comenzar"
                   : !gradoId
                     ? "Selecciona un grado"
-                    : !seccionId
-                      ? "Selecciona una sección"
-                      : "Consulta la asistencia"
+                    : "Selecciona una sección"
               }
               description={
                 !nivelId
                   ? "Elige el nivel educativo en la barra lateral para ver los grados disponibles."
                   : !gradoId
                     ? "Elige el grado para continuar con la selección del aula."
-                    : !seccionId
-                      ? "Elige la sección para cargar la lista de estudiantes."
-                      : "Haz clic en Actualizar para cargar la asistencia."
+                    : "Elige la sección para cargar la lista de estudiantes."
               }
               large
             />

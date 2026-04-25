@@ -27,14 +27,14 @@ export function AddStudentButton({
   periodoAcademico,
 }: AddStudentButtonProps) {
   const role = useCurrentRole();
-  const isProfessor = role === "profesor";
+  const isAdmin = role === "administrativo" || role === "super_admin";
   const [open, setOpen] = useState(false);
 
   useComponentShortcuts({
     onNew: () => setOpen(true),
   });
 
-  if (isProfessor) return null;
+  if (!isAdmin) return null;
 
   return (
     <>

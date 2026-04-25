@@ -9,6 +9,7 @@ import {
   IconLogout,
   IconShieldCheck
 } from "@tabler/icons-react";
+import { AdminLogoutButton } from "@/components/admin/admin-logout-button";
 
 export default async function AdminLayout({
   children,
@@ -39,7 +40,7 @@ export default async function AdminLayout({
       {/* Top Header */}
       <header className="h-16 border-b border-white/5 bg-black/20 backdrop-blur-md sticky top-0 z-50 flex items-center justify-between px-6">
         <div className="flex items-center gap-3">
-          <div className="size-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <div className="size-9 rounded-xl bg-linear-to-tr from-indigo-600 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
             <IconShieldCheck className="text-white size-5" />
           </div>
           <div>
@@ -53,9 +54,7 @@ export default async function AdminLayout({
             <span className="text-xs font-medium">{user.name || 'Master Admin'}</span>
             <span className="text-[10px] text-zinc-500">{user.email}</span>
           </div>
-          <div className="size-8 rounded-full bg-zinc-800 border border-white/5 flex items-center justify-center">
-             <IconLogout className="size-4 text-zinc-400" />
-          </div>
+          <AdminLogoutButton />
         </div>
       </header>
 

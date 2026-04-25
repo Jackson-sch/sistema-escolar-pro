@@ -31,6 +31,7 @@ interface DocumentWrapperProps {
   verificationCode?: string
   institucion: InstitucionProps
   children: React.ReactNode
+  origin?: string
 }
 
 export const DocumentWrapper = ({
@@ -39,10 +40,13 @@ export const DocumentWrapper = ({
   docId,
   verificationCode,
   institucion,
-  children
+  children,
+  origin: passedOrigin
 }: DocumentWrapperProps) => {
-  // En SSR window no está disponible
-  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://sistema-escolar.pro'
+  // En SSR window no está disponible. Priorizamos el origin pasado desde el servidor.
+  const origin = passedOrigin || (typeof window !== 'undefined' 
+    ? window.location.origin 
+    : (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'))
   const verificationUrl = verificationCode
     ? `${origin}/verificar?codigo=${verificationCode}`
     : null
@@ -58,6 +62,27 @@ export const DocumentWrapper = ({
     ? subHeaderParts.join(' | ') 
     : institucion.direccion
 
+  // Resolución del logo sin hooks para evitar errores en el servidor (SSR)
+  let logoUrl: string | null = null
+  const rawLogo = institucion.logo || (institucion as any).logoUrl
+  
+  if (rawLogo && typeof rawLogo === 'string' && rawLogo.trim() !== '') {
+    if (rawLogo.startsWith('http') || rawLogo.startsWith('data:')) {
+      logoUrl = rawLogo
+    } else {
+      const cleanPath = rawLogo.startsWith('/') ? rawLogo : `/${rawLogo}`
+      logoUrl = `${origin}${cleanPath}`
+    }
+  }
+
+  console.log('DocumentWrapper LOGO DEBUG:', {
+    rawLogo: institucion.logo,
+    origin,
+    finalUrl: logoUrl,
+    hasNombre: !!institucion.nombreInstitucion,
+    availableKeys: Object.keys(institucion)
+  })
+
   return (
     <Document title={title}>
       <Page size="A4" style={{ padding: 35, fontFamily: 'Helvetica', color: '#1e293b' }}>
@@ -67,10 +92,10 @@ export const DocumentWrapper = ({
           subtitle={subHeader}
           rightText={docTypeLabel}
           rightSubText={docId}
-          variant={institucion.logo ? "logo-left" : "simple"}
-          logo={institucion.logo ? (
+          variant={logoUrl ? "logo-left" : "simple"}
+          logo={logoUrl ? (
             <Image 
-              src={institucion.logo} 
+              src={logoUrl} 
               style={{ width: 48, height: 48, objectFit: 'contain' }} 
             />
           ) : undefined}

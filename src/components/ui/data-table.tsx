@@ -189,11 +189,11 @@ export function DataTable<TData, TValue>({
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 liquid-glass rounded-[2.5rem] bg-card/40 backdrop-blur-md border border-border/40 shadow-2xl overflow-hidden p-1">
       {/* ── TOOLBAR ─────────────────────────────────────────────── */}
       <div
         className={cn(
-          "flex items-start gap-3 rounded-2xl border bg-card p-3",
+          "flex items-start gap-3 p-6",
           stackFilters ? "flex-col" : "flex-col lg:flex-row lg:items-center",
         )}
       >
@@ -201,14 +201,14 @@ export function DataTable<TData, TValue>({
         {searchKey && (
           <InputGroup
             className={cn(
-              "bg-background rounded-full",
+              "bg-background/40 rounded-full border-border/40 focus-within:ring-2 focus-within:ring-primary/20 transition-all",
               stackFilters
                 ? "w-full"
                 : "w-full sm:w-72 lg:w-80 xl:w-96 shrink-0",
             )}
           >
             <InputGroupAddon>
-              <IconSearch className="h-4 w-4 text-muted-foreground" />
+              <IconSearch className="h-4 w-4 text-muted-foreground/60" />
             </InputGroupAddon>
             <InputGroupInput
               placeholder={searchPlaceholder}
@@ -223,7 +223,7 @@ export function DataTable<TData, TValue>({
                 onSearchChange?.(v);
                 table.getColumn(searchKey)?.setFilterValue(v);
               }}
-              className="h-10 w-full text-sm"
+              className="h-10 w-full text-sm font-medium placeholder:text-muted-foreground/40"
             />
             <InputGroupAddon
               align="inline-end"
@@ -244,6 +244,7 @@ export function DataTable<TData, TValue>({
           )}
         >
           <div className="flex flex-1 flex-wrap items-center gap-2">
+            {/* Si children es una función, le pasamos el objeto table */}
             {typeof children === "function" ? children(table) : children}
           </div>
 
@@ -257,13 +258,14 @@ export function DataTable<TData, TValue>({
                   onClearFilters?.();
                 }}
                 className={cn(
-                  "h-9 gap-1.5 rounded-xl px-3 text-xs font-semibold",
+                  "h-10 gap-1.5 rounded-xl px-4 text-xs font-black uppercase tracking-widest",
                   "text-muted-foreground border border-dashed border-muted-foreground/30",
                   "hover:border-destructive/40 hover:bg-destructive/5 hover:text-destructive",
-                  "transition-all duration-150",
+                  "transition-all duration-150 shadow-sm",
                 )}
               >
-                <IconFilterOff className="size-3.5" />
+                <IconFilterOff className="size-4" />
+                Limpiar
               </Button>
             )}
 
@@ -273,34 +275,36 @@ export function DataTable<TData, TValue>({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="hidden lg:flex h-9 gap-1.5 rounded-xl px-3 text-xs font-semibold"
+                    className="hidden lg:flex h-10 gap-2 rounded-xl px-4 text-xs font-black uppercase tracking-widest bg-background/40"
                   >
-                    <IconLayoutColumns className="size-3.5" />
+                    <IconLayoutColumns className="size-4" />
                     Columnas
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-44 rounded-xl">
-                  <DropdownMenuLabel className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
-                    Visibilidad
+                <DropdownMenuContent align="end" className="w-56 rounded-2xl bg-background/95 backdrop-blur-xl border-border/40 p-2 shadow-2xl">
+                  <DropdownMenuLabel className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-black px-2 py-3">
+                    Configurar Columnas
                   </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {table
-                    .getAllColumns()
-                    .filter(
-                      (col) =>
-                        typeof col.accessorFn !== "undefined" &&
-                        col.getCanHide(),
-                    )
-                    .map((col) => (
-                      <DropdownMenuCheckboxItem
-                        key={col.id}
-                        className="capitalize text-sm"
-                        checked={col.getIsVisible()}
-                        onCheckedChange={(v) => col.toggleVisibility(!!v)}
-                      >
-                        {col.id}
-                      </DropdownMenuCheckboxItem>
-                    ))}
+                  <DropdownMenuSeparator className="bg-border/20" />
+                  <div className="py-2">
+                    {table
+                      .getAllColumns()
+                      .filter(
+                        (col) =>
+                          typeof col.accessorFn !== "undefined" &&
+                          col.getCanHide(),
+                      )
+                      .map((col) => (
+                        <DropdownMenuCheckboxItem
+                          key={col.id}
+                          className="capitalize text-xs font-bold rounded-lg mb-1"
+                          checked={col.getIsVisible()}
+                          onCheckedChange={(v) => col.toggleVisibility(!!v)}
+                        >
+                          {col.id}
+                        </DropdownMenuCheckboxItem>
+                      ))}
+                  </div>
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
@@ -309,41 +313,41 @@ export function DataTable<TData, TValue>({
       </div>
 
       {/* ── TABLE ───────────────────────────────────────────────── */}
-      <div className="rounded-2xl border bg-card overflow-hidden w-full overflow-x-auto">
+      <div className="w-full overflow-x-auto">
         <Table className="min-w-max">
           <TableHeader>
             {table.getHeaderGroups().map((hg) => (
               <TableRow
                 key={hg.id}
-                className="border-b bg-muted/40 hover:bg-muted/40"
+                className="border-b border-border/40 bg-muted/20 hover:bg-muted/20"
               >
                 {hg.headers.map((header) => (
                   <TableHead
                     key={header.id}
                     colSpan={header.colSpan}
                     className={cn(
-                      "h-11 px-4 text-[11px] font-bold uppercase tracking-widest text-muted-foreground",
-                      "transition-colors duration-100",
+                      "h-14 px-8 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60",
+                      "transition-colors duration-200",
                       header.column.getCanSort() &&
-                        "cursor-pointer select-none hover:text-foreground",
+                        "cursor-pointer select-none hover:text-primary hover:bg-primary/5",
                     )}
                     style={{ width: header.column.getSize() }}
                     onClick={header.column.getToggleSortingHandler()}
                   >
                     {!header.isPlaceholder && (
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-2">
                         {flexRender(
                           header.column.columnDef.header,
                           header.getContext(),
                         )}
                         {header.column.getCanSort() && (
-                          <span className="shrink-0 opacity-60">
+                          <span className="shrink-0 opacity-40">
                             {header.column.getIsSorted() === "asc" ? (
-                              <IconSortAscending className="size-3.5 text-primary" />
+                              <IconSortAscending className="size-4 text-primary" />
                             ) : header.column.getIsSorted() === "desc" ? (
-                              <IconSortDescending className="size-3.5 text-primary" />
+                              <IconSortDescending className="size-4 text-primary" />
                             ) : (
-                              <IconArrowsSort className="size-3.5 opacity-40" />
+                              <IconArrowsSort className="size-4" />
                             )}
                           </span>
                         )}
@@ -362,16 +366,16 @@ export function DataTable<TData, TValue>({
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                   className={cn(
-                    "group border-b last:border-0 transition-colors duration-100",
-                    "hover:bg-primary/3",
-                    idx % 2 === 0 ? "bg-background" : "bg-muted/20",
-                    "data-[state=selected]:bg-primary/5",
+                    "group border-b border-border/20 last:border-0 transition-all duration-200",
+                    "hover:bg-primary/5",
+                    idx % 2 === 0 ? "bg-transparent" : "bg-muted/5",
+                    "data-[state=selected]:bg-primary/10",
                   )}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
-                      className="px-4 py-3.5 text-sm"
+                      className="px-8 py-5 text-sm font-bold text-foreground/80"
                       style={{ width: cell.column.getSize() }}
                     >
                       {flexRender(
@@ -386,7 +390,7 @@ export function DataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-auto p-0 pb-10"
+                  className="h-[400px] p-0"
                 >
                   <DataTableEmptyState
                     title={emptyStateTitle}
@@ -408,7 +412,7 @@ export function DataTable<TData, TValue>({
       </div>
 
       {/* ── PAGINATION ──────────────────────────────────────────── */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-1">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between p-6 bg-muted/10 border-t border-border/20">
         {/* Selection count */}
         {enableRowSelection ? (
           <p className="text-xs text-muted-foreground shrink-0">

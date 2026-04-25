@@ -67,7 +67,7 @@ export function ChartAreaInteractive({ data = [] }: ChartAreaInteractiveProps) {
   return (
     <Card className="@container/card">
       <CardHeader>
-        <CardTitle>Tendencia de Recaudación</CardTitle>
+        <CardTitle className="text-lg font-black tracking-tight">Tendencia de Recaudación</CardTitle>
         <CardDescription>
           Historial diario de ingresos por pensiones y otros conceptos.
         </CardDescription>

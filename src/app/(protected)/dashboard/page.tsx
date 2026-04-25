@@ -2,7 +2,13 @@ import { auth } from "@/auth";
 import { SectionCards } from "@/components/common/section-cards";
 import { ChartAreaInteractive } from "@/components/common/chart-area-interactive";
 import { AdmissionsTable } from "@/components/dashboard/admissions-table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   getDashboardStatsAction,
@@ -15,12 +21,12 @@ import { CapacityGauge } from "@/components/dashboard/capacity-gauge";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
 import { FinancialHealthCard } from "@/components/dashboard/financial-health-card";
 import { AttendanceTodayMonitor } from "@/components/dashboard/attendance-today-monitor";
-import { 
-  IconLayoutDashboard, 
-  IconUserPlus, 
-  IconCreditCard, 
+import {
+  IconLayoutDashboard,
+  IconUserPlus,
+  IconCreditCard,
   IconSpeakerphone,
-  IconArrowUpRight
+  IconArrowUpRight,
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -42,11 +48,6 @@ export default async function DashboardPage() {
 
     return (
       <div className="flex flex-1 flex-col gap-6 p-0 sm:p-6 pt-0">
-        <PageHeader
-          icon={<IconLayoutDashboard className="size-5" />}
-          title="Panel del Docente"
-          description={`Bienvenido, ${session.user.name}. Aquí tienes un resumen de tus cursos y alumnos.`}
-        />
         {teacherData.success && <TeacherDashboard data={teacherData.success} />}
       </div>
     );
@@ -72,23 +73,23 @@ export default async function DashboardPage() {
           title="Dashboard Institucional"
           description={`Panel de control · ${institucion?.nombreInstitucion ?? "Sistema Escolar Pro"} · Periodo ${institucion?.cicloEscolarActual ?? "2025"}`}
         />
-        
+
         <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide py-1 px-1 -m-1 lg:m-0">
-          <QuickAction 
-            href="/gestion/estudiantes" 
-            label="Matrícula" 
+          <QuickAction
+            href="/gestion/estudiantes"
+            label="Matrícula"
             icon={IconUserPlus}
             variant="default"
           />
-          <QuickAction 
-            href="/finanzas" 
-            label="Cobranza" 
+          <QuickAction
+            href="/finanzas"
+            label="Cobranza"
             icon={IconCreditCard}
             variant="outline"
           />
-          <QuickAction 
-            href="/comunicaciones" 
-            label="Anuncio" 
+          <QuickAction
+            href="/comunicaciones"
+            label="Anuncio"
             icon={IconSpeakerphone}
             variant="outline"
           />
@@ -103,7 +104,7 @@ export default async function DashboardPage() {
       {/* Primary Insights: Monitors & Capacity */}
       <section className="grid gap-6 px-2 lg:grid-cols-12">
         <div className="lg:col-span-4 translate-y-0 transition-all hover:-translate-y-1">
-          <AttendanceTodayMonitor 
+          <AttendanceTodayMonitor
             present={stats?.attendanceToday?.present || 0}
             absent={stats?.attendanceToday?.absent || 0}
             late={stats?.attendanceToday?.late || 0}
@@ -111,7 +112,7 @@ export default async function DashboardPage() {
           />
         </div>
         <div className="lg:col-span-4 translate-y-0 transition-all hover:-translate-y-1">
-          <FinancialHealthCard 
+          <FinancialHealthCard
             collected={stats?.totalRevenue || 0}
             overdue={stats?.totalOverdue || 0}
             pending={stats?.totalPending || 0}
@@ -133,18 +134,33 @@ export default async function DashboardPage() {
           <div className="transition-all hover:-translate-y-1 duration-300">
             <ChartAreaInteractive data={stats?.chartData} />
           </div>
-          
-          <Card className="liquid-glass border-none flex-1">
-            <CardHeader className="border-b border-white/5 pb-3 flex-row items-center justify-between">
+
+          <Card className="liquid-glass border-none flex-1 p-0">
+            <CardHeader className="border-b border-white/5 py-3 flex flex-col md:flex-row items-center justify-between">
               <div>
-                <CardTitle className="text-lg font-black tracking-tight">Admisiones Recientes</CardTitle>
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider">Últimos estudiantes registrados</p>
+                <CardTitle className="text-lg font-black tracking-tight">
+                  Admisiones Recientes
+                </CardTitle>
+                <CardDescription>
+                  Últimos estudiantes registrados
+                </CardDescription>
               </div>
-              <Button variant="ghost" size="sm" className="text-primary font-bold gap-1 group" asChild>
-                <Link href="/gestion/estudiantes">
-                  Ver todos <IconArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                </Link>
-              </Button>
+              <div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-primary font-bold gap-1 group"
+                  asChild
+                >
+                  <Link href="/gestion/estudiantes">
+                    Ver todos{" "}
+                    <IconArrowUpRight
+                      size={14}
+                      className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
+                    />
+                  </Link>
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="p-0">
               <ScrollArea className="h-[430px]">
@@ -158,8 +174,8 @@ export default async function DashboardPage() {
 
         {/* Right Column: Recent Activity (Spans whole height) */}
         <div className="lg:col-span-4 h-full min-h-[500px]">
-          <RecentActivity 
-            activities={stats?.recentActivity || []} 
+          <RecentActivity
+            activities={stats?.recentActivity || []}
             className="h-full"
           />
         </div>
@@ -168,24 +184,25 @@ export default async function DashboardPage() {
   );
 }
 
-function QuickAction({ 
-  href, 
-  label, 
-  icon: Icon, 
-  variant 
-}: { 
-  href: string, 
-  label: string, 
-  icon: any,
-  variant: "default" | "outline"
+function QuickAction({
+  href,
+  label,
+  icon: Icon,
+  variant,
+}: {
+  href: string;
+  label: string;
+  icon: any;
+  variant: "default" | "outline";
 }) {
   return (
-    <Button 
-      variant={variant} 
+    <Button
+      variant={variant}
       className={cn(
         "rounded-2xl gap-2 font-bold px-5 py-6 h-auto transition-all hover:scale-105 active:scale-95",
-        variant === "outline" && "border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary"
-      )} 
+        variant === "outline" &&
+          "border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary",
+      )}
       asChild
     >
       <Link href={href}>
@@ -211,8 +228,12 @@ function PageHeader({
         {icon}
       </div>
       <div>
-        <h1 className="text-xl font-black tracking-tight sm:text-3xl drop-shadow-sm">{title}</h1>
-        <p className="text-xs text-muted-foreground font-medium sm:text-sm">{description}</p>
+        <h1 className="text-xl font-black tracking-tight sm:text-3xl drop-shadow-sm">
+          {title}
+        </h1>
+        <p className="text-xs text-muted-foreground font-medium sm:text-sm">
+          {description}
+        </p>
       </div>
     </div>
   );

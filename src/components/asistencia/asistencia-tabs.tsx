@@ -17,9 +17,10 @@ interface AsistenciaTabsProps {
     scanner: React.ReactNode;
     politicas: React.ReactNode;
   };
+  isProfessor?: boolean;
 }
 
-export function AsistenciaTabs({ children }: AsistenciaTabsProps) {
+export function AsistenciaTabs({ children, isProfessor }: AsistenciaTabsProps) {
   const [tab, setTab] = useQueryState(
     "tab",
     parseAsString.withDefault("registro"),
@@ -46,11 +47,16 @@ export function AsistenciaTabs({ children }: AsistenciaTabsProps) {
       label: "Políticas",
       icon: <IconClockCog className="size-4" />,
     },
-  ];
+  ].filter((t) => {
+    if (isProfessor && (t.id === "scanner" || t.id === "politicas"))
+      return false;
+    return true;
+  });
 
   return (
     <Tabs value={tab} onValueChange={setTab}>
       <AnimatedTabs
+        layoutId="attendance-main-tabs"
         tabs={tabs}
         activeTab={tab}
         onTabChange={setTab}
@@ -65,13 +71,17 @@ export function AsistenciaTabs({ children }: AsistenciaTabsProps) {
         {children.reportes}
       </TabsContent>
 
-      <TabsContent value="scanner" className="space-y-4">
-        {children.scanner}
-      </TabsContent>
+      {!isProfessor && (
+        <TabsContent value="scanner" className="space-y-4">
+          {children.scanner}
+        </TabsContent>
+      )}
 
-      <TabsContent value="politicas" className="space-y-4">
-        {children.politicas}
-      </TabsContent>
+      {!isProfessor && (
+        <TabsContent value="politicas" className="space-y-4">
+          {children.politicas}
+        </TabsContent>
+      )}
     </Tabs>
   );
 }

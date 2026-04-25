@@ -3,6 +3,7 @@
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { IconLoader2, IconDeviceFloppy, IconCheck } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -226,14 +227,25 @@ function ConceptoFormContent({
           </Button>
           <Button
             type="submit"
-            className="w-full sm:w-auto rounded-full px-8"
+            className="w-full sm:w-auto rounded-full px-8 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300"
             disabled={isPending}
           >
-            {isPending
-              ? "Guardando..."
-              : concepto
-                ? "Actualizar Concepto"
-                : "Crear Concepto"}
+            {isPending ? (
+              <>
+                <IconLoader2 className="size-4 animate-spin mr-2" />
+                Guardando...
+              </>
+            ) : concepto ? (
+              <>
+                <IconDeviceFloppy className="size-4 mr-2" />
+                Actualizar Concepto
+              </>
+            ) : (
+              <>
+                <IconCheck className="size-4 mr-2" />
+                Crear Concepto
+              </>
+            )}
           </Button>
         </div>
       </form>

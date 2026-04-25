@@ -1,4 +1,3 @@
-import React from 'react'
 import {
   Text,
   View,
@@ -9,7 +8,6 @@ import { Stack } from '@/components/pdfx/stack/pdfx-stack'
 import { KeyValue } from '@/components/pdfx/key-value/pdfx-key-value'
 import { Table, TableHeader, TableBody, TableRow, TableCell } from '@/components/pdfx/table/pdfx-table'
 import { Divider } from '@/components/pdfx/divider/pdfx-divider'
-import { PageFooter } from '@/components/pdfx/page-footer/pdfx-page-footer'
 import { formatTitleCase } from '@/lib/formats'
 
 interface GradeReportPDFProps {
@@ -32,6 +30,7 @@ interface GradeReportPDFProps {
       puntajes: number[]
       promedios: number[]
     }
+    origin?: string
   }
 }
 
@@ -60,10 +59,12 @@ export const GradeReportPDF = ({ data }: GradeReportPDFProps) => {
       docTypeLabel={`Año Académico ${data?.anioAcademico || '2025'}`}
       docId={estudiante.codigo || estudiante.dni}
       verificationCode={verificationCode}
-      institucion={estudiante.institucionCompleta || {
-        nombreInstitucion: estudiante.institucion,
-        direccion: 'S/D',
-        logo: estudiante.logo
+      origin={data.origin}
+      institucion={{
+        ...(data.estudiante.institucionCompleta || {}),
+        nombreInstitucion: data.estudiante.institucionCompleta?.nombreInstitucion || data.estudiante.institucion,
+        direccion: data.estudiante.institucionCompleta?.direccion || 'S/D',
+        logo: data.estudiante.institucionCompleta?.logo || data.estudiante.logo
       }}
     >
       {/* Datos del Estudiante */}
@@ -149,7 +150,7 @@ export const GradeReportPDF = ({ data }: GradeReportPDFProps) => {
         <Stack direction="vertical" gap="sm" style={{ flex: 1, padding: 10, borderWidth: 1, borderColor: '#e2e8f0', borderRadius: 6 }}>
           <Heading level={6} transform="uppercase" color="mutedForeground">Observaciones por Periodo</Heading>
           {[1,2,3,4].map(i => (
-            <Stack key={i} direction="horizontal" gap="xs" style={{ borderBottomWidth: 0.5, borderBottomColor: '#f1f5f9', paddingVertical: 4 }}>
+            <Stack key={i} direction="horizontal" gap="md" style={{ borderBottomWidth: 0.5, borderBottomColor: '#f1f5f9', paddingVertical: 4 }}>
               <Text style={{ fontSize: 7, width: 60, fontWeight: 'bold' }}>{i}º Bimestre:</Text>
               <View style={{ flex: 1, height: 10 }} />
             </Stack>
@@ -158,7 +159,7 @@ export const GradeReportPDF = ({ data }: GradeReportPDFProps) => {
 
         <Stack direction="vertical" gap="sm" style={{ flex: 1, padding: 10, borderWidth: 1, borderColor: '#e2e8f0', borderRadius: 6 }}>
           <Heading level={6} transform="uppercase" color="mutedForeground">Escala de Calificación</Heading>
-          <Stack direction="vertical" gap="xs">
+          <Stack direction="vertical" gap="md">
             <Text style={{ fontSize: 7 }}><Text style={{ fontWeight: 'bold', color: '#059669' }}>AD (Logro Destacado):</Text> 18 - 20</Text>
             <Text style={{ fontSize: 7 }}><Text style={{ fontWeight: 'bold', color: '#2563eb' }}>A (Logro Previsto):</Text> 14 - 17</Text>
             <Text style={{ fontSize: 7 }}><Text style={{ fontWeight: 'bold', color: '#d97706' }}>B (En Proceso):</Text> 11 - 13</Text>

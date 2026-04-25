@@ -2,7 +2,12 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { IconUsers, IconUserCheck, IconUserX, IconClock } from "@tabler/icons-react";
+import {
+  IconUsers,
+  IconUserCheck,
+  IconUserX,
+  IconClock,
+} from "@tabler/icons-react";
 
 interface AttendanceTodayMonitorProps {
   present: number;
@@ -61,33 +66,37 @@ export function AttendanceTodayMonitor({
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-2xl font-black">{presentPerc.toFixed(0)}%</span>
-              <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-tight">Presentes</span>
+              <span className="text-2xl font-black">
+                {presentPerc.toFixed(0)}%
+              </span>
+              <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-tight">
+                Presentes
+              </span>
             </div>
           </div>
         </div>
 
         {/* Detailed Stats */}
         <div className="grid grid-cols-2 gap-3">
-          <AttendanceDetail 
+          <AttendanceDetail
             icon={IconUserCheck}
             label="Presentes"
             value={present}
             color="emerald"
           />
-          <AttendanceDetail 
+          <AttendanceDetail
             icon={IconClock}
             label="Tardanzas"
             value={late}
             color="amber"
           />
-          <AttendanceDetail 
+          <AttendanceDetail
             icon={IconUserX}
             label="Faltas"
             value={absent}
             color="red"
           />
-          <AttendanceDetail 
+          <AttendanceDetail
             icon={IconUsers}
             label="Total"
             value={total}
@@ -106,16 +115,16 @@ export function AttendanceTodayMonitor({
   );
 }
 
-function AttendanceDetail({ 
-  icon: Icon, 
-  label, 
-  value, 
-  color 
-}: { 
-  icon: any, 
-  label: string, 
-  value: number, 
-  color: "emerald" | "amber" | "red" | "blue"
+function AttendanceDetail({
+  icon: Icon,
+  label,
+  value,
+  color,
+}: {
+  icon: any;
+  label: string;
+  value: number;
+  color: "emerald" | "amber" | "red" | "blue";
 }) {
   const colors = {
     emerald: "text-emerald-500 bg-emerald-500/10",
@@ -126,11 +135,18 @@ function AttendanceDetail({
 
   return (
     <div className="flex items-center gap-2 p-2 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
-      <div className={cn("size-7 rounded-lg flex items-center justify-center shrink-0", colors[color])}>
+      <div
+        className={cn(
+          "size-7 rounded-lg flex items-center justify-center shrink-0",
+          colors[color],
+        )}
+      >
         <Icon size={14} />
       </div>
       <div className="min-w-0">
-        <p className="text-[9px] font-bold text-muted-foreground uppercase truncate">{label}</p>
+        <p className="text-[9px] font-bold text-muted-foreground uppercase truncate">
+          {label}
+        </p>
         <p className="text-xs font-black">{value}</p>
       </div>
     </div>

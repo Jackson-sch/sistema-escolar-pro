@@ -9,6 +9,8 @@ interface AnimatedTabsProps {
   activeTab: string;
   onTabChange: (id: string) => void;
   className?: string;
+  layoutId?: string;
+  size?: "default" | "sm";
 }
 
 export function AnimatedTabs({
@@ -16,14 +18,17 @@ export function AnimatedTabs({
   activeTab,
   onTabChange,
   className,
+  layoutId = "active-tab",
+  size = "default",
 }: AnimatedTabsProps) {
   return (
-    <div
-      className={cn(
-        "flex flex-row items-center justify-start bg-zinc-100 dark:bg-zinc-900/50 p-1 rounded-full w-fit border border-white/10",
-        className,
-      )}
-    >
+    <div className="w-full max-w-full overflow-x-auto scrollbar-hide py-1">
+      <div
+        className={cn(
+          "flex flex-row items-center justify-start bg-zinc-100 dark:bg-zinc-900/50 p-1 rounded-full w-fit border border-white/10 min-w-max",
+          className,
+        )}
+      >
       {tabs.map((tab) => {
         const isActive = activeTab === tab.id;
         return (
@@ -31,7 +36,8 @@ export function AnimatedTabs({
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
             className={cn(
-              "relative px-4 py-2 text-sm font-medium transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex items-center gap-2",
+              "relative font-medium transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex items-center gap-2",
+              size === "sm" ? "px-3 py-1.5 text-xs" : "px-4 py-2 text-sm",
               isActive
                 ? "dark:text-white text-zinc-900"
                 : "text-zinc-400 dark:hover:text-zinc-200 hover:text-zinc-900",
@@ -42,7 +48,7 @@ export function AnimatedTabs({
           >
             {isActive && (
               <motion.div
-                layoutId="active-tab-indicator"
+                layoutId={layoutId}
                 className="absolute inset-0 z-0 rounded-full"
                 transition={{
                   type: "spring",
@@ -64,10 +70,18 @@ export function AnimatedTabs({
               </motion.div>
             )}
             {tab.icon && <span className="relative z-10">{tab.icon}</span>}
-            <span className="relative z-10">{tab.label}</span>
+            <span 
+              className={cn(
+                "relative z-10 transition-all duration-300 whitespace-nowrap",
+                tab.icon && !isActive && "hidden sm:inline-block"
+              )}
+            >
+              {tab.label}
+            </span>
           </button>
         );
       })}
+      </div>
     </div>
   );
 }

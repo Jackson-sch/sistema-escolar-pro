@@ -16,6 +16,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
+import { IconChartPie } from "@tabler/icons-react"
 
 const colors = {
   pagados: "var(--chart-9)",
@@ -23,7 +24,6 @@ const colors = {
   vencidos: "var(--chart-13)",
 }
 
-// Definimos colores semánticos usando las variables del tema
 const chartConfig = {
   count: {
     label: "Cantidad",
@@ -53,31 +53,31 @@ interface EstadoGeneralChartProps {
 }
 
 export function EstadoGeneralChart({ data }: EstadoGeneralChartProps) {
-  // 1. Calculamos el total para el centro del gráfico
   const totalPagos = React.useMemo(() => {
     return data.reduce((acc, curr) => acc + curr.value, 0)
   }, [data])
 
-  // 2. Mapeamos los datos para asegurar que usen la config de colores
   const processedData = data.map((item) => ({
     ...item,
     fill: colors[item.name.toLowerCase() as keyof typeof colors] || colors.pendientes,
   }))
 
   return (
-    // Eliminamos h-full para que la tarjeta se ajuste al contenido
-    <Card className="flex flex-col shadow-sm border-border">
-      <CardHeader className="items-center pb-2 text-center">
-        <CardTitle>Estado de Pagos</CardTitle>
-        <CardDescription>Resumen general del periodo</CardDescription>
+    <Card className="liquid-glass border-none rounded-[2rem] overflow-hidden shadow-xl bg-card/40 backdrop-blur-md h-full flex flex-col">
+      <CardHeader className="flex flex-row items-center gap-4 pb-4">
+        <div className="size-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-600 border border-blue-500/20 shadow-inner">
+          <IconChartPie size={24} />
+        </div>
+        <div>
+          <CardTitle className="text-xl font-black tracking-tight">Distribución de Estados</CardTitle>
+          <CardDescription className="text-sm font-medium opacity-60">Proporción de cuotas según su estado de pago</CardDescription>
+        </div>
       </CardHeader>
 
-      {/* Eliminamos flex-1 para que no ocupe espacio innecesario */}
-      <CardContent className="pb-2">
+      <CardContent className="pb-0 flex-1 flex items-center justify-center">
         <ChartContainer
           config={chartConfig}
-          // Reducimos la altura máxima del contenedor del gráfico
-          className="mx-auto aspect-square max-h-[180px]"
+          className="mx-auto aspect-square w-full max-w-[240px]"
         >
           <PieChart>
             <ChartTooltip
@@ -88,8 +88,9 @@ export function EstadoGeneralChart({ data }: EstadoGeneralChartProps) {
               data={processedData}
               dataKey="value"
               nameKey="name"
-              innerRadius={40} // Reduje ligeramente el radio interno para proporción
-              strokeWidth={5}
+              innerRadius={60}
+              strokeWidth={8}
+              stroke="transparent"
             >
               <Label
                 content={({ viewBox }) => {
@@ -104,14 +105,14 @@ export function EstadoGeneralChart({ data }: EstadoGeneralChartProps) {
                         <tspan
                           x={viewBox.cx}
                           y={viewBox.cy}
-                          className="fill-foreground text-2xl font-bold" // Reduje un poco el tamaño de fuente
+                          className="fill-foreground text-3xl font-black tracking-tighter"
                         >
                           {totalPagos.toLocaleString()}
                         </tspan>
                         <tspan
                           x={viewBox.cx}
-                          y={(viewBox.cy || 0) + 20}
-                          className="fill-muted-foreground text-xs font-medium uppercase tracking-wider"
+                          y={(viewBox.cy || 0) + 24}
+                          className="fill-muted-foreground text-[10px] font-black uppercase tracking-widest"
                         >
                           Total
                         </tspan>
@@ -125,23 +126,22 @@ export function EstadoGeneralChart({ data }: EstadoGeneralChartProps) {
         </ChartContainer>
       </CardContent>
 
-      {/* Reducimos el padding superior y eliminamos el Separator */}
-      <CardFooter className="flex flex-col gap-3 pt-2 pb-4">
-        <div className="grid grid-cols-3 w-full gap-2 text-center text-xs">
+      <CardFooter className="flex flex-col gap-4 pt-0 pb-8 px-8">
+        <div className="grid grid-cols-3 w-full gap-4">
           {processedData.map((item) => {
             const percentage = totalPagos > 0 ? ((item.value / totalPagos) * 100).toFixed(1) : "0"
             return (
-              <div key={item.name} className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                <div className="flex items-center gap-1.5 text-muted-foreground">
+              <div key={item.name} className="flex flex-col items-center gap-1.5 p-3 rounded-[1.25rem] bg-card/30 border border-border/5 hover:bg-card/50 transition-all duration-300">
+                <div className="flex items-center gap-2">
                   <span
-                    className="h-2 w-2 rounded-full shrink-0"
+                    className="h-2 w-2 rounded-full shrink-0 shadow-[0_0_8px_rgba(0,0,0,0.2)]"
                     style={{ backgroundColor: item.fill }}
                   />
-                  <span className="capitalize font-medium">{item.name}</span>
+                  <span className="capitalize text-[10px] font-black tracking-widest text-muted-foreground/80">{item.name}</span>
                 </div>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-lg font-bold">{item.value}</span>
-                  <span className="text-[10px] text-muted-foreground">({percentage}%)</span>
+                  <span className="text-xl font-black tracking-tighter">{item.value}</span>
+                  <span className="text-[10px] font-bold text-muted-foreground/40">{percentage}%</span>
                 </div>
               </div>
             )
@@ -151,3 +151,4 @@ export function EstadoGeneralChart({ data }: EstadoGeneralChartProps) {
     </Card>
   )
 }
+ 

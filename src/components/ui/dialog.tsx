@@ -124,8 +124,8 @@ function DialogTitle({
 }: React.ComponentProps<typeof DialogPrimitive.Title>) {
   return (
     <DialogPrimitive.Title
-      data-slot="dialog-title"
       className={cn("text-lg leading-none font-semibold", className)}
+      suppressHydrationWarning
       {...props}
     />
   );
@@ -137,8 +137,8 @@ function DialogDescription({
 }: React.ComponentProps<typeof DialogPrimitive.Description>) {
   return (
     <DialogPrimitive.Description
-      data-slot="dialog-description"
       className={cn("text-muted-foreground text-sm", className)}
+      suppressHydrationWarning
       {...props}
     />
   );

@@ -1,6 +1,12 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   IconCircleCheck,
@@ -41,9 +47,16 @@ export function RecentActivity({ activities, className }: RecentActivityProps) {
   };
 
   return (
-    <Card className={cn("liquid-glass border-none flex flex-col overflow-hidden group", className)}>
+    <Card
+      className={cn(
+        "liquid-glass border-none flex flex-col overflow-hidden group",
+        className,
+      )}
+    >
       <CardHeader className="pb-4 relative z-10">
-        <CardTitle className="text-lg font-black tracking-tight">Actividad Reciente</CardTitle>
+        <CardTitle className="text-lg font-black tracking-tight">
+          Actividad Reciente
+        </CardTitle>
         <CardDescription className="text-xs font-medium">
           Últimos eventos registrados en el sistema.
         </CardDescription>

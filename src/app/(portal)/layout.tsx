@@ -14,12 +14,13 @@ export default async function PortalLayout({
 }) {
   const session = await auth();
 
-  // Verificar que el usuario está autenticado y es un padre
+  // Verificar que el usuario está autenticado y tiene un rol permitido (padre o profesor)
   if (!session?.user?.id) {
     redirect("/login");
   }
 
-  if (session.user.role !== "padre") {
+  const allowedRoles = ["padre", "profesor"];
+  if (!allowedRoles.includes(session.user.role)) {
     redirect("/");
   }
 
@@ -35,6 +36,8 @@ export default async function PortalLayout({
     session.user.institucionId || undefined,
   );
   const institucionData = institucionRes.data;
+
+  const headerTitle = user?.role === "profesor" ? "Portal Docente" : "Portal Padres";
 
   return (
     <div className="[--header-height:calc(var(--spacing)*14)]">
@@ -53,7 +56,7 @@ export default async function PortalLayout({
           institucionLogo={institucionData?.logo}
         />
         <SidebarInset>
-          <SiteHeader institucionName="Portal Padres" />
+          <SiteHeader institucionName={headerTitle} />
           <main className="flex flex-1 flex-col gap-4 p-4 relative ">
             <div className="flex-1 w-full">{children}</div>
             <SiteFooter />

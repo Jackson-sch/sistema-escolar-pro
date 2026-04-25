@@ -37,7 +37,7 @@ export default async function EstudiantesPage() {
 
   const periodoAcademico = institucion?.cicloEscolarActual || new Date().getFullYear();
   const session = await auth();
-  const isProfessor = session?.user?.role === "profesor";
+  const isAdmin = session?.user?.role === "administrativo" || session?.user?.role === "super_admin";
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-0 sm:p-4 pt-0 @container/main">
@@ -52,7 +52,7 @@ export default async function EstudiantesPage() {
           </p>
         </div>
         <div className="flex flex-row gap-3 items-center">
-          {!isProfessor && (
+          {isAdmin && (
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>

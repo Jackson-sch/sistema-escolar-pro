@@ -33,6 +33,7 @@ interface RowActionsProps {
 
 export function RowActions({ row, table }: RowActionsProps) {
   const role = useCurrentRole();
+  const canManage = role === "administrativo" || role === "super_admin";
   const isProfessor = role === "profesor";
 
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -81,7 +82,7 @@ export function RowActions({ row, table }: RowActionsProps) {
       variant: "ghost",
       className: "text-violet-500 rounded-full",
     },
-    ...(!isProfessor
+    ...(canManage
       ? ([
           !isEnrolled && {
             icon: IconFilePlus,

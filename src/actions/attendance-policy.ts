@@ -48,6 +48,11 @@ export async function savePoliticaAsistenciaAction(data: {
     const session = await auth();
     if (!session?.user?.id) return { error: "No autorizado" };
 
+    const isAdmin =
+      session.user.role === "administrativo" ||
+      session.user.role === "super_admin";
+    if (!isAdmin) return { error: "No tiene permisos para modificar políticas" };
+
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
       select: { institucionId: true },
@@ -96,6 +101,11 @@ export async function deletePoliticaAsistenciaAction(id: string) {
   try {
     const session = await auth();
     if (!session?.user?.id) return { error: "No autorizado" };
+
+    const isAdmin =
+      session.user.role === "administrativo" ||
+      session.user.role === "super_admin";
+    if (!isAdmin) return { error: "No tiene permisos para eliminar políticas" };
 
     await prisma.politicaAsistencia.delete({
       where: { id },

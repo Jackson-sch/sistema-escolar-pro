@@ -75,22 +75,41 @@ export const getDashboardStatsAction = createSafeAction(
       totalToday > 0 ? (presentToday / totalToday) * 100 : 0;
 
     // 3. Otros datos existentes ...
-    const [totalStudents, totalStaff, activeEnrollments, academicStats, prospectsCount] = await Promise.all([
+    const [
+      totalStudents,
+      totalStaff,
+      activeEnrollments,
+      academicStats,
+      prospectsCount,
+    ] = await Promise.all([
       prisma.user.count({
-        where: { role: "estudiante", institucionId: institucionId || undefined },
+        where: {
+          role: "estudiante",
+          institucionId: institucionId || undefined,
+        },
       }),
       prisma.user.count({
-        where: { role: { in: ["profesor", "administrativo"] }, institucionId: institucionId || undefined },
+        where: {
+          role: { in: ["profesor", "administrativo"] },
+          institucionId: institucionId || undefined,
+        },
       }),
       prisma.matricula.count({
-        where: { anioAcademico: currentYear, estado: "activo", estudiante: { institucionId: institucionId || undefined } },
+        where: {
+          anioAcademico: currentYear,
+          estado: "activo",
+          estudiante: { institucionId: institucionId || undefined },
+        },
       }),
       prisma.nota.aggregate({
         where: { estudiante: { institucionId: institucionId || undefined } },
         _avg: { valor: true },
       }),
       prisma.prospecto.count({
-        where: { institucionId: institucionId || undefined, anioPostulacion: currentYear },
+        where: {
+          institucionId: institucionId || undefined,
+          anioPostulacion: currentYear,
+        },
       }),
     ]);
 
@@ -108,10 +127,17 @@ export const getDashboardStatsAction = createSafeAction(
         nextDate.setDate(nextDate.getDate() + 1);
 
         const total = await prisma.asistencia.count({
-          where: { fecha: { gte: date, lt: nextDate }, estudiante: { institucionId: institucionId || undefined } },
+          where: {
+            fecha: { gte: date, lt: nextDate },
+            estudiante: { institucionId: institucionId || undefined },
+          },
         });
         const present = await prisma.asistencia.count({
-          where: { fecha: { gte: date, lt: nextDate }, presente: true, estudiante: { institucionId: institucionId || undefined } },
+          where: {
+            fecha: { gte: date, lt: nextDate },
+            presente: true,
+            estudiante: { institucionId: institucionId || undefined },
+          },
         });
         return {
           date: date.toISOString().split("T")[0],
@@ -139,7 +165,7 @@ export const getDashboardStatsAction = createSafeAction(
     // Normalizamos iterDate al inicio del día y nowRef para asegurar que "hoy" esté incluido
     const iterDate = new Date(sixMonthsAgo);
     iterDate.setHours(0, 0, 0, 0);
-    
+
     const nowRef = new Date();
     const todayStr = nowRef.toISOString().split("T")[0];
 
@@ -149,7 +175,7 @@ export const getDashboardStatsAction = createSafeAction(
       currentKey = iterDate.toISOString().split("T")[0];
       dailyStats[currentKey] = 0;
       iterDate.setDate(iterDate.getDate() + 1);
-      
+
       // Seguridad para evitar bucles infinitos en casos raros
       if (iterDate.getTime() > nowRef.getTime() + 86400000) break;
     }
@@ -167,8 +193,14 @@ export const getDashboardStatsAction = createSafeAction(
 
     // Capacidad
     const niveles = await prisma.nivelAcademico.findMany({
-      where: { institucionId: institucionId || undefined, anioAcademico: currentYear },
-      select: { capacidad: true, _count: { select: { matriculas: { where: { estado: "activo" } } } } },
+      where: {
+        institucionId: institucionId || undefined,
+        anioAcademico: currentYear,
+      },
+      select: {
+        capacidad: true,
+        _count: { select: { matriculas: { where: { estado: "activo" } } } },
+      },
     });
     const totalCap = niveles.reduce((acc, n) => acc + n.capacidad, 0);
     const totalOcc = niveles.reduce((acc, n) => acc + n._count.matriculas, 0);
@@ -179,10 +211,16 @@ export const getDashboardStatsAction = createSafeAction(
         where: { estudiante: { institucionId: institucionId || undefined } },
         orderBy: { fechaMatricula: "desc" },
         take: 5,
-        include: { estudiante: true, nivelAcademico: { include: { grado: true } } },
+        include: {
+          estudiante: true,
+          nivelAcademico: { include: { grado: true } },
+        },
       }),
       prisma.pago.findMany({
-        where: { estudiante: { institucionId: institucionId || undefined }, estado: "completado" },
+        where: {
+          estudiante: { institucionId: institucionId || undefined },
+          estado: "completado",
+        },
         orderBy: { fechaPago: "desc" },
         take: 5,
         include: { estudiante: true },
@@ -196,10 +234,33 @@ export const getDashboardStatsAction = createSafeAction(
     ]);
 
     const recentActivity = [
-      ...recentMatriculas.map((m) => ({ id: m.id, type: "matricula", title: `Nueva matrícula: ${m.estudiante.name}`, description: `${m.nivelAcademico.grado.nombre}`, date: m.fechaMatricula, user: m.estudiante.name })),
-      ...recentPagos.map((p) => ({ id: p.id, type: "pago", title: `Pago: ${p.concepto}`, description: `S/ ${p.monto.toFixed(2)}`, date: p.fechaPago!, user: p.estudiante.name })),
-      ...recentAnuncios.map((a) => ({ id: a.id, type: "anuncio", title: `Anuncio: ${a.titulo}`, description: a.resumen || "Aviso", date: a.createdAt, user: a.autor.name })),
-    ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 10);
+      ...recentMatriculas.map((m) => ({
+        id: m.id,
+        type: "matricula",
+        title: `Nueva matrícula: ${m.estudiante.name}`,
+        description: `${m.nivelAcademico.grado.nombre}`,
+        date: m.fechaMatricula,
+        user: `${m.estudiante.name} ${m.estudiante.apellidoPaterno} ${m.estudiante.apellidoMaterno}`,
+      })),
+      ...recentPagos.map((p) => ({
+        id: p.id,
+        type: "pago",
+        title: `Pago: ${p.concepto}`,
+        description: `S/ ${p.monto.toFixed(2)}`,
+        date: p.fechaPago!,
+        user: `${p.estudiante.name} ${p.estudiante.apellidoPaterno} ${p.estudiante.apellidoMaterno}`,
+      })),
+      ...recentAnuncios.map((a) => ({
+        id: a.id,
+        type: "anuncio",
+        title: `Anuncio: ${a.titulo}`,
+        description: a.resumen || "Aviso",
+        date: a.createdAt,
+        user: a.autor.name,
+      })),
+    ]
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 10);
 
     return {
       success: {
@@ -275,7 +336,7 @@ export const getTeacherDashboardAction = createSafeAction(
     const teacherId = session.user.id;
     const institucionId = session.user.institucionId;
 
-    // 1. Obtener cursos del profesor
+    // 1. Obtener cursos del profesor con conteo de estudiantes
     const cursos = await prisma.curso.findMany({
       where: {
         profesorId: teacherId,
@@ -285,6 +346,9 @@ export const getTeacherDashboardAction = createSafeAction(
         areaCurricular: true,
         nivelAcademico: {
           include: { grado: true, nivel: true },
+        },
+        _count: {
+          select: { estudiantes: true },
         },
       },
     });
@@ -354,12 +418,35 @@ export const getTeacherDashboardAction = createSafeAction(
       take: 5,
     });
 
+    // 5. Horario de hoy
+    const today = new Date().getDay(); // 0 (Sun) to 6 (Sat)
+    // Map JS getDay to database day (assuming 1=Mon, ..., 7=Sun or similar)
+    // Let's assume 1-7 where 1=Mon.
+    const dbDay = today === 0 ? 7 : today;
+
+    const todaySchedule = await prisma.horario.findMany({
+      where: {
+        cursoId: { in: cursoIds },
+        diaSemana: dbDay,
+      },
+      include: {
+        curso: {
+          include: {
+            areaCurricular: true,
+            nivelAcademico: { include: { grado: true } },
+          },
+        },
+      },
+      orderBy: { horaInicio: "asc" },
+    });
+
     return {
       success: {
         cursos,
         upcomingEvaluations: JSON.parse(JSON.stringify(upcomingEvaluations)),
         criticalAttendance: JSON.parse(JSON.stringify(criticalAttendance)),
         evaluationsToGrade: JSON.parse(JSON.stringify(evaluationsToGrade)),
+        todaySchedule: JSON.parse(JSON.stringify(todaySchedule)),
       },
     };
   },

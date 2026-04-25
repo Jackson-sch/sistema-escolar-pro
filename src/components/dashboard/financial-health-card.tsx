@@ -3,7 +3,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/formats";
 import { cn } from "@/lib/utils";
-import { IconCreditCard, IconAlertCircle, IconClock } from "@tabler/icons-react";
+import {
+  IconCreditCard,
+  IconAlertCircle,
+  IconClock,
+} from "@tabler/icons-react";
 
 interface FinancialHealthCardProps {
   collected: number;
@@ -39,19 +43,19 @@ export function FinancialHealthCard({
             <span>{formatCurrency(total)}</span>
           </div>
           <div className="h-3 w-full bg-muted/30 rounded-full overflow-hidden flex">
-            <div 
-              className="h-full bg-emerald-500 transition-all duration-1000 ease-out" 
-              style={{ width: `${collectedPerc}%` }} 
+            <div
+              className="h-full bg-emerald-500 transition-all duration-1000 ease-out"
+              style={{ width: `${collectedPerc}%` }}
               title={`Recaudado: ${collectedPerc.toFixed(1)}%`}
             />
-            <div 
-              className="h-full bg-amber-500 transition-all duration-1000 ease-out" 
-              style={{ width: `${pendingPerc}%` }} 
+            <div
+              className="h-full bg-amber-500 transition-all duration-1000 ease-out"
+              style={{ width: `${pendingPerc}%` }}
               title={`Por Vencer: ${pendingPerc.toFixed(1)}%`}
             />
-            <div 
-              className="h-full bg-red-500 transition-all duration-1000 ease-out" 
-              style={{ width: `${overduePerc}%` }} 
+            <div
+              className="h-full bg-red-500 transition-all duration-1000 ease-out"
+              style={{ width: `${overduePerc}%` }}
               title={`Vencido: ${overduePerc.toFixed(1)}%`}
             />
           </div>
@@ -59,21 +63,21 @@ export function FinancialHealthCard({
 
         {/* Legend / Details */}
         <div className="grid grid-cols-1 gap-3">
-          <FinanceItem 
+          <FinanceItem
             icon={IconCreditCard}
             label="Recaudado"
             amount={collected}
             color="emerald"
             percentage={collectedPerc}
           />
-          <FinanceItem 
+          <FinanceItem
             icon={IconClock}
             label="Por Vencer"
             amount={pending}
             color="amber"
             percentage={pendingPerc}
           />
-          <FinanceItem 
+          <FinanceItem
             icon={IconAlertCircle}
             label="Morosidad (Vencido)"
             amount={overdue}
@@ -93,18 +97,18 @@ export function FinancialHealthCard({
   );
 }
 
-function FinanceItem({ 
-  icon: Icon, 
-  label, 
-  amount, 
-  color, 
-  percentage 
-}: { 
-  icon: any, 
-  label: string, 
-  amount: number, 
-  color: "emerald" | "amber" | "red",
-  percentage: number
+function FinanceItem({
+  icon: Icon,
+  label,
+  amount,
+  color,
+  percentage,
+}: {
+  icon: any;
+  label: string;
+  amount: number;
+  color: "emerald" | "amber" | "red";
+  percentage: number;
 }) {
   const colors = {
     emerald: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20",
@@ -115,18 +119,37 @@ function FinanceItem({
   return (
     <div className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
       <div className="flex items-center gap-3">
-        <div className={cn("size-9 rounded-xl flex items-center justify-center border", colors[color])}>
+        <div
+          className={cn(
+            "size-9 rounded-xl flex items-center justify-center border",
+            colors[color],
+          )}
+        >
           <Icon size={18} />
         </div>
         <div>
-          <p className="text-[10px] font-bold text-muted-foreground uppercase">{label}</p>
+          <p className="text-[10px] font-bold text-muted-foreground uppercase">
+            {label}
+          </p>
           <p className="text-sm font-black">{formatCurrency(amount)}</p>
         </div>
       </div>
       <div className="text-right">
         <p className="text-xs font-black">{percentage.toFixed(1)}%</p>
-        <div className={cn("h-1 w-12 rounded-full bg-muted mt-1 overflow-hidden")}>
-           <div className={cn("h-full", color === "emerald" ? "bg-emerald-500" : color === "amber" ? "bg-amber-500" : "bg-red-500")} style={{ width: `${percentage}%` }} />
+        <div
+          className={cn("h-1 w-12 rounded-full bg-muted mt-1 overflow-hidden")}
+        >
+          <div
+            className={cn(
+              "h-full",
+              color === "emerald"
+                ? "bg-emerald-500"
+                : color === "amber"
+                  ? "bg-amber-500"
+                  : "bg-red-500",
+            )}
+            style={{ width: `${percentage}%` }}
+          />
         </div>
       </div>
     </div>

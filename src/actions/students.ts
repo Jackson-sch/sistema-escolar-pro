@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { deleteFile } from "@/lib/storage";
 import { Role } from "../../prisma/client";
 import bcrypt from "bcryptjs";
+import { auth } from "@/auth";
 
 /**
  * Limpia los datos convirtiendo strings vacíos en undefined para campos que deben ser únicos o nulos.
@@ -35,16 +36,50 @@ const sanitizeData = (data: any) => {
  */
 export async function getStudentsAction() {
   try {
+    const session = await auth();
+    const role = session?.user?.role;
+    const userId = session?.user?.id;
+    const institucionId = session?.user?.institucionId;
+
     const institucion = await prisma.institucionEducativa.findFirst({
+      where: institucionId ? { id: institucionId } : undefined,
       select: { cicloEscolarActual: true },
     });
     const currentYear =
       institucion?.cicloEscolarActual || new Date().getFullYear();
 
+    const where: any = {
+      role: "estudiante" as Role,
+      institucionId: institucionId || undefined,
+    };
+
+    if (role === "profesor") {
+      // Buscar IDs de secciones donde es tutor o profesor
+      const teacherSections = await prisma.nivelAcademico.findMany({
+        where: {
+          OR: [
+            { tutorId: userId },
+            { cursos: { some: { profesorId: userId } } },
+          ],
+          anioAcademico: currentYear,
+          institucionId: institucionId || undefined,
+        },
+        select: { id: true },
+      });
+
+      const sectionIds = teacherSections.map((s) => s.id);
+
+      where.matriculas = {
+        some: {
+          nivelAcademicoId: { in: sectionIds },
+          anioAcademico: currentYear,
+          estado: "activo",
+        },
+      };
+    }
+
     const students = await prisma.user.findMany({
-      where: {
-        role: "estudiante" as Role,
-      },
+      where,
       include: {
         estado: true,
         matriculas: {
@@ -122,12 +157,27 @@ export async function getInstitucionesAction() {
  */
 export async function getNivelesAcademicosAction(anio?: number, nivelId?: string) {
   try {
+    const session = await auth();
+    const role = session?.user?.role;
+    const userId = session?.user?.id;
+    const institucionId = session?.user?.institucionId;
+
+    const where: any = {
+      activo: true,
+      anioAcademico: anio,
+      nivelId: nivelId || undefined,
+      institucionId: institucionId || undefined,
+    };
+
+    if (role === "profesor") {
+      where.OR = [
+        { tutorId: userId },
+        { cursos: { some: { profesorId: userId } } },
+      ];
+    }
+
     const niveles = await prisma.nivelAcademico.findMany({
-      where: {
-        activo: true,
-        anioAcademico: anio,
-        nivelId: nivelId || undefined,
-      },
+      where,
       include: {
         grado: true,
         nivel: true,
@@ -427,16 +477,54 @@ export async function getGuardianByDniAction(dni: string) {
  */
 export async function searchStudentsAction(query: string) {
   try {
+    const session = await auth();
+    const role = session?.user?.role;
+    const userId = session?.user?.id;
+    const institucionId = session?.user?.institucionId;
+
+    const institucion = await prisma.institucionEducativa.findFirst({
+      where: institucionId ? { id: institucionId } : undefined,
+      select: { cicloEscolarActual: true },
+    });
+    const currentYear =
+      institucion?.cicloEscolarActual || new Date().getFullYear();
+
+    const where: any = {
+      role: "estudiante" as Role,
+      institucionId: institucionId || undefined,
+      OR: [
+        { name: { contains: query, mode: "insensitive" } },
+        { apellidoPaterno: { contains: query, mode: "insensitive" } },
+        { apellidoMaterno: { contains: query, mode: "insensitive" } },
+        { dni: { contains: query, mode: "insensitive" } },
+      ],
+    };
+
+    if (role === "profesor") {
+      const teacherSections = await prisma.nivelAcademico.findMany({
+        where: {
+          OR: [
+            { tutorId: userId },
+            { cursos: { some: { profesorId: userId } } },
+          ],
+          anioAcademico: currentYear,
+        },
+        select: { id: true },
+      });
+
+      const sectionIds = teacherSections.map((s) => s.id);
+
+      where.matriculas = {
+        some: {
+          nivelAcademicoId: { in: sectionIds },
+          anioAcademico: currentYear,
+          estado: "activo",
+        },
+      };
+    }
+
     const students = await prisma.user.findMany({
-      where: {
-        role: "estudiante" as Role,
-        OR: [
-          { name: { contains: query, mode: "insensitive" } },
-          { apellidoPaterno: { contains: query, mode: "insensitive" } },
-          { apellidoMaterno: { contains: query, mode: "insensitive" } },
-          { dni: { contains: query, mode: "insensitive" } },
-        ],
-      },
+      where,
       select: {
         id: true,
         name: true,

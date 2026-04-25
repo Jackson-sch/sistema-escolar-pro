@@ -124,6 +124,9 @@ export const upsertAsistenciaAction = createSafeAction(
               tardanza: asist.tardanza,
               justificada: asist.justificada,
               justificacion: asist.justificacion,
+              horaLlegada: (asist.presente && !existing.horaLlegada) 
+                ? new Date().toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit", timeZone: "America/Lima" }) 
+                : existing.horaLlegada,
             },
           });
         } else {
@@ -136,6 +139,9 @@ export const upsertAsistenciaAction = createSafeAction(
               tardanza: asist.tardanza,
               justificada: asist.justificada,
               justificacion: asist.justificacion,
+              horaLlegada: asist.presente 
+                ? new Date().toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit", timeZone: "America/Lima" }) 
+                : null,
             },
           });
         }
@@ -769,6 +775,7 @@ export async function registerQRAsistenciaAction(dni: string) {
     const horaLlegada = checkTime.toLocaleTimeString("es-PE", {
       hour: "2-digit",
       minute: "2-digit",
+      timeZone: "America/Lima",
     });
 
     // 3. Buscar el primer curso disponible para registrar la asistencia académica
@@ -887,9 +894,10 @@ export async function getRecentAttendanceLogsAction() {
       dni: log.estudiante.dni,
       time:
         log.horaLlegada ||
-        new Date(log.fecha).toLocaleTimeString("es-PE", {
+        new Date(log.createdAt).toLocaleTimeString("es-PE", {
           hour: "2-digit",
           minute: "2-digit",
+          timeZone: "America/Lima",
         }),
       status: log.tardanza ? "late" : "success",
       image: log.estudiante.image || undefined,

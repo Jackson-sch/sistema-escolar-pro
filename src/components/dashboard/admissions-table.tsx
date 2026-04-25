@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   Table,
@@ -7,22 +7,22 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/formats";
 
 interface AdmissionsTableProps {
   students?: any[];
 }
 
-type BadgeVariant = "default" | "secondary" | "outline" | "destructive"
+type BadgeVariant = "default" | "secondary" | "outline" | "destructive";
 
 const statusMap: Record<string, BadgeVariant> = {
   activo: "default",
   pendiente: "secondary",
   retirado: "destructive",
   egresado: "outline",
-}
+};
 
 export function AdmissionsTable({ students = [] }: AdmissionsTableProps) {
   return (
@@ -37,19 +37,23 @@ export function AdmissionsTable({ students = [] }: AdmissionsTableProps) {
       <TableBody>
         {students.length === 0 ? (
           <TableRow>
-            <TableCell colSpan={3} className="text-center h-24 text-muted-foreground">
+            <TableCell
+              colSpan={3}
+              className="text-center h-24 text-muted-foreground"
+            >
               No hay admisiones recientes.
             </TableCell>
           </TableRow>
         ) : (
           students.map((student) => {
-            const fullName = `${student.name || ""} ${student.apellidoPaterno || ""} ${student.apellidoMaterno || ""}`.trim()
+            const fullName =
+              `${student.name || ""} ${student.apellidoPaterno || ""} ${student.apellidoMaterno || ""}`.trim();
             const gradeName = student.nivelAcademico
               ? `${student.nivelAcademico.grado?.nombre || ""} ${student.nivelAcademico.nivel?.nombre || ""}`
-              : "No asignado"
-            const statusLabel = student.estado?.nombre || "Sin estado"
-            const statusKey = student.estado?.slug || "pendiente"
-            const date = formatDate(student.createdAt)
+              : "No asignado";
+            const statusLabel = student.estado?.nombre || "Sin estado";
+            const statusKey = student.estado?.slug || "pendiente";
+            const date = formatDate(student.createdAt);
 
             return (
               <TableRow key={student.id}>
@@ -68,10 +72,10 @@ export function AdmissionsTable({ students = [] }: AdmissionsTableProps) {
                   </Badge>
                 </TableCell>
               </TableRow>
-            )
+            );
           })
         )}
       </TableBody>
     </Table>
-  )
+  );
 }

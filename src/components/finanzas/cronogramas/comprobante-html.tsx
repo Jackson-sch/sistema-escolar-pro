@@ -1,4 +1,5 @@
 import React from "react";
+import { toTitleCase } from "@/lib/utils";
 
 interface ComprobanteHtmlProps {
   pago: {
@@ -26,6 +27,8 @@ interface ComprobanteHtmlProps {
     direccion?: string;
     telefono?: string;
     ruc?: string;
+    dre?: string;
+    ugel?: string;
   };
 }
 
@@ -33,210 +36,193 @@ export const ComprobanteHtml = React.forwardRef<
   HTMLDivElement,
   ComprobanteHtmlProps
 >(({ pago, estudiante, institucion }, ref) => {
+  const studentFull = toTitleCase(`${estudiante.apellidoPaterno} ${estudiante.apellidoMaterno}, ${estudiante.name}`);
+  const institucionNombre = toTitleCase(institucion.nombre);
+
   return (
     <div
       ref={ref}
-      className="mx-auto bg-white text-slate-800 font-sans relative"
-      style={{ maxWidth: "800px", minHeight: "297mm" }}
+      className="mx-auto bg-white text-slate-800 font-sans relative overflow-hidden"
+      style={{ maxWidth: "800px", minHeight: "297mm", padding: "40px" }}
     >
       {/* Watermark */}
       <div
         className="absolute pointer-events-none select-none"
         style={{
           top: "40%",
-          left: "12%",
-          fontSize: "80px",
-          fontWeight: "bold",
-          color: "rgba(16,185,129,0.08)",
+          left: "5%",
+          fontSize: "90px",
+          fontWeight: "900",
+          color: "rgba(16,185,129,0.03)",
           transform: "rotate(-35deg)",
-          letterSpacing: "16px",
+          letterSpacing: "20px",
+          zIndex: 0,
         }}
       >
-        PAGADO
+        DOCUMENTO OFICIAL
       </div>
 
-      {/* Green top bar */}
-      <div className="h-1.5 bg-emerald-600 w-full" />
-
-      {/* Header */}
-      <div className="flex justify-between items-start px-10 pt-8 pb-6">
+      {/* Header Container */}
+      <div className="flex justify-between items-start mb-10 relative z-10">
         <div className="flex-1">
-          <h1 className="text-xl font-bold text-emerald-900 mb-1.5">
-            {institucion.nombre}
+          <h1 className="text-2xl font-black text-slate-900 mb-1">
+            {institucionNombre}
           </h1>
-          <p className="text-xs text-slate-500">
-            {institucion.direccion || "Dirección de la Institución"}
-          </p>
-          <p className="text-xs text-slate-500">
-            Telf: {institucion.telefono || "—"}
-          </p>
-          <p className="text-xs text-slate-500">
-            RUC: {institucion.ruc || "—"}
-          </p>
+          <div className="flex flex-col gap-0.5">
+            <p className="text-[11px] text-slate-500 font-medium">
+              {institucion.direccion || "Dirección Institucional"}
+            </p>
+            {institucion.dre && (
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                DRE: {institucion.dre} | UGEL: {institucion.ugel}
+              </p>
+            )}
+            <p className="text-[11px] text-slate-500 font-medium">
+              Telf: {institucion.telefono || "—"} | RUC: {institucion.ruc || "—"}
+            </p>
+          </div>
         </div>
-        <div className="border-2 border-emerald-600 rounded-md px-5 py-3 min-w-[170px] text-center">
-          <p className="text-[9px] font-bold uppercase tracking-[3px] text-emerald-600 mb-1">
-            Recibo de Pago
-          </p>
-          <p className="text-lg font-black text-emerald-900">
-            {pago.numeroBoleta || "000-000"}
-          </p>
+        <div className="flex flex-col items-end">
+          <div className="bg-slate-900 text-white px-6 py-4 rounded-xl text-center min-w-[200px] shadow-xl">
+            <p className="text-[10px] font-black uppercase tracking-[4px] opacity-70 mb-1">
+              Recibo de Pago
+            </p>
+            <p className="text-xl font-black">
+              {pago.numeroBoleta || "000-000"}
+            </p>
+          </div>
+          <div className="mt-4 bg-emerald-100 text-emerald-700 px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase border border-emerald-200">
+            Pago Completado
+          </div>
         </div>
       </div>
 
-      {/* Green divider */}
-      <div className="h-0.5 bg-emerald-600 mx-10" />
-
-      {/* Content */}
-      <div className="px-10 pt-6 pb-8">
-        {/* Student Info */}
-        <section className="mb-5">
-          <h2 className="text-[9px] font-bold uppercase tracking-[3px] text-emerald-600 mb-3">
+      {/* Main Info Card */}
+      <div className="grid grid-cols-2 gap-8 border border-slate-200 rounded-2xl p-8 bg-slate-50/50 mb-8 relative z-10">
+        <div>
+          <h2 className="text-[10px] font-black uppercase tracking-[3px] text-slate-400 mb-4 border-l-2 border-slate-900 pl-3">
             Datos del Estudiante
           </h2>
-          <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+          <div className="space-y-3">
             <div>
-              <span className="text-[8px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">
-                Nombres
-              </span>
-              <span className="text-sm font-bold text-slate-700">
-                {estudiante.apellidoPaterno} {estudiante.apellidoMaterno},{" "}
-                {estudiante.name}
-              </span>
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Nombre Completo</p>
+              <p className="text-sm font-black text-slate-800">{studentFull}</p>
             </div>
             <div>
-              <span className="text-[8px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">
-                ID / Código
-              </span>
-              <span className="text-sm font-bold text-slate-700">
-                {estudiante.codigoEstudiante || "N/A"}
-              </span>
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">ID / Código</p>
+              <p className="text-sm font-bold text-slate-700">{estudiante.codigoEstudiante || "N/A"}</p>
             </div>
             <div>
-              <span className="text-[8px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">
-                Grado / Sección
-              </span>
-              <span className="text-sm font-bold text-slate-700">
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Grado y Sección</p>
+              <p className="text-sm font-bold text-slate-700">
                 {estudiante.nivelAcademico
                   ? `${estudiante.nivelAcademico.nivel.nombre} - ${estudiante.nivelAcademico.grado.nombre} "${estudiante.nivelAcademico.seccion}"`
                   : "N/A"}
-              </span>
+              </p>
             </div>
           </div>
-        </section>
+        </div>
 
-        {/* Payment Details */}
-        <section className="mb-5">
-          <h2 className="text-[9px] font-bold uppercase tracking-[3px] text-emerald-600 mb-3">
-            Detalles del Pago
+        <div>
+          <h2 className="text-[10px] font-black uppercase tracking-[3px] text-slate-400 mb-4 border-l-2 border-slate-900 pl-3">
+            Detalles de Operación
           </h2>
-          <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+          <div className="space-y-3">
             <div>
-              <span className="text-[8px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">
-                Fecha de Pago
-              </span>
-              <span className="text-sm font-bold text-slate-700">
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Fecha de Emisión</p>
+              <p className="text-sm font-bold text-slate-800">
                 {new Date(pago.fechaPago).toLocaleDateString("es-PE", {
                   day: "2-digit",
                   month: "long",
                   year: "numeric",
                 })}
-              </span>
+              </p>
             </div>
             <div>
-              <span className="text-[8px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">
-                Método de Pago
-              </span>
-              <span className="text-sm font-bold text-slate-700">
-                {pago.metodoPago}
-              </span>
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Método de Pago</p>
+              <p className="text-sm font-bold text-slate-700">{pago.metodoPago}</p>
             </div>
-            {pago.referenciaPago && (
-              <div>
-                <span className="text-[8px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">
-                  Referencia
-                </span>
-                <span className="text-sm font-bold text-slate-700">
-                  {pago.referenciaPago}
-                </span>
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* Items Table */}
-        <section className="mb-5">
-          <h2 className="text-[9px] font-bold uppercase tracking-[3px] text-emerald-600 mb-3">
-            Detalle de Conceptos
-          </h2>
-          <div className="overflow-hidden rounded">
-            <div className="grid grid-cols-[1fr_120px] bg-emerald-900 text-white p-3 text-[9px] font-bold uppercase tracking-wider">
-              <span>Descripción / Concepto</span>
-              <span className="text-right">Monto</span>
+            <div>
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Referencia</p>
+              <p className="text-sm font-bold text-slate-700">{pago.referenciaPago || "Operación Directa"}</p>
             </div>
-            <div className="grid grid-cols-[1fr_120px] p-3 text-sm bg-slate-50 border-b border-slate-100">
-              <span>{pago.concepto}</span>
-              <span className="text-right font-bold">
-                S/ {pago.monto.toFixed(2)}
-              </span>
-            </div>
-          </div>
-        </section>
-
-        {/* Totals Section */}
-        <div className="flex justify-end mt-6">
-          <div className="w-56 space-y-1">
-            <div className="flex justify-between px-1 text-sm">
-              <span className="text-slate-500">Subtotal:</span>
-              <span className="font-bold text-slate-700">
-                S/ {pago.monto.toFixed(2)}
-              </span>
-            </div>
-            <div className="flex justify-between px-1 text-sm">
-              <span className="text-slate-500">Mora / Otros:</span>
-              <span className="font-bold text-slate-700">S/ 0.00</span>
-            </div>
-            <div className="flex justify-between bg-emerald-100 rounded-md p-2.5 mt-2 text-base">
-              <span className="font-black text-emerald-900">TOTAL PAGADO:</span>
-              <span className="font-black text-emerald-900">
-                S/ {pago.monto.toFixed(2)}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Observations */}
-        {pago.observaciones && (
-          <div className="mt-5 bg-slate-50 rounded border-l-[3px] border-emerald-600 p-3">
-            <p className="text-[8px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-              Observaciones
-            </p>
-            <p className="text-xs text-slate-500 leading-relaxed">
-              {pago.observaciones}
-            </p>
-          </div>
-        )}
-
-        {/* Signature Area */}
-        <div className="mt-16 flex justify-around">
-          <div className="w-44 text-center">
-            <div className="border-b border-slate-300 mb-1.5" />
-            <span className="text-[9px] text-slate-400">Recibí Conforme</span>
-          </div>
-          <div className="w-44 text-center">
-            <div className="border-b border-slate-300 mb-1.5" />
-            <span className="text-[9px] text-slate-400">Caja / Tesorería</span>
           </div>
         </div>
       </div>
 
+      {/* Table Section */}
+      <div className="mb-8 relative z-10">
+        <h2 className="text-[10px] font-black uppercase tracking-[3px] text-slate-400 mb-4 border-l-2 border-slate-900 pl-3">
+          Detalle del Concepto
+        </h2>
+        <div className="border border-slate-200 rounded-2xl overflow-hidden">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest">
+                <th className="py-4 px-6 text-left w-16">Cant.</th>
+                <th className="py-4 px-6 text-left">Descripción del Servicio</th>
+                <th className="py-4 px-6 text-right">Monto</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="text-sm border-b border-slate-100">
+                <td className="py-5 px-6 text-slate-500 font-bold">01</td>
+                <td className="py-5 px-6 font-black text-slate-800">{pago.concepto}</td>
+                <td className="py-5 px-6 text-right font-black">S/ {pago.monto.toFixed(2)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Totals Section */}
+      <div className="flex justify-end mb-12 relative z-10">
+        <div className="w-64 bg-slate-50 border border-slate-200 rounded-2xl p-6 shadow-sm">
+          <div className="space-y-2 mb-4">
+            <div className="flex justify-between text-xs font-medium text-slate-500">
+              <span>Subtotal:</span>
+              <span>S/ {pago.monto.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-xs font-medium text-slate-500">
+              <span>Mora / Otros:</span>
+              <span>S/ 0.00</span>
+            </div>
+          </div>
+          <div className="pt-4 border-t border-slate-200 flex justify-between items-center">
+            <span className="text-xs font-black text-slate-900 uppercase tracking-wider">Total:</span>
+            <span className="text-xl font-black text-emerald-600">S/ {pago.monto.toFixed(2)}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Observations */}
+      {pago.observaciones && (
+        <div className="mb-12 bg-slate-50 rounded-xl border-l-4 border-slate-400 p-5 relative z-10">
+          <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">Observaciones:</p>
+          <p className="text-xs text-slate-600 leading-relaxed font-medium">
+            {pago.observaciones}
+          </p>
+        </div>
+      )}
+
+      {/* Signature Area */}
+      <div className="mt-auto pt-16 flex justify-around relative z-10">
+        <div className="w-48 text-center">
+          <div className="h-px bg-slate-300 mb-3" />
+          <p className="text-[10px] font-black text-slate-800 uppercase tracking-widest mb-1">Recibí Conforme</p>
+          <p className="text-[9px] text-slate-400">Estudiante / Apoderado</p>
+        </div>
+        <div className="w-48 text-center">
+          <div className="h-px bg-slate-300 mb-3" />
+          <p className="text-[10px] font-black text-slate-800 uppercase tracking-widest mb-1">Caja / Tesorería</p>
+          <p className="text-[9px] text-slate-400">{institucionNombre}</p>
+        </div>
+      </div>
+
       {/* Footer */}
-      <footer className="absolute bottom-6 left-10 right-10 flex justify-between pt-3 border-t border-slate-100 text-[9px] text-slate-400">
-        <span>
-          Comprobante de pago electrónico — Conservar para trámite
-          administrativo
-        </span>
-        <span>Generado el {new Date().toLocaleString("es-PE")}</span>
+      <footer className="mt-16 pt-6 border-t border-slate-100 flex justify-between items-center text-[10px] font-bold text-slate-400 relative z-10">
+        <p>Comprobante de pago electrónico oficial — Sistema Escolar Pro</p>
+        <p>Generado el {new Date().toLocaleString("es-PE")}</p>
       </footer>
     </div>
   );

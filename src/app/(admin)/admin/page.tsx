@@ -59,10 +59,10 @@ export default async function AdminDashboardPage() {
           const Icon = card.icon;
           return (
             <div key={card.title} className="group relative overflow-hidden rounded-3xl bg-zinc-900 border border-white/5 p-6 transition-all hover:border-white/10">
-               <div className={`absolute top-0 right-0 size-24 bg-gradient-to-br ${card.color} opacity-[0.03] blur-2xl group-hover:opacity-[0.08] transition-opacity`} />
+               <div className={`absolute top-0 right-0 size-24 bg-linear-to-br ${card.color} opacity-[0.03] blur-2xl group-hover:opacity-[0.08] transition-opacity`} />
                
                <div className="flex items-center justify-between mb-4">
-                  <div className={`size-12 rounded-2xl bg-gradient-to-br ${card.color} flex items-center justify-center text-white shadow-lg shadow-black/20`}>
+                  <div className={`size-12 rounded-2xl bg-linear-to-br ${card.color} flex items-center justify-center text-white shadow-lg shadow-black/20`}>
                      <Icon className="size-6" />
                   </div>
                </div>
@@ -106,7 +106,7 @@ export default async function AdminDashboardPage() {
             </div>
          </div>
 
-         <div className="rounded-3xl bg-gradient-to-br from-indigo-600 to-violet-700 p-8 text-white relative overflow-hidden group">
+         <div className="rounded-3xl bg-linear-to-br from-indigo-600 to-violet-700 p-8 text-white relative overflow-hidden group">
             <div className="absolute top-[-20%] right-[-20%] size-64 bg-white/10 blur-3xl rounded-full" />
             <div className="relative z-10 space-y-6">
                <h2 className="text-xl font-bold">Acciones Rápidas</h2>
