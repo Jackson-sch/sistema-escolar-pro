@@ -85,9 +85,9 @@ export const MESES_OPTIONS = [
   { id: 6, nombre: "Julio" },
   { id: 7, nombre: "Agosto" },
   { id: 8, nombre: "Septiembre" },
-  { id: 10, nombre: "Octubre" },
-  { id: 11, nombre: "Noviembre" },
-  { id: 12, nombre: "Diciembre" },
+  { id: 9, nombre: "Octubre" },
+  { id: 10, nombre: "Noviembre" },
+  { id: 11, nombre: "Diciembre" },
 ] as const;
 
 export const GENERO_OPTIONS = SEXO_OPTIONS; // Alias para compatibilidad

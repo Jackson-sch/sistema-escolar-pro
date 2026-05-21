@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sistema Escolar Pro
 
-## Getting Started
+Sistema de gestión escolar peruano construido con Next.js 16, diseñado para instituciones educativas que buscan modernizar sus procesos administrativos y académicos.
 
-First, run the development server:
+## Tecnologías
+
+- **Framework:** Next.js 16 (App Router)
+- **Lenguaje:** TypeScript
+- **Base de datos:** PostgreSQL + Prisma ORM
+- **Autenticación:** NextAuth v5 (JWT, Credentials)
+- **UI:** Tailwind CSS v4 + shadcn/ui + Radix UI
+- **IA:** Google Gemini (asistente académico/financiero)
+- **PDF:** React-PDF + PDFx
+- **Mapas:** MapLibre GL
+
+## Módulos
+
+- Dashboard con métricas
+- Gestión académica (niveles, grados, cursos, horarios)
+- Matrículas y admisiones
+- Evaluaciones y notas
+- Asistencia
+- Finanzas (pagos, cronogramas, comprobantes)
+- Uniformes (ventas, inventario)
+- Portal de padres (notas, asistencia, horario, pagos)
+- Comunicaciones (anuncios, eventos)
+- Psicopedagogía
+- Chat con IA
+- Super-admin multi-institucion
+
+## Requisitos
+
+- Node.js 22+
+- Bun (gestor de paquetes)
+- PostgreSQL 15+
+- (Opcional) Docker + Docker Compose
+
+## Inicio rápido
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Clonar el repositorio
+git clone <repo-url>
+cd sistema-escolar-pro
+
+# Copiar variables de entorno
+cp .env.example .env.local
+# Editar .env.local con tus credenciales
+
+# Instalar dependencias
+bun install
+
+# Generar cliente Prisma y migrar
+bun run db:generate
+bun run db:migrate:deploy
+
+# (Opcional) Poblar datos de prueba
+bun run db:seed
+
+# Iniciar servidor de desarrollo
+bun run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Con Docker
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+docker compose up -d
+docker compose exec app bun run db:migrate:deploy
+docker compose exec app bun run db:seed
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Scripts disponibles
 
-## Learn More
+| Comando | Descripción |
+|---------|-------------|
+| `bun run dev` | Inicia servidor de desarrollo |
+| `bun run build` | Compila para producción |
+| `bun run lint` | Ejecuta ESLint |
+| `bun run typecheck` | Verifica tipos TypeScript |
+| `bun run format` | Formatea código con Prettier |
+| `bun run db:generate` | Genera cliente Prisma |
+| `bun run db:migrate` | Crea migración de BD |
+| `bun run db:seed` | Pobla datos de prueba |
+| `bun run setup` | Instalación completa desde cero |
 
-To learn more about Next.js, take a look at the following resources:
+## Variables de entorno
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Ver `.env.example` para las variables requeridas.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Licencia
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Privado — Uso interno.

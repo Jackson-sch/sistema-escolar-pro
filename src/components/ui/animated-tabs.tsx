@@ -57,13 +57,13 @@ export function AnimatedTabs({
                 }}
               >
                 {/* 1. Main glassy pill base - Slightly more opaque */}
-                <div className="absolute inset-0 rounded-full dark:bg-white/[0.12] bg-zinc-900/12 ring-1 ring-white/20 shadow-lg" />
+                <div className="absolute inset-0 rounded-full dark:bg-white/12 bg-zinc-900/12 ring-1 ring-white/20 shadow-lg" />
 
                 {/* 2. Enhanced soft diffused bloom at the bottom */}
-                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4/5 h-2/3 dark:bg-white/[0.15] bg-zinc-900/15 blur-xl rounded-full" />
+                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4/5 h-2/3 dark:bg-white/15 bg-zinc-900/15 blur-xl rounded-full" />
 
                 {/* 3. Inner glow - More noticeable */}
-                <div className="absolute inset-0 rounded-full dark:bg-linear-to-b from-white/[0.08] to-transparent bg-linear-to-b from-zinc-900/12 to-transparent" />
+                <div className="absolute inset-0 rounded-full dark:bg-linear-to-b from-white/08 bg-linear-to-b from-zinc-900/12 to-transparent" />
 
                 {/* 4. Center 'Hotspot' for depth */}
                 <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-1/4 dark:bg-white/10 bg-zinc-900/10 blur-md rounded-full" />
