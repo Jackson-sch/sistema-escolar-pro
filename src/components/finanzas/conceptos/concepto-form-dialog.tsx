@@ -220,14 +220,14 @@ function ConceptoFormContent({
             type="button"
             variant="outline"
             onClick={onSuccess}
-            className="w-full sm:w-auto rounded-full border-border/40 hover:bg-accent/50"
+            className="w-full sm:w-auto rounded-full border-border/40 hover:bg-accent/50 hover:scale-105"
             disabled={isPending}
           >
             Cancelar
           </Button>
           <Button
             type="submit"
-            className="w-full sm:w-auto rounded-full px-8 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300"
+            className="w-full sm:w-auto rounded-full px-8 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300 hover:scale-105"
             disabled={isPending}
           >
             {isPending ? (

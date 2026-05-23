@@ -4,13 +4,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTransition, useEffect } from "react";
 import {
-  IconUser,
   IconId,
   IconPhone,
-  IconCheck,
   IconLoader2,
   IconDeviceFloppy,
-  IconSearch,
   IconMail,
 } from "@tabler/icons-react";
 import * as z from "zod";
@@ -182,7 +179,7 @@ export function FamilyMemberForm({
             name="dni"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-[11px] font-bold tracking-wider text-muted-foreground/70 ml-1">
+                <FormLabel className="text-micro font-bold tracking-wider text-muted-foreground/70 ml-1">
                   DNI / Documento
                 </FormLabel>
                 <FormControl>
@@ -207,7 +204,7 @@ export function FamilyMemberForm({
             name="parentesco"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-[11px] font-bold tracking-wider text-muted-foreground/70 ml-1">
+                <FormLabel className="text-micro font-bold tracking-wider text-muted-foreground/70 ml-1">
                   Parentesco
                 </FormLabel>
                 <Select
@@ -239,7 +236,7 @@ export function FamilyMemberForm({
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-[11px] font-bold tracking-wider text-muted-foreground/70 ml-1">
+                <FormLabel className="text-micro font-bold tracking-wider text-muted-foreground/70 ml-1">
                   Nombres
                 </FormLabel>
                 <FormControl>
@@ -258,7 +255,7 @@ export function FamilyMemberForm({
             name="apellidoPaterno"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-[11px] font-bold tracking-wider text-muted-foreground/70 ml-1">
+                <FormLabel className="text-micro font-bold tracking-wider text-muted-foreground/70 ml-1">
                   Ap. Paterno
                 </FormLabel>
                 <FormControl>
@@ -277,7 +274,7 @@ export function FamilyMemberForm({
             name="apellidoMaterno"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-[11px] font-bold tracking-wider text-muted-foreground/70 ml-1">
+                <FormLabel className="text-micro font-bold tracking-wider text-muted-foreground/70 ml-1">
                   Ap. Materno
                 </FormLabel>
                 <FormControl>
@@ -299,7 +296,7 @@ export function FamilyMemberForm({
             name="telefono"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-[11px] font-bold tracking-wider text-muted-foreground/70 ml-1">
+                <FormLabel className="text-micro font-bold tracking-wider text-muted-foreground/70 ml-1">
                   Teléfono
                 </FormLabel>
                 <FormControl>
@@ -321,7 +318,7 @@ export function FamilyMemberForm({
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-[11px] font-bold tracking-wider text-muted-foreground/70 ml-1">
+                <FormLabel className="text-micro font-bold tracking-wider text-muted-foreground/70 ml-1">
                   Email
                 </FormLabel>
                 <FormControl>
@@ -351,7 +348,7 @@ export function FamilyMemberForm({
                   <FormLabel className="text-sm font-bold">
                     Contacto Primario
                   </FormLabel>
-                  <FormDescription className="text-[11px]">
+                  <FormDescription className="text-micro">
                     ¿Es la persona principal de contacto?
                   </FormDescription>
                 </div>
@@ -408,7 +405,7 @@ export function FamilyMemberForm({
             type="button"
             variant="outline"
             onClick={onSuccess}
-            className="w-full sm:w-auto rounded-full border-border/40 hover:bg-accent/50"
+            className="w-full sm:w-auto rounded-full border-border/40 hover:bg-accent/50 hover:scale-105"
             disabled={isPending}
           >
             Cancelar
@@ -416,7 +413,7 @@ export function FamilyMemberForm({
           <Button
             disabled={isPending}
             type="submit"
-            className="w-full sm:w-auto rounded-full px-8"
+            className="w-full sm:w-auto rounded-full px-8 hover:scale-105"
           >
             {isPending ? (
               <IconLoader2 className="animate-spin" />

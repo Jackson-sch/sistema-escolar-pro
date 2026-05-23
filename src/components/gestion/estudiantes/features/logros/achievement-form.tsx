@@ -263,7 +263,7 @@ export function AchievementForm({
           <Button
             disabled={isPending}
             type="submit"
-            className="w-full rounded-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-lg shadow-primary/20 h-11"
+            className="w-full rounded-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-lg shadow-primary/20 h-11 hover:scale-105"
           >
             {isPending ? (
               <IconLoader2 className="animate-spin mr-2" />

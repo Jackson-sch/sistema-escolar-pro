@@ -209,14 +209,14 @@ export function UpdateDueDateModal({
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={isPending}
-              className="flex-1 rounded-full"
+              className="flex-1 rounded-full hover:scale-105"
             >
               Cancelar
             </Button>
             <Button
               type="submit"
               disabled={isPending || !form.watch("conceptoId")}
-              className="flex-1 rounded-full shadow-lg shadow-primary/20"
+              className="flex-1 rounded-full shadow-lg shadow-primary/20 hover:scale-105"
             >
               {isPending ? (
                 <>

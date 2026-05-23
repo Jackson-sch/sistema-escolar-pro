@@ -138,7 +138,7 @@ export default async function DashboardPage() {
           <Card className="liquid-glass border-none flex-1 p-0">
             <CardHeader className="border-b border-white/5 py-3 flex flex-col md:flex-row items-center justify-between">
               <div>
-                <CardTitle className="text-lg font-black tracking-tight">
+                <CardTitle className="text-lg font-bold tracking-tight">
                   Admisiones Recientes
                 </CardTitle>
                 <CardDescription>
@@ -175,7 +175,7 @@ export default async function DashboardPage() {
         {/* Right Column: Recent Activity (Spans whole height) */}
         <div className="lg:col-span-4 h-full min-h-[500px]">
           <RecentActivity
-            activities={stats?.recentActivity || []}
+            activities={(stats?.recentActivity || []) as any}
             className="h-full"
           />
         </div>
@@ -228,7 +228,7 @@ function PageHeader({
         {icon}
       </div>
       <div>
-        <h1 className="text-xl font-black tracking-tight sm:text-3xl drop-shadow-sm">
+        <h1 className="text-xl font-bold tracking-tight sm:text-3xl drop-shadow-sm">
           {title}
         </h1>
         <p className="text-xs text-muted-foreground font-medium sm:text-sm">

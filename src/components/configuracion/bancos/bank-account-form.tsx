@@ -33,10 +33,10 @@ interface CuentaBancaria {
   nombre?: string;
   tipo?: TipoCuenta;
   numero?: string;
-  cci?: string;
-  titular?: string;
-  tipoCuenta?: string;
-  qrCode?: string;
+  cci?: string | null;
+  titular?: string | null;
+  tipoCuenta?: string | null;
+  qrCode?: string | null;
   esPrincipal?: boolean;
   activo?: boolean;
 }
@@ -136,7 +136,7 @@ export function BankAccountForm({
       e?.preventDefault();
       setLoading(true);
       try {
-        const result = await saveBankAccountAction(form);
+        const result = await saveBankAccountAction(form as any);
         if (result.success) {
           toast.success(cuenta ? "Cuenta actualizada" : "Cuenta creada");
           setIsDirty(false);
@@ -184,7 +184,7 @@ export function BankAccountForm({
               variant="ghost"
               size="icon"
               onClick={onClose}
-              className="lg:hidden shrink-0 rounded-full hover:bg-primary/10 hover:text-primary transition-all active:scale-90"
+              className="lg:hidden shrink-0 rounded-full hover:bg-primary/10 hover:text-primary transition-all active:scale-90 hover:scale-105"
             >
               <IconArrowLeft size={22} strokeWidth={2.5} />
             </Button>
@@ -279,7 +279,7 @@ export function BankAccountForm({
               icon={<IconUser size={13} className="text-primary/60" />}
             >
               <Input
-                value={form.titular}
+                value={form.titular || ""}
                 onChange={(e) => patch("titular", e.target.value)}
                 placeholder="Nombre completo del titular"
                 className="rounded-full border-border/20 bg-muted/20 font-bold px-5 focus-visible:ring-primary/20 focus-visible:bg-muted/30 transition-all"
@@ -309,7 +309,7 @@ export function BankAccountForm({
             {isBanco ? (
               <Field label="CCI (Código Interbancario)">
                 <Input
-                  value={form.cci}
+                  value={form.cci || ""}
                   onChange={(e) => patch("cci", e.target.value)}
                   placeholder="Opcional: 000-000-000000000000-00"
                   className="rounded-full border-border/20 bg-muted/20 font-mono font-bold px-5 focus-visible:ring-primary/20 focus-visible:bg-muted/30 transition-all"
@@ -321,7 +321,7 @@ export function BankAccountForm({
                   <IconQrCode size={16} /> Código QR de Recaudación
                 </Label>
                   <ImageUpload
-                    value={form.qrCode}
+                    value={form.qrCode || ""}
                     onChange={(url) => patch("qrCode", url)}
                     onRemove={() => patch("qrCode", "")}
                     className="w-full"
@@ -338,7 +338,7 @@ export function BankAccountForm({
           <div className="grid grid-cols-1 gap-6">
             <Field label="Tipo de Cuenta / Descripción">
               <Input
-                value={form.tipoCuenta}
+                value={form.tipoCuenta || ""}
                 onChange={(e) => patch("tipoCuenta", e.target.value)}
                 placeholder="Ej: Cuenta Corriente Soles, Ahorros Institución..."
                 className="rounded-full border-border/20 bg-muted/20 font-bold px-5 focus-visible:ring-primary/20 focus-visible:bg-muted/30 transition-all"

@@ -112,7 +112,7 @@ export function CategoryForm({ onSuccess }: CategoryFormProps) {
         <Button
           disabled={isPending}
           type="submit"
-          className="w-full rounded-full"
+          className="w-full rounded-full hover:scale-105"
         >
           {isPending ? (
             <IconLoader2 className="animate-spin" />

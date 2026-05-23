@@ -11,7 +11,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { StudentForm } from "@/components/gestion/estudiantes/management/student-form";
-import { FormModal } from "@/components/modals/form-modal";
+import { FormDrawer } from "@/components/modals/form-drawer";
 import { useCurrentRole } from "@/hooks/use-current-role";
 import { useComponentShortcuts } from "@/hooks/use-component-shortcuts";
 
@@ -53,19 +53,19 @@ export function AddStudentButton({
         </Tooltip>
       </TooltipProvider>
 
-      <FormModal
+      <FormDrawer
         title="Registro de Estudiante"
         description={`Gestión de alta para el periodo académico ${periodoAcademico}.`}
         isOpen={open}
         onOpenChange={setOpen}
-        className="sm:max-w-3xl"
+        className="sm:max-w-2xl"
       >
         <StudentForm
           onSuccess={() => setOpen(false)}
           instituciones={instituciones}
           estados={estados}
         />
-      </FormModal>
+      </FormDrawer>
     </>
   );
 }

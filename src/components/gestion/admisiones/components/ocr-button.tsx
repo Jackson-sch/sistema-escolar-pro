@@ -82,7 +82,7 @@ export function OCRButton({ onScanComplete }: OCRButtonProps) {
         ) : (
           <IconSparkles className="size-4" />
         )}
-        <span className="text-[11px] uppercase tracking-wider">
+        <span className="text-micro uppercase tracking-wider">
           {isScanning ? "Escaneando..." : "Escanear DNI con IA"}
         </span>
       </Button>

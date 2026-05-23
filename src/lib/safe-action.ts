@@ -22,8 +22,8 @@ export function createSafeAction<TInput, TOutput>(
         return { error: "No autorizado. Por favor inicie sesión." }
       }
 
-      // 2. Autorización (Opcional por roles)
-      if (options?.roles && !options.roles.includes(session.user.role || "")) {
+      // 2. Autorización (Opcional por roles) — super_admin siempre tiene acceso
+      if (options?.roles && session.user.role !== "super_admin" && !options.roles.includes(session.user.role || "")) {
         return { error: "No tienes permiso para realizar esta acción." }
       }
 

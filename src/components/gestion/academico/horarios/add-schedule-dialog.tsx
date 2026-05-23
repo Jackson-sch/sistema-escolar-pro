@@ -378,13 +378,12 @@ export function AddScheduleDialog({
             <Button
               type="submit"
               className={cn(
-                "w-full rounded-full transition-all duration-300 shadow-lg",
+                "w-full rounded-full transition-all duration-300 shadow-lg hover:scale-105",
                 limiteAlcanzado
                   ? "bg-amber-600 hover:bg-amber-700 shadow-amber-600/20"
                   : "bg-blue-600 hover:bg-blue-700 shadow-blue-600/20",
               )}
-              disabled={loading}
-            >
+              disabled={loading}>
               {loading ? "Procesando..." : "Guardar Horario"}
             </Button>
           </div>

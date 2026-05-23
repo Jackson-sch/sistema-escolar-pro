@@ -1,4 +1,5 @@
 "use server";
+import { serialize } from "@/lib/dto";
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
@@ -19,7 +20,7 @@ export async function getNivelesAction(institucionId?: string) {
       },
       orderBy: { nombre: "asc" },
     });
-    return { data: JSON.parse(JSON.stringify(niveles)) };
+    return { data: serialize(niveles) };
   } catch (error) {
     console.error("Error fetching niveles:", error);
     return { error: "No se pudieron obtener los niveles" };
@@ -42,7 +43,7 @@ export async function upsertNivelAction(values: any, id?: string) {
       revalidatePath(REVALIDATE_PATH);
       return {
         success: "Nivel actualizado",
-        data: JSON.parse(JSON.stringify(nivel)),
+        data: serialize(nivel),
       };
     } else {
       const nivel = await prisma.nivel.create({
@@ -51,7 +52,7 @@ export async function upsertNivelAction(values: any, id?: string) {
       revalidatePath(REVALIDATE_PATH);
       return {
         success: "Nivel creado",
-        data: JSON.parse(JSON.stringify(nivel)),
+        data: serialize(nivel),
       };
     }
   } catch (error: any) {
@@ -111,7 +112,7 @@ export async function getGradosAction(nivelId?: string, profesorId?: string) {
       },
       orderBy: [{ nivel: { nombre: "asc" } }, { orden: "asc" }],
     });
-    return { data: JSON.parse(JSON.stringify(grados)) };
+    return { data: serialize(grados) };
   } catch (error) {
     console.error("Error fetching grados:", error);
     return { error: "No se pudieron obtener los grados" };
@@ -137,7 +138,7 @@ export async function upsertGradoAction(values: any, id?: string) {
       revalidatePath(REVALIDATE_PATH);
       return {
         success: "Grado actualizado",
-        data: JSON.parse(JSON.stringify(grado)),
+        data: serialize(grado),
       };
     } else {
       const grado = await prisma.grado.create({
@@ -146,7 +147,7 @@ export async function upsertGradoAction(values: any, id?: string) {
       revalidatePath(REVALIDATE_PATH);
       return {
         success: "Grado creado",
-        data: JSON.parse(JSON.stringify(grado)),
+        data: serialize(grado),
       };
     }
   } catch (error: any) {
@@ -239,7 +240,7 @@ export async function getSeccionesAction(filters?: {
       },
     }));
 
-    return { data: JSON.parse(JSON.stringify(data)) };
+    return { data: serialize(data) };
   } catch (error) {
     console.error("Error fetching secciones:", error);
     return { error: "No se pudieron obtener las secciones" };
@@ -270,7 +271,7 @@ export async function upsertSeccionAction(values: any, id?: string) {
       revalidatePath(REVALIDATE_PATH);
       return {
         success: "Sección actualizada",
-        data: JSON.parse(JSON.stringify(seccion)),
+        data: serialize(seccion),
       };
     } else {
       const seccion = await prisma.nivelAcademico.create({
@@ -279,7 +280,7 @@ export async function upsertSeccionAction(values: any, id?: string) {
       revalidatePath(REVALIDATE_PATH);
       return {
         success: "Sección creada",
-        data: JSON.parse(JSON.stringify(seccion)),
+        data: serialize(seccion),
       };
     }
   } catch (error: any) {
@@ -369,7 +370,7 @@ export async function getTutoresAction() {
       },
       orderBy: { apellidoPaterno: "asc" },
     });
-    return { data: JSON.parse(JSON.stringify(tutores)) };
+    return { data: serialize(tutores) };
   } catch (error) {
     return { error: "Error al cargar tutores" };
   }
@@ -399,7 +400,7 @@ export async function getStudentsInSeccionAction(nivelAcademicoId: string) {
         apellidoPaterno: "asc",
       },
     });
-    return { data: JSON.parse(JSON.stringify(students)) };
+    return { data: serialize(students) };
   } catch (error) {
     console.error("Error fetching students in seccion:", error);
     return { error: "No se pudieron obtener los estudiantes" };
@@ -414,7 +415,7 @@ export async function getPeriodosByAnioAction(anio: number) {
       where: { anioEscolar: anio },
       orderBy: { numero: "asc" },
     });
-    return { data: JSON.parse(JSON.stringify(periodos)) };
+    return { data: serialize(periodos) };
   } catch (error) {
     console.error("Error fetching periodos:", error);
     return { error: "No se pudieron obtener los periodos" };

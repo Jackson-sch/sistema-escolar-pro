@@ -254,7 +254,7 @@ export function AddPensionButton({ conceptos, niveles }: AddPensionButtonProps) 
             <DialogFooter className="pt-2">
               <Button
                 type="submit"
-                className="w-full rounded-full font-medium"
+                className="w-full rounded-full font-medium hover:scale-105"
                 disabled={isPending}
               >
                 {isPending ? (

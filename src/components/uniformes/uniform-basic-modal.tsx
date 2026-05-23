@@ -227,14 +227,14 @@ export function UniformBasicModal({
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="flex-1 rounded-xl h-11 font-bold"
+              className="flex-1 rounded-xl h-11 font-bold hover:scale-105"
             >
               Cancelar
             </Button>
             <Button
               type="submit"
               disabled={isPending}
-              className="flex-1 rounded-xl h-11 font-bold shadow-lg shadow-primary/20"
+              className="flex-1 rounded-xl h-11 font-bold shadow-lg shadow-primary/20 hover:scale-105"
             >
               {isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

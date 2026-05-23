@@ -1,4 +1,5 @@
 "use server";
+import { serialize } from "@/lib/dto";
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
@@ -24,7 +25,7 @@ export const getConceptosAction = createSafeAction(
       orderBy: { nombre: "asc" },
     });
 
-    return { success: JSON.parse(JSON.stringify(conceptos)) };
+    return { success: serialize(conceptos) };
   },
 );
 

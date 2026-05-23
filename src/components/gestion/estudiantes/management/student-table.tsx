@@ -11,10 +11,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { IconFilter, IconSchool } from "@tabler/icons-react";
 
 interface StudentTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  totalCount?: number;
   meta?: any;
 }
 
@@ -44,20 +46,24 @@ function StudentFilters({
   }, [nivelFilter, table]);
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex items-center gap-2.5 flex-wrap w-full sm:w-auto">
+      {/* Estado Select */}
       <Select value={estadoFilter} onValueChange={meta.setEstadoFilter}>
-        <SelectTrigger className="w-[140px] h-9 bg-muted/5 border-border/40 text-[11px] font-medium transition-all focus:ring-primary/20 rounded-full">
-          <SelectValue placeholder="Estado" />
+        <SelectTrigger className="w-full sm:w-auto min-w-[160px] h-10 bg-background border-slate-200 dark:border-zinc-800 rounded-full text-xs font-bold hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors pl-3.5 gap-2">
+          <div className="flex items-center gap-2">
+            <IconFilter className="size-3.5 text-muted-foreground/60 shrink-0" />
+            <SelectValue placeholder="Estado" />
+          </div>
         </SelectTrigger>
-        <SelectContent className="border-border/40 bg-background/95 backdrop-blur-xl">
-          <SelectItem value="ALL" className="text-[11px] font-medium">
-            Todos los estados
+        <SelectContent className="border-slate-200 dark:border-zinc-800 rounded-2xl bg-background/95 backdrop-blur-xl p-1 shadow-2xl">
+          <SelectItem value="ALL" className="font-bold text-xs">
+            Todos los Estados
           </SelectItem>
           {meta?.estados?.map((e: any) => (
             <SelectItem
               key={e.id}
               value={e.nombre}
-              className="text-[11px] font-medium"
+              className="font-bold text-xs"
             >
               {e.nombre}
             </SelectItem>
@@ -65,13 +71,17 @@ function StudentFilters({
         </SelectContent>
       </Select>
 
+      {/* Nivel Select */}
       <Select value={nivelFilter} onValueChange={meta.setNivelFilter}>
-        <SelectTrigger className="w-[160px] h-9 bg-muted/5 border-border/40 text-[11px] font-medium transition-all focus:ring-primary/20 rounded-full">
-          <SelectValue placeholder="Nivel" />
+        <SelectTrigger className="w-full sm:w-auto min-w-[200px] h-10 bg-background border-slate-200 dark:border-zinc-800 rounded-full text-xs font-bold hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors pl-3.5 gap-2">
+          <div className="flex items-center gap-2">
+            <IconSchool className="size-3.5 text-muted-foreground/60 shrink-0" />
+            <SelectValue placeholder="Nivel" />
+          </div>
         </SelectTrigger>
-        <SelectContent className="border-border/40 bg-background/95 backdrop-blur-xl">
-          <SelectItem value="ALL" className="text-[11px] font-medium">
-            Todos los niveles
+        <SelectContent className="border-slate-200 dark:border-zinc-800 rounded-2xl bg-background/95 backdrop-blur-xl p-1 shadow-2xl">
+          <SelectItem value="ALL" className="font-bold text-xs">
+            Todos los Niveles
           </SelectItem>
           {Array.from(
             new Set(meta?.nivelesAcademicos?.map((n: any) => n.nivel.nombre)),
@@ -79,7 +89,7 @@ function StudentFilters({
             <SelectItem
               key={nombre}
               value={nombre}
-              className="text-[11px] font-medium"
+              className="font-bold text-xs"
             >
               {nombre}
             </SelectItem>

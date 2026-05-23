@@ -53,7 +53,7 @@ export default async function AdminInstitucionesPage({
                 </div>
                  <div className="flex items-center gap-2 relative z-10">
                     <InstitucionDeleteButton instId={inst.id} instName={inst.nombreInstitucion} />
-                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${inst._count.users > 0 ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-orange-500/10 text-orange-500 border border-orange-500/20'}`}>
+                    <span className={`px-3 py-1 rounded-full text-xxs font-bold uppercase tracking-widest ${inst._count.users > 0 ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-orange-500/10 text-orange-500 border border-orange-500/20'}`}>
                        {inst._count.users > 0 ? 'ACTIVA' : 'CONFIGURANDO'}
                     </span>
                  </div>
@@ -73,14 +73,14 @@ export default async function AdminInstitucionesPage({
 
                 <div className="grid grid-cols-2 gap-4">
                    <div className="space-y-1">
-                      <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Cód. Modular</p>
+                      <p className="text-xxs text-zinc-500 uppercase font-bold tracking-wider">Cód. Modular</p>
                       <div className="flex items-center gap-2 text-sm font-medium">
                          <IconHash className="size-3 text-zinc-600" />
                          {inst.codigoModular}
                       </div>
                    </div>
                    <div className="space-y-1">
-                      <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Usuarios</p>
+                      <p className="text-xxs text-zinc-500 uppercase font-bold tracking-wider">Usuarios</p>
                       <div className="flex items-center gap-2 text-sm font-medium">
                          <IconUsers className="size-3 text-zinc-600" />
                          {inst._count.users} miembros

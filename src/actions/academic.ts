@@ -1,15 +1,29 @@
 "use server";
-
+import { serialize } from "@/lib/dto";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { auth } from "@/auth";
 
 /**
  * Obtiene todas las áreas curriculares
  */
 export async function getCurricularAreasAction(nivelId?: string) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado. Por favor inicie sesión." };
+    }
+
+    const where: any = {};
+    if (nivelId) where.nivelId = nivelId;
+
+    // Si no es super_admin, limitar por institucionId
+    if (session.user.role !== "super_admin" && session.user.institucionId) {
+      where.institucionId = session.user.institucionId;
+    }
+
     const areas = await prisma.areaCurricular.findMany({
-      where: nivelId ? { nivelId } : undefined,
+      where,
       include: {
         nivel: true,
       },
@@ -17,7 +31,7 @@ export async function getCurricularAreasAction(nivelId?: string) {
         orden: "asc",
       },
     });
-    return { data: JSON.parse(JSON.stringify(areas)) };
+    return { data: serialize(areas) };
   } catch (error) {
     console.error("Error fetching areas:", error);
     return { error: "No se pudieron obtener las áreas curriculares" };
@@ -33,13 +47,25 @@ export async function getCoursesAction(filters?: {
   nivelId?: string;
 }) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado. Por favor inicie sesión." };
+    }
+
+    const where: any = {
+      anioAcademico: filters?.anioAcademico,
+      profesorId: filters?.profesorId || undefined,
+      nivelId: filters?.nivelId || undefined,
+      activo: true,
+    };
+
+    // Si no es super_admin, limitar por institucionId
+    if (session.user.role !== "super_admin" && session.user.institucionId) {
+      where.institucionId = session.user.institucionId;
+    }
+
     const courses = await prisma.curso.findMany({
-      where: {
-        anioAcademico: filters?.anioAcademico,
-        profesorId: filters?.profesorId || undefined,
-        nivelId: filters?.nivelId || undefined,
-        activo: true,
-      },
+      where,
       include: {
         areaCurricular: true,
         profesor: {
@@ -62,15 +88,30 @@ export async function getCoursesAction(filters?: {
         createdAt: "desc",
       },
     });
-    return { data: JSON.parse(JSON.stringify(courses)) };
+    return { data: serialize(courses) };
   } catch (error) {
     console.error("Error fetching courses:", error);
     return { error: "No se pudo obtener la carga horaria" };
   }
 }
 
+/**
+ * Crea o actualiza un área curricular
+ */
 export async function upsertAreaAction(values: any, id?: string) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado. Por favor inicie sesión." };
+    }
+
+    const role = session.user.role;
+    if (role !== "super_admin" && role !== "administrativo") {
+      return { error: "No tienes permiso para realizar esta acción." };
+    }
+
+    const targetInstitucionId = session.user.institucionId;
+
     // Limpiar valores vacíos para campos opcionales/relaciones
     const cleanValues = {
       ...values,
@@ -79,9 +120,20 @@ export async function upsertAreaAction(values: any, id?: string) {
       color: values.color || "#3b82f6",
       icono: values.icono || null,
       creditos: values.creditos === 0 ? null : values.creditos,
+      institucionId: targetInstitucionId || values.institucionId,
     };
 
     if (id) {
+      // Verificar que el área pertenece a la misma institución si no es super_admin
+      if (role !== "super_admin" && targetInstitucionId) {
+        const existing = await prisma.areaCurricular.findFirst({
+          where: { id, institucionId: targetInstitucionId },
+        });
+        if (!existing) {
+          return { error: "Área curricular no encontrada o no tiene permisos." };
+        }
+      }
+
       const area = await prisma.areaCurricular.update({
         where: { id },
         data: cleanValues,
@@ -89,7 +141,7 @@ export async function upsertAreaAction(values: any, id?: string) {
       revalidatePath("/gestion/academico/areas");
       return {
         success: "Área curricular actualizada",
-        data: JSON.parse(JSON.stringify(area)),
+        data: serialize(area),
       };
     } else {
       const area = await prisma.areaCurricular.create({
@@ -98,7 +150,7 @@ export async function upsertAreaAction(values: any, id?: string) {
       revalidatePath("/gestion/academico/areas");
       return {
         success: "Área curricular creada",
-        data: JSON.parse(JSON.stringify(area)),
+        data: serialize(area),
       };
     }
   } catch (error) {
@@ -113,9 +165,30 @@ export async function upsertAreaAction(values: any, id?: string) {
  */
 export async function upsertCourseAction(values: any, id?: string) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado. Por favor inicie sesión." };
+    }
+
+    const role = session.user.role;
+    if (role !== "super_admin" && role !== "administrativo") {
+      return { error: "No tienes permiso para realizar esta acción." };
+    }
+
+    const targetInstitucionId = session.user.institucionId;
     const { nivelAcademicoIds, ...courseData } = values;
 
     if (id) {
+      // Verificar pertenencia si no es super_admin
+      if (role !== "super_admin" && targetInstitucionId) {
+        const existing = await prisma.curso.findFirst({
+          where: { id, institucionId: targetInstitucionId },
+        });
+        if (!existing) {
+          return { error: "Curso no encontrado o no tiene permisos." };
+        }
+      }
+
       // Si hay ID, es una actualización individual (usualmente desde la tabla)
       const updateData: any = {
         ...courseData,
@@ -138,7 +211,7 @@ export async function upsertCourseAction(values: any, id?: string) {
       revalidatePath("/gestion/academico/carga-horaria");
       return {
         success: "Curso actualizado",
-        data: JSON.parse(JSON.stringify(course)),
+        data: serialize(course),
       };
     } else {
       // Creación múltiple
@@ -150,6 +223,11 @@ export async function upsertCourseAction(values: any, id?: string) {
       for (const nivelId of nivelAcademicoIds) {
         const nivel = levels.find((l) => l.id === nivelId);
         if (!nivel) continue;
+
+        // Validar que el nivel pertenece a la institución del usuario administrativo
+        if (role !== "super_admin" && targetInstitucionId && nivel.institucionId !== targetInstitucionId) {
+          continue;
+        }
 
         const createData: any = {
           nombre: courseData.nombre,
@@ -163,7 +241,7 @@ export async function upsertCourseAction(values: any, id?: string) {
           nivelAcademicoId: nivelId,
           nivelId: nivel.nivelId,
           gradoId: nivel.gradoId,
-          institucionId: nivel.institucionId,
+          institucionId: targetInstitucionId || nivel.institucionId,
           profesorId: values.profesorId || null,
         };
 
@@ -176,7 +254,7 @@ export async function upsertCourseAction(values: any, id?: string) {
       revalidatePath("/gestion/academico/carga-horaria");
       return {
         success: `${createdCourses.length} asignaciones creadas correctamente`,
-        data: JSON.parse(JSON.stringify(createdCourses)),
+        data: serialize(createdCourses),
       };
     }
   } catch (error: any) {
@@ -185,6 +263,7 @@ export async function upsertCourseAction(values: any, id?: string) {
         error: `Ya existe un curso con el código "${values.codigo}" en una de las secciones seleccionadas para el año ${values.anioAcademico}.`,
       };
     }
+    console.error("Error upserting course:", error);
     return { error: "No se pudo procesar la asignación del curso" };
   }
 }
@@ -197,6 +276,25 @@ export async function assignTeacherAction(
   profesorId: string,
 ) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado. Por favor inicie sesión." };
+    }
+    const role = session.user.role;
+    if (role !== "super_admin" && role !== "administrativo") {
+      return { error: "No tienes permiso para realizar esta acción." };
+    }
+    const targetInstitucionId = session.user.institucionId;
+
+    if (role !== "super_admin" && targetInstitucionId) {
+      const existing = await prisma.curso.findFirst({
+        where: { id: courseId, institucionId: targetInstitucionId },
+      });
+      if (!existing) {
+        return { error: "Curso no encontrado o no tiene permisos." };
+      }
+    }
+
     const course = await prisma.curso.update({
       where: { id: courseId },
       data: { profesorId },
@@ -204,7 +302,7 @@ export async function assignTeacherAction(
     revalidatePath("/gestion/academico/carga-horaria");
     return {
       success: "Profesor asignado correctamente",
-      data: JSON.parse(JSON.stringify(course)),
+      data: serialize(course),
     };
   } catch (error) {
     console.error("Error assigning teacher:", error);
@@ -217,6 +315,25 @@ export async function assignTeacherAction(
  */
 export async function deleteAreaAction(id: string) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado. Por favor inicie sesión." };
+    }
+    const role = session.user.role;
+    if (role !== "super_admin" && role !== "administrativo") {
+      return { error: "No tienes permiso para realizar esta acción." };
+    }
+    const targetInstitucionId = session.user.institucionId;
+
+    if (role !== "super_admin" && targetInstitucionId) {
+      const existing = await prisma.areaCurricular.findFirst({
+        where: { id, institucionId: targetInstitucionId },
+      });
+      if (!existing) {
+        return { error: "Área curricular no encontrada o no tiene permisos." };
+      }
+    }
+
     await prisma.areaCurricular.delete({
       where: { id },
     });
@@ -235,6 +352,25 @@ export async function deleteAreaAction(id: string) {
  */
 export async function deleteCourseAction(id: string) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado. Por favor inicie sesión." };
+    }
+    const role = session.user.role;
+    if (role !== "super_admin" && role !== "administrativo") {
+      return { error: "No tienes permiso para realizar esta acción." };
+    }
+    const targetInstitucionId = session.user.institucionId;
+
+    if (role !== "super_admin" && targetInstitucionId) {
+      const existing = await prisma.curso.findFirst({
+        where: { id, institucionId: targetInstitucionId },
+      });
+      if (!existing) {
+        return { error: "Curso no encontrado o no tiene permisos." };
+      }
+    }
+
     await prisma.curso.delete({
       where: { id },
     });
@@ -250,10 +386,15 @@ export async function deleteCourseAction(id: string) {
  */
 export async function getInstitucionesAction() {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado. Por favor inicie sesión." };
+    }
+
     const instituciones = await prisma.institucionEducativa.findMany({
-      select: { 
-        id: true, 
-        nombreInstitucion: true, 
+      select: {
+        id: true,
+        nombreInstitucion: true,
         cicloEscolarActual: true,
         codigoModular: true,
         dre: true,
@@ -263,7 +404,7 @@ export async function getInstitucionesAction() {
         logo: true,
       },
     });
-    return { data: JSON.parse(JSON.stringify(instituciones)) };
+    return { data: serialize(instituciones) };
   } catch (error) {
     return { error: "Error al cargar instituciones" };
   }

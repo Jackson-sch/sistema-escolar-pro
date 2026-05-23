@@ -387,7 +387,7 @@ export function AnnouncementForm({
             type="button"
             variant="outline"
             onClick={onSuccess}
-            className="w-full sm:w-auto rounded-full border-border/40 hover:bg-accent/50"
+            className="w-full sm:w-auto rounded-full border-border/40 hover:bg-accent/50 hover:scale-105"
             disabled={loading}
           >
             Cancelar
@@ -395,7 +395,7 @@ export function AnnouncementForm({
           <Button
             type="submit"
             variant="default"
-            className="w-full sm:w-auto rounded-full px-8"
+            className="w-full sm:w-auto rounded-full px-8 hover:scale-105"
             disabled={loading}
           >
             {loading

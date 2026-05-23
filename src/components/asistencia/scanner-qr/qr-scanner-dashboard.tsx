@@ -28,9 +28,9 @@ import { useQRScanner } from "@/hooks/use-qr-scanner";
 interface ScanLog {
   id: string;
   studentName: string;
-  dni: string;
+  dni: string | null;
   time: string;
-  status: "success" | "error" | "late";
+  status: string;
   image?: string;
 }
 

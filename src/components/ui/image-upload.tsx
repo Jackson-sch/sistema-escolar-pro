@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
 import Image from "next/image"
+import { useTranslation } from "@/lib/i18n"
+
 
 interface ImageUploadProps {
   value?: string
@@ -23,6 +25,7 @@ export function ImageUpload({
   disabled: externalDisabled,
   className,
 }: ImageUploadProps) {
+  const { t } = useTranslation()
   const [isUploading, setIsUploading] = React.useState(false)
   const fileInputRef = React.useRef<HTMLInputElement>(null)
 
@@ -43,13 +46,13 @@ export function ImageUpload({
 
       if (response.ok && data.url) {
         onChange(data.url)
-        toast.success("Imagen subida correctamente")
+        toast.success(t("imageUpload.success"))
       } else {
-        throw new Error(data.error || "Error al subir la imagen")
+        throw new Error(data.error || t("imageUpload.error"))
       }
     } catch (error: any) {
       console.error("Upload error:", error)
-      toast.error(error.message || "No se pudo subir la imagen")
+      toast.error(error.message || t("imageUpload.failed"))
     } finally {
       setIsUploading(false)
     }
@@ -59,7 +62,7 @@ export function ImageUpload({
     const file = e.target.files?.[0]
     if (file) {
       if (!file.type.startsWith("image/")) {
-        toast.error("El archivo debe ser una imagen")
+        toast.error(t("imageUpload.invalidType"))
         return
       }
       uploadFile(file)
@@ -109,7 +112,7 @@ export function ImageUpload({
         {isUploading && (
           <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-background/60 backdrop-blur-sm animate-in fade-in duration-300">
             <IconLoader2 className="size-10 text-primary animate-spin" />
-            <p className="text-[10px] font-bold uppercase tracking-widest mt-2 text-primary">Subiendo...</p>
+            <p className="text-xs font-bold uppercase tracking-widest mt-2 text-primary">{t("imageUpload.uploading")}</p>
           </div>
         )}
 
@@ -117,7 +120,7 @@ export function ImageUpload({
           <>
             <Image
               src={value}
-              alt="Preview"
+              alt={t("imageUpload.preview")}
               fill
               unoptimized
               className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -146,13 +149,13 @@ export function ImageUpload({
               <div className="p-4 bg-muted/10 rounded-2xl group-hover:bg-primary/10 transition-colors">
                 <IconPhoto className="size-10" />
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-widest">Subir Imagen</span>
+              <span className="text-xs font-bold uppercase tracking-widest">{t("imageUpload.uploadImage")}</span>
             </div>
           )
         )}
       </div>
-      <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">
-        PNG, JPG, WEBP (Máx. 4MB)
+      <p className="text-xs text-muted-foreground font-medium uppercase tracking-tighter">
+        {t("imageUpload.maxSize")}
       </p>
     </div>
   )

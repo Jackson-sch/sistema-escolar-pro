@@ -127,7 +127,7 @@ export function LoginForm() {
           <Button
             disabled={isPending}
             type="submit"
-            className="w-full h-11 transition-all active:scale-[0.98]"
+            className="w-full h-11 transition-all active:scale-[0.98] hover:scale-105"
           >
             {isPending && <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />}
             {isPending ? "Iniciando sesión..." : "Ingresar al sistema"}

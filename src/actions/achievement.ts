@@ -1,4 +1,5 @@
 "use server";
+import { serialize } from "@/lib/dto";
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
@@ -23,7 +24,7 @@ export async function createAchievementAction(studentId: string, values: Achieve
     });
 
     revalidatePath(`/gestion/estudiantes`);
-    return { success: "Logro registrado correctamente", data: JSON.parse(JSON.stringify(achievement)) };
+    return { success: "Logro registrado correctamente", data: serialize(achievement) };
   } catch (error) {
     console.error("Error creating achievement:", error);
     return { error: "No se pudo registrar el logro" };
@@ -40,7 +41,7 @@ export async function getStudentAchievementsAction(studentId: string) {
       orderBy: { fecha: "desc" },
     });
 
-    return { data: JSON.parse(JSON.stringify(achievements)) };
+    return { data: serialize(achievements) };
   } catch (error) {
     console.error("Error fetching achievements:", error);
     return { error: "No se pudieron cargar los logros" };

@@ -96,7 +96,7 @@ export const StudentCardPDF = ({
               </View>
 
               {/* Info */}
-              <Stack direction="vertical" gap="xs" style={{ flex: 1 }}>
+              <Stack direction="vertical" gap="sm" style={{ flex: 1 }}>
                 <View>
                   <Text style={{ fontSize: 4, color: "#94a3b8", fontWeight: "bold" }}>ESTUDIANTE</Text>
                   <Text style={{ fontSize: fullName.length > 25 ? 7 : 8, fontWeight: "bold", color: "#0f172a", textTransform: "uppercase" }}>{fullName}</Text>
@@ -125,7 +125,7 @@ export const StudentCardPDF = ({
             </Stack>
 
             {/* Footer Front */}
-            <Stack direction="horizontal" align="center" gap="xs" style={{ height: 25, marginTop: 5, borderTopWidth: 0.5, borderTopColor: "#f1f5f9" }}>
+            <Stack direction="horizontal" align="center" gap="sm" style={{ height: 25, marginTop: 5, borderTopWidth: 0.5, borderTopColor: "#f1f5f9" }}>
               <View style={{ width: 14, height: 14, backgroundColor: "#ffffff" }}>
                 {qrCode && <Image src={qrCode} style={{ width: "100%", height: "100%" }} />}
               </View>
@@ -146,7 +146,7 @@ export const StudentCardPDF = ({
               Este carnet es personal e intransferible. Identifica al portador como estudiante regular de nuestra institución. En caso de pérdida, informar a la dirección.
             </Text>
             
-            <Stack direction="vertical" align="center" gap="xs">
+            <Stack direction="vertical" align="center" gap="sm">
               <View style={{ padding: 3, backgroundColor: "#ffffff", borderRadius: 4, borderWidth: 1, borderColor: "#f1f5f9" }}>
                 {qrCode ? (
                   <Image src={qrCode} style={{ width: 40, height: 40 }} />

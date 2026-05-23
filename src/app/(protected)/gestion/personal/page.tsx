@@ -39,7 +39,7 @@ export default async function PersonalPage() {
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
             Gestión de Personal
           </h1>
-          <p className="text-[10px] sm:text-xs text-muted-foreground">
+          <p className="text-xxs sm:text-xs text-muted-foreground">
             Administración de perfiles, cargos y nómina docente y
             administrativa.
           </p>

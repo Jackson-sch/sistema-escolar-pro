@@ -323,7 +323,7 @@ export function EventForm({ onSuccess, initialData, id }: EventFormProps) {
             type="button"
             variant="outline"
             onClick={onSuccess}
-            className="w-full sm:w-auto rounded-full border-border/40 hover:bg-accent/50"
+            className="w-full sm:w-auto rounded-full border-border/40 hover:bg-accent/50 hover:scale-105"
             disabled={loading}
           >
             Cancelar
@@ -331,7 +331,7 @@ export function EventForm({ onSuccess, initialData, id }: EventFormProps) {
           <Button
             type="submit"
             variant="default"
-            className="w-full sm:w-auto rounded-full transition-all active:scale-[0.98] px-8"
+            className="w-full sm:w-auto rounded-full transition-all active:scale-[0.98] px-8 hover:scale-105"
             disabled={loading}
           >
             {loading

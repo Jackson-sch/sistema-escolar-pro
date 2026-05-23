@@ -658,7 +658,7 @@ export function StaffForm({
                 type="button"
                 variant="outline"
                 onClick={onSuccess}
-                className="w-full sm:w-auto rounded-full border-border/40 hover:bg-accent/50"
+                className="w-full sm:w-auto rounded-full border-border/40 hover:bg-accent/50 hover:scale-105"
                 disabled={isPending}
               >
                 Cancelar
@@ -666,7 +666,7 @@ export function StaffForm({
               <Button
                 disabled={isPending}
                 type="submit"
-                className="w-full sm:w-auto rounded-full px-8"
+                className="w-full sm:w-auto rounded-full px-8 hover:scale-105"
               >
                 {isPending && (
                   <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />

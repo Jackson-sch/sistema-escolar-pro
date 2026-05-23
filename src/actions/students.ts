@@ -1,4 +1,5 @@
 "use server";
+import { serialize } from "@/lib/dto";
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
@@ -32,14 +33,25 @@ const sanitizeData = (data: any) => {
 };
 
 /**
- * Obtiene la lista de estudiantes con filtros básicos
+ * Obtiene la lista de estudiantes con paginación, búsqueda y filtros
  */
-export async function getStudentsAction() {
+export async function getStudentsAction(params?: {
+  page?: number;
+  pageSize?: number;
+  estado?: string;
+  nivel?: string;
+}) {
   try {
     const session = await auth();
     const role = session?.user?.role;
     const userId = session?.user?.id;
     const institucionId = session?.user?.institucionId;
+
+    const page = params?.page || 1;
+    const pageSize = params?.pageSize || 25;
+    const estado = params?.estado || "";
+    const nivel = params?.nivel || "";
+    const skip = (page - 1) * pageSize;
 
     const institucion = await prisma.institucionEducativa.findFirst({
       where: institucionId ? { id: institucionId } : undefined,
@@ -53,8 +65,11 @@ export async function getStudentsAction() {
       institucionId: institucionId || undefined,
     };
 
+    if (estado && estado !== "ALL") {
+      where.estado = { nombre: estado };
+    }
+
     if (role === "profesor") {
-      // Buscar IDs de secciones donde es tutor o profesor
       const teacherSections = await prisma.nivelAcademico.findMany({
         where: {
           OR: [
@@ -78,45 +93,63 @@ export async function getStudentsAction() {
       };
     }
 
-    const students = await prisma.user.findMany({
-      where,
-      include: {
-        estado: true,
-        matriculas: {
-          where: { anioAcademico: currentYear },
-          include: {
-            nivelAcademico: {
-              include: {
-                grado: true,
-                nivel: true,
-                sede: true,
+    if (nivel && nivel !== "ALL") {
+      const matriculaFilter: any = {
+        some: {
+          anioAcademico: currentYear,
+          nivelAcademico: { nivel: { nombre: nivel } },
+        },
+      };
+
+      if (where.matriculas) {
+        Object.assign(where.matriculas.some, matriculaFilter.some);
+      } else {
+        where.matriculas = matriculaFilter;
+      }
+    }
+
+    const [students, totalCount] = await Promise.all([
+      prisma.user.findMany({
+        where,
+        include: {
+          estado: true,
+          matriculas: {
+            where: { anioAcademico: currentYear },
+            include: {
+              nivelAcademico: {
+                include: {
+                  grado: true,
+                  nivel: true,
+                  sede: true,
+                },
               },
             },
           },
-        },
-        padresTutores: {
-          include: {
-            padreTutor: true,
+          padresTutores: {
+            include: {
+              padreTutor: true,
+            },
           },
         },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+        orderBy: {
+          createdAt: "desc",
+        },
+        skip,
+        take: pageSize,
+      }),
+      prisma.user.count({ where }),
+    ]);
 
-    // Mapear para que nivelAcademico refleje la matrícula del año actual
     const mappedStudents = students.map((s) => {
       const currentMatricula = s.matriculas[0];
       return {
         ...s,
         nivelAcademico: currentMatricula?.nivelAcademico || null,
-        // Mantener una referencia opcional si se requiere saber si tiene matricula este año
         matriculadoEsteAnio: !!currentMatricula,
       };
     });
 
-    return { data: JSON.parse(JSON.stringify(mappedStudents)) };
+    return { data: serialize(mappedStudents), totalCount };
   } catch (error) {
     console.error("Error fetching students:", error);
     return { error: "No se pudieron obtener los estudiantes" };
@@ -132,8 +165,9 @@ export async function getUserStatusesAction() {
       where: { activo: true },
       orderBy: { orden: "asc" },
     });
-    return { data: JSON.parse(JSON.stringify(statuses)) };
+    return { data: serialize(statuses) };
   } catch (error) {
+    console.error("Error al cargar estados:", error);
     return { error: "Error al cargar estados" };
   }
 }
@@ -146,8 +180,9 @@ export async function getInstitucionesAction() {
     const instituciones = await prisma.institucionEducativa.findMany({
       select: { id: true, nombreInstitucion: true },
     });
-    return { data: JSON.parse(JSON.stringify(instituciones)) };
+    return { data: serialize(instituciones) };
   } catch (error) {
+    console.error("Error al cargar instituciones:", error);
     return { error: "Error al cargar instituciones" };
   }
 }
@@ -192,7 +227,7 @@ export async function getNivelesAcademicosAction(anio?: number, nivelId?: string
         { seccion: "asc" },
       ],
     });
-    return { data: JSON.parse(JSON.stringify(niveles)) };
+    return { data: serialize(niveles) };
   } catch (error) {
     return { error: "Error al cargar niveles académicos" };
   }
@@ -289,7 +324,7 @@ export async function createStudentAction(values: any) {
     revalidatePath("/gestion/estudiantes");
     return {
       success: "Estudiante registrado con éxito",
-      data: JSON.parse(JSON.stringify(student)),
+      data: serialize(student),
     };
   } catch (error: any) {
     console.error("Error creating student:", error);
@@ -417,7 +452,7 @@ export async function updateStudentAction(id: string, values: any) {
     revalidatePath("/gestion/estudiantes");
     return {
       success: "Estudiante actualizado correctamente",
-      data: JSON.parse(JSON.stringify(student)),
+      data: serialize(student),
     };
   } catch (error: any) {
     console.error("Error updating student:", error);
@@ -465,7 +500,7 @@ export async function getGuardianByDniAction(dni: string) {
 
     if (!guardian) return { data: null };
 
-    return { data: JSON.parse(JSON.stringify(guardian)) };
+    return { data: serialize(guardian) };
   } catch (error) {
     console.error("Error fetching guardian by DNI:", error);
     return { error: "Error al buscar el apoderado" };
@@ -540,7 +575,7 @@ export async function searchStudentsAction(query: string) {
       take: 10,
     });
 
-    return { data: JSON.parse(JSON.stringify(students)) };
+    return { data: serialize(students) };
   } catch (error) {
     console.error("Error searching students:", error);
     return { error: "No se pudo realizar la búsqueda" };
@@ -569,7 +604,7 @@ export async function getStudentByIdAction(id: string) {
 
     if (!student) return { data: null };
 
-    return { data: JSON.parse(JSON.stringify(student)) };
+    return { data: serialize(student) };
   } catch (error) {
     console.error("Error fetching student by ID:", error);
     return { error: "Error al buscar el estudiante" };
@@ -606,9 +641,60 @@ export async function getStudentByDniAction(dni: string) {
 
     if (!student) return { error: "Estudiante no encontrado" };
 
-    return { data: JSON.parse(JSON.stringify(student)) };
+    return { data: serialize(student) };
   } catch (error) {
     console.error("Error fetching student by DNI:", error);
     return { error: "Error al buscar el estudiante" };
+  }
+}
+
+/**
+ * Obtiene las estadísticas resumidas para el panel de gestión de estudiantes
+ */
+export async function getStudentDashboardStatsAction() {
+  try {
+    const session = await auth();
+    const institucionId = session?.user?.institucionId;
+
+    const institucion = await prisma.institucionEducativa.findFirst({
+      where: institucionId ? { id: institucionId } : undefined,
+      select: { cicloEscolarActual: true },
+    });
+    const currentYear = institucion?.cicloEscolarActual || new Date().getFullYear();
+
+    const whereEstudiantes: any = {
+      role: "estudiante" as Role,
+      institucionId: institucionId || undefined,
+    };
+
+    const whereActiveMatricula: any = {
+      anioAcademico: currentYear,
+      estudiante: {
+        institucionId: institucionId || undefined,
+      },
+    };
+
+    const [totalStudents, activeEnrollments, newEnrollments] = await Promise.all([
+      prisma.user.count({ where: whereEstudiantes }),
+      prisma.matricula.count({ where: whereActiveMatricula }),
+      prisma.matricula.count({
+        where: {
+          ...whereActiveMatricula,
+          esPrimeraVez: true,
+        },
+      }),
+    ]);
+
+    return {
+      data: {
+        totalStudents,
+        activeEnrollments,
+        newEnrollments,
+        currentYear,
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching student dashboard stats:", error);
+    return { error: "No se pudieron obtener las estadísticas de estudiantes" };
   }
 }

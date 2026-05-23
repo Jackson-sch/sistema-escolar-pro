@@ -512,10 +512,10 @@ export function HealthForm({
         </CardGeneric>
 
         <div className="flex justify-end gap-3 pt-4">
-          <Button type="button" variant="outline" onClick={() => onSuccess?.()}>
+          <Button type="button" variant="outline" onClick={() => onSuccess?.()} className="hover:scale-105">
             Cancelar
           </Button>
-          <Button type="submit" disabled={isPending}>
+          <Button type="submit" disabled={isPending} className="hover:scale-105">
             {isPending ? "Guardando..." : "Guardar Cambios"}
           </Button>
         </div>

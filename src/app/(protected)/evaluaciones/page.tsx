@@ -55,7 +55,7 @@ export default async function EvaluacionesPage() {
           <h1 className="text-xl sm:text-2xl font-bold t">
             Gestión de Evaluaciones
           </h1>
-          <p className="text-[10px] sm:text-xs text-muted-foreground">
+          <p className="text-xxs sm:text-xs text-muted-foreground">
             Planificación académica y registro de calificaciones
             institucionales.
           </p>

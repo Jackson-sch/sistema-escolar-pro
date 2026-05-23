@@ -556,6 +556,8 @@ model Curso {
   notas            Nota[]
 
   @@unique([codigo, anioAcademico, nivelAcademicoId])
+  @@index([institucionId, anioAcademico])
+  @@index([profesorId])
 }
 
 model Horario {
@@ -670,6 +672,8 @@ model Asistencia {
   registradoPor   User?    @relation("RegistrosAsistencia", fields: [registradoPorId], references: [id])
 
   @@unique([estudianteId, cursoId, fecha])
+  @@index([estudianteId, fecha])
+  @@index([cursoId])
 }
 
 model Documento {
@@ -912,6 +916,7 @@ model CronogramaPago {
   ventaUniforme    VentaUniforme?
 
   @@index([estudianteId])
+  @@index([estudianteId, pagado])
   @@index([conceptoId])
 }
 

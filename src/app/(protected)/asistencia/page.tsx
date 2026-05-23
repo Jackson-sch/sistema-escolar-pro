@@ -43,7 +43,7 @@ export default async function AsistenciaPage() {
           <h1 className="text-xl sm:text-3xl font-bold tracking-tight">
             Control de Asistencia
           </h1>
-          <p className="text-[10px] sm:text-sm text-muted-foreground">
+          <p className="text-xxs sm:text-sm text-muted-foreground">
             Gestión diaria y reportes consolidados por nivel y sección.
           </p>
         </div>

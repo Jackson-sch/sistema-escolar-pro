@@ -49,7 +49,7 @@ export default async function ConfiguracionPage() {
           <h1 className="text-xl sm:text-3xl font-bold">
             Configuración del Sistema
           </h1>
-          <p className="text-[10px] sm:text-sm text-muted-foreground">
+          <p className="text-xxs sm:text-sm text-muted-foreground">
             Gestión de identidad institucional, sedes y variables dinámicas de
             la plataforma.
           </p>

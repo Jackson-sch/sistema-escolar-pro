@@ -1,4 +1,5 @@
 "use server";
+import { serialize } from "@/lib/dto";
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
@@ -42,7 +43,7 @@ export const getDeudaHijosAction = createSafeAction(
       }))
     );
 
-    return { success: JSON.parse(JSON.stringify(deudas)) };
+    return { success: serialize(deudas) };
   }
 )
 
@@ -94,7 +95,7 @@ export const createComprobanteAction = createSafeAction(
     revalidatePath("/portal");
     revalidatePath("/finanzas/verificacion");
 
-    return { success: JSON.parse(JSON.stringify(comprobante)) };
+    return { success: serialize(comprobante) };
   }
 )
 
@@ -118,7 +119,7 @@ export const getComprobantesAction = createSafeAction(
       orderBy: { createdAt: "desc" },
     });
 
-    return { success: JSON.parse(JSON.stringify(comprobantes)) };
+    return { success: serialize(comprobantes) };
   }
 )
 
@@ -160,7 +161,7 @@ export const getPendingComprobantesAction = createSafeAction(
       orderBy: { createdAt: "asc" },
     });
 
-    return { success: JSON.parse(JSON.stringify(comprobantes)) };
+    return { success: serialize(comprobantes) };
   },
   { roles: ["administrativo"] }
 )

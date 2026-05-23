@@ -187,7 +187,7 @@ export function IAReminderButton({ cronograma }: IAReminderButtonProps) {
               </div>
               <div className="bg-white/2 border border-white/5 rounded-[2rem] p-6 pt-8 overflow-hidden relative">
                 <div className="max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                  <div className="prose prose-sm prose-invert max-w-none text-foreground/90 leading-relaxed font-medium">
+                  <div className="prose prose-sm max-w-none text-foreground/90 leading-relaxed font-medium dark:prose-invert">
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                       {reminder || ""}
                     </ReactMarkdown>

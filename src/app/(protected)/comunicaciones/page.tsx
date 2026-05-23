@@ -25,7 +25,7 @@ export default async function ComunicacionesPage() {
           <h1 className="text-xl sm:text-3xl font-bold">
             Portal de Comunicaciones
           </h1>
-          <p className="text-[10px] sm:text-sm text-muted-foreground font-medium">
+          <p className="text-xxs sm:text-sm text-muted-foreground font-medium">
             Mantén a la comunidad educativa informada con anuncios y eventos.
           </p>
         </div>

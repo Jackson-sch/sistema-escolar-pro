@@ -18,6 +18,6 @@ export const CronogramaFilterSchema = z.object({
 export const CreateCronogramaMasivoSchema = z.object({
   conceptoId: z.string().min(1, "Debe seleccionar un concepto"),
   monto: z.number().min(0, "El monto debe ser mayor o igual a 0"),
-  fechaVencimiento: z.union([z.date(), z.string()]),
+  fechaVencimiento: z.coerce.date({ message: "Fecha de vencimiento inválida" }),
   nivelId: z.string().optional(),
 })

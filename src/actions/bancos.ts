@@ -1,4 +1,5 @@
 "use server";
+import { serialize } from "@/lib/dto";
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
@@ -31,7 +32,7 @@ export const getBankAccountsAction = createSafeAction(
       orderBy: [{ esPrincipal: "desc" }, { createdAt: "desc" }],
     });
 
-    return { success: JSON.parse(JSON.stringify(cuentas)) };
+    return { success: serialize(cuentas) };
   },
 );
 
@@ -59,7 +60,7 @@ export const saveBankAccountAction = createSafeAction(
         });
         revalidatePath("/configuracion/institucion");
         revalidatePath("/portal/deudas");
-        return { success: JSON.parse(JSON.stringify(cuenta)) };
+        return { success: serialize(cuenta) };
       } else {
         const cuenta = await prisma.cuentaBancaria.create({
           data: {
@@ -70,7 +71,7 @@ export const saveBankAccountAction = createSafeAction(
         });
         revalidatePath("/configuracion/institucion");
         revalidatePath("/portal/deudas");
-        return { success: JSON.parse(JSON.stringify(cuenta)) };
+        return { success: serialize(cuenta) };
       }
     } catch (error) {
       console.error("Error al guardar cuenta bancaria:", error);

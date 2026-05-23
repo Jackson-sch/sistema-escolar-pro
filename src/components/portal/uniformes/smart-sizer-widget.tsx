@@ -141,9 +141,9 @@ function computeSize(
 
 function ConfidenceBadge({ confidence }: { confidence: Confidence }) {
   const map = {
-    alta:  { label: "Alta precisión",   className: "bg-green-400/20 text-green-200 border-green-400/30" },
-    media: { label: "Precisión media",  className: "bg-yellow-400/20 text-yellow-200 border-yellow-400/30" },
-    baja:  { label: "Baja precisión",   className: "bg-red-400/20 text-red-200 border-red-400/30" },
+    alta:  { label: "Alta precisión",   className: "bg-emerald-500/10 text-emerald-700 border-emerald-500/20 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30" },
+    media: { label: "Precisión media",  className: "bg-amber-500/10 text-amber-700 border-amber-500/20 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30" },
+    baja:  { label: "Baja precisión",   className: "bg-rose-500/10 text-rose-700 border-rose-500/20 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/30" },
   };
   const { label, className } = map[confidence];
   return (
@@ -155,10 +155,10 @@ function ConfidenceBadge({ confidence }: { confidence: Confidence }) {
 
 function SizeChartTable({ highlight }: { highlight: string | null }) {
   return (
-    <div className="rounded-2xl overflow-hidden border border-white/10">
+    <div className="rounded-2xl overflow-hidden border border-slate-200 dark:border-white/10 relative z-10 bg-white/40 dark:bg-zinc-950/20">
       <table className="w-full text-[11px]">
         <thead>
-          <tr className="bg-white/10 text-blue-100">
+          <tr className="bg-indigo-50/80 dark:bg-white/10 text-indigo-950 dark:text-indigo-100 border-b border-slate-200 dark:border-white/10">
             <th className="px-3 py-2 text-left font-black">Talla</th>
             <th className="px-3 py-2 text-center font-black">Edad</th>
             <th className="px-3 py-2 text-center font-black">Cm</th>
@@ -171,11 +171,13 @@ function SizeChartTable({ highlight }: { highlight: string | null }) {
             return (
               <tr
                 key={row.size}
-                className={`border-t border-white/5 transition-colors ${
-                  isMatch ? "bg-white/20 text-white" : "text-blue-100/70"
+                className={`border-t border-slate-100 dark:border-white/5 transition-colors ${
+                  isMatch
+                    ? "bg-indigo-600/10 dark:bg-white/20 text-indigo-950 dark:text-white"
+                    : "text-slate-600 dark:text-blue-100/70"
                 }`}
               >
-                <td className={`px-3 py-2 font-black ${isMatch ? "text-white" : ""}`}>
+                <td className={`px-3 py-2 font-black ${isMatch ? "text-indigo-600 dark:text-white" : ""}`}>
                   {row.size}
                 </td>
                 <td className="px-3 py-2 text-center">
@@ -244,32 +246,40 @@ export default function SmartSizerWidget() {
   }, []);
 
   return (
-    <div className="bg-blue-600 text-white rounded-[2.5rem] p-7 space-y-5 shadow-2xl shadow-blue-500/40 relative overflow-hidden">
+    <div className="liquid-glass rounded-[2.5rem] p-7 space-y-6 relative overflow-hidden transition-all duration-500 shadow-2xl">
+      {/* Background blobs for liquid-glass depth */}
+      <div className="absolute -top-24 -left-24 w-60 h-60 bg-indigo-500/20 dark:bg-indigo-500/10 rounded-full blur-3xl animate-blob pointer-events-none select-none" />
+      <div className="absolute -bottom-24 -right-24 w-60 h-60 bg-orange-500/15 dark:bg-orange-500/10 rounded-full blur-3xl animate-blob pointer-events-none select-none" />
+
       {/* Background decoration */}
-      <div className="absolute top-0 right-0 p-8 opacity-[0.07] pointer-events-none select-none">
+      <div className="absolute top-0 right-0 p-8 opacity-[0.05] pointer-events-none select-none dark:text-white text-indigo-950">
         <Sparkles className="h-36 w-36" />
       </div>
 
       {/* Header */}
-      <div className="flex items-center gap-3 relative">
-        <div className="h-10 w-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center shrink-0">
+      <div className="flex items-center gap-3 relative z-10">
+        <div className="h-10 w-10 bg-indigo-600/10 dark:bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center shrink-0 border border-indigo-600/20 dark:border-white/10 text-indigo-600 dark:text-white shadow-sm">
           <Ruler className="h-5 w-5" />
         </div>
         <div>
-          <h3 className="text-xl font-black leading-tight">Calculador de Tallas</h3>
-          <p className="text-blue-200 text-[11px] font-medium">Uniforme escolar • Niños 3–17 años</p>
+          <h3 className="text-xl font-black leading-tight text-indigo-950 dark:text-white">
+            Calculador de Tallas
+          </h3>
+          <p className="text-indigo-600/70 dark:text-indigo-200/60 text-[11px] font-bold uppercase tracking-wider">
+            Uniforme escolar • Niños 3–17 años
+          </p>
         </div>
       </div>
 
       {/* Inputs */}
-      <div className="grid grid-cols-3 gap-3 relative">
+      <div className="grid grid-cols-3 gap-3 relative z-10">
         {/* Age */}
         <div className="space-y-1.5">
-          <Label className="text-[10px] text-blue-200 uppercase tracking-widest">
+          <Label className="text-[10px] text-indigo-600/70 dark:text-indigo-200/70 uppercase tracking-widest font-black">
             Edad
           </Label>
           <Select value={age} onValueChange={setAge}>
-            <SelectTrigger className="bg-white/10 border-white/20 h-11! w-full rounded-full text-white font-bold text-sm">
+            <SelectTrigger className="bg-indigo-50/50 dark:bg-white/5 border-slate-200 dark:border-white/10 h-11! w-full rounded-full text-foreground dark:text-white font-bold text-sm shadow-inner transition-all hover:bg-indigo-50 dark:hover:bg-white/10">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -284,13 +294,13 @@ export default function SmartSizerWidget() {
 
         {/* Height */}
         <div className="space-y-1.5">
-          <Label className="text-[10px] text-blue-200 uppercase tracking-widest">
+          <Label className="text-[10px] text-indigo-600/70 dark:text-indigo-200/70 uppercase tracking-widest font-black">
             Estatura cm
           </Label>
           <Input
             type="number"
             inputMode="numeric"
-            className="bg-white/10 border-white/20 h-11 w-full rounded-full text-white font-bold placeholder:text-white/30 text-sm"
+            className="bg-indigo-50/50 dark:bg-white/5 border-slate-200 dark:border-white/10 h-11 w-full rounded-full text-foreground dark:text-white font-bold placeholder:text-muted-foreground/30 text-sm shadow-inner transition-all hover:bg-indigo-50 dark:hover:bg-white/10"
             placeholder="140"
             min={50}
             max={220}
@@ -301,13 +311,13 @@ export default function SmartSizerWidget() {
 
         {/* Weight */}
         <div className="space-y-1.5">
-          <Label className="text-[10px] text-blue-200 uppercase tracking-widest">
+          <Label className="text-[10px] text-indigo-600/70 dark:text-indigo-200/70 uppercase tracking-widest font-black">
             Peso kg
           </Label>
           <Input
             type="number"
             inputMode="numeric"
-            className="bg-white/10 border-white/20 h-11 w-full rounded-full text-white font-bold placeholder:text-white/30 text-sm"
+            className="bg-indigo-50/50 dark:bg-white/5 border-slate-200 dark:border-white/10 h-11 w-full rounded-full text-foreground dark:text-white font-bold placeholder:text-muted-foreground/30 text-sm shadow-inner transition-all hover:bg-indigo-50 dark:hover:bg-white/10"
             placeholder="32"
             min={5}
             max={150}
@@ -319,24 +329,24 @@ export default function SmartSizerWidget() {
 
       {/* Validation error */}
       {error && (
-        <div className="flex items-center gap-2 bg-red-500/20 border border-red-400/30 rounded-xl px-4 py-2.5">
-          <AlertCircle className="h-4 w-4 text-red-300 shrink-0" />
-          <p className="text-red-200 text-xs font-bold">{error}</p>
+        <div className="flex items-center gap-2 bg-rose-500/10 dark:bg-rose-500/20 border border-rose-200 dark:border-rose-500/30 rounded-2xl px-4 py-3 relative z-10">
+          <AlertCircle className="h-4 w-4 text-rose-500 shrink-0" />
+          <p className="text-rose-700 dark:text-rose-300 text-xs font-bold">{error}</p>
         </div>
       )}
 
       {/* Result card */}
       {result && !error && (
-        <div className="bg-white/15 backdrop-blur-sm border border-white/20 rounded-2xl p-4 space-y-3">
+        <div className="bg-indigo-50/40 dark:bg-white/5 backdrop-blur-sm border border-indigo-100/50 dark:border-white/10 rounded-[1.75rem] p-5 space-y-4 shadow-inner relative z-10 transition-all duration-300">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-blue-200 mb-1">
+              <p className="text-[10px] font-black uppercase tracking-widest text-indigo-600/70 dark:text-indigo-200/70 mb-1">
                 Talla Sugerida
               </p>
               <div className="flex items-baseline gap-2.5">
-                <span className="text-4xl font-black leading-none">{result.primary}</span>
+                <span className="text-4xl font-black leading-none text-indigo-950 dark:text-white">{result.primary}</span>
                 {result.fallback && (
-                  <span className="text-base font-black text-white/50">
+                  <span className="text-base font-black text-indigo-950/40 dark:text-white/40">
                     o {result.fallback}
                   </span>
                 )}
@@ -348,23 +358,23 @@ export default function SmartSizerWidget() {
           {/* Signals */}
           {result.signals.length > 0 && (
             <div className="flex items-center gap-1.5 flex-wrap">
-              <CheckCircle2 className="h-3.5 w-3.5 text-green-300 shrink-0" />
-              <p className="text-[11px] text-blue-100 font-medium">
-                Basado en: <span className="font-black text-white">{result.signals.join(", ")}</span>
+              <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+              <p className="text-[11px] text-indigo-950/80 dark:text-indigo-200/80 font-medium">
+                Basado en: <span className="font-black text-indigo-600 dark:text-indigo-400">{result.signals.join(", ")}</span>
               </p>
             </div>
           )}
 
           {/* Conflict note */}
           {result.note && (
-            <div className="flex items-start gap-1.5 bg-yellow-400/10 border border-yellow-400/20 rounded-xl px-3 py-2">
-              <Info className="h-3.5 w-3.5 text-yellow-300 shrink-0 mt-0.5" />
-              <p className="text-[11px] text-yellow-200 font-medium leading-snug">{result.note}</p>
+            <div className="flex items-start gap-1.5 bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-2xl px-3 py-2.5">
+              <Info className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+              <p className="text-[11px] text-amber-800 dark:text-amber-200 font-bold leading-normal">{result.note}</p>
             </div>
           )}
 
           {result.confidence === "baja" && (
-            <p className="text-[11px] text-blue-200/70 font-medium">
+            <p className="text-[11px] text-indigo-950/60 dark:text-indigo-200/60 font-medium italic">
               💡 Para mayor precisión, agrega estatura y peso.
             </p>
           )}
@@ -372,11 +382,11 @@ export default function SmartSizerWidget() {
       )}
 
       {/* CTA buttons */}
-      <div className="flex gap-2.5 relative">
+      <div className="flex gap-2.5 relative z-10">
         <Button
           onClick={handleCalculate}
           disabled={!!validationError}
-          className="flex-1 bg-white text-blue-600 hover:bg-slate-100 disabled:opacity-40 rounded-full h-12 font-black text-sm shadow-lg"
+          className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-black rounded-full h-12 text-sm shadow-lg shadow-orange-500/10 hover:shadow-orange-600/20 active:scale-95 transition-all duration-200 relative z-10 border-none"
         >
           {result ? "Recalcular" : "Calcular Talla"}
         </Button>
@@ -384,7 +394,7 @@ export default function SmartSizerWidget() {
           <Button
             onClick={handleReset}
             variant="ghost"
-            className="h-12 px-4 rounded-full text-white/70 hover:bg-white/10 hover:text-white font-bold text-sm"
+            className="h-12 px-5 rounded-full text-indigo-600 hover:bg-indigo-600/10 dark:text-white/70 dark:hover:bg-white/10 dark:hover:text-white font-bold text-sm transition-all duration-200 relative z-10"
           >
             Limpiar
           </Button>
@@ -394,7 +404,7 @@ export default function SmartSizerWidget() {
       {/* Size chart toggle */}
       <button
         onClick={() => setShowChart((v) => !v)}
-        className="flex items-center gap-1.5 text-[11px] font-bold text-blue-200 hover:text-white transition-colors w-full justify-center relative"
+        className="flex items-center gap-1.5 text-[11px] font-black text-indigo-600 hover:text-indigo-800 dark:text-indigo-200/80 dark:hover:text-white transition-colors w-full justify-center relative z-10 uppercase tracking-wider"
       >
         <ChevronDown
           className={`h-3.5 w-3.5 transition-transform duration-200 ${showChart ? "rotate-180" : ""}`}

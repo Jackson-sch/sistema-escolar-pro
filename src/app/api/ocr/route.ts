@@ -1,8 +1,10 @@
+import { NextResponse } from "next/server";
 import { generateObject } from "ai";
 import { z } from "zod";
 import { getGoogleClient } from "@/lib/gemini";
+import { auth } from "@/auth";
 
-export const runtime = "nodejs"; // Cambiar a nodejs ya que edge no soporta prisma fácilmente si se usa el cliente estándar
+export const runtime = "nodejs";
 
 const documentSchema = z.object({
   dni: z.string().optional(),
@@ -15,10 +17,15 @@ const documentSchema = z.object({
 
 export async function POST(req: Request) {
   try {
-    const { image } = await req.json(); // base64 image
+    const session = await auth();
+    if (!session?.user) {
+      return Response.json({ error: "No autorizado" }, { status: 401 });
+    }
+
+    const { image } = await req.json();
 
     if (!image) {
-      return new Response("No image provided", { status: 400 });
+      return NextResponse.json({ error: "No image provided" }, { status: 400 });
     }
 
     // El modelo base64 viene con el prefijo data:image/jpeg;base64,
@@ -50,15 +57,12 @@ export async function POST(req: Request) {
       ],
     });
 
-    return Response.json(result.object);
+    return NextResponse.json(result.object);
   } catch (error: any) {
     console.error("OCR Error:", error);
-    return Response.json(
-      { 
-        error: error.message || "Error processing image",
-        details: error.cause?.message || error.toString()
-      }, 
-      { status: 500 }
+    return NextResponse.json(
+      { error: "Error al procesar la imagen" },
+      { status: 500 },
     );
   }
 }

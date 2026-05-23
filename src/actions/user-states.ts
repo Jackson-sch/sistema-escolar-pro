@@ -1,4 +1,5 @@
 "use server"
+import { serialize } from "@/lib/dto";
 
 import prisma from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
@@ -17,7 +18,7 @@ export async function getUserStatesAction(institucionId?: string) {
       },
       orderBy: { orden: "asc" }
     })
-    return { data: JSON.parse(JSON.stringify(states)) }
+    return { data: serialize(states) }
   } catch (error) {
     console.error("Error fetching user states:", error)
     return { error: "No se pudieron obtener los estados de usuario" }
@@ -47,7 +48,7 @@ export async function upsertUserStateAction(values: any, id?: string) {
       revalidatePath(REVALIDATE_PATH)
       revalidatePath("/gestion/personal")
       revalidatePath("/gestion/estudiantes")
-      return { success: "Estado actualizado", data: JSON.parse(JSON.stringify(state)) }
+      return { success: "Estado actualizado", data: serialize(state) }
     } else {
       const state = await prisma.estadoUsuario.create({
         data: {
@@ -58,7 +59,7 @@ export async function upsertUserStateAction(values: any, id?: string) {
       revalidatePath(REVALIDATE_PATH)
       revalidatePath("/gestion/personal")
       revalidatePath("/gestion/estudiantes")
-      return { success: "Estado creado", data: JSON.parse(JSON.stringify(state)) }
+      return { success: "Estado creado", data: serialize(state) }
     }
   } catch (error: any) {
     console.error("Error upserting user state:", error)

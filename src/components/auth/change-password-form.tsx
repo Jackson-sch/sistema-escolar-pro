@@ -98,7 +98,7 @@ export function ChangePasswordForm() {
       <Button
         type="submit"
         disabled={loading}
-        className="w-full h-12 rounded-xl gap-2 font-bold text-base"
+        className="w-full h-12 rounded-xl gap-2 font-bold text-base hover:scale-105"
       >
         {loading ? (
           <>

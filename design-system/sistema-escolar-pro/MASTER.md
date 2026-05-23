@@ -172,7 +172,7 @@
 
 ## Anti-Patterns (Do NOT Use)
 
-- ❌ Dark modes
+- ❌ Dark modes (Forbidden for administrative dashboards to maintain playful claymorphic aesthetics; permitted only for parent/student portals for nighttime legibility)
 - ❌ Complex jargon
 
 ### Additional Forbidden Patterns

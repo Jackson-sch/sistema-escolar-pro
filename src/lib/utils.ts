@@ -24,3 +24,16 @@ export function toTitleCase(str: string): string {
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 }
+
+export function sanitizeEmptyFields<T extends Record<string, unknown>>(
+  data: T,
+  fields: (keyof T)[],
+): T {
+  const result = { ...data };
+  for (const field of fields) {
+    if (result[field] === "" || result[field] === undefined) {
+      result[field] = null as any;
+    }
+  }
+  return result;
+}

@@ -86,7 +86,16 @@ export function DeudasListClient({
       {/* Overview Cards */}
       <div className="grid gap-4 md:gap-6 md:grid-cols-2">
         {stats.map((stat) => (
-          <StatCard key={stat.title} {...stat} />
+          <StatCard
+            key={stat.title}
+            title={stat.title}
+            value={stat.value}
+            icon={stat.icon}
+            iconColor={stat.iconColor}
+            glowColor={stat.glowColor}
+            className={stat.className}
+            description={stat.description}
+          />
         ))}
       </div>
 
@@ -99,7 +108,7 @@ export function DeudasListClient({
           <Button
             variant="link"
             onClick={() => setHistoryOpen(true)}
-            className="w-fit p-2 h-auto text-primary hover:text-primary/80 font-bold text-[10px] md:text-xs gap-2 transition-colors"
+            className="w-fit p-2 h-auto text-primary hover:text-primary/80 font-bold text-xxs md:text-xs gap-2 transition-colors"
           >
             <IconUpload size={14} className="md:size-4" />
             <span className="underline underline-offset-4 decoration-2">
@@ -114,16 +123,16 @@ export function DeudasListClient({
             <Table className="w-full text-left border-collapse">
               <TableHeader>
                 <TableRow className="border-b border-border bg-accent-foreground/5 text-muted-foreground">
-                  <TableHead className="px-4 py-2 text-[10px] font-black uppercase tracking-widest w-2/5">
+                  <TableHead className="px-4 py-2 text-xxs font-black uppercase tracking-widest w-2/5">
                     DESCRIPCIÓN
                   </TableHead>
-                  <TableHead className="px-4 py-2 text-[10px] font-black uppercase tracking-widest">
+                  <TableHead className="px-4 py-2 text-xxs font-black uppercase tracking-widest">
                     MONTO
                   </TableHead>
-                  <TableHead className="px-4 py-2 text-[10px] font-black uppercase tracking-widest">
+                  <TableHead className="px-4 py-2 text-xxs font-black uppercase tracking-widest">
                     ESTADO
                   </TableHead>
-                  <TableHead className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-right">
+                  <TableHead className="px-4 py-2 text-xxs font-black uppercase tracking-widest text-right">
                     ACCIÓN
                   </TableHead>
                 </TableRow>
@@ -161,7 +170,7 @@ export function DeudasListClient({
                         <TableCell className="font-bold text-[15px] text-foreground dark:text-white/90">
                           {formatCurrency(pendiente)}
                           <br />
-                          <span className="text-[10px] text-muted-foreground mt-1">
+                          <span className="text-xxs text-muted-foreground mt-1">
                             Venc:{" "}
                             {formatDate(deuda.fechaVencimiento, "dd MMM, yyyy")}
                           </span>
@@ -256,7 +265,7 @@ export function DeudasListClient({
 
                   <Button
                     onClick={() => handlePayNow(deuda)}
-                    className={`w-full h-11 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all active:scale-[0.98] ${
+                    className={`w-full h-11 rounded-xl font-black text-xxs uppercase tracking-[0.2em] transition-all active:scale-[0.98] ${
                       vencida
                         ? "bg-rose-500 hover:bg-rose-600 text-white shadow-lg shadow-rose-500/20"
                         : "bg-primary hover:bg-primary/80 text-white shadow-lg shadow-primary/20"

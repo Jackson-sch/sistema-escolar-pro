@@ -85,7 +85,7 @@ export function ViewAnnouncementDialog({
             </div>
           </div>
 
-          <div className="prose prose-invert max-w-none">
+          <div className="prose max-w-none dark:prose-invert">
             <p className="text-md text-foreground/90 font-medium leading-relaxed bg-muted/20 p-5 rounded-2xl border border-border/10 italic">
               {anuncio.resumen}
             </p>

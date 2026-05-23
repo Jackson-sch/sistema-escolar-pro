@@ -38,7 +38,7 @@ export default async function PortalUniformesPage() {
     <div className="flex flex-1 flex-col gap-8 p-4 sm:p-10 pt-0 @container/main animate-in fade-in duration-700 min-h-screen max-w-[1600px] mx-auto w-full">
       {/* Sección de Encabezado */}
       <div className="space-y-1 mt-4 md:mt-0">
-        <h1 className="text-3xl md:text-4xl font-black tracking-tight">
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
           Guía de Uniformes
         </h1>
         <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed">

@@ -20,7 +20,7 @@ export default async function PerfilPage() {
     return (
       <div className="flex flex-1 items-center justify-center p-4">
         <div className="text-center space-y-4">
-          <p className="text-destructive font-black text-xl">
+          <p className="text-destructive font-bold text-xl">
             {result.error || "Error al cargar el perfil"}
           </p>
           <p className="text-muted-foreground font-medium">
@@ -34,7 +34,7 @@ export default async function PerfilPage() {
   return (
     <div className="flex flex-1 flex-col gap-8 md:gap-10 p-4 sm:p-10 pt-0 @container/main animate-in fade-in duration-700 min-h-screen max-w-[1600px] mx-auto w-full">
       <div className="space-y-1 mt-4 md:mt-0">
-        <h1 className="text-4xl font-black tracking-tight drop-shadow-sm">
+        <h1 className="text-4xl font-bold tracking-tight drop-shadow-sm">
           Mi Perfil
         </h1>
         <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed max-w-2xl">

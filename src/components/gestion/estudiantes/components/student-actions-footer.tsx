@@ -59,7 +59,7 @@ export function StudentActionsFooter({
         {!isProfessor && (
           <Button
             variant="outline"
-            className="w-full rounded-full text-[11px] md:text-sm h-9 md:h-10"
+            className="w-full rounded-full text-micro md:text-sm h-9 md:h-10"
             onClick={onEdit}
           >
             <IconEdit className="size-3.5 md:size-4 mr-1.5 md:mr-2 text-blue-500" />{" "}
@@ -88,7 +88,7 @@ export function StudentActionsFooter({
           {({ loading }) => (
             <Button
               variant="outline"
-              className="w-full rounded-full text-[11px] md:text-sm h-9 md:h-10"
+              className="w-full rounded-full text-micro md:text-sm h-9 md:h-10"
               disabled={loading}
             >
               <IconId className="size-3.5 md:size-4 mr-1.5 md:mr-2" />

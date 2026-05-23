@@ -1,4 +1,5 @@
 "use server";
+import { serialize } from "@/lib/dto";
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
@@ -26,7 +27,7 @@ export async function getStaffAction() {
         createdAt: "desc",
       },
     });
-    return { data: JSON.parse(JSON.stringify(staff)) };
+    return { data: serialize(staff) };
   } catch (error) {
     console.error("Error fetching staff:", error);
     return { error: "No se pudo obtener la lista de personal" };
@@ -42,7 +43,7 @@ export async function getUserStatusesAction() {
       where: { activo: true },
       orderBy: { orden: "asc" },
     });
-    return { data: JSON.parse(JSON.stringify(statuses)) };
+    return { data: serialize(statuses) };
   } catch (error) {
     return { error: "Error al cargar estados" };
   }
@@ -56,7 +57,7 @@ export async function getInstitucionesAction() {
     const instituciones = await prisma.institucionEducativa.findMany({
       select: { id: true, nombreInstitucion: true },
     });
-    return { data: JSON.parse(JSON.stringify(instituciones)) };
+    return { data: serialize(instituciones) };
   } catch (error) {
     return { error: "Error al cargar instituciones" };
   }
@@ -71,7 +72,7 @@ export async function getCargosAction() {
       where: { activo: true },
       orderBy: { jerarquia: "asc" },
     });
-    return { data: JSON.parse(JSON.stringify(cargos)) };
+    return { data: serialize(cargos) };
   } catch (error) {
     return { error: "Error al cargar cargos" };
   }
@@ -96,7 +97,7 @@ export async function createStaffAction(values: any) {
     revalidatePath("/gestion/personal");
     return {
       success: "Personal registrado con éxito",
-      data: JSON.parse(JSON.stringify(staff)),
+      data: serialize(staff),
     };
   } catch (error: any) {
     console.error("Error creating staff:", error);
@@ -132,7 +133,7 @@ export async function updateStaffAction(id: string, values: any) {
     revalidatePath("/gestion/personal");
     return {
       success: "Personal actualizado correctamente",
-      data: JSON.parse(JSON.stringify(staff)),
+      data: serialize(staff),
     };
   } catch (error) {
     console.error("Error updating staff:", error);

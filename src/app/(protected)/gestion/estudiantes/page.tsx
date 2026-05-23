@@ -4,11 +4,13 @@ import {
   getInstitucionesAction,
   getUserStatusesAction,
   getNivelesAcademicosAction,
+  getStudentDashboardStatsAction,
 } from "@/actions/students";
 import { getInstitucionAction } from "@/actions/institucion";
 import { columns } from "@/components/gestion/estudiantes/components/columns";
 import { StudentTable } from "@/components/gestion/estudiantes/management/student-table";
 import { AddStudentButton } from "@/components/gestion/estudiantes/components/add-student-button";
+import StudentStats from "@/components/gestion/estudiantes/components/stats";
 import { Button } from "@/components/ui/button";
 import { auth } from "@/auth";
 import {
@@ -17,27 +19,34 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Suspense } from "react";
 
 export default async function EstudiantesPage() {
-  // Fetch de todos los datos necesarios en paralelo para optimizar carga
   const [
-    { data: students = [] },
+    { data: estudiantes = [], totalCount = 0 },
     { data: instituciones = [] },
     { data: estados = [] },
     { data: nivelesAcademicos = [] },
     { data: institucion },
+    { data: stats },
   ] = await Promise.all([
-    getStudentsAction(),
+    getStudentsAction({ page: 1, pageSize: 25 }),
     getInstitucionesAction(),
     getUserStatusesAction(),
     getNivelesAcademicosAction(),
     getInstitucionAction(),
+    getStudentDashboardStatsAction(),
   ]);
 
   const periodoAcademico = institucion?.cicloEscolarActual || new Date().getFullYear();
   const session = await auth();
   const isAdmin = session?.user?.role === "administrativo" || session?.user?.role === "super_admin";
+
+  const defaultStats = stats || {
+    totalStudents: 0,
+    activeEnrollments: 0,
+    newEnrollments: 0,
+    currentYear: periodoAcademico,
+  };
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-0 sm:p-4 pt-0 @container/main">
@@ -46,7 +55,7 @@ export default async function EstudiantesPage() {
           <h1 className="text-xl sm:text-3xl font-bold tracking-tight">
             Gestión de Estudiantes
           </h1>
-          <p className="text-[10px] sm:text-sm text-muted-foreground font-medium">
+          <p className="text-xxs sm:text-sm text-muted-foreground font-medium">
             Administración integral de la información personal y académica de
             los alumnos.
           </p>
@@ -65,7 +74,7 @@ export default async function EstudiantesPage() {
                 </TooltipTrigger>
                 <TooltipContent
                   side="bottom"
-                  className="text-[11px] font-medium"
+                  className="text-micro font-medium"
                 >
                   Exportar base de datos de alumnos
                 </TooltipContent>
@@ -81,21 +90,19 @@ export default async function EstudiantesPage() {
         </div>
       </div>
 
-      <Suspense
-        fallback={
-          <div className="flex items-center justify-center min-h-[400px] text-sm text-muted-foreground font-medium animate-pulse">
-            Cargando base de datos de estudiantes...
-          </div>
-        }
-      >
-        <div className="px-4 sm:px-2">
-          <StudentTable
-            columns={columns}
-            data={students as any}
-            meta={{ instituciones, estados, nivelesAcademicos, institucion }}
-          />
+      <div className="px-4 sm:px-2 space-y-6">
+        {/* BANNER DE ESTADO RÁPIDO - DASHBOARD STYLE */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <StudentStats stats={defaultStats} />
         </div>
-      </Suspense>
+
+        <StudentTable
+          columns={columns}
+          data={estudiantes as any}
+          totalCount={totalCount}
+          meta={{ instituciones, estados, nivelesAcademicos, institucion }}
+        />
+      </div>
     </div>
   );
 }

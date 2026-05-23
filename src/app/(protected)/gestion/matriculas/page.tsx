@@ -43,7 +43,7 @@ export default async function MatriculasPage() {
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
             Registro de Matrículas
           </h1>
-          <p className="text-muted-foreground text-[10px] sm:text-xs">
+          <p className="text-muted-foreground text-xxs sm:text-xs">
             Control de inscripciones académicas, asignación de aulas y estados
             de vacantes {currentAnio}.
           </p>

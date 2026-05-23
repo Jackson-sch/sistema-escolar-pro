@@ -281,7 +281,7 @@ export function EnrollmentForm({
                                 >
                                   <IconCheck
                                     className={cn(
-                                      "mr-2 h-4 w-4",
+                                      "mr-2 size-4",
                                       student.id === field.value
                                         ? "opacity-100"
                                         : "opacity-0",
@@ -292,13 +292,13 @@ export function EnrollmentForm({
                                       {student.apellidoPaterno}{" "}
                                       {student.apellidoMaterno}, {student.name}
                                     </span>
-                                    <div className="flex items-center gap-3 text-[10px] font-medium tracking-wider text-muted-foreground/70">
+                                    <div className="flex items-center gap-3 font-medium tracking-wider text-muted-foreground/70">
                                       <span className="flex items-center gap-1">
-                                        <IconId className="h-3 w-3" />
+                                        <IconId className="size-4" />
                                         {student.dni}
                                       </span>
                                       <span className="flex items-center gap-1 text-violet-400/90 font-bold">
-                                        <IconCalendarEvent className="h-3 w-3 text-violet-500" />
+                                        <IconCalendarEvent className="size-4 text-violet-500" />
                                         {calculateAge(student.fechaNacimiento)}{" "}
                                         años
                                       </span>
@@ -341,7 +341,7 @@ export function EnrollmentForm({
                           <div className="flex flex-wrap gap-y-2 gap-x-4 mt-1">
                             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                               <div className="p-1 rounded-md bg-white/5">
-                                <IconId className="h-3 w-3 text-violet-400" />
+                                <IconId className="size-4 text-violet-400" />
                               </div>
                               <span className="font-medium tracking-wide">
                                 DNI: {s.dni}
@@ -349,7 +349,7 @@ export function EnrollmentForm({
                             </div>
                             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                               <div className="p-1 rounded-md bg-white/5">
-                                <IconCalendarFilled className="h-3 w-3 text-pink-400" />
+                                <IconCalendarFilled className="size-4 text-pink-400" />
                               </div>
                               <span className="font-medium tracking-wide">
                                 {calculateAge(s.fechaNacimiento)} años
@@ -357,7 +357,7 @@ export function EnrollmentForm({
                             </div>
                             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                               <div className="p-1 rounded-md bg-white/5">
-                                <IconBuildingCommunity className="h-3 w-3 text-blue-400" />
+                                <IconBuildingCommunity className="size-4 text-blue-400" />
                               </div>
                               <span className="font-medium tracking-wide">
                                 {s.direccion || "Sin dirección"}
@@ -376,7 +376,7 @@ export function EnrollmentForm({
             <div className="group relative overflow-hidden rounded-2xl border border-white/5 bg-linear-to-br from-blue-500/5 via-transparent to-transparent p-6 transition-all hover:border-blue-500/10">
               <div className="mb-4 flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400 ring-1 ring-inset ring-blue-500/20">
-                  <IconSchool className="h-5 w-5" />
+                  <IconSchool className="size-5" />
                 </div>
                 <div className="space-y-0.5">
                   <h3 className="text-sm font-bold tracking-widest text-foreground/90">
@@ -419,13 +419,13 @@ export function EnrollmentForm({
                         >
                           <Icon
                             className={cn(
-                              "h-5 w-5 transition-transform duration-300 group-hover:scale-110",
+                              "size-5 transition-transform duration-300 group-hover:scale-110",
                               isActive
                                 ? "text-white"
                                 : "text-muted-foreground/50",
                             )}
                           />
-                          <span className="text-[10px] font-bold uppercase tracking-widest leading-none">
+                          <span className="uppercase tracking-widest leading-none">
                             {level.id}
                           </span>
                         </button>
@@ -491,7 +491,7 @@ export function EnrollmentForm({
                       </FormLabel>
                       <FormControl>
                         <div className="relative group/input">
-                          <IconBuildingCommunity className="absolute left-4 top-2.5 h-5 w-5 text-muted-foreground/50 transition-colors group-hover/input:text-blue-400/70" />
+                          <IconBuildingCommunity className="absolute left-4 top-2.5 size-5 text-muted-foreground/50 transition-colors group-hover/input:text-blue-400/70" />
                           <Input
                             {...field}
                             className="h-11 bg-black/20 border-white/5 pl-12 placeholder:text-xs transition-all hover:bg-black/30 focus:border-blue-500/30 focus:bg-black/40 focus:ring-4 focus:ring-blue-500/10 rounded-2xl"
@@ -511,7 +511,7 @@ export function EnrollmentForm({
               <div className="group relative overflow-hidden rounded-2xl border border-white/5 bg-linear-to-br from-emerald-500/5 via-transparent to-transparent p-4 transition-all hover:border-emerald-500/10">
                 <div className="mb-3 flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
-                    <IconCheck className="h-5 w-5" />
+                    <IconCheck className="size-5" />
                   </div>
                   <div className="space-y-0.5">
                     <h3 className="text-sm font-bold tracking-widest text-foreground/90">
@@ -605,7 +605,7 @@ export function EnrollmentForm({
               <div className="group relative overflow-hidden rounded-2xl border border-white/5 bg-linear-to-br from-pink-500/5 via-transparent to-transparent p-4 transition-all hover:border-pink-500/10">
                 <div className="mb-3 flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-pink-500/10 text-pink-400 ring-1 ring-inset ring-pink-500/20">
-                    <IconDiscount2 className="h-5 w-5" />
+                    <IconDiscount2 className="size-5" />
                   </div>
                   <div className="space-y-0.5">
                     <h3 className="text-sm font-bold tracking-widest text-foreground/90">
@@ -690,7 +690,7 @@ export function EnrollmentForm({
                   <FormItem>
                     <FormLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
                       Observaciones
-                      <span className="text-[10px] font-normal lowercase italic text-muted-foreground/40">
+                      <span className="font-normal lowercase italic text-muted-foreground/40">
                         (Opcional)
                       </span>
                     </FormLabel>
@@ -716,7 +716,7 @@ export function EnrollmentForm({
                 variant="outline"
                 onClick={onCancel}
                 disabled={isPending}
-                className="rounded-full px-6 h-12 hover:bg-white/5 text-muted-foreground hover:text-foreground transition-all font-semibold"
+                className="rounded-full px-6 h-12 hover:bg-white/5 text-muted-foreground hover:text-foreground transition-all font-semibold hover:scale-105"
               >
                 Cancelar
               </Button>
@@ -724,17 +724,17 @@ export function EnrollmentForm({
             <Button
               type="submit"
               disabled={isPending}
-              className="rounded-full px-12 h-12  font-bold transition-all duration-300 text-white min-w-[200px]"
+              className="rounded-full px-12 h-12  font-bold transition-all duration-300 min-w-[200px] hover:scale-105"
             >
               {isPending ? (
                 <>
-                  <IconLoader2 className="mr-2 h-5 w-5 animate-spin" />
+                  <IconLoader2 className="mr-2 size-5 animate-spin" />
                   Procesando...
                 </>
               ) : (
                 <>
                   Confirmar Registro
-                  <IconArrowRight className="ml-2 h-5 w-5" />
+                  <IconArrowRight className="ml-2 size-5" />
                 </>
               )}
             </Button>

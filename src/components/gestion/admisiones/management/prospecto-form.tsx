@@ -420,14 +420,14 @@ export function ProspectoForm({
             type="button"
             variant="ghost"
             onClick={onSuccess}
-            className="rounded-full px-5 text-sm font-medium text-muted-foreground hover:text-foreground"
+            className="rounded-full px-5 text-sm font-medium text-muted-foreground hover:text-foreground hover:scale-105"
             disabled={loading}
           >
             Cancelar
           </Button>
           <Button
             type="submit"
-            className="rounded-full px-7 text-sm font-semibold gap-2 min-w-[160px]"
+            className="rounded-full px-7 text-sm font-semibold gap-2 min-w-[160px] hover:scale-105"
             disabled={loading}
           >
             {loading ? (

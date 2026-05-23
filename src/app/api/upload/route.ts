@@ -30,6 +30,36 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Validar tipo MIME
+    const allowedMimeTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+      "application/pdf",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // xlsx
+      "application/vnd.ms-excel", // xls
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // docx
+      "application/msword", // doc
+    ];
+
+    if (!allowedMimeTypes.includes(file.type)) {
+      return NextResponse.json(
+        { error: "Tipo de archivo no permitido. Solo se permiten imágenes y documentos estándar (PDF, Word, Excel)." },
+        { status: 400 },
+      );
+    }
+
+    // Validar extensión (Mitigación doble de extensiones peligrosas)
+    const fileExtension = file.name.split(".").pop()?.toLowerCase();
+    const disallowedExtensions = ["html", "htm", "svg", "js", "jsx", "ts", "tsx", "sh", "bat", "exe", "cmd"];
+    if (!fileExtension || disallowedExtensions.includes(fileExtension)) {
+      return NextResponse.json(
+        { error: "Extensión de archivo peligrosa o no permitida." },
+        { status: 400 },
+      );
+    }
+
     // Usar utilidad de almacenamiento (Local o Cloudinary)
     const url = await uploadFile(file);
 

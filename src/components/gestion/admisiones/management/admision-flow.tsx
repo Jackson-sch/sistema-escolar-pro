@@ -251,7 +251,7 @@ export function AdmisionFlow({ admision, onSuccess }: AdmisionFlowProps) {
           <div className="pt-2">
             <Button
               type="submit"
-              className="w-full"
+              className="w-full hover:scale-105"
               disabled={loading || admision.prospecto.estado === "MATRICULADO"}
             >
               {loading ? (

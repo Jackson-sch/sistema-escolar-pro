@@ -133,7 +133,7 @@ export function VerificarContent() {
                 type="submit"
                 size="lg"
                 disabled={loading}
-                className="h-14 px-8 rounded-2xl bg-emerald-600 hover:bg-emerald-700 font-bold active:scale-95 transition-all"
+                className="h-14 px-8 rounded-2xl bg-emerald-600 hover:bg-emerald-700 font-bold active:scale-95 transition-all hover:scale-105"
               >
                 {loading ? (
                   <IconLoader2 className="animate-spin size-6" />

@@ -5,29 +5,15 @@ import { useQueryState, parseAsString } from "nuqs";
 import { cn } from "@/lib/utils";
 import {
   Shirt,
-  ShoppingCart,
   History,
   LayoutDashboard,
   Ruler,
   ChevronLeft,
   ChevronRight,
-  Heart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { toast } from "sonner";
-import {
-  crearReservaUniformeAction,
-  toggleFavoritoUniformeAction,
-} from "@/actions/uniformes";
+import { crearReservaUniformeAction } from "@/actions/uniformes";
 import ReservationCard from "@/components/portal/uniformes/reservation-card";
 import HeroSection from "@/components/portal/uniformes/hero-section";
 import TopBar from "@/components/portal/uniformes/top-bar";
@@ -170,7 +156,7 @@ export function UniformCatalogue({
       {/* Left Sidebar - Portal Navigation */}
       <aside className="w-full lg:w-64 space-y-6">
         <div className="bg-card backdrop-blur-xl p-6 rounded-[2rem] border shadow-xl shadow-slate-200/50 dark:shadow-none">
-          <p className="text-[10px] font-black text-foreground uppercase tracking-[0.2em] mb-6 ml-2">
+          <p className="text-xxs font-black text-foreground uppercase tracking-[0.2em] mb-6 ml-2">
             Portal
           </p>
           <nav className="space-y-2">
@@ -210,7 +196,7 @@ export function UniformCatalogue({
         </div>
 
         <div className="bg-card p-6 rounded-[2rem] border space-y-4">
-          <p className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.2em]">
+          <p className="text-xxs font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.2em]">
             Soporte en Vivo
           </p>
           <p className="text-xs text-slate-600 dark:text-slate-400 font-medium leading-relaxed">

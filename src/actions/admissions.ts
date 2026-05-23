@@ -1,4 +1,5 @@
 "use server"
+import { serialize } from "@/lib/dto";
 
 import prisma from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
@@ -32,7 +33,7 @@ export const getProspectosAction = createSafeAction(
         },
         orderBy: { createdAt: "desc" }
       })
-      return { success: JSON.parse(JSON.stringify(prospectos)) }
+      return { success: serialize(prospectos) }
     } catch (error) {
       console.error("Error fetching prospectos:", error)
       return { error: "No se pudieron obtener los prospectos" }
@@ -72,7 +73,7 @@ export const upsertProspectoAction = createSafeAction(
           data
         })
         revalidatePath(REVALIDATE_PATH)
-        return { success: "Prospecto actualizado", data: JSON.parse(JSON.stringify(prospecto)) }
+        return { success: "Prospecto actualizado", data: serialize(prospecto) }
       } else {
         const prospecto = await prisma.prospecto.create({
           data
@@ -96,7 +97,7 @@ export const upsertProspectoAction = createSafeAction(
           }).catch(e => console.error("Error welcome sms:", e));
         }
 
-        return { success: "Prospecto registrado correctamente", data: JSON.parse(JSON.stringify(prospecto)) }
+        return { success: "Prospecto registrado correctamente", data: serialize(prospecto) }
       }
     } catch (error: any) {
       console.error("Error upserting prospecto:", error)
@@ -141,7 +142,7 @@ export const convertProspectoToAdmisionAction = createSafeAction(
       })
 
       revalidatePath(REVALIDATE_PATH)
-      return { success: "Proceso de admisión iniciado", data: JSON.parse(JSON.stringify(result)) }
+      return { success: "Proceso de admisión iniciado", data: serialize(result) }
     } catch (error) {
       console.error("Error converting to admision:", error)
       return { error: "No se pudo iniciar el proceso de admisión" }
@@ -212,7 +213,7 @@ export const updateAdmisionResultAction = createSafeAction(
         }
       }
 
-      return { success: "Gestión de admisión actualizada", data: JSON.parse(JSON.stringify(result)) }
+      return { success: "Gestión de admisión actualizada", data: serialize(result) }
     } catch (error) {
       console.error("Error updating admision:", error)
       return { error: "No se pudo actualizar el resultado de la admisión" }
@@ -310,7 +311,7 @@ export const convertProspectoToEstudianteAction = createSafeAction(
         }).catch(e => console.error("Error credentials sms:", e));
       }
 
-      return { success: "Estudiante generado correctamente. Ahora puede iniciar su matrícula.", data: JSON.parse(JSON.stringify(result)) }
+      return { success: "Estudiante generado correctamente. Ahora puede iniciar su matrícula.", data: serialize(result) }
     } catch (error: any) {
       console.error("Error converting prospecto to student:", error)
       if (error.code === "P2002") {

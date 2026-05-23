@@ -34,7 +34,7 @@ export default async function PortalComunicacionesPage({
     return (
       <div className="flex flex-1 flex-col gap-8 p-4 sm:p-10 pt-0">
         <div className="space-y-1 mt-4 md:mt-0">
-          <h1 className="text-3xl md:text-4xl font-black tracking-tight">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
             Centro de Comunicaciones
           </h1>
           <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed">
@@ -72,7 +72,7 @@ export default async function PortalComunicacionesPage({
     <div className="flex-1 flex flex-col gap-8 p-4 sm:p-10 pt-0 animate-in fade-in duration-700">
       {/* Sección de Encabezado */}
       <div className="space-y-1 mt-4 md:mt-0 mb-4 xl:mb-0">
-        <h1 className="text-3xl md:text-4xl font-black tracking-tight">
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
           {view === "docentes"
             ? "Directorio Docente"
             : "Centro de Comunicaciones"}
@@ -88,7 +88,7 @@ export default async function PortalComunicacionesPage({
         {/* Sidebar Izquierdo (Student & Navigation) */}
         <aside className="w-full xl:w-64 flex flex-col gap-8 shrink-0">
           <div className="bg-card rounded-2xl p-4 shadow-sm border border-border">
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4 px-2">
+            <p className="text-xxs font-bold text-muted-foreground uppercase tracking-widest mb-4 px-2">
               Estudiante Actual
             </p>
             <StudentSelector students={hijos as any} orientation="vertical" />

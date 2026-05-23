@@ -151,7 +151,7 @@ export async function GET(req: NextRequest) {
       }
     };
 
-    const buffer = await renderToBuffer(<GradeReportPDF data={pdfData} />);
+    const buffer = await renderToBuffer(<GradeReportPDF data={pdfData as any} />);
 
     return new NextResponse(new Uint8Array(buffer), {
       status: 200,

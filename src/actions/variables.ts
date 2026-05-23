@@ -1,4 +1,5 @@
 "use server"
+import { serialize } from "@/lib/dto";
 
 import prisma from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
@@ -16,7 +17,7 @@ export async function getVariablesAction() {
         { clave: "asc" }
       ]
     })
-    return { data: JSON.parse(JSON.stringify(variables)) }
+    return { data: serialize(variables) }
   } catch (error) {
     console.error("Error al obtener variables:", error)
     return { error: "No se pudieron cargar las variables" }
@@ -55,7 +56,7 @@ export async function upsertVariableAction(data: {
     })
 
     revalidatePath(REVALIDATE_PATH)
-    return { data: JSON.parse(JSON.stringify(variable)) }
+    return { data: serialize(variable) }
   } catch (error) {
     console.error("Error al guardar variable:", error)
     return { error: "No se pudo guardar la variable" }
@@ -87,7 +88,7 @@ export async function getVariableByKeyAction(clave: string) {
     const variable = await prisma.variableSistema.findUnique({
       where: { clave }
     })
-    return { data: variable ? JSON.parse(JSON.stringify(variable)) : null }
+    return { data: variable ? serialize(variable) : null }
   } catch (error) {
     console.error("Error al obtener variable por clave:", error)
     return { error: "Error al buscar la variable" }

@@ -196,7 +196,7 @@ export function PsychopedagogicalForm({
                       type="button"
                       variant="ghost"
                       size="icon"
-                      className="size-5 rounded-full hover:bg-primary/10 text-primary"
+                      className="size-5 rounded-full hover:bg-primary/10 text-primary hover:scale-105"
                       onClick={() => setShowCategoryModal(true)}
                     >
                       <IconPlus className="size-3" />
@@ -328,7 +328,7 @@ export function PsychopedagogicalForm({
           <Button
             disabled={isPending}
             type="submit"
-            className="w-full rounded-full"
+            className="w-full rounded-full hover:scale-105"
           >
             {isPending ? (
               <IconLoader2 className="animate-spin" />

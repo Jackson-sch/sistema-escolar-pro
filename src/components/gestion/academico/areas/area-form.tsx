@@ -311,7 +311,7 @@ export function AreaForm({
             type="button"
             variant="outline"
             onClick={onSuccess}
-            className="w-full sm:w-auto rounded-full border-border/40 hover:bg-accent/50"
+            className="w-full sm:w-auto rounded-full border-border/40 hover:bg-accent/50 hover:scale-105"
             disabled={isPending}
           >
             Cancelar
@@ -319,7 +319,7 @@ export function AreaForm({
           <Button
             disabled={isPending}
             type="submit"
-            className="w-full sm:w-auto font-medium rounded-full px-8"
+            className="w-full sm:w-auto font-medium rounded-full px-8 hover:scale-105"
           >
             {isPending && <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />}
             {isPending ? "Guardando..." : id ? "Guardar Cambios" : "Crear Área"}

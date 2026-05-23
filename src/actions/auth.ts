@@ -1,4 +1,5 @@
 "use server";
+import { serialize } from "@/lib/dto";
 
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
@@ -22,7 +23,7 @@ export async function getLayoutUserAction(userId: string) {
         institucionId: true,
       },
     });
-    return { success: user ? JSON.parse(JSON.stringify(user)) : null };
+    return { success: user ? serialize(user) : null };
   } catch (error) {
     console.error("Error fetching layout user:", error);
     return { error: "No se pudo obtener el usuario" };

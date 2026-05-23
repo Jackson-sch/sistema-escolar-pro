@@ -13,7 +13,7 @@ export default async function EstadosUsuarioPage() {
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-primary">
             Estados de Usuario
           </h1>
-          <p className="text-[10px] sm:text-xs text-muted-foreground">
+          <p className="text-xxs sm:text-xs text-muted-foreground">
             Gestiona los estados operativos, permisos de acceso y colores de
             identificación para usuarios.
           </p>

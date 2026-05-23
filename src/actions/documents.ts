@@ -1,4 +1,5 @@
 "use server"
+import { serialize } from "@/lib/dto";
 
 import prisma from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
@@ -35,7 +36,7 @@ export async function getDocumentByCodeAction(codigo: string) {
         tipoDocumento: true
       }
     })
-    return { data: documento ? JSON.parse(JSON.stringify(documento)) : null }
+    return { data: documento ? serialize(documento) : null }
   } catch (error) {
     console.error("Error verifying document:", error)
     return { error: "Error interno al verificar el documento" }

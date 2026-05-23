@@ -1,4 +1,5 @@
 "use server"
+import { serialize } from "@/lib/dto";
 
 import prisma from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
@@ -34,7 +35,7 @@ export async function getHorariosBySeccionAction(seccionId: string) {
         { horaInicio: "asc" }
       ]
     })
-    return { data: JSON.parse(JSON.stringify(horarios)) }
+    return { data: serialize(horarios) }
   } catch (error) {
     console.error("Error fetching horarios:", error)
     return { error: "No se pudieron obtener los horarios" }
@@ -52,13 +53,13 @@ export async function upsertHorarioAction(values: any, id?: string) {
         data: values
       })
       revalidatePath(REVALIDATE_PATH)
-      return { success: "Horario actualizado", data: JSON.parse(JSON.stringify(horario)) }
+      return { success: "Horario actualizado", data: serialize(horario) }
     } else {
       const horario = await prisma.horario.create({
         data: values
       })
       revalidatePath(REVALIDATE_PATH)
-      return { success: "Horario asignado", data: JSON.parse(JSON.stringify(horario)) }
+      return { success: "Horario asignado", data: serialize(horario) }
     }
   } catch (error: any) {
     console.error("Error upserting horario:", error)

@@ -15,7 +15,7 @@ export default async function VerificacionPage() {
         </p>
       </div>
 
-      <VerificacionTable comprobantes={result.success || []} />
+      <VerificacionTable comprobantes={(result.success || []) as any} />
     </div>
   );
 }

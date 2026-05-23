@@ -49,7 +49,7 @@ export default async function PortalDashboardPage({
     return (
       <div className="flex flex-1 flex-col gap-8 p-4 sm:p-10 pt-0">
         <div className="space-y-1 mt-4 md:mt-0">
-          <h1 className="text-3xl md:text-4xl font-black tracking-tight">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
             Bienvenido al Portal
           </h1>
           <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed">
@@ -73,7 +73,7 @@ export default async function PortalDashboardPage({
     <div className="flex flex-1 flex-col gap-8 p-4 md:p-10 pt-0 @container/main animate-in fade-in duration-700 min-h-screen max-w-[1600px] mx-auto w-full">
       {/* Sección de Encabezado */}
       <div className="space-y-1 mt-4 md:mt-0">
-        <h1 className="text-3xl md:text-4xl font-black tracking-tight">
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
           Bienvenido al Portal
         </h1>
         <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed">
@@ -91,7 +91,7 @@ export default async function PortalDashboardPage({
       <main className="space-y-8">
         <div className="flex items-center gap-3">
           <div className="h-8 w-1.5 bg-primary rounded-full" />
-          <h2 className="text-2xl font-black tracking-tight capitalize">
+          <h2 className="text-2xl font-bold tracking-tight capitalize">
             Panel de {currentStudent.name}
           </h2>
         </div>

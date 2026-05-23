@@ -6,6 +6,6 @@ export interface VariableSistema {
   descripcion?: string | null;
   seccion?: string | null;
   activo: boolean;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: string | Date;
+  updatedAt: string | Date;
 }

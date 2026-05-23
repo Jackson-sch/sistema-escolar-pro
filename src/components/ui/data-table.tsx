@@ -22,7 +22,6 @@ import {
   IconChevronsLeft,
   IconChevronsRight,
   IconSearch,
-  IconAdjustmentsHorizontal,
   IconArrowsSort,
   IconSortAscending,
   IconSortDescending,
@@ -227,7 +226,7 @@ export function DataTable<TData, TValue>({
             />
             <InputGroupAddon
               align="inline-end"
-              className="text-[10px] uppercase font-black opacity-30 hidden sm:flex border-l border-primary/5 pl-3 ml-2 shrink-0"
+              className="text-xs uppercase font-black opacity-30 hidden sm:flex border-l border-primary/5 pl-3 ml-2 shrink-0"
             >
               {totalRows}
             </InputGroupAddon>
@@ -252,20 +251,15 @@ export function DataTable<TData, TValue>({
             {showClearFilters && (
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon"
                 onClick={() => {
                   table.resetColumnFilters();
                   onClearFilters?.();
                 }}
-                className={cn(
-                  "h-10 gap-1.5 rounded-xl px-4 text-xs font-black uppercase tracking-widest",
-                  "text-muted-foreground border border-dashed border-muted-foreground/30",
-                  "hover:border-destructive/40 hover:bg-destructive/5 hover:text-destructive",
-                  "transition-all duration-150 shadow-sm",
-                )}
+                className="rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all duration-200 border-none shadow-none"
+                title="Limpiar filtros"
               >
                 <IconFilterOff className="size-4" />
-                Limpiar
               </Button>
             )}
 
@@ -282,7 +276,7 @@ export function DataTable<TData, TValue>({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56 rounded-2xl bg-background/95 backdrop-blur-xl border-border/40 p-2 shadow-2xl">
-                  <DropdownMenuLabel className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-black px-2 py-3">
+                  <DropdownMenuLabel className="text-xs uppercase tracking-widest text-muted-foreground/60 font-black px-2 py-3">
                     Configurar Columnas
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator className="bg-border/20" />
@@ -326,7 +320,7 @@ export function DataTable<TData, TValue>({
                     key={header.id}
                     colSpan={header.colSpan}
                     className={cn(
-                      "h-14 px-8 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60",
+                      "h-10 px-6 text-xs font-black uppercase tracking-widest text-muted-foreground/60",
                       "transition-colors duration-200",
                       header.column.getCanSort() &&
                         "cursor-pointer select-none hover:text-primary hover:bg-primary/5",
@@ -375,7 +369,7 @@ export function DataTable<TData, TValue>({
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
-                      className="px-8 py-5 text-sm font-bold text-foreground/80"
+                      className="px-4 py-1 text-xs text-foreground/80"
                       style={{ width: cell.column.getSize() }}
                     >
                       {flexRender(

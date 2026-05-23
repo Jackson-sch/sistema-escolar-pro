@@ -5,7 +5,12 @@ import { getSystemVariable } from "./settings";
  * Obtiene el cliente de Google AI configurado con la API Key dinámica.
  */
 export async function getGoogleClient() {
-  const apiKey = await getSystemVariable("GOOGLE_GENERATIVE_AI_API_KEY");
+  let apiKey = await getSystemVariable("GOOGLE_GENERATIVE_AI_API_KEY");
+
+  // Fallback de resiliencia si en la base de datos se guardó bajo la clave "GEMINI"
+  if (!apiKey) {
+    apiKey = await getSystemVariable("GEMINI");
+  }
 
   return createGoogleGenerativeAI({
     apiKey: apiKey,
@@ -17,10 +22,15 @@ export async function getGoogleClient() {
  */
 export async function getGeminiModel() {
   const client = await getGoogleClient();
-  const modelName = await getSystemVariable(
+  let modelName = await getSystemVariable(
     "GEMINI_MODEL",
-    "gemini-3-flash-preview",
+    "gemini-2.5-flash",
   );
+
+  // Redirección de resiliencia si se configuró el preview descontinuado "gemini-3-flash-preview"
+  if (modelName === "gemini-3-flash-preview") {
+    modelName = "gemini-2.5-flash";
+  }
 
   return client(modelName);
 }

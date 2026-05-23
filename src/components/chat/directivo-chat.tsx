@@ -78,15 +78,15 @@ export function DirectivoChat({ context }: DirectivoChatProps) {
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4">
       {isOpen && (
-        <div className="w-[380px] h-[600px] bg-background/80 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] shadow-xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-5 duration-300">
+        <div className="w-[380px] h-[600px] bg-white/95 dark:bg-zinc-950/95 backdrop-blur-3xl border border-slate-200/80 dark:border-zinc-800 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-5 duration-300">
           {/* Header - Fixed height */}
-          <div className="h-20 p-6 bg-linear-to-r from-primary/20 to-primary/20 border-b border-white/5 flex items-center justify-between shrink-0">
+          <div className="h-20 p-6 bg-indigo-50/50 dark:bg-zinc-900/50 border-b border-slate-100 dark:border-zinc-800 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-3">
-              <div className="size-10 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+              <div className="size-10 rounded-2xl bg-indigo-600 dark:bg-indigo-500 flex items-center justify-center shadow-lg shadow-indigo-600/10">
                 <IconSparkles className="size-5 text-white" />
               </div>
               <div>
-                <h3 className="text-sm font-black uppercase tracking-tight">
+                <h3 className="text-sm font-black uppercase tracking-tight text-foreground">
                   Director GPT
                 </h3>
                 <div className="flex items-center gap-1.5">
@@ -101,14 +101,14 @@ export function DirectivoChat({ context }: DirectivoChatProps) {
               variant="ghost"
               size="icon"
               onClick={() => setIsOpen(false)}
-              className="size-8 rounded-full hover:bg-white/10"
+              className="size-8 rounded-full hover:bg-slate-200/50 dark:hover:bg-white/10 text-foreground"
             >
               <IconX className="size-4" />
             </Button>
           </div>
 
           {/* Messages - Native scroll with flex-1 */}
-          <div className="flex-1 overflow-y-auto p-6 overscroll-y-contain scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+          <div className="flex-1 overflow-y-auto p-6 overscroll-y-contain scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-white/10 scrollbar-track-transparent">
             <div className="space-y-6">
               {messages.map((m) => (
                 <div
@@ -120,27 +120,27 @@ export function DirectivoChat({ context }: DirectivoChatProps) {
                 >
                   <div className="flex items-center gap-2">
                     {m.role === "assistant" && (
-                      <IconRobot className="size-3 text-primary" />
+                      <IconRobot className="size-3 text-indigo-600 dark:text-indigo-400" />
                     )}
                     <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                       {m.role === "user" ? "Director" : "Asistente Pro"}
                     </span>
                     {m.role === "user" && (
-                      <IconUser className="size-3 text-primary" />
+                      <IconUser className="size-3 text-indigo-600 dark:text-indigo-400" />
                     )}
                   </div>
                   <div
                     className={cn(
                       "max-w-[85%] px-4 py-3 rounded-2xl text-xs leading-relaxed shadow-sm",
                       m.role === "user"
-                        ? "bg-primary shadow-2xl shadow-primary/20 text-white rounded-tr-none"
-                        : "bg-white/5 border border-white/5 text-foreground rounded-tl-none",
+                        ? "bg-indigo-600 shadow-lg shadow-indigo-600/10 text-white rounded-tr-none dark:bg-indigo-500"
+                        : "bg-slate-100/80 border border-slate-200/50 text-foreground rounded-tl-none dark:bg-white/5 dark:border-white/5 dark:border-white/10",
                     )}
                   >
                     <div
                       className={cn(
-                        "prose prose-invert prose-xs max-w-none wrap-break-word [&_p]:leading-relaxed [&_p]:m-0 [&_ul]:my-1 [&_ol]:my-1 [&_li]:m-0 text-foreground text-sm",
-                        m.role === "user" ? "text-white" : "",
+                        "prose prose-xs max-w-none wrap-break-word [&_p]:leading-relaxed [&_p]:m-0 [&_ul]:my-1 [&_ol]:my-1 [&_li]:m-0 text-foreground text-sm dark:prose-invert",
+                        m.role === "user" ? "prose-invert text-white" : "",
                       )}
                     >
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>
@@ -158,8 +158,8 @@ export function DirectivoChat({ context }: DirectivoChatProps) {
                       Escribiendo...
                     </span>
                   </div>
-                  <div className="bg-white/5 border border-white/5 px-4 py-3 rounded-2xl rounded-tl-none">
-                    <IconLoader2 className="size-4 animate-spin text-primary" />
+                  <div className="bg-slate-100/80 border border-slate-200/50 dark:bg-white/5 dark:border-white/5 px-4 py-3 rounded-2xl rounded-tl-none">
+                    <IconLoader2 className="size-4 animate-spin text-indigo-600 dark:text-indigo-400" />
                   </div>
                 </div>
               )}
@@ -170,19 +170,19 @@ export function DirectivoChat({ context }: DirectivoChatProps) {
           {/* Input - Fixed height */}
           <form
             onSubmit={handleSend}
-            className="h-24 p-6 bg-white/5 border-t border-white/5 flex items-center gap-3 shrink-0"
+            className="h-24 p-6 bg-slate-50/50 dark:bg-zinc-900/30 border-t border-slate-100 dark:border-zinc-800 flex items-center gap-3 shrink-0"
           >
             <Input
               placeholder="Haz una consulta ejecutiva..."
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
-              className="h-12 border rounded-full focus-visible:ring-violet-500/20 text-sm font-medium"
+              className="h-12 border border-slate-200 dark:border-zinc-800 rounded-full focus-visible:ring-indigo-500/20 text-sm font-medium"
             />
             <Button
               type="submit"
               size="icon"
               disabled={isLoading || !chatInput.trim()}
-              className="size-12 rounded-2xl bg-primary hover:bg-primary/80 shadow-xl shadow-primary/20 transition-all active:scale-95 shrink-0"
+              className="size-12 rounded-2xl bg-indigo-600 hover:bg-indigo-500 shadow-xl shadow-indigo-600/10 transition-all active:scale-95 shrink-0 hover:scale-105 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white"
             >
               <IconSend className="size-5" />
             </Button>
@@ -194,10 +194,10 @@ export function DirectivoChat({ context }: DirectivoChatProps) {
       <Button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "size-16 rounded-[2rem] shadow-2xl transition-all duration-500 group overflow-hidden",
+          "size-16 rounded-[2rem] shadow-2xl transition-all duration-500 group overflow-hidden border",
           isOpen
-            ? "bg-background border border-white/10 text-primary hover:bg-muted"
-            : "bg-primary text-white hover:bg-primary/80 hover:scale-105",
+            ? "bg-slate-100 border-slate-200 text-indigo-600 hover:bg-slate-200 dark:bg-zinc-900 dark:border-zinc-800 dark:text-indigo-400 dark:hover:bg-zinc-800"
+            : "bg-indigo-600 border-indigo-600 text-white hover:bg-indigo-500 hover:scale-105 active:scale-95 dark:bg-indigo-500 dark:border-indigo-500 dark:hover:bg-indigo-600",
         )}
       >
         <div className="relative size-full flex items-center justify-center">

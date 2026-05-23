@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { IconCalendarEvent, IconFilter } from "@tabler/icons-react";
 
 interface EnrollmentTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -45,34 +46,49 @@ function EnrollmentFilters({
   }, [estadoFilter, table]);
 
   return (
-    <div className="flex items-center gap-3">
-      <div className="flex items-center bg-muted/50 rounded-full p-1">
+    <div className="flex items-center gap-3 flex-wrap">
+      <div className="flex items-center bg-slate-100 dark:bg-zinc-900 rounded-full p-1 border border-slate-200/50 dark:border-zinc-800/50 gap-1 pl-3">
+        <IconCalendarEvent className="size-4 text-muted-foreground/75 shrink-0" />
+        <span className="text-[10px] uppercase font-black tracking-wider text-muted-foreground/50 mr-1 hidden sm:inline select-none">
+          Periodo
+        </span>
         <Button
-          variant={anioFilter === currentYear ? "secondary" : "ghost"}
+          variant="ghost"
           onClick={() => meta.setAnioFilter(currentYear)}
-          className="h-8 text-xs font-bold rounded-full"
+          className={`h-8 text-xs font-black rounded-full px-4 transition-all duration-200 ${
+            anioFilter === currentYear
+              ? "bg-indigo-600 text-white shadow-md hover:bg-indigo-500 hover:text-white"
+              : "text-muted-foreground hover:bg-slate-200/50 dark:hover:bg-zinc-800"
+          }`}
         >
           {currentYear}
         </Button>
         <Button
-          variant={anioFilter === currentYear + 1 ? "secondary" : "ghost"}
+          variant="ghost"
           onClick={() => meta.setAnioFilter(currentYear + 1)}
-          className="h-8 text-xs font-bold rounded-full"
+          className={`h-8 text-xs font-black rounded-full px-4 transition-all duration-200 ${
+            anioFilter === currentYear + 1
+              ? "bg-indigo-600 text-white shadow-md hover:bg-indigo-500 hover:text-white"
+              : "text-muted-foreground hover:bg-slate-200/50 dark:hover:bg-zinc-800"
+          }`}
         >
           {currentYear + 1}
         </Button>
       </div>
 
       <Select value={estadoFilter} onValueChange={meta.setEstadoFilter}>
-        <SelectTrigger className="w-[140px] h-10 bg-background border-primary/10 rounded-full">
-          <SelectValue placeholder="Estado" />
+        <SelectTrigger className="w-full sm:w-auto min-w-[180px] h-10 bg-background border-slate-200 dark:border-zinc-800 rounded-full text-xs font-bold hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors pl-3.5 gap-2">
+          <div className="flex items-center gap-2">
+            <IconFilter className="size-3.5 text-muted-foreground/60 shrink-0" />
+            <SelectValue placeholder="Estado" />
+          </div>
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="ALL">Todos</SelectItem>
-          <SelectItem value="activo">Activo</SelectItem>
-          <SelectItem value="retirado">Retirado</SelectItem>
-          <SelectItem value="suspendido">Suspendido</SelectItem>
-          <SelectItem value="egresado">Egresado</SelectItem>
+          <SelectItem value="ALL" className="font-bold text-xs">Todos los Estados</SelectItem>
+          <SelectItem value="activo" className="font-bold text-xs text-green-500">Activo</SelectItem>
+          <SelectItem value="retirado" className="font-bold text-xs text-red-500">Retirado</SelectItem>
+          <SelectItem value="suspendido" className="font-bold text-xs text-yellow-600">Suspendido</SelectItem>
+          <SelectItem value="egresado" className="font-bold text-xs text-blue-500">Egresado</SelectItem>
         </SelectContent>
       </Select>
     </div>

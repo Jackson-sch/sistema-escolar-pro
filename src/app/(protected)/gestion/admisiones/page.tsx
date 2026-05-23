@@ -30,7 +30,7 @@ export default async function AdmisionesPage() {
           <h1 className="text-xl sm:text-3xl font-bold tracking-tight">
             Admisiones (CRM)
           </h1>
-          <p className="text-[10px] sm:text-sm text-muted-foreground font-medium">
+          <p className="text-xxs sm:text-sm text-muted-foreground font-medium">
             Gestiona los nuevos interesados y el proceso de evaluación de
             vacantes.
           </p>

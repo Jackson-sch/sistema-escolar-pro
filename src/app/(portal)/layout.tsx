@@ -20,7 +20,7 @@ export default async function PortalLayout({
   }
 
   const allowedRoles = ["padre", "profesor"];
-  if (!allowedRoles.includes(session.user.role)) {
+  if (!session.user.role || !allowedRoles.includes(session.user.role)) {
     redirect("/");
   }
 

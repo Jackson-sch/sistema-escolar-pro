@@ -11,7 +11,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { EnrollmentForm } from "@/components/gestion/matriculas/management/enrollment-form";
-import { FormModal } from "@/components/modals/form-modal";
+import { FormDrawer } from "@/components/modals/form-drawer";
 
 interface AddEnrollmentButtonProps {
   nivelesAcademicos: any[];
@@ -28,7 +28,10 @@ export function AddEnrollmentButton({
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button onClick={() => setOpen(true)} className="rounded-full">
+            <Button
+              onClick={() => setOpen(true)}
+              className="rounded-full"
+            >
               <IconFilePlus className="sm:mr-2 h-5 w-5" />
               <span className="hidden sm:inline">Nueva Matrícula</span>
             </Button>
@@ -39,12 +42,11 @@ export function AddEnrollmentButton({
         </Tooltip>
       </TooltipProvider>
 
-      <FormModal
+      <FormDrawer
         title={`Inscripción Académica ${year}`}
         description="Complete los datos para formalizar la vacante del estudiante en el nuevo periodo lectivo."
         isOpen={open}
         onOpenChange={setOpen}
-        className="sm:max-w-2xl"
       >
         {open && (
           <EnrollmentForm
@@ -53,7 +55,7 @@ export function AddEnrollmentButton({
             nivelesAcademicos={nivelesAcademicos}
           />
         )}
-      </FormModal>
+      </FormDrawer>
     </>
   );
 }

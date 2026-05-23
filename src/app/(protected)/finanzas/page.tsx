@@ -21,7 +21,6 @@ import { FinanzasReportes } from "@/components/finanzas/reportes/reportes";
 import { FinanzasTabs } from "@/components/finanzas/finanzas-tabs";
 import { DataTableSkeleton } from "@/components/ui/data-table-skeleton";
 import { FinanzasDashboardSkeleton } from "@/components/finanzas/dashboard-skeleton";
-import { BackgroundRippleEffect } from "@/components/ui/background-ripple-effect";
 import { Badge } from "@/components/ui/badge";
 import { IconWallet } from "@tabler/icons-react";
 
@@ -72,8 +71,8 @@ async function FinanzasContent() {
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 px-2">
               <div>
-                <h3 className="text-xl font-black tracking-tight">Cronograma de Pagos</h3>
-                <p className="text-sm text-muted-foreground font-medium">
+                <h3 className="text-xl font-semibold tracking-tight">Cronograma de Pagos</h3>
+                <p className="text-sm text-muted-foreground font-normal">
                   Seguimiento detallado de cuotas por estudiante.
                 </p>
               </div>
@@ -86,7 +85,7 @@ async function FinanzasContent() {
               </div>
             </div>
             <CronogramaTable
-              data={cronograma}
+              data={cronograma as any}
               conceptos={conceptos}
               institucion={instituciones[0]}
               formatoComprobante={formatoComprobante}
@@ -97,8 +96,8 @@ async function FinanzasContent() {
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 px-2">
               <div>
-                <h3 className="text-xl font-black tracking-tight">Catálogo de Conceptos</h3>
-                <p className="text-sm text-muted-foreground font-medium">
+                <h3 className="text-xl font-semibold tracking-tight">Catálogo de Conceptos</h3>
+                <p className="text-sm text-muted-foreground font-normal">
                   Configuración de pensiones, matrículas y otros servicios.
                 </p>
               </div>
@@ -117,43 +116,32 @@ async function FinanzasContent() {
 
 export default async function FinanzasPage() {
   return (
-    <div className="relative min-h-screen flex flex-col gap-8 p-4 md:p-8 pt-6 @container/main overflow-hidden">
-      {/* ── BACKGROUND DECORATION ── */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        <BackgroundRippleEffect 
-          variant="dots" 
-          opacity={0.4}
-          color="rgba(139, 92, 246, 0.1)"
-        />
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/2" />
-      </div>
-
+    <div className="min-h-screen flex flex-col gap-8 p-4 md:p-8 pt-6 @container/main">
       {/* ── HEADER ── */}
-      <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
         <div className="space-y-2">
-          <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 w-fit">
+          <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-4 py-1 rounded-full text-xxs font-medium uppercase tracking-widest flex items-center gap-2 w-fit">
             <IconWallet size={14} />
             Tesorería & Cobranzas
           </Badge>
-          <h1 className="text-4xl md:text-5xl font-black tracking-tighter leading-none">
+          <h1 className="text-4xl md:text-5xl font-semibold tracking-tighter leading-none">
             Gestión Financiera
           </h1>
-          <p className="text-muted-foreground text-sm md:text-base max-w-2xl font-medium leading-relaxed">
+          <p className="text-muted-foreground text-sm md:text-base max-w-2xl font-normal leading-relaxed">
             Administra el ciclo de vida financiero de la institución con herramientas de cobranza avanzada y análisis de recaudación en tiempo real.
           </p>
         </div>
       </div>
 
       {/* ── DASHBOARD ── */}
-      <div className="relative z-10 px-2">
+      <div className="px-2">
         <Suspense fallback={<FinanzasDashboardSkeleton />}>
           <DashboardWrapper />
         </Suspense>
       </div>
 
       {/* ── TABS & CONTENT ── */}
-      <div className="relative z-10">
+      <div>
         <Suspense fallback={<DataTableSkeleton rowCount={8} />}>
           <FinanzasContent />
         </Suspense>

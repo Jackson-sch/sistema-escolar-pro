@@ -39,7 +39,7 @@ export default async function DeudasPage({
     <div className="flex flex-1 flex-col gap-8 md:gap-10 p-4 sm:p-10 pt-0 @container/main animate-in fade-in duration-700 min-h-screen">
       {/* Sección de Encabezado */}
       <div className="space-y-1 mt-4 md:mt-0">
-        <h1 className="text-3xl md:text-4xl font-black tracking-tight">
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
           Estado de Cuentas
         </h1>
         <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed">
@@ -64,21 +64,21 @@ export default async function DeudasPage({
           <BankInfoSidebar bancos={bancos} />
 
           {/* Tarjeta de ayuda */}
-          <Card className="border-none bg-primary rounded-[1.25rem] p-6 md:p-8 text-white relative overflow-hidden group shadow-2xl shadow-primary/20">
+          <Card className="border-none bg-primary rounded-[1.25rem] p-6 md:p-8 text-primary-foreground relative overflow-hidden group shadow-2xl shadow-primary/20">
             <div className="relative z-10 flex items-center gap-4 md:gap-5">
-              <div className="size-10 md:size-12 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+              <div className="size-10 md:size-12 rounded-full bg-primary-foreground/20 flex items-center justify-center shrink-0">
                 <IconDeviceMobile size={20} className="md:size-24" />
               </div>
               <div className="space-y-1">
-                <h4 className="text-lg font-black tracking-tight">
+                <h4 className="text-lg font-bold tracking-tight">
                   ¿Necesitas ayuda?
                 </h4>
-                <p className="text-xs font-bold text-white/80 leading-snug">
+                <p className="text-xs font-bold text-primary-foreground/80 leading-snug">
                   Contacta directamente con el departamento de finanzas.
                 </p>
                 <Button
                   variant="link"
-                  className="p-0 h-auto text-white font-black text-[10px] uppercase tracking-widest underline decoration-2 underline-offset-4 hover:decoration-white transition-all mt-2"
+                  className="p-0 h-auto text-primary-foreground font-bold text-xxs uppercase tracking-widest underline decoration-2 underline-offset-4 hover:decoration-primary-foreground transition-all mt-2"
                 >
                   ENVIAR MENSAJE
                 </Button>

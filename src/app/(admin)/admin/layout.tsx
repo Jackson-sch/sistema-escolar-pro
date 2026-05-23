@@ -45,14 +45,14 @@ export default async function AdminLayout({
           </div>
           <div>
             <h1 className="font-bold text-sm tracking-tight">SISTEMA ESCOLAR PRO</h1>
-            <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest">Master Control</p>
+            <p className="text-xxs text-zinc-500 uppercase font-bold tracking-widest">Master Control</p>
           </div>
         </div>
 
         <div className="flex items-center gap-4">
           <div className="hidden sm:flex flex-col items-end">
             <span className="text-xs font-medium">{user.name || 'Master Admin'}</span>
-            <span className="text-[10px] text-zinc-500">{user.email}</span>
+            <span className="text-xxs text-zinc-500">{user.email}</span>
           </div>
           <AdminLogoutButton />
         </div>

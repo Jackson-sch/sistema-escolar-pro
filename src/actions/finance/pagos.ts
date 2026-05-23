@@ -1,4 +1,5 @@
 "use server";
+import { serialize } from "@/lib/dto";
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
@@ -107,7 +108,7 @@ export const getResumenDeudaAction = createSafeAction(
 
     return {
       success: {
-        deudas: JSON.parse(JSON.stringify(deudas)),
+        deudas: serialize(deudas),
         totalDeuda,
         cuotasPendientes,
       },

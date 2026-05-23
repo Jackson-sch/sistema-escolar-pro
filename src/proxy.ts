@@ -54,6 +54,23 @@ export const proxy = auth((req) => {
     }
   }
 
+  if (userRole === "estudiante" || userRole === "padre") {
+    const allowedPrefixes = [
+      "/portal",
+      "/dashboard",
+      "/api",
+      "/mi-perfil",
+    ];
+
+    const isAllowed = allowedPrefixes.some((prefix) =>
+      nextUrl.pathname.startsWith(prefix),
+    );
+
+    if (!isAllowed) {
+      return Response.redirect(new URL("/portal", nextUrl));
+    }
+  }
+
   return;
 });
 

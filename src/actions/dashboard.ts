@@ -1,4 +1,5 @@
 "use server";
+import { serialize } from "@/lib/dto";
 
 import prisma from "@/lib/prisma";
 import { createSafeAction } from "@/lib/safe-action";
@@ -286,7 +287,7 @@ export const getDashboardStatsAction = createSafeAction(
           absent: totalToday - presentToday,
         },
         attendanceHistory: attendanceHistoryByDay.reverse(),
-        recentActivity: JSON.parse(JSON.stringify(recentActivity)),
+        recentActivity: serialize(recentActivity),
       },
     };
   },
@@ -322,7 +323,7 @@ export const getRecentAdmissionsAction = createSafeAction(
       take: limit,
     });
 
-    return { success: JSON.parse(JSON.stringify(admissions)) };
+    return { success: serialize(admissions) };
   },
   { roles: ["administrativo"] },
 );
@@ -443,10 +444,10 @@ export const getTeacherDashboardAction = createSafeAction(
     return {
       success: {
         cursos,
-        upcomingEvaluations: JSON.parse(JSON.stringify(upcomingEvaluations)),
-        criticalAttendance: JSON.parse(JSON.stringify(criticalAttendance)),
-        evaluationsToGrade: JSON.parse(JSON.stringify(evaluationsToGrade)),
-        todaySchedule: JSON.parse(JSON.stringify(todaySchedule)),
+        upcomingEvaluations: serialize(upcomingEvaluations),
+        criticalAttendance: serialize(criticalAttendance),
+        evaluationsToGrade: serialize(evaluationsToGrade),
+        todaySchedule: serialize(todaySchedule),
       },
     };
   },

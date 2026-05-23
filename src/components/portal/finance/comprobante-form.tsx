@@ -185,7 +185,7 @@ export function ComprobanteForm({
               <IconReceipt2 className="size-5" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-black uppercase tracking-widest text-primary/70">
+              <p className="text-xxs font-black uppercase tracking-widest text-primary/70">
                 Resumen de Pago
               </p>
               <h3 className="font-black text-base truncate">
@@ -288,7 +288,7 @@ export function ComprobanteForm({
                       <p className="text-sm font-black text-primary uppercase tracking-wider">
                         IA Escaneando
                       </p>
-                      <p className="text-[10px] text-muted-foreground font-bold">
+                      <p className="text-xxs text-muted-foreground font-bold">
                         Extrayendo datos...
                       </p>
                     </div>
@@ -305,7 +305,7 @@ export function ComprobanteForm({
                 <p className="font-bold text-foreground text-sm">
                   Haz clic para buscar
                 </p>
-                <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground/60 mt-1">
+                <p className="text-xxs uppercase font-black tracking-widest text-muted-foreground/60 mt-1">
                   JPG, PNG o PDF
                 </p>
               </div>
@@ -340,7 +340,7 @@ export function ComprobanteForm({
             />
           </div>
           {isMontoMismatched && (
-            <p className="text-[10px] font-bold text-red-500 mt-1.5 flex items-center gap-1 animate-pulse">
+            <p className="text-xxs font-bold text-red-500 mt-1.5 flex items-center gap-1 animate-pulse">
               <IconX className="size-3" />
               El monto no coincide con la deuda ({formatCurrency(expectedMonto)}
               )
@@ -399,7 +399,7 @@ export function ComprobanteForm({
           disabled={
             loading || !preview || !form.cronogramaId || isMontoMismatched
           }
-          className="w-full h-12 rounded-full gap-2 font-black text-base shadow-lg shadow-primary/20 transition-all hover:shadow-primary/30 active:scale-[0.98] bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:grayscale"
+          className="w-full h-12 rounded-full gap-2 font-black text-base shadow-lg shadow-primary/20 transition-all hover:shadow-primary/30 active:scale-[0.98] bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:grayscale hover:scale-105"
         >
           {loading ? (
             <>
@@ -418,7 +418,7 @@ export function ComprobanteForm({
           <div className="bg-blue-500/10 rounded-lg p-1.5 shrink-0">
             <IconInfoCircle className="size-3.5 text-blue-500" />
           </div>
-          <p className="text-[11px] leading-snug text-blue-500/80 font-medium">
+          <p className="text-xs leading-snug text-blue-500/80 font-medium">
             Posterior al envío, la administración validará los datos. Recibirás
             un correo cuando el proceso finalice.
           </p>

@@ -186,8 +186,8 @@ export function StudentForm({
       const searchGuardian = async () => {
         try {
           const res = await getGuardianByDniAction(dniApoderado);
-          const fullName = `${res.data.name} ${res.data.apellidoPaterno} ${res.data.apellidoMaterno}`;
           if (res?.data) {
+            const fullName = `${res.data.name || ""} ${res.data.apellidoPaterno || ""} ${res.data.apellidoMaterno || ""}`.trim();
             form.setValue("nombreApoderado", fullName, {
               shouldValidate: true,
               shouldDirty: true,
@@ -228,7 +228,7 @@ export function StudentForm({
               name="name"
               render={({ field }) => (
                 <FormItem className="md:col-span-4">
-                  <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">
+                  <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
                     Nombres
                   </FormLabel>
                   <FormControl>
@@ -248,7 +248,7 @@ export function StudentForm({
               name="apellidoPaterno"
               render={({ field }) => (
                 <FormItem className="md:col-span-4">
-                  <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">
+                  <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
                     Apellido Paterno
                   </FormLabel>
                   <FormControl>
@@ -268,7 +268,7 @@ export function StudentForm({
               name="apellidoMaterno"
               render={({ field }) => (
                 <FormItem className="md:col-span-4">
-                  <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">
+                  <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
                     Apellido Materno
                   </FormLabel>
                   <FormControl>
@@ -291,7 +291,7 @@ export function StudentForm({
               name="dni"
               render={({ field }) => (
                 <FormItem className="md:col-span-4">
-                  <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">
+                  <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
                     DNI / Documento de Identidad
                   </FormLabel>
                   <FormControl>
@@ -316,7 +316,7 @@ export function StudentForm({
               name="fechaNacimiento"
               render={({ field }) => (
                 <FormItem className="md:col-span-4">
-                  <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">
+                  <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
                     Fecha de Nacimiento
                   </FormLabel>
                   <Popover>
@@ -367,7 +367,7 @@ export function StudentForm({
               name="sexo"
               render={({ field }) => (
                 <FormItem className="md:col-span-4">
-                  <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">
+                  <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
                     Género / Sexo
                   </FormLabel>
                   <Select
@@ -396,7 +396,7 @@ export function StudentForm({
               name="nacionalidad"
               render={({ field }) => (
                 <FormItem className="md:col-span-3">
-                  <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">
+                  <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
                     Nacionalidad
                   </FormLabel>
                   <FormControl>
@@ -417,7 +417,7 @@ export function StudentForm({
               name="email"
               render={({ field }) => (
                 <FormItem className="md:col-span-6">
-                  <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">
+                  <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
                     Correo Electrónico (Opcional)
                   </FormLabel>
                   <FormControl>
@@ -442,7 +442,7 @@ export function StudentForm({
               name="estadoId"
               render={({ field }) => (
                 <FormItem className="md:col-span-3">
-                  <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">
+                  <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
                     Estado de Alumno
                   </FormLabel>
                   <Select
@@ -481,7 +481,7 @@ export function StudentForm({
                 name="institucionId"
                 render={({ field }) => (
                   <FormItem className="md:col-span-12">
-                    <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">
+                    <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
                       Institución
                     </FormLabel>
                     <Select
@@ -521,7 +521,7 @@ export function StudentForm({
               name="direccion"
               render={({ field }) => (
                 <FormItem className="md:col-span-12">
-                  <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">
+                  <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
                     Dirección Exacta de Residencia
                   </FormLabel>
                   <FormControl>
@@ -540,7 +540,7 @@ export function StudentForm({
               name="departamento"
               render={({ field }) => (
                 <FormItem className="md:col-span-4">
-                  <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">
+                  <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
                     Departamento
                   </FormLabel>
                   <FormControl>
@@ -558,7 +558,7 @@ export function StudentForm({
               name="provincia"
               render={({ field }) => (
                 <FormItem className="md:col-span-4">
-                  <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">
+                  <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
                     Provincia
                   </FormLabel>
                   <FormControl>
@@ -576,7 +576,7 @@ export function StudentForm({
               name="distrito"
               render={({ field }) => (
                 <FormItem className="md:col-span-4">
-                  <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">
+                  <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
                     Distrito
                   </FormLabel>
                   <FormControl>
@@ -604,7 +604,7 @@ export function StudentForm({
               name="dniApoderado"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">
+                  <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
                     DNI del Apoderado
                   </FormLabel>
                   <FormControl>
@@ -627,7 +627,7 @@ export function StudentForm({
               name="nombreApoderado"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">
+                  <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
                     Nombre Completo Apoderado
                   </FormLabel>
                   <FormControl>
@@ -646,7 +646,7 @@ export function StudentForm({
               name="telefonoApoderado"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">
+                  <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
                     Teléfono / WhatsApp
                   </FormLabel>
                   <FormControl>
@@ -665,7 +665,7 @@ export function StudentForm({
               name="parentescoApoderado"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">
+                  <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
                     Parentesco con el Alumno
                   </FormLabel>
                   <Select
@@ -697,7 +697,7 @@ export function StudentForm({
             type="button"
             variant="outline"
             onClick={onSuccess}
-            className="w-full sm:w-auto rounded-full border-border/40 hover:bg-accent/50"
+            className="w-full sm:w-auto rounded-full border-border/40 hover:bg-accent/50 hover:scale-105"
             disabled={isPending}
             size="lg"
           >
@@ -707,7 +707,7 @@ export function StudentForm({
             disabled={isPending}
             type="submit"
             size="lg"
-            className="w-full sm:w-auto rounded-full px-8"
+            className="w-full sm:w-auto rounded-full px-8 hover:scale-105"
           >
             {isPending ? (
               <>

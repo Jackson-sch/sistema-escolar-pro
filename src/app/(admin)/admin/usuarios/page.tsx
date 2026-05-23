@@ -41,13 +41,13 @@ export default async function AdminUsuariosPage() {
                <div className="mt-6 p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/10 space-y-3">
                   <div className="flex gap-2">
                      <IconAlertCircle className="size-4 text-indigo-400 shrink-0 mt-0.5" />
-                     <p className="text-[11px] text-zinc-400 leading-relaxed">
+                     <p className="text-micro text-zinc-400 leading-relaxed">
                         Al crear la cuenta, el usuario recibirá una contraseña temporal <span className="text-indigo-400 font-bold">Colegio2026</span> y se le pedirá cambiarla al primer inicio de sesión.
                      </p>
                   </div>
                   <div className="flex gap-2">
                      <IconShieldLock className="size-4 text-indigo-400 shrink-0 mt-0.5" />
-                     <p className="text-[11px] text-zinc-400 leading-relaxed">
+                     <p className="text-micro text-zinc-400 leading-relaxed">
                         El sistema lo redirigirá automáticamente al formulario de registro de institución tras el login.
                      </p>
                   </div>
@@ -59,7 +59,7 @@ export default async function AdminUsuariosPage() {
          <div className="xl:col-span-2 space-y-4">
             <h2 className="font-bold text-lg flex items-center gap-2 mb-4">
                Cuentas sin Institución
-               <span className="px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-500 text-[10px] font-bold">
+               <span className="px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-500 text-xxs font-bold">
                   {pendingAdmins.length}
                </span>
             </h2>
@@ -75,7 +75,7 @@ export default async function AdminUsuariosPage() {
                           <h3 className="font-bold text-sm leading-none flex items-center gap-2">
                              {admin.name || 'Sin Nombre'}
                              {admin.mustChangePassword && (
-                               <span className="text-[10px] bg-orange-500/10 text-orange-500 px-2 py-0.5 rounded-full border border-orange-500/20">Invited</span>
+                               <span className="text-xxs bg-orange-500/10 text-orange-500 px-2 py-0.5 rounded-full border border-orange-500/20">Invited</span>
                              )}
                           </h3>
                           <div className="flex items-center gap-4 mt-2">

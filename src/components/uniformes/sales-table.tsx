@@ -73,7 +73,7 @@ export function SalesTable({ ventas, adminId }: SalesTableProps) {
       );
       if (res.error) {
         toast.error(res.error);
-      } else {
+      } else if (res.data) {
         toast.success(`Estado del pedido actualizado a ${nuevoEstado}`);
         setSelectedVenta(res.data);
       }
@@ -85,7 +85,7 @@ export function SalesTable({ ventas, adminId }: SalesTableProps) {
       const res = await aprobarVentaUniformeAction(ventaId, adminId);
       if (res.error) {
         toast.error(res.error);
-      } else {
+      } else if (res.data) {
         toast.success("Reserva aprobada y vinculada al cronograma de pagos");
         setSelectedVenta(res.data.venta);
       }
@@ -97,7 +97,7 @@ export function SalesTable({ ventas, adminId }: SalesTableProps) {
       const res = await confirmarEntregaUniformeAction(ventaId);
       if (res.error) {
         toast.error(res.error);
-      } else {
+      } else if (res.data) {
         toast.success("Pedido entregado y stock actualizado correctamente");
         setSelectedVenta(res.data);
       }

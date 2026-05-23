@@ -107,7 +107,7 @@ export function CapacityForm({
         <Button
           disabled={isPending}
           type="submit"
-          className="w-full rounded-full mt-4"
+          className="w-full rounded-full mt-4 hover:scale-105"
         >
           {isPending && <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />}
           {id ? "Guardar Cambios" : "Añadir Capacidad"}

@@ -1,4 +1,5 @@
 "use server";
+import { serialize } from "@/lib/dto";
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
@@ -33,7 +34,7 @@ export async function getEnrollmentsAction() {
         fechaMatricula: "desc",
       },
     });
-    return { data: JSON.parse(JSON.stringify(enrollments)) };
+    return { data: serialize(enrollments) };
   } catch (error) {
     console.error("Error fetching enrollments:", error);
     return { error: "No se pudieron obtener las matrículas" };
@@ -152,7 +153,7 @@ export async function createEnrollmentAction(values: any) {
 
     return {
       success: "Matrícula realizada exitosamente y cobro generado",
-      data: JSON.parse(JSON.stringify(result)),
+      data: serialize(result),
     };
   } catch (error: any) {
     console.error("Error creating enrollment:", error);
@@ -238,8 +239,9 @@ export async function getUnenrolledStudentsAction(anio: number) {
         fechaNacimiento: true,
       },
     });
-    return { data: JSON.parse(JSON.stringify(students)) };
+    return { data: serialize(students) };
   } catch (error) {
+    console.error("Error al buscar estudiantes:", error);
     return { error: "Error al buscar estudiantes" };
   }
 }

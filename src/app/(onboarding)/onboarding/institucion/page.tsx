@@ -488,7 +488,7 @@ export default function OnboardingInstitucionPage() {
               <Button
                 type="button"
                 onClick={handleNext}
-                className="bg-primary hover:bg-primary/90 text-white rounded-xl gap-2 px-6 shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95"
+                className="rounded-xl gap-2 px-6 shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95"
               >
                 Siguiente
                 <IconArrowRight className="size-4" />
@@ -497,7 +497,7 @@ export default function OnboardingInstitucionPage() {
               <Button
                 type="submit"
                 disabled={isPending}
-                className="bg-gradient-to-r from-primary to-violet-600 hover:from-primary/90 hover:to-violet-600/90 text-white rounded-xl gap-2 px-8 shadow-lg shadow-primary/25 transition-all hover:scale-[1.02] active:scale-95"
+                className="bg-gradient-to-r from-zinc-900 to-violet-600 hover:from-zinc-800 hover:to-violet-500 text-white rounded-xl gap-2 px-8 shadow-lg shadow-primary/25 transition-all hover:scale-[1.02] active:scale-95"
               >
                 {isPending ? (
                   <>

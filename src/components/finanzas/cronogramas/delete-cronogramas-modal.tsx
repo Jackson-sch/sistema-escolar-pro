@@ -157,7 +157,7 @@ export function DeleteCronogramasModal({
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={isPending}
-              className="flex-1 rounded-full"
+              className="flex-1 rounded-full hover:scale-105"
             >
               Cancelar
             </Button>
@@ -165,7 +165,7 @@ export function DeleteCronogramasModal({
               type="submit"
               variant="destructive"
               disabled={isPending || !form.watch("conceptoId")}
-              className="flex-1 rounded-full shadow-lg shadow-destructive/10"
+              className="flex-1 rounded-full shadow-lg shadow-destructive/10 hover:scale-105"
             >
               {isPending ? (
                 <>

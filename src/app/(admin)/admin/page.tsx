@@ -70,7 +70,7 @@ export default async function AdminDashboardPage() {
                <div className="space-y-1">
                   <p className="text-sm font-medium text-zinc-500">{card.title}</p>
                   <h3 className="text-3xl font-bold tracking-tight">{card.value}</h3>
-                  <p className="text-[11px] text-zinc-500 mt-2">{card.description}</p>
+                  <p className="text-micro text-zinc-500 mt-2">{card.description}</p>
                </div>
             </div>
           )

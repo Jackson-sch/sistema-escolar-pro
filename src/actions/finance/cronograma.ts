@@ -1,4 +1,5 @@
 "use server";
+import { serialize } from "@/lib/dto";
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
@@ -70,7 +71,7 @@ export const getCronogramaAction = createSafeAction(
         { estudiante: { apellidoPaterno: "asc" } },
       ],
     });
-    return { success: JSON.parse(JSON.stringify(cronograma)) };
+    return { success: serialize(cronograma) };
   },
 );
 

@@ -101,7 +101,7 @@ export function ChangePasswordDialog({
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="absolute right-1 top-1/2 -translate-y-1/2 size-8"
+                className="absolute right-1 top-1/2 -translate-y-1/2 size-8 hover:scale-105"
                 onClick={() => setShowNew(!showNew)}
               >
                 {showNew ? <IconEyeOff size={16} /> : <IconEye size={16} />}
@@ -134,7 +134,7 @@ export function ChangePasswordDialog({
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="absolute right-1 top-1/2 -translate-y-1/2 size-8"
+                className="absolute right-1 top-1/2 -translate-y-1/2 size-8 hover:scale-105"
                 onClick={() => setShowConfirm(!showConfirm)}
               >
                 {showConfirm ? <IconEyeOff size={16} /> : <IconEye size={16} />}
@@ -151,7 +151,7 @@ export function ChangePasswordDialog({
             <Button
               type="button"
               variant="outline"
-              className="flex-1 rounded-xl font-bold"
+              className="flex-1 rounded-xl font-bold hover:scale-105"
               onClick={() => {
                 reset();
                 onOpenChange(false);
@@ -162,7 +162,7 @@ export function ChangePasswordDialog({
             <Button
               type="submit"
               disabled={isPending}
-              className="flex-1 rounded-xl font-bold gap-2"
+              className="flex-1 rounded-xl font-bold gap-2 hover:scale-105"
             >
               {isPending ? (
                 <IconLoader2 size={16} className="animate-spin" />

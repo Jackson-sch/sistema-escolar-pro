@@ -136,7 +136,7 @@ export function UniformVariantsModal({
               onClick={() =>
                 append({ sedeId: "", talla: "", precio: 0, stock: 0 })
               }
-              className="h-8 border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 rounded-lg text-xs font-bold"
+              className="h-8 border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 rounded-lg text-xs font-bold hover:scale-105"
             >
               <Plus className="h-3.5 w-3.5 mr-1.5" />
               Añadir Talla
@@ -154,7 +154,7 @@ export function UniformVariantsModal({
                   variant="ghost"
                   size="icon"
                   onClick={() => remove(index)}
-                  className="absolute top-2 right-2 h-7 w-7 text-muted-foreground/40 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100"
+                  className="absolute top-2 right-2 h-7 w-7 text-muted-foreground/40 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100 hover:scale-105"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
@@ -264,14 +264,14 @@ export function UniformVariantsModal({
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="flex-1 rounded-xl h-11 font-bold"
+              className="flex-1 rounded-xl h-11 font-bold hover:scale-105"
             >
               Cancelar
             </Button>
             <Button
               type="submit"
               disabled={isPending}
-              className="flex-1 rounded-xl h-11 font-bold shadow-lg shadow-primary/20"
+              className="flex-1 rounded-xl h-11 font-bold shadow-lg shadow-primary/20 hover:scale-105"
             >
               {isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

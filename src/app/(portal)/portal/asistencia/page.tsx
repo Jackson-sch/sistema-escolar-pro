@@ -32,7 +32,7 @@ export default async function PortalAsistenciaPage({
     return (
       <div className="flex flex-1 flex-col gap-6 p-4 sm:p-6 pt-0">
         <div className="space-y-1 mt-4 md:mt-0">
-          <h1 className="text-3xl md:text-4xl font-black tracking-tight">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
             Control de Asistencia
           </h1>
           <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed">
@@ -79,7 +79,7 @@ export default async function PortalAsistenciaPage({
     <div className="flex flex-1 flex-col gap-8 p-4 sm:p-6 pt-0 animate-in fade-in duration-700">
       {/* Sección de Encabezado */}
       <div className="space-y-1 mt-4 md:mt-0">
-        <h1 className="text-3xl md:text-4xl font-black tracking-tight">
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
           Control de Asistencia
         </h1>
         <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed">

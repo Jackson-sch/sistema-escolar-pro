@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState } from "react";
 
 import {
@@ -12,19 +13,44 @@ import {
 import { Row, Table } from "@tanstack/react-table";
 import { toast } from "sonner";
 
-import { FormModal } from "@/components/modals/form-modal";
+import { FormDrawer } from "@/components/modals/form-drawer";
 import {
   ResponsiveRowActions,
   ActionItem,
 } from "@/components/common/responsive-row-actions";
 
 import { deleteStudentAction } from "@/actions/students";
-import { StudentForm } from "@/components/gestion/estudiantes/management/student-form";
 import { StudentTableType } from "@/components/gestion/estudiantes/components/columns";
-import { ConfirmModal } from "@/components/modals/confirm-modal";
 import { useCurrentRole } from "@/hooks/use-current-role";
-import { ViewStudentSheet } from "@/components/gestion/estudiantes/management/view-student-sheet";
-import { EnrollmentForm } from "@/components/gestion/matriculas/management/enrollment-form";
+
+const StudentForm = dynamic(
+  () =>
+    import(
+      "@/components/gestion/estudiantes/management/student-form"
+    ).then((m) => ({ default: m.StudentForm })),
+  { ssr: false },
+);
+const ConfirmModal = dynamic(
+  () =>
+    import("@/components/modals/confirm-modal").then((m) => ({
+      default: m.ConfirmModal,
+    })),
+  { ssr: false },
+);
+const ViewStudentSheet = dynamic(
+  () =>
+    import(
+      "@/components/gestion/estudiantes/management/view-student-sheet"
+    ).then((m) => ({ default: m.ViewStudentSheet })),
+  { ssr: false },
+);
+const EnrollmentForm = dynamic(
+  () =>
+    import(
+      "@/components/gestion/matriculas/management/enrollment-form"
+    ).then((m) => ({ default: m.EnrollmentForm })),
+  { ssr: false },
+);
 
 interface RowActionsProps {
   row: Row<StudentTableType>;
@@ -123,12 +149,11 @@ export function RowActions({ row, table }: RowActionsProps) {
         description={`¿Estás seguro de eliminar a ${student.name} ${student.apellidoPaterno}? Esta acción es irreversible y el alumno perderá su registro histórico.`}
       />
 
-      <FormModal
+      <FormDrawer
         title="Editar Estudiante"
         description="Modifique los datos personales y académicos del alumno."
         isOpen={showEditDialog}
         onOpenChange={setShowEditDialog}
-        className="sm:max-w-4xl"
       >
         <StudentForm
           id={student.id}
@@ -137,27 +162,25 @@ export function RowActions({ row, table }: RowActionsProps) {
           instituciones={metaData?.instituciones || []}
           estados={metaData?.estados || []}
         />
-      </FormModal>
+      </FormDrawer>
 
-      <FormModal
+      <FormDrawer
         title={`Inscripción Académica ${year}`}
         description={`Formalice la vacante de ${student.name} ${student.apellidoPaterno} para el nuevo periodo lectivo.`}
         isOpen={showEnrollmentDialog}
         onOpenChange={setShowEnrollmentDialog}
-        className="sm:max-w-2xl"
       >
         {showEnrollmentDialog && (
           <EnrollmentForm
             onSuccess={() => {
               setShowEnrollmentDialog(false);
-              // Podríamos necesitar revalidar o refrescar la tabla si no es automático
             }}
             onCancel={() => setShowEnrollmentDialog(false)}
             nivelesAcademicos={metaData?.nivelesAcademicos || []}
             defaultStudentId={student.id}
           />
         )}
-      </FormModal>
+      </FormDrawer>
 
       <ViewStudentSheet
         student={student}
