@@ -1,0 +1,223 @@
+"use client";
+
+import {
+  User,
+  BadgeDollarSign,
+  Building2,
+  CheckCircle2,
+  XCircle,
+  Layers,
+  Loader2,
+} from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { UniformReceiptDownload } from "./uniform-receipt-download";
+
+interface SalesDetailDialogProps {
+  venta: any | null;
+  onClose: () => void;
+  isPending: boolean;
+  onUpdateStatus: (ventaId: string, nuevoEstado: any) => void;
+  onApprove: (ventaId: string) => void;
+  onConfirmDelivery: (ventaId: string) => void;
+}
+
+export function SalesDetailDialog({
+  venta,
+  onClose,
+  isPending,
+  onUpdateStatus,
+  onApprove,
+  onConfirmDelivery,
+}: SalesDetailDialogProps) {
+  return (
+    <Dialog open={!!venta} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-[500px] border border-white/10 bg-card/30 backdrop-blur-2xl shadow-3xl rounded-[2rem] overflow-hidden">
+        <DialogHeader className="space-y-1">
+          <DialogTitle className="flex items-center gap-3 text-2xl font-black text-foreground tracking-tight">
+            <BadgeDollarSign className="h-7 w-7 text-primary" />
+            Venta {venta?.codigo}
+          </DialogTitle>
+          <DialogDescription className="text-muted-foreground/60 text-xs font-medium uppercase tracking-wider">
+            Gestión de reserva y aprobación administrativa.
+          </DialogDescription>
+        </DialogHeader>
+
+        {venta && (
+          <div className="space-y-6 pt-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 rounded-2xl bg-muted/10 border border-border/20 shadow-sm flex flex-col gap-2">
+                <span className="text-[8px] font-black text-primary/80 uppercase tracking-widest bg-primary/5 border border-primary/10 px-2.5 py-0.5 rounded-full w-max">
+                  Estudiante
+                </span>
+                <div className="flex items-center gap-2 text-sm font-bold text-foreground tracking-tight">
+                  <User className="h-4 w-4 text-primary shrink-0" />
+                  {venta.estudiante?.name}{" "}
+                  {venta.estudiante?.apellidoPaterno}
+                </div>
+              </div>
+              <div className="p-4 rounded-2xl bg-muted/10 border border-border/20 shadow-sm flex flex-col gap-2">
+                <span className="text-[8px] font-black text-primary/80 uppercase tracking-widest bg-primary/5 border border-primary/10 px-2.5 py-0.5 rounded-full w-max">
+                  Sede de recojo
+                </span>
+                <div className="flex items-center gap-2 text-sm font-bold text-foreground tracking-tight">
+                  <Building2 className="h-4 w-4 text-primary shrink-0" />
+                  {venta.sede?.nombre}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <span className="text-[10px] font-black text-muted-foreground/80 uppercase tracking-[0.2em] ml-1">
+                Resumen de pedido
+              </span>
+              <div className="space-y-2">
+                {venta.detalles?.map((d: any) => (
+                  <div
+                    key={d.id}
+                    className="p-3.5 flex justify-between items-center bg-muted/5 border border-border/10 rounded-2xl hover:bg-muted/10 transition-colors duration-200"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <span className="text-sm font-bold text-foreground tracking-tight">
+                        {d.variante.uniforme.nombre}
+                      </span>
+                      <div className="flex gap-2">
+                        <span className="text-[9px] text-primary/80 bg-primary/5 border border-primary/10 font-black uppercase tracking-wider px-2 py-0.5 rounded-md">
+                          Talla {d.variante.talla}
+                        </span>
+                        <span className="text-[9px] text-muted-foreground/80 font-bold bg-muted/20 px-2 py-0.5 rounded-md">
+                          {d.cantidad} {d.cantidad === 1 ? "unidad" : "unidades"}
+                        </span>
+                      </div>
+                    </div>
+                    <span className="text-sm font-extrabold text-foreground font-mono">
+                      S/ {d.subtotal.toFixed(2)}
+                    </span>
+                  </div>
+                ))}
+                
+                <div className="mt-4 p-4 flex justify-between items-center bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 border border-primary/20 rounded-2xl shadow-inner">
+                  <span className="text-xs font-black text-foreground uppercase tracking-widest">
+                    Total a Pagar
+                  </span>
+                  <span className="text-2xl font-black text-primary font-mono tracking-tighter">
+                    S/ {venta.total?.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {venta.estado === "RESERVADO" && (
+              <div className="bg-amber-500/5 p-4 rounded-2xl border border-amber-500/20 flex items-start gap-3.5 shadow-[0_4px_16px_rgba(245,158,11,0.03)] animate-pulse">
+                <CheckCircle2 className="h-5 w-5 text-amber-500 mt-0.5 shrink-0" />
+                <div className="text-[11px] text-muted-foreground leading-relaxed font-semibold">
+                  <span className="font-black text-amber-600 dark:text-amber-400 block mb-0.5 uppercase tracking-wider">
+                    Aprobación Administrativa Requerida
+                  </span>
+                  Al aprobar esta reserva, se generará una obligación de pago en el cronograma escolar y el stock se descontará del inventario.
+                </div>
+              </div>
+            )}
+
+            {venta.estado === "APROBADO" && (
+              <div className="bg-emerald-500/5 p-4 rounded-2xl border border-emerald-500/20 flex items-center gap-3.5 shadow-[0_4px_16px_rgba(16,185,129,0.03)]">
+                <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />
+                <div className="text-[11px] text-muted-foreground leading-relaxed font-semibold">
+                  <span className="font-black text-emerald-600 dark:text-emerald-400 block mb-0.5 uppercase tracking-wider">
+                    Reserva Aprobada
+                  </span>
+                  La reserva administrativa ha sido autorizada y vinculada con éxito al módulo de tesorería del estudiante.
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        <DialogFooter className="pt-6 gap-3">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            disabled={isPending}
+            className="border-border/30 bg-muted/10 text-foreground/80 hover:bg-muted/20 rounded-xl h-11 font-bold flex-1 transition-all duration-200 active:scale-[0.98]"
+          >
+            Cerrar
+          </Button>
+          {venta?.estado === "RESERVADO" && (
+            <div className="flex gap-2 flex-3">
+              <Button
+                variant="ghost"
+                onClick={() => onUpdateStatus(venta.id, "CANCELADO")}
+                disabled={isPending}
+                className="text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 rounded-xl font-bold h-11 transition-all duration-200 active:scale-95"
+              >
+                <XCircle className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => onUpdateStatus(venta.id, "EN_PRUEBA")}
+                disabled={isPending}
+                className="border-violet-500/30 bg-violet-500/5 text-violet-500 hover:bg-violet-500/10 rounded-xl h-11 font-bold px-4 transition-all duration-200 active:scale-95"
+              >
+                <Layers className="h-4 w-4 mr-2" />
+                Prueba
+              </Button>
+              <Button
+                onClick={() => onApprove(venta.id)}
+                disabled={isPending}
+                className="bg-primary hover:bg-primary/95 text-primary-foreground shadow-lg shadow-primary/20 rounded-xl h-11 font-bold flex-1 transition-all duration-200 active:scale-[0.97]"
+              >
+                {isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  "Aprobar y Cobrar"
+                )}
+              </Button>
+            </div>
+          )}
+          {venta?.estado === "EN_PRUEBA" && (
+            <div className="flex gap-2 flex-3">
+              <Button
+                variant="ghost"
+                onClick={() => onUpdateStatus(venta.id, "CANCELADO")}
+                disabled={isPending}
+                className="text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 rounded-xl font-bold h-11 transition-all duration-200 active:scale-95"
+              >
+                <XCircle className="h-4 w-4" />
+              </Button>
+              <Button
+                onClick={() => onApprove(venta.id)}
+                disabled={isPending}
+                className="bg-primary hover:bg-primary/95 text-primary-foreground shadow-lg shadow-primary/20 rounded-xl h-11 font-bold flex-1 transition-all duration-200 active:scale-[0.97]"
+              >
+                {isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  "Aprobar y Cobrar"
+                )}
+              </Button>
+            </div>
+          )}
+          {venta?.estado === "APROBADO" && (
+            <div className="flex gap-2 flex-1">
+              <UniformReceiptDownload venta={venta} />
+              <Button
+                onClick={() => onConfirmDelivery(venta.id)}
+                disabled={isPending}
+                className="bg-foreground text-background hover:bg-foreground/90 rounded-xl h-11 font-bold flex-1 transition-all duration-200 active:scale-[0.97]"
+              >
+                {isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  "Confirmar Entrega"
+                )}
+              </Button>
+            </div>
+          )}
+          {venta && ["ENTREGADO", "PAGADO"].includes(venta.estado) && (
+            <UniformReceiptDownload venta={venta} />
+          )}
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

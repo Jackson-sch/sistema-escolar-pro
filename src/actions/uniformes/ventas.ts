@@ -260,6 +260,26 @@ export async function actualizarEstadoVentaUniformeAction(
         estado: nuevoEstado,
         updatedAt: new Date(),
       },
+      include: {
+        estudiante: {
+          include: {
+            nivelAcademico: {
+              include: {
+                grado: true,
+                nivel: true,
+              },
+            },
+          },
+        },
+        sede: true,
+        detalles: {
+          include: {
+            variante: {
+              include: { uniforme: true },
+            },
+          },
+        },
+      },
     });
 
     revalidatePath("/uniformes");

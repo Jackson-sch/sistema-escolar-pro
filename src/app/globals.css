@@ -52,7 +52,9 @@
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
   --text-xxs: 10px;
+  --text-xxs-line-height: 12px;
   --text-micro: 11px;
+  --text-micro-line-height: 14px;
   --animate-shine: shine var(--duration) infinite linear;
   @keyframes shine {
     0% {
@@ -270,13 +272,11 @@
   /* Text XXS 10px */
   .text-xxs {
     font-size: 10px;
-    line-height: 1rem;
   }
 
   /* Text Micro 11px */
   .text-micro {
     font-size: 11px;
-    line-height: 1.1rem;
   }
 
   /* Liquid Glass Utility v2.5 - OKLCH & Tailwind v4 Native */
