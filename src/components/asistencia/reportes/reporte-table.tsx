@@ -20,40 +20,41 @@ interface ReporteTableProps {
   mes: number;
 }
 
+function getDayStatus(asistencias: any[], day: number) {
+  const asistencia = asistencias.find(
+    (a) => new Date(a.fecha).getDate() === day,
+  );
+  if (!asistencia) return null;
+  if (asistencia.tardanza) return "tarde";
+  if (asistencia.justificada) return "justificado";
+  if (!asistencia.presente) return "ausente";
+  return "presente";
+}
+
+function renderStatusIcon(status: string | null) {
+  switch (status) {
+    case "presente":
+      return <IconCircleFilled className="size-3 text-emerald-500 mx-auto" />;
+    case "ausente":
+      return <IconCircleFilled className="size-3 text-red-500 mx-auto" />;
+    case "tarde":
+      return <IconCircleFilled className="size-3 text-amber-500 mx-auto" />;
+    case "justificado":
+      return <IconCircleFilled className="size-3 text-sky-500 mx-auto" />;
+    default:
+      return <span className="text-muted-foreground/30 text-xs">-</span>;
+  }
+}
+
 export function ReporteTable({
   reportData,
   daysInMonth,
   anio,
   mes,
 }: ReporteTableProps) {
-  const getDayStatus = (asistencias: any[], day: number) => {
-    const asistencia = asistencias.find(
-      (a) => new Date(a.fecha).getDate() === day,
-    );
-    if (!asistencia) return null;
-    if (asistencia.tardanza) return "tarde";
-    if (asistencia.justificada) return "justificado";
-    if (!asistencia.presente) return "ausente";
-    return "presente";
-  };
-
-  const renderStatusIcon = (status: string | null) => {
-    switch (status) {
-      case "presente":
-        return <IconCircleFilled className="size-3 text-emerald-500 mx-auto" />;
-      case "ausente":
-        return <IconCircleFilled className="size-3 text-red-500 mx-auto" />;
-      case "tarde":
-        return <IconCircleFilled className="size-3 text-amber-500 mx-auto" />;
-      case "justificado":
-        return <IconCircleFilled className="size-3 text-sky-500 mx-auto" />;
-      default:
-        return null;
-    }
-  };
 
   return (
-    <div className="w-full overflow-x-auto relative bg-dark shadow-2xl">
+    <div className="w-full overflow-x-auto relative bg-dark shadow-lg">
       <table className="w-full border-separate border-spacing-0 min-w-max">
         <TableHeader className="sticky top-0 bg-background z-10 shadow-sm">
           <TableRow className="border-b border-white/5 hover:bg-transparent">

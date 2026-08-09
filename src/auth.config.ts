@@ -15,9 +15,16 @@ export default {
 
           const user = await prisma.user.findUnique({
             where: { email },
+            include: { estado: true },
           })
 
           if (!user || !user.password) return null
+
+          // Validar que la cuenta esté activa (si tiene estado asignado)
+          if (user.estado && user.estado.esActivo === false) {
+            console.warn(`[Auth] Intento de login en cuenta inactiva/suspendida: '${email}'`);
+            return null;
+          }
 
           const passwordsMatch = await bcrypt.compare(password, user.password)
 

@@ -75,7 +75,7 @@ export function OCRButton({ onScanComplete }: OCRButtonProps) {
         variant="outline"
         onClick={() => fileInputRef.current?.click()}
         disabled={isScanning}
-        className="h-10 px-4 border-blue-500/30 bg-blue-500/5 hover:bg-blue-500/10 text-blue-600 hover:text-blue-700 font-bold gap-2 rounded-full transition-all active:scale-95"
+        className="h-10 px-4 border-blue-500/30 bg-blue-500/5 hover:bg-blue-500/10 text-blue-600 hover:text-blue-700 font-bold gap-2 rounded-full transition-[color,background-color,transform] active:scale-95"
       >
         {isScanning ? (
           <IconLoader2 className="size-4 animate-spin" />

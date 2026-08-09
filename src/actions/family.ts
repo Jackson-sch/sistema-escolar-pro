@@ -1,9 +1,11 @@
 "use server"
 
 import prisma from "@/lib/prisma"
+import { auth } from "@/auth";
 import { revalidatePath } from "next/cache"
-import { Role } from "../../prisma/client"
+import { Role } from "@prisma/client"
 import bcrypt from "bcryptjs"
+import { randomBytes } from "crypto";
 
 const REVALIDATE_PATH = "/gestion/estudiantes"
 
@@ -22,6 +24,19 @@ const sanitizeDataFamiliar = (data: any) => {
 
 export async function upsertFamilyMemberAction(studentId: string, values: any, relationId?: string) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
+    const rawRole = (session.user.role || "").toString().toLowerCase();
+    const allowedRoles = ["super_admin", "admin", "administrador", "director", "coordinador", "administrativo"];
+    if (!allowedRoles.includes(rawRole)) {
+      return { error: "No tienes permiso para gestionar relaciones familiares." };
+    }
+
+    const institucionId = session.user.institucionId;
+
     const sanitizedValues = sanitizeDataFamiliar(values);
     const {
       dni,
@@ -67,7 +82,7 @@ export async function upsertFamilyMemberAction(studentId: string, values: any, r
       }
 
       // Si no existe, lo creamos con una contraseña por defecto (su DNI o uno aleatorio si no hay)
-      const passwordToHash = dni || Math.random().toString(36).slice(-8);
+      const passwordToHash = dni || randomBytes(6).toString("base64url");
       const hashedPassword = await bcrypt.hash(passwordToHash, 10)
       
       parent = await prisma.user.create({
@@ -82,6 +97,7 @@ export async function upsertFamilyMemberAction(studentId: string, values: any, r
           password: hashedPassword,
           estadoId: estadoActivo.id,
           mustChangePassword: true,
+          institucionId: institucionId || undefined,
           ...userData
         }
       })
@@ -162,6 +178,17 @@ export async function upsertFamilyMemberAction(studentId: string, values: any, r
 
 export async function removeFamilyRelationAction(relationId: string) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
+    const rawRole = (session.user.role || "").toString().toLowerCase();
+    const allowedRoles = ["super_admin", "admin", "administrador", "director", "coordinador", "administrativo"];
+    if (!allowedRoles.includes(rawRole)) {
+      return { error: "No tienes permiso para eliminar relaciones familiares." };
+    }
+
     await prisma.relacionFamiliar.delete({
       where: { id: relationId }
     })
@@ -175,6 +202,17 @@ export async function removeFamilyRelationAction(relationId: string) {
 
 export async function togglePrimaryContactAction(studentId: string, relationId: string) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
+    const rawRole = (session.user.role || "").toString().toLowerCase();
+    const allowedRoles = ["super_admin", "admin", "administrador", "director", "coordinador", "administrativo"];
+    if (!allowedRoles.includes(rawRole)) {
+      return { error: "No tienes permiso para actualizar el contacto primario." };
+    }
+
     // Quitar todos los demás
     await prisma.relacionFamiliar.updateMany({
       where: { hijoId: studentId },

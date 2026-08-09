@@ -3,6 +3,7 @@
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { getActiveSedeId } from "@/actions/active-sede";
 
 export async function getDirectorioDocentesAction() {
   try {
@@ -15,10 +16,6 @@ export async function getDirectorioDocentesAction() {
       };
     }
 
-    // Buscamos a los profesores (si el padre y todos los colegios son unívocos, esto es suficiente)
-    // De haber multi-institución, podríamos extraerlo del padreTutor->relacionFamiliar->estudiante->institucionId
-    // Procedemos a buscar el ID usando los hijos si es necesario o un fallback simple.
-
     let targetInstitucionId = session.user.institucionId;
     if (!targetInstitucionId && session.user.role === "padre") {
       const relacion = await prisma.relacionFamiliar.findFirst({
@@ -28,16 +25,26 @@ export async function getDirectorioDocentesAction() {
       targetInstitucionId = relacion?.hijo?.institucionId as string | undefined;
     }
 
+    const activeSedeId = await getActiveSedeId();
+    const whereCondition: any = {
+      institucionId: (targetInstitucionId as string | undefined) ?? undefined,
+      role: "profesor",
+      estado: {
+        esActivo: true,
+      },
+    };
+
+    if (activeSedeId) {
+      whereCondition.OR = [
+        { cursosImpartidos: { some: { nivelAcademico: { sedeId: activeSedeId } } } },
+        { nivelesTutoria: { some: { sedeId: activeSedeId } } },
+      ];
+    }
+
     // Obtener los docentes de la misma institución educativa del usuario actual.
     // Solo aquellos con el role "profesor" y listando sus campos públicos relevantes
     const docentes = await prisma.user.findMany({
-      where: {
-        institucionId: (targetInstitucionId as string | undefined) ?? undefined,
-        role: "profesor",
-        estado: {
-          esActivo: true,
-        },
-      },
+      where: whereCondition,
       select: {
         id: true,
         name: true,

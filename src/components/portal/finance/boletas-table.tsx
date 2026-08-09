@@ -13,9 +13,9 @@ export function BoletasTable({ data }: BoletasTableProps) {
   const columns = React.useMemo(() => getBoletaColumns(), []);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between px-2">
-        <h3 className="text-xl font-black tracking-tight flex items-center gap-2">
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold tracking-tight flex items-center gap-2">
           <IconHistory className="size-5 text-primary" />
           Documentos Recientes
         </h3>
@@ -26,8 +26,8 @@ export function BoletasTable({ data }: BoletasTableProps) {
         data={data}
         searchKey="concepto"
         searchPlaceholder="Buscar por concepto (ej. Pensión, Matrícula)..."
-        emptyStateTitle="No hay boletas disponibles"
-        emptyStateDescription="Tus comprobantes aparecerán aquí conforme se procesen los pagos realizados."
+        emptyStateTitle="No hay boletas de pago disponibles"
+        emptyStateDescription="Las boletas se mostrarán aquí cuando se registren y validen tus pagos."
         showColumnVisibility={false}
       />
     </div>

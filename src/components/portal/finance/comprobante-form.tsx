@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -176,29 +177,29 @@ export function ComprobanteForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 pb-3">
+    <form onSubmit={handleSubmit} className="space-y-5 pb-3">
       {/* Info precargada */}
       {cronogramaPrecargado && (
-        <Card className="border-border/40 bg-primary/5 dark:bg-primary/10 overflow-hidden rounded-2xl">
+        <Card className="border-border bg-card overflow-hidden shadow-sm">
           <CardContent className="p-4 flex items-center gap-4">
-            <div className="size-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary shadow-inner">
+            <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
               <IconReceipt2 className="size-5" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xxs font-black uppercase tracking-widest text-primary/70">
-                Resumen de Pago
+              <p className="text-xs font-semibold text-primary">
+                Pago seleccionado
               </p>
-              <h3 className="font-black text-base truncate">
+              <h3 className="font-semibold text-base truncate">
                 {cronogramaPrecargado.concepto}
               </h3>
-              <div className="flex items-center gap-3 text-xs text-muted-foreground/80 font-bold">
+              <div className="flex items-center gap-3 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <IconUser className="size-3" />
                   <span className="truncate">
                     {cronogramaPrecargado.estudiante}
                   </span>
                 </span>
-                <span className="font-black text-foreground">
+                <span className="font-semibold text-foreground">
                   {formatCurrency(cronogramaPrecargado.monto)}
                 </span>
               </div>
@@ -225,15 +226,15 @@ export function ComprobanteForm({
               });
             }}
           >
-            <SelectTrigger className="h-12 rounded-2xl border-border/40 bg-card/50 transition-all focus:ring-primary/20">
+            <SelectTrigger className="h-11 rounded-lg border-border bg-background transition-colors focus:ring-primary/20">
               <SelectValue placeholder="Selecciona el concepto..." />
             </SelectTrigger>
-            <SelectContent className="rounded-2xl border-border/40">
+            <SelectContent className="rounded-lg border-border">
               {opcionesDeuda.map((deuda) => (
                 <SelectItem
                   key={deuda.id}
                   value={deuda.id}
-                  className="rounded-xl"
+                  className="rounded-md"
                 >
                   {deuda.label}
                 </SelectItem>
@@ -251,11 +252,14 @@ export function ComprobanteForm({
         </Label>
         <div className="relative">
           {preview ? (
-            <div className="relative rounded-2xl overflow-hidden border border-border/40 bg-muted/30 group">
+            <div className="relative rounded-lg overflow-hidden border border-border bg-muted/30 group">
               {preview.startsWith("data:image") ? (
-                <img
+                <Image
                   src={preview}
                   alt="Comprobante"
+                  width={400}
+                  height={256}
+                  unoptimized
                   className="w-full max-h-64 object-contain p-2"
                 />
               ) : (
@@ -274,15 +278,15 @@ export function ComprobanteForm({
                   variant="destructive"
                   size="icon"
                   onClick={() => setPreview(null)}
-                  className="rounded-xl scale-75 group-hover:scale-100 transition-transform"
+                  className="rounded-md scale-75 group-hover:scale-100 transition-transform"
                 >
                   <IconX className="size-5" />
                 </Button>
               </div>
 
               {isScanning && (
-                <div className="absolute inset-0 bg-primary/20 backdrop-blur-sm flex flex-col items-center justify-center animate-in fade-in duration-300">
-                  <div className="bg-background/90 p-4 rounded-2xl shadow-xl flex flex-col items-center gap-3 border border-primary/20">
+                <div className="absolute inset-0 bg-primary/20 backdrop-blur-sm flex flex-col items-center justify-center animate-in fade-in animation-duration-">
+                  <div className="bg-background p-4 rounded-lg shadow-lg flex flex-col items-center gap-3 border border-primary/20">
                     <IconLoader2 className="size-8 animate-spin text-primary" />
                     <div className="text-center">
                       <p className="text-sm font-black text-primary uppercase tracking-wider">
@@ -297,8 +301,8 @@ export function ComprobanteForm({
               )}
             </div>
           ) : (
-            <label className="group flex flex-col items-center justify-center min-h-[160px] border-2 border-dashed border-border/40 hover:border-primary/50 rounded-2xl cursor-pointer transition-all bg-card/30 hover:bg-primary/5">
-              <div className="size-14 rounded-2xl bg-muted/50 group-hover:bg-primary/10 flex items-center justify-center text-muted-foreground group-hover:text-primary transition-all mb-3 shadow-sm border border-border/20">
+            <label className="group flex flex-col items-center justify-center min-h-[160px] border-2 border-dashed border-border hover:border-primary/50 rounded-lg cursor-pointer transition-colors bg-card hover:bg-primary/5">
+              <div className="size-12 rounded-lg bg-muted group-hover:bg-primary/10 flex items-center justify-center text-muted-foreground group-hover:text-primary transition-colors mb-3 border border-border">
                 <IconUpload className="size-7" />
               </div>
               <div className="text-center">
@@ -336,7 +340,7 @@ export function ComprobanteForm({
               value={form.monto}
               onChange={(e) => setForm({ ...form, monto: e.target.value })}
               placeholder="0.00"
-              className="h-11 pl-10 rounded-full border-border/40 bg-card/50 focus:ring-primary/20 font-black text-base"
+              className="h-11 pl-10 rounded-lg border-border bg-background focus:ring-primary/20 font-semibold text-base"
             />
           </div>
           {isMontoMismatched && (
@@ -359,7 +363,7 @@ export function ComprobanteForm({
             onChange={(e) =>
               setForm({ ...form, fechaOperacion: e.target.value })
             }
-            className="h-11 rounded-full border-border/40 bg-card/50 focus:ring-primary/20 font-bold"
+            className="h-11 rounded-lg border-border bg-background focus:ring-primary/20 font-medium"
           />
         </div>
 
@@ -372,7 +376,7 @@ export function ComprobanteForm({
             value={form.bancoOrigen}
             onChange={(e) => setForm({ ...form, bancoOrigen: e.target.value })}
             placeholder="Ej: BCP, Interbank..."
-            className="h-11 rounded-full border-border/40 bg-card/50 focus:ring-primary/20 font-bold"
+            className="h-11 rounded-lg border-border bg-background focus:ring-primary/20 font-medium"
           />
         </div>
 
@@ -387,7 +391,7 @@ export function ComprobanteForm({
               setForm({ ...form, numeroOperacion: e.target.value })
             }
             placeholder="Ej: 123456"
-            className="h-11 rounded-full border-border/40 bg-card/50 focus:ring-primary/20 font-mono text-sm"
+            className="h-11 rounded-lg border-border bg-background focus:ring-primary/20 font-mono text-sm"
           />
         </div>
       </div>
@@ -399,7 +403,7 @@ export function ComprobanteForm({
           disabled={
             loading || !preview || !form.cronogramaId || isMontoMismatched
           }
-          className="w-full h-12 rounded-full gap-2 font-black text-base shadow-lg shadow-primary/20 transition-all hover:shadow-primary/30 active:scale-[0.98] bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:grayscale hover:scale-105"
+          className="w-full h-11 rounded-lg gap-2 font-semibold text-sm shadow-sm transition-colors bg-primary hover:bg-primary/90 disabled:opacity-50"
         >
           {loading ? (
             <>
@@ -414,8 +418,8 @@ export function ComprobanteForm({
           )}
         </Button>
 
-        <div className="mt-4 p-3 rounded-xl bg-blue-500/5 border border-blue-500/10 flex items-start gap-3">
-          <div className="bg-blue-500/10 rounded-lg p-1.5 shrink-0">
+        <div className="mt-4 p-3 rounded-lg bg-blue-500/5 border border-blue-500/15 flex items-start gap-3">
+          <div className="bg-blue-500/10 rounded-md p-1.5 shrink-0">
             <IconInfoCircle className="size-3.5 text-blue-500" />
           </div>
           <p className="text-xs leading-snug text-blue-500/80 font-medium">

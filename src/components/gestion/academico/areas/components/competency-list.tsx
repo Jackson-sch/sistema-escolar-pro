@@ -1,13 +1,13 @@
 "use client";
 
-import { format } from "date-fns";
 import { 
   IconEdit, 
   IconTrash, 
   IconPlus, 
-  IconCheck, 
   IconPointFilled,
-  IconGripVertical
+  IconGripVertical,
+  IconSparkles,
+  IconLayersSubtract,
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -45,7 +45,7 @@ interface CompetencyListProps {
   areaId: string;
 }
 
-function CapacityItem({ cap, compId }: { cap: CapacidadWithRelations, compId: string }) {
+function CapacityItem({ cap, compId }: { cap: CapacidadWithRelations; compId: string }) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -66,34 +66,34 @@ function CapacityItem({ cap, compId }: { cap: CapacidadWithRelations, compId: st
 
   return (
     <>
-      <div className="flex gap-3 bg-background border border-border/50 p-3 rounded-lg text-sm transition-colors hover:border-border group/cap relative">
-        <div className="mt-0.5 cursor-grab text-muted-foreground/30 hover:text-muted-foreground shrink-0">
-           <IconGripVertical className="w-4 h-4" />
+      <div className="flex items-center gap-3 bg-background/80 border border-border/40 p-3 rounded-xl text-xs transition-[border-color] hover:border-indigo-500/30 group/cap relative shadow-xs">
+        <div className="cursor-grab text-muted-foreground/30 hover:text-muted-foreground shrink-0">
+          <IconGripVertical className="size-4" />
         </div>
-        <div className="flex-1 space-y-1 min-w-0 pr-16">
-          <p className="font-medium truncate">{cap.nombre}</p>
+        <div className="flex-1 space-y-0.5 min-w-0 pr-16">
+          <p className="font-bold text-foreground truncate">{cap.nombre}</p>
           {cap.descripcion && (
-            <p className="text-xs text-muted-foreground line-clamp-2">{cap.descripcion}</p>
+            <p className="text-[11px] text-muted-foreground line-clamp-1">{cap.descripcion}</p>
           )}
         </div>
         
         {/* Actions */}
-        <div className="absolute top-2.5 right-2 flex gap-1 bg-background/80 backdrop-blur-sm opacity-0 group-hover/cap:opacity-100 transition-opacity rounded-md">
+        <div className="absolute top-2 right-2 flex items-center gap-1 bg-background/90 opacity-0 group-hover/cap:opacity-100 transition-opacity rounded-lg p-0.5 border border-border/40">
           <Button 
             variant="ghost" 
             size="icon" 
-            className="h-6 w-6 text-muted-foreground hover:text-primary"
+            className="size-6 text-muted-foreground hover:text-indigo-600 hover:bg-indigo-500/10 rounded-md transition-colors"
             onClick={() => setShowEditDialog(true)}
           >
-            <IconEdit className="w-3.5 h-3.5" />
+            <IconEdit className="size-3.5" />
           </Button>
           <Button 
             variant="ghost" 
             size="icon" 
-            className="h-6 w-6 text-muted-foreground hover:text-destructive"
+            className="size-6 text-muted-foreground hover:text-rose-600 hover:bg-rose-500/10 rounded-md transition-colors"
             onClick={() => setShowConfirmModal(true)}
           >
-            <IconTrash className="w-3.5 h-3.5" />
+            <IconTrash className="size-3.5" />
           </Button>
         </div>
       </div>
@@ -125,7 +125,7 @@ function CapacityItem({ cap, compId }: { cap: CapacidadWithRelations, compId: st
   );
 }
 
-function CompetencyItem({ comp, index }: { comp: CompetenciaWithCapacidades, index: number }) {
+function CompetencyItem({ comp, index }: { comp: CompetenciaWithCapacidades; index: number }) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showCapacityDialog, setShowCapacityDialog] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -147,76 +147,85 @@ function CompetencyItem({ comp, index }: { comp: CompetenciaWithCapacidades, ind
 
   return (
     <>
-      <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-        {/* Timeline Node */}
-        <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-background bg-muted-foreground/20 text-muted-foreground shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 transition-colors group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary/30">
-          <span className="text-xs font-bold leading-none">C{index + 1}</span>
+      <div className="relative flex flex-col md:flex-row items-start gap-4 group">
+        {/* Timeline Index Badge */}
+        <div className="size-9 rounded-xl bg-indigo-600 text-white font-mono font-bold text-xs flex items-center justify-center shrink-0 shadow-md shadow-indigo-500/20">
+          C{index + 1}
         </div>
         
         {/* Card Content */}
-        <Card className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] shadow-sm border bg-background/50 backdrop-blur-sm transition-all duration-300 hover:shadow-md hover:border-primary/30">
-          <CardContent className="p-5">
-             <div className="flex justify-between items-start mb-3 gap-4">
-                <div>
-                  <h4 className="font-bold text-base leading-tight flex items-start gap-2">
-                     <span className="text-primary mt-0.5"><IconPointFilled className="w-4 h-4" /></span> 
-                     {comp.nombre}
-                  </h4>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {comp.descripcion || "Sin descripción proporcionada."}
+        <Card className="flex-1 rounded-2xl border border-border/40 bg-card/80 shadow-xs transition-[border-color,box-shadow] duration-300 hover:border-indigo-500/30 hover:shadow-md">
+          <CardContent className="p-5 space-y-4">
+            <div className="flex justify-between items-start gap-4">
+              <div className="space-y-1">
+                <h4 className="font-bold text-sm text-foreground flex items-start gap-1.5 leading-snug">
+                  <IconPointFilled className="size-4 text-indigo-500 mt-0.5 shrink-0" />
+                  <span>{comp.nombre}</span>
+                </h4>
+                {comp.descripcion && (
+                  <p className="text-xs text-muted-foreground leading-relaxed pl-5">
+                    {comp.descripcion}
+                  </p>
+                )}
+              </div>
+              
+              {/* Actions */}
+              <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="size-7 rounded-lg text-muted-foreground hover:text-indigo-600 hover:bg-indigo-500/10 transition-colors"
+                  onClick={() => setShowEditDialog(true)}
+                >
+                  <IconEdit className="size-4" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="size-7 rounded-lg text-muted-foreground hover:text-rose-600 hover:bg-rose-500/10 transition-colors"
+                  onClick={() => setShowConfirmModal(true)}
+                >
+                  <IconTrash className="size-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Capacidades Wrapper */}
+            <div className="space-y-2.5 bg-muted/30 p-3.5 rounded-xl border border-border/30">
+              <div className="flex justify-between items-center px-0.5">
+                <h5 className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground flex items-center gap-1">
+                  <IconLayersSubtract className="size-3 text-indigo-500" />
+                  Capacidades Asociadas
+                </h5>
+                <Badge variant="outline" className="text-[9px] font-mono font-bold bg-background border-border/40 text-muted-foreground">
+                  {comp.capacidades?.length || 0} Capacidades
+                </Badge>
+              </div>
+              
+              {comp.capacidades && comp.capacidades.length > 0 ? (
+                <div className="space-y-2">
+                  {comp.capacidades.map((cap) => (
+                    <CapacityItem key={cap.id} cap={cap} compId={comp.id} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-3 bg-background/50 rounded-xl border border-dashed border-border/30">
+                  <p className="text-xs text-muted-foreground/60 italic">
+                    Sin capacidades definidas aún.
                   </p>
                 </div>
-                
-                {/* Actions */}
-                <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8 text-muted-foreground hover:text-primary"
-                    onClick={() => setShowEditDialog(true)}
-                  >
-                    <IconEdit className="w-4 h-4" />
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                    onClick={() => setShowConfirmModal(true)}
-                  >
-                    <IconTrash className="w-4 h-4" />
-                  </Button>
-                </div>
-             </div>
-
-             {/* Capacidades Wrapper */}
-             <div className="mt-5 space-y-3 bg-muted/30 p-4 rounded-xl border border-dashed">
-               <div className="flex justify-between items-center mb-1">
-                  <h5 className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Capacidades Asociadas</h5>
-                  <Badge variant="outline" className="text-[10px] bg-background border-border/50">
-                    {comp.capacidades?.length || 0} Registros
-                  </Badge>
-               </div>
-               
-               {comp.capacidades && comp.capacidades.length > 0 ? (
-                 comp.capacidades.map((cap, capIdx) => (
-                   <CapacityItem key={cap.id} cap={cap} compId={comp.id} />
-                 ))
-               ) : (
-                 <p className="text-xs text-muted-foreground/70 italic p-2 text-center">
-                   No se han definido capacidades para esta competencia.
-                 </p>
-               )}
-               
-               <Button 
-                 variant="ghost" 
-                 size="sm" 
-                 className="w-full text-xs h-8 border border-dashed hover:border-primary/50 hover:bg-primary/5 mt-2"
-                 onClick={() => setShowCapacityDialog(true)}
-               >
-                 <IconPlus className="w-3 h-3 mr-1" />
-                 Añadir Capacidad
-               </Button>
-             </div>
+              )}
+              
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full text-xs font-semibold h-8 border-dashed border-indigo-500/30 hover:border-indigo-500 hover:bg-indigo-500/5 text-indigo-600 dark:text-indigo-400 rounded-lg transition-[background-color,border-color] gap-1.5 cursor-pointer mt-1"
+                onClick={() => setShowCapacityDialog(true)}
+              >
+                <IconPlus className="size-3.5" />
+                <span>Añadir Capacidad</span>
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -261,23 +270,22 @@ function CompetencyItem({ comp, index }: { comp: CompetenciaWithCapacidades, ind
 }
 
 export function CompetencyList({ competencies, areaId }: CompetencyListProps) {
-  
   if (!competencies || competencies.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center h-full">
-        <div className="w-16 h-16 rounded-full bg-muted/30 flex items-center justify-center mb-4">
-          <IconPlus className="w-8 h-8 text-muted-foreground/50" />
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <div className="size-14 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 flex items-center justify-center mb-3">
+          <IconSparkles className="size-7" />
         </div>
-        <h3 className="text-lg font-semibold">Sin competencias registradas</h3>
-        <p className="text-sm text-muted-foreground mt-1 max-w-sm">
-          Esta área curricular aún no tiene competencias. Puedes agregar la primera desde el botón superior.
+        <h3 className="text-sm font-bold text-foreground">Sin competencias registradas</h3>
+        <p className="text-xs text-muted-foreground mt-1 max-w-xs">
+          Esta área curricular aún no tiene competencias registradas. Puedes agregar la primera competencia o cargar el estándar CNEB.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="relative space-y-8 pb-32 before:absolute before:inset-0 before:ml-[1.4rem] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-linear-to-b before:from-transparent before:via-border/60 before:to-transparent">
+    <div className="space-y-4">
       {competencies.map((comp, index) => (
         <CompetencyItem key={comp.id} comp={comp} index={index} />
       ))}

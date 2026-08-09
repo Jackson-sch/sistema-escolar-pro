@@ -1,6 +1,7 @@
 "use server";
 import { serialize } from "@/lib/dto";
 import prisma from "@/lib/prisma";
+import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { deleteFile } from "@/lib/storage";
 
@@ -30,6 +31,11 @@ export async function getUniformesAction(categoriaId?: string) {
 
 export async function upsertUniformeAction(data: any) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     const { id, variantes, ...rest } = data;
     let uniforme;
 
@@ -60,9 +66,11 @@ export async function upsertUniformeAction(data: any) {
         where: { uniformeId: id },
       });
 
-      const incomingIds = variantes.map((v: any) => v.id).filter(Boolean);
+      const incomingIds = new Set(
+        variantes.flatMap((v: any) => (v.id ? [v.id] : [])),
+      );
       const toDelete = currentVariantes.filter(
-        (cv) => !incomingIds.includes(cv.id),
+        (cv) => !incomingIds.has(cv.id),
       );
 
       if (toDelete.length > 0) {
@@ -117,6 +125,11 @@ export async function upsertUniformeAction(data: any) {
 
 export async function deleteUniformeAction(id: string) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     const uniforme = await prisma.uniforme.findUnique({
       where: { id },
       select: { imagen: true },

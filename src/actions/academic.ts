@@ -15,7 +15,9 @@ export async function getCurricularAreasAction(nivelId?: string) {
     }
 
     const where: any = {};
-    if (nivelId) where.nivelId = nivelId;
+    if (nivelId) {
+      where.OR = [{ nivelId }, { nivelId: null }];
+    }
 
     // Si no es super_admin, limitar por institucionId
     if (session.user.role !== "super_admin" && session.user.institucionId) {
@@ -218,15 +220,25 @@ export async function upsertCourseAction(values: any, id?: string) {
       const createdCourses = [];
       const levels = await prisma.nivelAcademico.findMany({
         where: { id: { in: nivelAcademicoIds } },
+        select: { id: true, nivelId: true, gradoId: true, institucionId: true, tutorId: true },
       });
 
+      const levelsMap = new Map(levels.map((l) => [l.id, l]));
+
       for (const nivelId of nivelAcademicoIds) {
-        const nivel = levels.find((l) => l.id === nivelId);
+        const nivel = levelsMap.get(nivelId);
         if (!nivel) continue;
 
         // Validar que el nivel pertenece a la institución del usuario administrativo
         if (role !== "super_admin" && targetInstitucionId && nivel.institucionId !== targetInstitucionId) {
           continue;
+        }
+
+        // Si la opción asignada correspondía al tutor del salón de origen o tutor por defecto,
+        // asignar el tutor PROPIO de cada sección individual.
+        let targetProfesorId = values.profesorId || null;
+        if (values.isTutorDefault || (values.originTutorId && values.profesorId === values.originTutorId)) {
+          targetProfesorId = nivel.tutorId || values.profesorId || null;
         }
 
         const createData: any = {
@@ -242,7 +254,7 @@ export async function upsertCourseAction(values: any, id?: string) {
           nivelId: nivel.nivelId,
           gradoId: nivel.gradoId,
           institucionId: targetInstitucionId || nivel.institucionId,
-          profesorId: values.profesorId || null,
+          profesorId: targetProfesorId,
         };
 
         const course = await prisma.curso.create({
@@ -273,7 +285,7 @@ export async function upsertCourseAction(values: any, id?: string) {
  */
 export async function assignTeacherAction(
   courseId: string,
-  profesorId: string,
+  profesorId: string | null,
 ) {
   try {
     const session = await auth();
@@ -300,6 +312,7 @@ export async function assignTeacherAction(
       data: { profesorId },
     });
     revalidatePath("/gestion/academico/carga-horaria");
+    revalidatePath("/gestion/academico/estructura");
     return {
       success: "Profesor asignado correctamente",
       data: serialize(course),

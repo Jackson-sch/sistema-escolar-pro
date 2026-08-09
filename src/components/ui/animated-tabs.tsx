@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { motion } from "framer-motion";
+import { LazyMotion, domAnimation, m } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface AnimatedTabsProps {
@@ -47,32 +47,34 @@ export function AnimatedTabs({
             }}
           >
             {isActive && (
-              <motion.div
-                layoutId={layoutId}
-                className="absolute inset-0 z-0 rounded-full"
-                transition={{
-                  type: "spring",
-                  bounce: 0.2,
-                  duration: 0.6,
-                }}
-              >
-                {/* 1. Main glassy pill base - Slightly more opaque */}
-                <div className="absolute inset-0 rounded-full dark:bg-white/12 bg-zinc-900/12 ring-1 ring-white/20 shadow-lg" />
+              <LazyMotion features={domAnimation}>
+                <m.div
+                  layoutId={layoutId}
+                  className="absolute inset-0 z-0 rounded-full"
+                  transition={{
+                    type: "spring",
+                    bounce: 0.2,
+                    duration: 0.6,
+                  }}
+                >
+                  {/* 1. Main glassy pill base - Slightly more opaque */}
+                  <div className="absolute inset-0 rounded-full dark:bg-white/12 bg-zinc-900/12 ring-1 ring-white/20 shadow-lg" />
 
-                {/* 2. Enhanced soft diffused bloom at the bottom */}
-                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4/5 h-2/3 dark:bg-white/15 bg-zinc-900/15 blur-xl rounded-full" />
+                  {/* 2. Enhanced soft diffused bloom at the bottom */}
+                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4/5 h-2/3 dark:bg-white/15 bg-zinc-900/15 blur-xl rounded-full" />
 
-                {/* 3. Inner glow - More noticeable */}
-                <div className="absolute inset-0 rounded-full dark:bg-linear-to-b from-white/08 bg-linear-to-b from-zinc-900/12 to-transparent" />
+                  {/* 3. Inner glow - More noticeable */}
+                  <div className="absolute inset-0 rounded-full dark:bg-linear-to-b from-white/08 bg-linear-to-b from-zinc-900/12 to-transparent" />
 
-                {/* 4. Center 'Hotspot' for depth */}
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-1/4 dark:bg-white/10 bg-zinc-900/10 blur-md rounded-full" />
-              </motion.div>
+                  {/* 4. Center 'Hotspot' for depth */}
+                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-1/4 dark:bg-white/10 bg-zinc-900/10 blur-md rounded-full" />
+                </m.div>
+              </LazyMotion>
             )}
             {tab.icon && <span className="relative z-10">{tab.icon}</span>}
             <span 
               className={cn(
-                "relative z-10 transition-all duration-300 whitespace-nowrap",
+                "relative z-10 transition duration-300 whitespace-nowrap",
                 tab.icon && !isActive && "hidden sm:inline-block"
               )}
             >

@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "./client"
 }
 
 datasource db {
@@ -1252,4 +1251,24 @@ model NotificationLog {
   @@index([userId])
   @@index([createdAt])
   @@index([tipo])
+}
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  usuarioId     String?
+  usuarioNombre String?
+  usuarioEmail  String?
+  institucionId String?
+  accion        String   // CREATE, UPDATE, DELETE, LOGIN, EXPORT
+  entidad       String   // Estudiante, Nota, Pago, Staff, Seccion, etc.
+  entidadId     String?
+  detalles      Json?
+  ip            String?
+  userAgent     String?
+  createdAt     DateTime @default(now())
+
+  @@index([institucionId, createdAt])
+  @@index([entidad, entidadId])
+  @@index([usuarioId])
+  @@index([createdAt])
 }

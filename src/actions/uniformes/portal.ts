@@ -1,10 +1,20 @@
 "use server";
 import { serialize } from "@/lib/dto";
 import prisma from "@/lib/prisma";
+import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 
-export async function getPortalUniformesDataAction(padreId: string) {
+export async function getPortalUniformesDataAction(targetPadreId?: string) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
+    const rawRole = (session.user.role || "").toString().toLowerCase();
+    const isAdmin = ["super_admin", "admin", "administrador", "director"].includes(rawRole);
+    const padreId = isAdmin && targetPadreId ? targetPadreId : session.user.id;
+
     const [uniforms, categorias, sedes, relaciones] = await Promise.all([
       prisma.uniforme.findMany({
         where: { activo: true },
@@ -87,10 +97,17 @@ export async function getPortalUniformesDataAction(padreId: string) {
 }
 
 export async function toggleFavoritoUniformeAction(
-  userId: string,
+  targetUserId: string,
   uniformeId: string,
 ) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
+    const userId = session.user.id;
+
     const existing = await prisma.favoritoUniforme.findUnique({
       where: {
         userId_uniformeId: {

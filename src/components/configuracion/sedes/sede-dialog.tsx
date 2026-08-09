@@ -23,13 +23,14 @@ import { ImageUpload } from "@/components/ui/image-upload";
 import { LocationPicker } from "./location-picker";
 import { FormModal } from "@/components/modals/form-modal";
 import { useFormModal } from "@/components/modals/form-modal-context";
-import { IconLoader2 } from "@tabler/icons-react";
+import { IconLoader2, IconDeviceFloppy, IconExternalLink } from "@tabler/icons-react";
+import { FormKeyboardHelpBar } from "@/components/common/form-keyboard-help-bar";
 
 const SedeSchema = z.object({
   nombre: z.string().min(1, "El nombre es obligatorio"),
   direccion: z.string().optional(),
   telefono: z.string().optional(),
-  email: z.string().email("Email inválido").optional().or(z.literal("")),
+  email: z.email("Email inválido").optional().or(z.literal("")),
   director: z.string().optional(),
   codigoIdentifier: z.string().optional(),
   logo: z.string().optional(),
@@ -49,17 +50,17 @@ interface SedeDialogProps {
 export function SedeDialog({ open, onOpenChange, sede }: SedeDialogProps) {
   return (
     <FormModal
-      title={sede ? "Editar Sede" : "Nueva Sede"}
+      title={sede ? "Editar Sede Institucional" : "Nueva Sede Institucional"}
       description={
         sede?.esPrincipal
           ? "Esta es la sede principal. Sus datos básicos se sincronizan con los Datos Institucionales."
           : sede
-            ? "Modifique los datos de la sede aquí."
-            : "Ingrese los datos de la nueva sede."
+            ? "Modifique la información de la sede seleccionada."
+            : "Complete los datos para registrar una nueva sede."
       }
       isOpen={open}
       onOpenChange={onOpenChange}
-      className="sm:max-w-[600px]"
+      className="sm:max-w-[620px]"
     >
       <SedeFormContent sede={sede} onSuccess={() => onOpenChange(false)} />
     </FormModal>
@@ -133,8 +134,8 @@ function SedeFormContent({ sede, onSuccess }: SedeFormContentProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="flex justify-center py-2">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-1 py-1">
+        <div className="flex justify-center py-1">
           <FormField
             control={form.control}
             name="logo"
@@ -146,7 +147,7 @@ function SedeFormContent({ sede, onSuccess }: SedeFormContentProps) {
                     onChange={(url) => field.onChange(url)}
                     onRemove={() => field.onChange("")}
                     disabled={isPending}
-                    className="w-32 h-32"
+                    className="w-28 h-28"
                   />
                 </FormControl>
                 <FormMessage />
@@ -160,24 +161,24 @@ function SedeFormContent({ sede, onSuccess }: SedeFormContentProps) {
           name="nombre"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nombre de la Sede</FormLabel>
+              <FormLabel className="text-xs font-medium text-foreground/80">Nombre de la Sede</FormLabel>
               <FormControl>
-                <Input placeholder="Ej. Sede Central" {...field} className="rounded-full" />
+                <Input placeholder="Ej. Sede Central - Av. Los Tulipanes" {...field} className="bg-background border-border/40 rounded-xl text-xs h-9" />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <FormField
             control={form.control}
             name="codigoIdentifier"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Código Modular/Local</FormLabel>
+                <FormLabel className="text-xs font-medium text-foreground/80">Código Modular / Identificador</FormLabel>
                 <FormControl>
-                  <Input placeholder="Ej. 123456" {...field} className="rounded-full" />
+                  <Input placeholder="Ej. 123456" {...field} className="bg-background border-border/40 rounded-xl text-xs h-9 font-mono" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -188,9 +189,9 @@ function SedeFormContent({ sede, onSuccess }: SedeFormContentProps) {
             name="telefono"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Teléfono</FormLabel>
+                <FormLabel className="text-xs font-medium text-foreground/80">Teléfono Directo</FormLabel>
                 <FormControl>
-                  <Input placeholder="Ej. 999888777" {...field} className="rounded-full" />
+                  <Input placeholder="Ej. (01) 445-8899" {...field} className="bg-background border-border/40 rounded-xl text-xs h-9" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -203,24 +204,24 @@ function SedeFormContent({ sede, onSuccess }: SedeFormContentProps) {
           name="direccion"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Dirección</FormLabel>
+              <FormLabel className="text-xs font-medium text-foreground/80">Dirección Física</FormLabel>
               <FormControl>
-                <Input placeholder="Av. Principal 123" {...field} className="rounded-full" />
+                <Input placeholder="Av. Principal 123, Urb. San Andrés" {...field} className="bg-background border-border/40 rounded-xl text-xs h-9" />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <FormField
             control={form.control}
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email de Contacto</FormLabel>
+                <FormLabel className="text-xs font-medium text-foreground/80">Email Oficial de Contacto</FormLabel>
                 <FormControl>
-                  <Input placeholder="contacto@sede.com" {...field} className="rounded-full" />
+                  <Input placeholder="contacto@colegio.edu.pe" {...field} className="bg-background border-border/40 rounded-xl text-xs h-9" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -231,9 +232,9 @@ function SedeFormContent({ sede, onSuccess }: SedeFormContentProps) {
             name="director"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Director / Encargado</FormLabel>
+                <FormLabel className="text-xs font-medium text-foreground/80">Director / Encargado de Sede</FormLabel>
                 <FormControl>
-                  <Input placeholder="Nombre del responsable" {...field} className="rounded-full" />
+                  <Input placeholder="Nombre del responsable" {...field} className="bg-background border-border/40 rounded-xl text-xs h-9" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -241,30 +242,17 @@ function SedeFormContent({ sede, onSuccess }: SedeFormContentProps) {
           />
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <FormLabel>Ubicación en el Mapa</FormLabel>
+            <FormLabel className="text-xs font-medium text-foreground/80">Geolocalización en Mapa</FormLabel>
             <a
               href="https://www.google.com/maps"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[11px] text-blue-500 hover:text-blue-400 flex items-center gap-1 transition-colors"
+              className="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 font-medium"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-3 w-3"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                <polyline points="15 3 21 3 21 9" />
-                <line x1="10" y1="14" x2="21" y2="3" />
-              </svg>
-              Buscar en Google Maps
+              <IconExternalLink className="size-3" />
+              <span>Abrir Google Maps</span>
             </a>
           </div>
           <LocationPicker
@@ -284,20 +272,19 @@ function SedeFormContent({ sede, onSuccess }: SedeFormContentProps) {
             disabled={isPending}
           />
 
-          {/* Manual lat/lng inputs */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 pt-1">
             <FormField
               control={form.control}
               name="lat"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[11px] text-muted-foreground">
+                  <FormLabel className="text-[10px] text-muted-foreground font-bold uppercase">
                     Latitud
                   </FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Ej. -8.083672"
-                      className="h-8 text-xs font-mono rounded-full"
+                      placeholder="-8.083672"
+                      className="bg-background border-border/40 h-8 text-xs font-mono rounded-xl"
                       {...field}
                       value={field.value ?? ""}
                       onPaste={(e) => {
@@ -334,13 +321,13 @@ function SedeFormContent({ sede, onSuccess }: SedeFormContentProps) {
               name="lng"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[11px] text-muted-foreground">
+                  <FormLabel className="text-[10px] text-muted-foreground font-bold uppercase">
                     Longitud
                   </FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Ej. -79.000787"
-                      className="h-8 text-xs font-mono rounded-full"
+                      placeholder="-79.000787"
+                      className="bg-background border-border/40 h-8 text-xs font-mono rounded-xl"
                       {...field}
                       value={field.value ?? ""}
                       onChange={(e) =>
@@ -356,10 +343,6 @@ function SedeFormContent({ sede, onSuccess }: SedeFormContentProps) {
               )}
             />
           </div>
-          <p className="text-[10px] text-muted-foreground/60">
-            Haz clic en el mapa, busca una dirección, o pega las coordenadas
-            desde Google Maps.
-          </p>
         </div>
 
         {sede && (
@@ -367,11 +350,11 @@ function SedeFormContent({ sede, onSuccess }: SedeFormContentProps) {
             control={form.control}
             name="activo"
             render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+              <FormItem className="flex items-center justify-between rounded-xl border border-border/40 p-3 bg-background/50">
                 <div className="space-y-0.5">
-                  <FormLabel>Sede Activa</FormLabel>
-                  <FormDescription>
-                    Desactivar para ocultar esta sede en nuevos registros
+                  <FormLabel className="text-xs font-semibold cursor-pointer">Sede Operativa Activa</FormLabel>
+                  <FormDescription className="text-[11px]">
+                    Si se desactiva, la sede no aparecerá en nuevas matrículas.
                   </FormDescription>
                 </div>
                 <FormControl>
@@ -385,12 +368,15 @@ function SedeFormContent({ sede, onSuccess }: SedeFormContentProps) {
           />
         )}
 
-        <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-white/5">
+        {/* Guía de Atajos de Teclado */}
+        <FormKeyboardHelpBar />
+
+        <div className="flex items-center justify-end gap-3 pt-3 border-t border-border/30">
           <Button
             type="button"
             variant="outline"
             onClick={onSuccess}
-            className="w-full sm:w-auto rounded-full border-border/40 hover:bg-accent/50 hover:scale-105"
+            className="rounded-xl px-5 h-10 font-semibold text-xs border-border/40"
             disabled={isPending}
           >
             Cancelar
@@ -398,10 +384,19 @@ function SedeFormContent({ sede, onSuccess }: SedeFormContentProps) {
           <Button
             type="submit"
             disabled={isPending}
-            className="w-full sm:w-auto rounded-full px-8 hover:scale-105"
+            className="rounded-xl px-6 h-10 font-semibold text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 gap-2 min-w-[170px]"
           >
-            {isPending && <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {sede ? "Actualizar Sede" : "Crear Sede"}
+            {isPending ? (
+              <>
+                <IconLoader2 className="size-4 animate-spin" />
+                <span>Procesando...</span>
+              </>
+            ) : (
+              <>
+                <IconDeviceFloppy className="size-4" />
+                <span>{sede ? "Actualizar Sede" : "Guardar Sede"}</span>
+              </>
+            )}
           </Button>
         </div>
       </form>

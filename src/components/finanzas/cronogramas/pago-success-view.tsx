@@ -8,7 +8,7 @@ import { CronogramaTableType } from "@/components/finanzas/cronogramas/cronogram
 import { ComprobanteHtml } from "@/components/finanzas/cronogramas/comprobante-html";
 import { ComprobanteTicketHtml } from "@/components/finanzas/cronogramas/comprobante-ticket-html";
 import { createPortal } from "react-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import type { FormatoComprobante } from "@/lib/comprobante-constants";
 import { formatCurrency, formatDate } from "@/lib/formats";
 
@@ -60,16 +60,20 @@ export function PagoSuccessView({
   formatoComprobante = "A4",
   onClose,
 }: PagoSuccessViewProps) {
-  const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
 
+  // Detección de hidratación sin setState síncrono en el efecto
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+
   useEffect(() => {
-    setMounted(true);
     // Trigger entrance animation
     const t = setTimeout(() => setVisible(true), 50);
     return () => {
       clearTimeout(t);
-      setMounted(false);
     };
   }, []);
 

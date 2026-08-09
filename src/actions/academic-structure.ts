@@ -2,6 +2,7 @@
 import { serialize } from "@/lib/dto";
 
 import prisma from "@/lib/prisma";
+import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 
 const REVALIDATE_PATH = "/gestion/academico/estructura";
@@ -11,10 +12,24 @@ const REVALIDATE_PATH = "/gestion/academico/estructura";
 /**
  * Obtiene los niveles de la institución
  */
-export async function getNivelesAction(institucionId?: string) {
+import { getActiveSedeId } from "@/actions/active-sede";
+
+export async function getNivelesAction(targetInstitucionId?: string, targetSedeId?: string) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return { error: "No autorizado" };
+    }
+
+    const institucionId = session.user.institucionId || targetInstitucionId;
+    const activeSedeId = targetSedeId || (await getActiveSedeId());
+
+    const whereCondition: any = {};
+    if (institucionId) whereCondition.institucionId = institucionId;
+    if (activeSedeId) whereCondition.sedeId = activeSedeId;
+
     const niveles = await prisma.nivel.findMany({
-      where: institucionId ? { institucionId } : undefined,
+      where: Object.keys(whereCondition).length > 0 ? whereCondition : undefined,
       include: {
         _count: { select: { grados: true } },
       },
@@ -32,6 +47,11 @@ export async function getNivelesAction(institucionId?: string) {
  */
 export async function upsertNivelAction(values: any, id?: string) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     if (!values.nombre || values.nombre.trim() === "") {
       return { error: "El nombre del nivel es requerido" };
     }
@@ -69,6 +89,11 @@ export async function upsertNivelAction(values: any, id?: string) {
  */
 export async function deleteNivelAction(id: string) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     await prisma.nivel.delete({ where: { id } });
     revalidatePath(REVALIDATE_PATH);
     return { success: "Nivel eliminado" };
@@ -124,6 +149,11 @@ export async function getGradosAction(nivelId?: string, profesorId?: string) {
  */
 export async function upsertGradoAction(values: any, id?: string) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     if (!values.nivelId) return { error: "Debe seleccionar un nivel" };
     if (!values.nombre || values.nombre.trim() === "")
       return { error: "El nombre es requerido" };
@@ -164,6 +194,11 @@ export async function upsertGradoAction(values: any, id?: string) {
  */
 export async function deleteGradoAction(id: string) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     await prisma.grado.delete({ where: { id } });
     revalidatePath(REVALIDATE_PATH);
     return { success: "Grado eliminado" };
@@ -209,6 +244,13 @@ export async function getSeccionesAction(filters?: {
         grado: { select: { id: true, nombre: true, codigo: true, nivelId: true } },
         tutor: { select: { id: true, name: true, apellidoPaterno: true, apellidoMaterno: true, image: true } },
         sede: { select: { id: true, nombre: true } },
+        cursos: {
+          where: { activo: true },
+          include: {
+            profesor: { select: { id: true, name: true, apellidoPaterno: true, apellidoMaterno: true, image: true } },
+            areaCurricular: { select: { id: true, nombre: true, color: true } },
+          },
+        },
       },
       orderBy: [
         { nivel: { nombre: "asc" } },
@@ -252,6 +294,11 @@ export async function getSeccionesAction(filters?: {
  */
 export async function upsertSeccionAction(values: any, id?: string) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     // Obtener el nivelId del grado seleccionado
     if (values.gradoId && !values.nivelId) {
       const grado = await prisma.grado.findUnique({
@@ -293,10 +340,98 @@ export async function upsertSeccionAction(values: any, id?: string) {
 }
 
 /**
+ * Wizard Atómico: Crea una nueva sección con todos sus cursos y docentes asignados en 1 sola transacción
+ */
+export async function createFullSectionWizardAction(values: {
+  seccionData: {
+    gradoId: string;
+    seccion: string;
+    turno?: string;
+    capacidad?: number;
+    aulaAsignada?: string;
+    tutorId?: string | null;
+    anioAcademico: number;
+    institucionId: string;
+  };
+  cursosData: Array<{
+    nombre: string;
+    codigo: string;
+    areaCurricularId: string;
+    horasSemanales: number;
+    profesorId?: string | null;
+  }>;
+}) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
+    const grado = await prisma.grado.findUnique({
+      where: { id: values.seccionData.gradoId },
+      select: { nivelId: true },
+    });
+
+    if (!grado) {
+      return { error: "Grado no encontrado" };
+    }
+
+    const result = await prisma.$transaction(async (tx) => {
+      const seccion = await tx.nivelAcademico.create({
+        data: {
+          ...values.seccionData,
+          nivelId: grado.nivelId,
+        } as any,
+      });
+
+      const cursosCreados = [];
+      for (const curso of values.cursosData) {
+        const nuevoCurso = await tx.curso.create({
+          data: {
+            nombre: curso.nombre,
+            codigo: curso.codigo,
+            areaCurricularId: curso.areaCurricularId,
+            horasSemanales: curso.horasSemanales || 3,
+            profesorId: curso.profesorId || values.seccionData.tutorId || null,
+            nivelAcademicoId: seccion.id,
+            nivelId: grado.nivelId,
+            gradoId: values.seccionData.gradoId,
+            anioAcademico: values.seccionData.anioAcademico,
+            institucionId: values.seccionData.institucionId,
+          },
+        });
+        cursosCreados.push(nuevoCurso);
+      }
+
+      return { seccion, cursos: cursosCreados };
+    });
+
+    revalidatePath("/gestion/academico/estructura");
+    revalidatePath("/gestion/academico/carga-horaria");
+
+    return {
+      success: `¡Sección "${result.seccion.seccion}" creada exitosamente con ${result.cursos.length} cursos configurados!`,
+      data: serialize(result),
+    };
+  } catch (error: any) {
+    console.error("Error en wizard de creación de sección:", error);
+    if (error.code === "P2002") {
+      return { error: "Ya existe esta sección para el grado y año académico." };
+    }
+    return { error: "No se pudo crear la sección completa." };
+  }
+}
+
+/**
  * Elimina una sección
  */
 export async function deleteSeccionAction(id: string) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     // Verificar si tiene estudiantes matriculados
     const seccion = await prisma.nivelAcademico.findUnique({
       where: { id },
@@ -326,12 +461,36 @@ export async function deleteSeccionAction(id: string) {
  */
 export async function assignTutorAction(seccionId: string, tutorId: string | null) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     await prisma.nivelAcademico.update({
       where: { id: seccionId },
       data: { tutorId: tutorId || null },
     });
+
+    // Auto-asignar el Tutor a los cursos del aula que no tengan docente aún
+    if (tutorId) {
+      await prisma.curso.updateMany({
+        where: {
+          nivelAcademicoId: seccionId,
+          profesorId: null,
+        },
+        data: {
+          profesorId: tutorId,
+        },
+      });
+    }
+
     revalidatePath(REVALIDATE_PATH);
-    return { success: tutorId ? "Tutor asignado correctamente" : "Tutor removido" };
+    revalidatePath("/gestion/academico/carga-horaria");
+    return {
+      success: tutorId
+        ? "Tutor asignado correctamente y sincronizado con los cursos del aula"
+        : "Tutor removido",
+    };
   } catch (error) {
     console.error("Error assigning tutor:", error);
     return { error: "No se pudo asignar el tutor" };
@@ -360,7 +519,9 @@ export async function getAniosAcademicosAction() {
 export async function getTutoresAction() {
   try {
     const tutores = await prisma.user.findMany({
-      where: { role: "profesor" },
+      where: {
+        role: { in: ["profesor", "administrativo", "super_admin"] },
+      },
       select: {
         id: true,
         name: true,
@@ -380,10 +541,16 @@ export async function getTutoresAction() {
  */
 export async function getStudentsInSeccionAction(nivelAcademicoId: string) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return { error: "No autorizado" };
+    }
+
     const students = await prisma.user.findMany({
       where: {
         nivelAcademicoId,
         role: "estudiante",
+        institucionId: session.user.institucionId || undefined,
         matriculas: {
           some: {
             estado: "activo",
@@ -411,8 +578,16 @@ export async function getStudentsInSeccionAction(nivelAcademicoId: string) {
  */
 export async function getPeriodosByAnioAction(anio: number) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return { error: "No autorizado" };
+    }
+
     const periodos = await prisma.periodoAcademico.findMany({
-      where: { anioEscolar: anio },
+      where: {
+        anioEscolar: anio,
+        institucionId: session.user.institucionId || undefined,
+      },
       orderBy: { numero: "asc" },
     });
     return { data: serialize(periodos) };
@@ -427,6 +602,11 @@ export async function getPeriodosByAnioAction(anio: number) {
  */
 export async function cloneAcademicStructureAction(fromYear: number, toYear: number, institucionId: string) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     // 1. Verificar si ya existen secciones para el año destino
     const existingToYear = await prisma.nivelAcademico.count({
       where: { 

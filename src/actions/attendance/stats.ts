@@ -4,39 +4,8 @@ import prisma from "@/lib/prisma";
 import { serialize } from "@/lib/dto";
 import { auth } from "@/auth";
 
-/**
- * Obtiene estadísticas de asistencia para un dashboard
- */
-export async function getAsistenciaStatsAction(nivelAcademicoId?: string) {
-  try {
-    const session = await auth();
-    if (!session?.user) return { error: "No autorizado" };
-    
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const total = await prisma.asistencia.count({
-      where: {
-        estudiante: { institucionId: session.user.institucionId || undefined },
-        fecha: { gte: today },
-        ...(nivelAcademicoId ? { curso: { nivelAcademicoId } } : {}),
-      },
-    });
-
-    const presentes = await prisma.asistencia.count({
-      where: {
-        estudiante: { institucionId: session.user.institucionId || undefined },
-        presente: true,
-        fecha: { gte: today },
-        ...(nivelAcademicoId ? { curso: { nivelAcademicoId } } : {}),
-      },
-    });
-
-    return { data: { total, presentes, ausentes: total - presentes } };
-  } catch (error) {
-    return { error: "Fallo al obtener estadísticas" };
-  }
-}
+const shortMonthFormat = new Intl.DateTimeFormat("es-PE", { month: "short" });
+const longMonthFormat = new Intl.DateTimeFormat("es-PE", { month: "long" });
 
 /**
  * Obtiene alumnos con alertas de inasistencia (falla mayor al 15%)
@@ -101,23 +70,27 @@ export async function getAttendanceAlertsAction(
     });
 
     const alertas = alumnos
-      .map((alumno) => {
+      .flatMap((alumno) => {
         const faltas = alumno.asistencias.filter(
           (a: any) => !a.presente && !a.justificada,
         ).length;
         const porcentajeFaltas =
           totalDiasYear > 0 ? (faltas / totalDiasYear) * 100 : 0;
+        const porcentaje = Number(porcentajeFaltas.toFixed(2));
 
-        return {
-          id: alumno.id,
-          nombre: `${alumno.apellidoPaterno} ${alumno.apellidoMaterno}, ${alumno.name}`,
-          seccion: `${alumno.nivelAcademico?.grado.nombre} "${alumno.nivelAcademico?.seccion}"`,
-          faltas,
-          totalDias: totalDiasYear,
-          porcentaje: Number(porcentajeFaltas.toFixed(2)),
-        };
+        if (porcentaje < threshold * 100) return [];
+
+        return [
+          {
+            id: alumno.id,
+            nombre: `${alumno.apellidoPaterno} ${alumno.apellidoMaterno}, ${alumno.name}`,
+            seccion: `${alumno.nivelAcademico?.grado.nombre} "${alumno.nivelAcademico?.seccion}"`,
+            faltas,
+            totalDias: totalDiasYear,
+            porcentaje,
+          },
+        ];
       })
-      .filter((a) => a.porcentaje >= threshold * 100)
       .sort((a, b) => b.porcentaje - a.porcentaje);
 
     return { data: serialize(alertas) };
@@ -285,7 +258,7 @@ export async function getInstitutionalSummaryAction(
       if (scope === "year") {
         const monthNum = a.fecha.getMonth();
         key = monthNum.toString();
-        label = new Intl.DateTimeFormat("es-PE", { month: "short" }).format(a.fecha);
+        label = shortMonthFormat.format(a.fecha);
         sortKey = monthNum.toString().padStart(2, '0');
       } else {
         key = a.fecha.toISOString().split("T")[0];
@@ -327,7 +300,7 @@ export async function getInstitutionalSummaryAction(
         isToday: scope === "today",
         scope,
         periodLabel: mes !== undefined && anio !== undefined
-          ? `Mes de ${new Intl.DateTimeFormat("es-PE", { month: "long" }).format(new Date(anio, mes))}`
+          ? `Mes de ${longMonthFormat.format(new Date(anio, mes))}`
           : scope === "year" ? `Año Académico ${anio}` : "Registro de Hoy",
       },
     };

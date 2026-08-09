@@ -1,4 +1,4 @@
-import { IconCloudDownload } from "@tabler/icons-react";
+import { IconCloudDownload, IconUsers } from "@tabler/icons-react";
 import {
   getStudentsAction,
   getInstitucionesAction,
@@ -13,12 +13,17 @@ import { AddStudentButton } from "@/components/gestion/estudiantes/components/ad
 import StudentStats from "@/components/gestion/estudiantes/components/stats";
 import { Button } from "@/components/ui/button";
 import { auth } from "@/auth";
+import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+
+export const metadata = {
+  title: "Gestión de Estudiantes | Sistema Escolar Pro",
+  description: "Administración de alumnos, expedientes académicos y padrón escolar.",
+};
 
 export default async function EstudiantesPage() {
   const [
@@ -49,37 +54,38 @@ export default async function EstudiantesPage() {
   };
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-0 sm:p-4 pt-0 @container/main">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-4 sm:px-2">
-        <div>
-          <h1 className="text-xl sm:text-3xl font-bold tracking-tight">
+    <div className="min-h-screen flex flex-col gap-6 p-4 md:p-8 pt-6 @container/main">
+      {/* ── HEADER ── */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
+        <div className="space-y-2">
+          <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-4 py-1 rounded-full text-xxs font-semibold uppercase tracking-widest flex items-center gap-2 w-fit">
+            <IconUsers size={14} />
+            Padrón Estudiantil
+          </Badge>
+          <h1 className="text-3xl md:text-5xl font-bold tracking-tight leading-none">
             Gestión de Estudiantes
           </h1>
-          <p className="text-xxs sm:text-sm text-muted-foreground font-medium">
-            Administración integral de la información personal y académica de
-            los alumnos.
+          <p className="text-muted-foreground text-sm md:text-base max-w-2xl font-normal leading-relaxed">
+            Administración integral del expediente personal, historial de matrículas y estado de los alumnos.
           </p>
         </div>
-        <div className="flex flex-row gap-3 items-center">
+
+        <div className="flex flex-row gap-3 items-center shrink-0">
           {isAdmin && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="outline" className="rounded-full">
-                    <IconCloudDownload className="mr-2 h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                    <span className="hidden sm:inline font-semibold">
-                      Descargar Padrón
-                    </span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="bottom"
-                  className="text-micro font-medium"
-                >
-                  Exportar base de datos de alumnos
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" className="rounded-xl h-10 px-4 font-semibold text-xs border-border/40 gap-2 cursor-pointer">
+                  <IconCloudDownload className="size-4 text-muted-foreground" />
+                  <span className="hidden sm:inline">Descargar Padrón</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent
+                side="bottom"
+                className="text-micro font-medium"
+              >
+                Exportar base de datos de alumnos en Excel/CSV
+              </TooltipContent>
+            </Tooltip>
           )}
 
           <AddStudentButton
@@ -90,12 +96,13 @@ export default async function EstudiantesPage() {
         </div>
       </div>
 
-      <div className="px-4 sm:px-2 space-y-6">
-        {/* BANNER DE ESTADO RÁPIDO - DASHBOARD STYLE */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <StudentStats stats={defaultStats} />
-        </div>
+      {/* ── BENTO KPIS ── */}
+      <div className="px-1">
+        <StudentStats stats={defaultStats} />
+      </div>
 
+      {/* ── TABLA DE ESTUDIANTES ── */}
+      <div className="px-1">
         <StudentTable
           columns={columns}
           data={estudiantes as any}

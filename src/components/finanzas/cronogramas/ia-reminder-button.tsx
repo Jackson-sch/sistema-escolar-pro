@@ -125,7 +125,7 @@ export function IAReminderButton({ cronograma }: IAReminderButtonProps) {
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-[550px] p-0 bg-background/95 backdrop-blur-3xl border-white/5 rounded-[2.5rem] shadow-2xl overflow-hidden">
+        <DialogContent className="sm:max-w-[550px] p-0 bg-background/95 border-white/5 rounded-2xl shadow-lg overflow-hidden">
           {/* Header Personalizado */}
           <div className="p-8 pb-4 relative">
             <div className="flex items-center gap-4 mb-2">
@@ -185,7 +185,7 @@ export function IAReminderButton({ cronograma }: IAReminderButtonProps) {
               <div className="absolute -top-2 left-6 z-10 px-3 py-1 rounded-full bg-violet-600 text-white text-[9px] font-bold uppercase tracking-widest shadow-lg shadow-violet-500/20">
                 Contenido del mensaje
               </div>
-              <div className="bg-white/2 border border-white/5 rounded-[2rem] p-6 pt-8 overflow-hidden relative">
+              <div className="bg-white/2 border border-white/5 rounded-2xl p-6 pt-8 overflow-hidden relative">
                 <div className="max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                   <div className="prose prose-sm max-w-none text-foreground/90 leading-relaxed font-medium dark:prose-invert">
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
@@ -197,7 +197,7 @@ export function IAReminderButton({ cronograma }: IAReminderButtonProps) {
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="absolute bottom-4 right-4 rounded-xl size-10 bg-background/50 border border-white/5 backdrop-blur-sm hover:bg-violet-600 hover:text-white transition-all shadow-xl"
+                  className="absolute bottom-4 right-4 rounded-xl size-10 bg-background/80 border border-white/5 hover:bg-violet-600 hover:text-white transition-colors shadow-lg"
                   onClick={handleGenerate}
                   disabled={loading}
                 >

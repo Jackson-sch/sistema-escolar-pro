@@ -6,6 +6,8 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { getInstitucionByIdAction } from "@/actions/institucion";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { getParentUserAction } from "@/actions/portal";
+import { CommandPalette } from "@/components/common/command-palette";
+import { OnboardingTourDialog } from "@/components/common/onboarding-tour-dialog";
 
 export default async function PortalLayout({
   children,
@@ -37,11 +39,14 @@ export default async function PortalLayout({
   );
   const institucionData = institucionRes.data;
 
-  const headerTitle = user?.role === "profesor" ? "Portal Docente" : "Portal Padres";
+  const headerTitle =
+    user?.role === "profesor" ? "Portal Docente" : "Portal Padres";
 
   return (
-    <div className="[--header-height:calc(var(--spacing)*14)]">
+    <div className="[--header-height:calc(var(--spacing)*14)] min-h-screen">
       <SidebarProvider>
+        <CommandPalette />
+        <OnboardingTourDialog userRole={user?.role || "padre"} />
         <AppSidebar
           userRole={user?.role || "padre"}
           userName={user?.name || session.user.name || undefined}
@@ -55,9 +60,9 @@ export default async function PortalLayout({
           institucionName={institucionData?.nombreInstitucion}
           institucionLogo={institucionData?.logo}
         />
-        <SidebarInset>
+        <SidebarInset className="flex min-h-screen flex-col">
           <SiteHeader institucionName={headerTitle} />
-          <main className="flex flex-1 flex-col gap-4 p-4 relative ">
+          <main className="relative flex flex-1 flex-col gap-4 overflow-x-hidden p-2">
             <div className="flex-1 w-full">{children}</div>
             <SiteFooter />
           </main>

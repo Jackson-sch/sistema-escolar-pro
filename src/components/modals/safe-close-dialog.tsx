@@ -15,7 +15,6 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
-import { ShineBorder } from "../ui/shine-border";
 
 interface SafeCloseDialogProps {
   isOpen: boolean;
@@ -32,9 +31,8 @@ export function SafeCloseDialog({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onCancel()}>
       <DialogContent
         showCloseButton={false}
-        className="sm:max-w-[400px] gap-0 p-0 border-none bg-card shadow-2xl overflow-hidden"
+        className="sm:max-w-[400px] gap-0 p-0 border border-border/50 bg-card shadow-sm overflow-hidden"
       >
-        <ShineBorder shineColor={["#3b82f6", "#ef4444", "#22c55e", "#eab308"]} />
 
         <div className="p-6 pt-8 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-500/10 text-amber-500 ring-8 ring-amber-500/5">

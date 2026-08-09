@@ -5,7 +5,7 @@ export const prospectoSchema = z.object({
   nombre: z.string().min(2, "Nombre requerido"),
   apellidoPaterno: z.string().min(2, "Apellido paterno requerido"),
   apellidoMaterno: z.string().min(2, "Apellido materno requerido"),
-  email: z.string().email("Correo inválido").optional().or(z.literal("")),
+  email: z.email("Correo inválido").optional().or(z.literal("")),
   telefono: z.string().min(7, "Teléfono inválido"),
   direccion: z.string().optional(),
   gradoInteresId: z.string().min(1, "Debe seleccionar un grado"),

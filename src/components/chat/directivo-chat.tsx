@@ -21,6 +21,16 @@ interface DirectivoChatProps {
   context?: any;
 }
 
+function getMessageContent(m: any) {
+  return (
+    m.content ||
+    m.parts
+      ?.flatMap((p: any) => (p.type === "text" ? [p.text] : []))
+      .join("") ||
+    ""
+  );
+}
+
 export function DirectivoChat({ context }: DirectivoChatProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [chatInput, setChatInput] = useState("");
@@ -64,21 +74,10 @@ export function DirectivoChat({ context }: DirectivoChatProps) {
     setChatInput("");
   };
 
-  const getMessageContent = (m: any) => {
-    return (
-      m.content ||
-      m.parts
-        ?.filter((p: any) => p.type === "text")
-        .map((p: any) => p.text)
-        .join("") ||
-      ""
-    );
-  };
-
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4">
+    <div className="fixed bottom-20 right-6 z-50 flex flex-col items-end gap-4">
       {isOpen && (
-        <div className="w-[380px] h-[600px] bg-white/95 dark:bg-zinc-950/95 backdrop-blur-3xl border border-slate-200/80 dark:border-zinc-800 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-5 duration-300">
+        <div className="w-[380px] h-[600px] bg-white/95 dark:bg-zinc-950/95 border border-slate-200/80 dark:border-zinc-800 rounded-2xl shadow-lg overflow-hidden flex flex-col animate-in slide-in-from-bottom-5 animation-duration-">
           {/* Header - Fixed height */}
           <div className="h-20 p-6 bg-indigo-50/50 dark:bg-zinc-900/50 border-b border-slate-100 dark:border-zinc-800 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-3">
@@ -182,7 +181,7 @@ export function DirectivoChat({ context }: DirectivoChatProps) {
               type="submit"
               size="icon"
               disabled={isLoading || !chatInput.trim()}
-              className="size-12 rounded-2xl bg-indigo-600 hover:bg-indigo-500 shadow-xl shadow-indigo-600/10 transition-all active:scale-95 shrink-0 hover:scale-105 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white"
+              className="size-12 rounded-2xl bg-indigo-600 hover:bg-indigo-500 shadow-xl shadow-indigo-600/10 transition-[background-color,transform] active:scale-95 shrink-0 hover:scale-105 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white"
             >
               <IconSend className="size-5" />
             </Button>
@@ -194,22 +193,22 @@ export function DirectivoChat({ context }: DirectivoChatProps) {
       <Button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "size-16 rounded-[2rem] shadow-2xl transition-all duration-500 group overflow-hidden border",
+          "size-12 rounded-full shadow-lg transition-[color,background-color,border-color] duration-300 group overflow-hidden border cursor-pointer",
           isOpen
             ? "bg-slate-100 border-slate-200 text-indigo-600 hover:bg-slate-200 dark:bg-zinc-900 dark:border-zinc-800 dark:text-indigo-400 dark:hover:bg-zinc-800"
-            : "bg-indigo-600 border-indigo-600 text-white hover:bg-indigo-500 hover:scale-105 active:scale-95 dark:bg-indigo-500 dark:border-indigo-500 dark:hover:bg-indigo-600",
+            : "bg-indigo-600 border-indigo-600 text-white hover:bg-indigo-700 hover:scale-105 active:scale-95 dark:bg-indigo-500 dark:border-indigo-500 dark:hover:bg-indigo-600",
         )}
       >
         <div className="relative size-full flex items-center justify-center">
           <IconMessageChatbot
             className={cn(
-              "size-7 transition-all duration-500",
+              "size-5 transition-[opacity,transform] duration-300",
               isOpen ? "opacity-0 scale-50 rotate-90" : "opacity-100 scale-100",
             )}
           />
           <IconX
             className={cn(
-              "absolute size-7 transition-all duration-500",
+              "absolute size-5 transition-[opacity,transform] duration-300",
               isOpen
                 ? "opacity-100 scale-100"
                 : "opacity-0 scale-50 -rotate-90",

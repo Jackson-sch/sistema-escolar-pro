@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useReducer } from "react";
 import {
   IconPlus,
   IconTrash,
@@ -94,7 +94,7 @@ function PoliticaCard({
   return (
     <div
       className={cn(
-        "group relative flex flex-col rounded-2xl border bg-card overflow-hidden transition-all duration-300",
+        "group relative flex flex-col rounded-2xl border bg-card overflow-hidden transition-[border-color,box-shadow,opacity,filter,padding,gap] duration-300",
         "hover:border-border hover:shadow-sm",
         p.activo
           ? "border-border/60"
@@ -234,14 +234,15 @@ function PoliticaCard({
         <div className="flex items-center gap-1.5">
           <button
             onClick={() => onDelete(p.id)}
-            className="size-8 rounded-lg flex items-center justify-center text-muted-foreground opacity-0 group-hover:opacity-100 transition-all hover:bg-destructive/10 hover:text-destructive"
+            aria-label="Eliminar política"
+            className="size-8 rounded-lg flex items-center justify-center text-muted-foreground opacity-0 group-hover:opacity-100 transition-[color,background-color,opacity] hover:bg-destructive/10 hover:text-destructive"
           >
             <IconTrash className="size-3.5" />
           </button>
 
           <button
             onClick={() => onEdit(p)}
-            className="flex items-center gap-1.5 h-8 px-3 rounded-lg bg-foreground text-background text-[11px] font-bold uppercase tracking-wide transition-all hover:opacity-80 active:scale-95"
+            className="flex items-center gap-1.5 h-8 px-3 rounded-lg bg-foreground text-background text-[11px] font-bold uppercase tracking-wide transition-[opacity,transform] hover:opacity-80 active:scale-95"
           >
             <IconPencil className="size-3" />
             Editar
@@ -250,6 +251,62 @@ function PoliticaCard({
       </div>
     </div>
   );
+}
+
+// ─── Política Form Reducer ────────────────────────────────────────────────────
+// El formulario del diálogo actualiza muchos campos juntos (al abrir en modo
+// nuevo o edición), por eso se agrupan en un solo reducer.
+
+interface PoliticaFormState {
+  editingPolitica: any;
+  nombre: string;
+  nivelId: string;
+  turno: string;
+  horaEntrada: string;
+  horaSalida: string;
+  tolerancia: number;
+  activo: boolean;
+}
+
+type PoliticaFormAction =
+  | { type: "PATCH"; patch: Partial<PoliticaFormState> }
+  | { type: "OPEN_NEW" }
+  | { type: "OPEN_EDIT"; politica: any };
+
+const politicaFormInitialState: PoliticaFormState = {
+  editingPolitica: null,
+  nombre: "",
+  nivelId: "all",
+  turno: "all",
+  horaEntrada: "08:00",
+  horaSalida: "13:00",
+  tolerancia: 0,
+  activo: true,
+};
+
+function politicaFormReducer(
+  state: PoliticaFormState,
+  action: PoliticaFormAction,
+): PoliticaFormState {
+  switch (action.type) {
+    case "PATCH":
+      return { ...state, ...action.patch };
+    case "OPEN_NEW":
+      return { ...politicaFormInitialState };
+    case "OPEN_EDIT":
+      return {
+        editingPolitica: action.politica,
+        nombre: action.politica.nombre,
+        nivelId: action.politica.nivelId || "all",
+        turno: action.politica.turno || "all",
+        horaEntrada: action.politica.horaEntrada,
+        horaSalida: action.politica.horaSalida,
+        tolerancia: action.politica.tolerancia,
+        activo: action.politica.activo,
+      };
+    default:
+      return state;
+  }
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
@@ -264,15 +321,22 @@ export function PoliticasAsistenciaClient({
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [editingPolitica, setEditingPolitica] = useState<any>(null);
 
-  const [nombre, setNombre] = useState("");
-  const [nivelId, setNivelId] = useState<string>("all");
-  const [turno, setTurno] = useState<string>("all");
-  const [horaEntrada, setHoraEntrada] = useState("08:00");
-  const [horaSalida, setHoraSalida] = useState("13:00");
-  const [tolerancia, setTolerancia] = useState(0);
-  const [activo, setActivo] = useState(true);
+  // Estado del formulario agrupado en un reducer.
+  const [formState, dispatch] = useReducer(politicaFormReducer, undefined, () => ({
+    ...politicaFormInitialState,
+  }));
+
+  const {
+    editingPolitica,
+    nombre,
+    nivelId,
+    turno,
+    horaEntrada,
+    horaSalida,
+    tolerancia,
+    activo,
+  } = formState;
 
   const [ConfirmDialog, confirm] = useConfirm(
     "¿Está seguro?",
@@ -300,25 +364,7 @@ export function PoliticasAsistenciaClient({
   }
 
   const handleOpenDialog = (politica?: any) => {
-    if (politica) {
-      setEditingPolitica(politica);
-      setNombre(politica.nombre);
-      setNivelId(politica.nivelId || "all");
-      setTurno(politica.turno || "all");
-      setHoraEntrada(politica.horaEntrada);
-      setHoraSalida(politica.horaSalida);
-      setTolerancia(politica.tolerancia);
-      setActivo(politica.activo);
-    } else {
-      setEditingPolitica(null);
-      setNombre("");
-      setNivelId("all");
-      setTurno("all");
-      setHoraEntrada("08:00");
-      setHoraSalida("13:00");
-      setTolerancia(0);
-      setActivo(true);
-    }
+    dispatch(politica ? { type: "OPEN_EDIT", politica } : { type: "OPEN_NEW" });
     setIsDialogOpen(true);
   };
 
@@ -469,10 +515,10 @@ export function PoliticasAsistenciaClient({
             onClick={() => handleOpenDialog()}
             className={cn(
               "group flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-border/30 min-h-[260px]",
-              "hover:border-foreground/20 hover:bg-muted/20 transition-all duration-300"
+              "hover:border-foreground/20 hover:bg-muted/20 transition-[background-color,border-color] duration-300"
             )}
           >
-            <div className="size-10 rounded-xl bg-muted/40 flex items-center justify-center border border-border/40 group-hover:bg-muted/80 group-hover:scale-110 transition-all">
+            <div className="size-10 rounded-xl bg-muted/40 flex items-center justify-center border border-border/40 group-hover:bg-muted/80 group-hover:scale-110 transition-[background-color,transform]">
               <IconPlus className="size-5 text-muted-foreground" />
             </div>
             <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground group-hover:text-foreground transition-colors">
@@ -492,20 +538,28 @@ export function PoliticasAsistenciaClient({
       >
         <PoliticaFormFields
           nombre={nombre}
-          setNombre={setNombre}
+          setNombre={(v) => dispatch({ type: "PATCH", patch: { nombre: v } })}
           nivelId={nivelId}
-          setNivelId={setNivelId}
+          setNivelId={(v) =>
+            dispatch({ type: "PATCH", patch: { nivelId: v } })
+          }
           niveles={niveles}
           turno={turno}
-          setTurno={setTurno}
+          setTurno={(v) => dispatch({ type: "PATCH", patch: { turno: v } })}
           horaEntrada={horaEntrada}
-          setHoraEntrada={setHoraEntrada}
+          setHoraEntrada={(v) =>
+            dispatch({ type: "PATCH", patch: { horaEntrada: v } })
+          }
           horaSalida={horaSalida}
-          setHoraSalida={setHoraSalida}
+          setHoraSalida={(v) =>
+            dispatch({ type: "PATCH", patch: { horaSalida: v } })
+          }
           tolerancia={tolerancia}
-          setTolerancia={setTolerancia}
+          setTolerancia={(v) =>
+            dispatch({ type: "PATCH", patch: { tolerancia: v } })
+          }
           activo={activo}
-          setActivo={setActivo}
+          setActivo={(v) => dispatch({ type: "PATCH", patch: { activo: v } })}
         />
 
         <div className="flex justify-end gap-2 pt-4 border-t">

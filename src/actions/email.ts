@@ -27,8 +27,18 @@ export async function sendEmailAction({
   accionUrl,
 }: SendEmailParams) {
   const session = await auth();
-  const institucionId = session?.user?.institucionId;
-  const userId = session?.user?.id;
+  if (!session?.user) {
+    return { error: "No autorizado. Inicie sesión." };
+  }
+
+  const rawRole = (session.user.role || "").toString().toLowerCase();
+  const allowedRoles = ["super_admin", "admin", "administrador", "director", "coordinador", "profesor", "docente", "administrativo"];
+  if (!allowedRoles.includes(rawRole)) {
+    return { error: "No tienes permisos para enviar correos electrónicos." };
+  }
+
+  const institucionId = session.user.institucionId;
+  const userId = session.user.id;
   const recipientStr = Array.isArray(to) ? to.join(", ") : to;
 
   try {

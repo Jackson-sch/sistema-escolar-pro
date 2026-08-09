@@ -6,8 +6,13 @@ import {
   IconCalendar,
   IconDownload,
 } from "@tabler/icons-react";
+import dynamic from "next/dynamic";
 import { formatLongDate, getInitials } from "@/lib/formats";
-import { EnrollmentCertificateActions } from "@/components/gestion/documentos/enrollment-certificate-actions";
+
+const EnrollmentCertificateActions = dynamic<any>(
+  () => import("@/components/gestion/documentos/enrollment-certificate-actions").then((mod) => mod.EnrollmentCertificateActions),
+  { ssr: false }
+);
 
 import {
   Sheet,
@@ -91,7 +96,7 @@ export function EnrollmentViewSheet({
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Sección</span>
                 <Badge variant="outline" className="font-semibold">
-                  Sección "{enrollment.nivelAcademico.seccion}"
+                  Sección &quot;{enrollment.nivelAcademico.seccion}&quot;
                 </Badge>
               </div>
             </div>

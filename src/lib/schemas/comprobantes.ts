@@ -2,7 +2,7 @@ import { z } from "zod"
 
 export const ComprobanteSchema = z.object({
   cronogramaId: z.string(),
-  archivoUrl: z.string().url("URL de archivo inválida"),
+  archivoUrl: z.url("URL de archivo inválida"),
   monto: z.number().min(0.01, "El monto debe ser mayor a 0"),
   bancoOrigen: z.string().optional(),
   numeroOperacion: z.string().optional(),

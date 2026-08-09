@@ -1,7 +1,6 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { IconUsers } from "@tabler/icons-react";
 
 interface CapacityGaugeProps {
@@ -10,26 +9,25 @@ interface CapacityGaugeProps {
   percentage: number;
 }
 
+function getStatusColor(p: number) {
+  if (p < 70) return "bg-emerald-500";
+  if (p < 90) return "bg-amber-500";
+  return "bg-red-500";
+}
+
+function getStatusText(p: number) {
+  if (p < 70) return "Capacidad Ideal";
+  if (p < 90) return "Cerca del Límite";
+  return "Capacidad Crítica";
+}
+
 export function CapacityGauge({
   occupied,
   total,
   percentage,
 }: CapacityGaugeProps) {
-  // Color based on occupancy
-  const getStatusColor = (p: number) => {
-    if (p < 70) return "bg-emerald-500";
-    if (p < 90) return "bg-amber-500";
-    return "bg-red-500";
-  };
-
-  const getStatusText = (p: number) => {
-    if (p < 70) return "Capacidad Ideal";
-    if (p < 90) return "Cerca del Límite";
-    return "Capacidad Crítica";
-  };
-
   return (
-    <Card className="overflow-hidden h-full">
+    <Card className="h-full overflow-hidden rounded-2xl border-border/50 bg-card/80 shadow-sm">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
@@ -58,7 +56,7 @@ export function CapacityGauge({
 
           <div className="relative h-4 w-full overflow-hidden rounded-full bg-secondary">
             <div
-              className={`h-full transition-all duration-500 ${getStatusColor(percentage)}`}
+              className={`h-full transition-[color,width] duration-500 ${getStatusColor(percentage)}`}
               style={{ width: `${percentage}%` }}
             />
           </div>

@@ -60,7 +60,7 @@ export default async function NotasPage({ params }: NotasPageProps) {
   );
 
   return (
-    <div className="container mx-auto py-6 space-y-8 animate-in fade-in duration-500">
+    <div className="container mx-auto py-6 space-y-8 animate-in fade-in animation-duration-">
       {/* 1. Header de Navegación y Título */}
       <div className="flex flex-col gap-6">
         <div className="flex items-start gap-4">
@@ -95,8 +95,8 @@ export default async function NotasPage({ params }: NotasPageProps) {
               </span>
               <span>•</span>
               <span className="flex items-center gap-1">
-                {evaluacion.curso.nivelAcademico?.grado.nombre} "
-                {evaluacion.curso.nivelAcademico?.seccion}"
+                {evaluacion.curso.nivelAcademico?.grado.nombre} &quot;
+                {evaluacion.curso.nivelAcademico?.seccion}&quot;
               </span>
               <span>•</span>
               <span className="uppercase">

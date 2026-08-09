@@ -1,29 +1,8 @@
 "use server";
 import { serialize } from "@/lib/dto";
 import prisma from "@/lib/prisma";
+import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
-
-export async function getVariantesUniformeAction(
-  uniformeId: string,
-  sedeId?: string,
-) {
-  try {
-    const variantes = await prisma.varianteUniforme.findMany({
-      where: {
-        uniformeId,
-        ...(sedeId ? { sedeId } : {}),
-      },
-      include: {
-        sede: true,
-        uniforme: true,
-      },
-    });
-    return { data: serialize(variantes) };
-  } catch (error) {
-    console.error("Error fetching variants:", error);
-    return { error: "No se pudieron obtener las variantes" };
-  }
-}
 
 export async function getTodasLasVariantesAction(filters?: {
   sedeId?: string;
@@ -54,30 +33,6 @@ export async function getTodasLasVariantesAction(filters?: {
   }
 }
 
-export async function upsertVarianteUniformeAction(data: any) {
-  try {
-    const { id, ...rest } = data;
-    let variante;
-
-    if (id) {
-      variante = await prisma.varianteUniforme.update({
-        where: { id },
-        data: rest,
-      });
-    } else {
-      variante = await prisma.varianteUniforme.create({
-        data: rest,
-      });
-    }
-
-    revalidatePath("/uniformes");
-    return { data: serialize(variante) };
-  } catch (error) {
-    console.error("Error upserting variant:", error);
-    return { error: "No se pudo guardar la variante" };
-  }
-}
-
 export async function registrarMovimientoInventarioAction(data: {
   varianteId: string;
   tipo: "ENTRADA" | "SALIDA" | "AJUSTE";
@@ -86,6 +41,11 @@ export async function registrarMovimientoInventarioAction(data: {
   referencia?: string;
 }) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     const result = await prisma.$transaction(async (tx: any) => {
       const movimiento = await tx.movimientoInventario.create({
         data,

@@ -11,24 +11,25 @@ interface CompetenciesPageProps {
 }
 
 export default async function CompetenciesPage({ searchParams }: CompetenciesPageProps) {
-  const params = await searchParams;
-  const nivelId = typeof params.nivelId === "string" ? params.nivelId : undefined;
-
-  const [{ data: niveles = [] }] = await Promise.all([
-    getNivelesAction()
+  const [params, nivelesRes] = await Promise.all([
+    searchParams,
+    getNivelesAction(),
   ]);
+  const niveles = nivelesRes.data || [];
+
+  const activeNivelId = typeof params.nivelId === "string"
+    ? params.nivelId
+    : (niveles.length > 0 ? niveles[0].id : undefined);
 
   let allCompetencies: any[] = [];
   let areas: any[] = [];
 
-  if (nivelId) {
-    const [{ data: fetchedAreas = [] }, { data: fetchedCompetencies = [] }] = await Promise.all([
-      getCurricularAreasAction(nivelId),
-      getCompetenciesByNivelAction(nivelId),
-    ]);
-    areas = fetchedAreas;
-    allCompetencies = fetchedCompetencies;
-  }
+  const [{ data: fetchedAreas = [] }, { data: fetchedCompetencies = [] }] = await Promise.all([
+    getCurricularAreasAction(activeNivelId),
+    getCompetenciesByNivelAction(activeNivelId),
+  ]);
+  areas = fetchedAreas;
+  allCompetencies = fetchedCompetencies;
 
   return (
     <div className="space-y-4 px-2">

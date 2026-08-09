@@ -1,7 +1,12 @@
+import dynamic from "next/dynamic";
 import { IconFileDownload } from "@tabler/icons-react";
-import { PDFDownloadLink } from "@react-pdf/renderer";
 import { ComprobantePDF } from "@/components/finanzas/cronogramas/comprobante-pdf";
 import { Button } from "@/components/ui/button";
+
+const PDFDownloadLink = dynamic(
+  () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
+  { ssr: false }
+);
 
 interface DownloadWrapperProps {
   pago: any;

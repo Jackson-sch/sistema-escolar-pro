@@ -7,11 +7,10 @@ import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { StaffForm } from "@/components/gestion/personal/management/staff-form";
-import { FormModal } from "@/components/modals/form-modal";
+import { FormDrawer } from "@/components/modals/form-drawer";
 
 interface AddStaffButtonProps {
   instituciones: { id: string; nombreInstitucion: string }[];
@@ -28,29 +27,27 @@ export function AddStaffButton({
 
   return (
     <>
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              onClick={() => setOpen(true)}
-              className="rounded-full sm:w-auto sm:px-4 shadow-md bg-primary hover:bg-primary/90 text-primary-foreground"
-            >
-              <IconUserPlus className="sm:mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">Nuevo Personal</span>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Registrar Nuevo Personal</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            onClick={() => setOpen(true)}
+            className="rounded-full sm:w-auto sm:px-4 shadow-md bg-primary hover:bg-primary/90 text-primary-foreground"
+          >
+            <IconUserPlus className="sm:mr-2 h-4 w-4" />
+            <span className="hidden sm:inline">Nuevo Personal</span>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Registrar Nuevo Personal</p>
+        </TooltipContent>
+      </Tooltip>
 
-      <FormModal
+      <FormDrawer
         title="Registro de Personal"
         description="Gestión de alta para docentes, administrativos y directivos."
         isOpen={open}
         onOpenChange={setOpen}
-        className="sm:max-w-2xl"
+        Icon={IconUserPlus}
       >
         <StaffForm
           onSuccess={() => setOpen(false)}
@@ -58,7 +55,7 @@ export function AddStaffButton({
           estados={estados}
           cargos={cargos}
         />
-      </FormModal>
+      </FormDrawer>
     </>
   );
 }

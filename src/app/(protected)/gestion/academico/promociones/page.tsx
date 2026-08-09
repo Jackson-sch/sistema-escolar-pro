@@ -10,41 +10,34 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const metadata = {
-  title: "Cierre de Año y Promociones | Sistema Escolar",
+  title: "Cierre de Año y Promociones | EduNova Pro",
   description: "Gestión de transición masiva de estudiantes entre ciclos escolares.",
 };
 
 export default async function PromocionesPage(props: {
   searchParams: Promise<{ anioOrigen?: string; anioDestino?: string }>;
 }) {
-  const searchParams = await props.searchParams;
-  const institucionRes = await getInstitucionAction();
+  // Obtener datos iniciales en paralelo (incl. searchParams)
+  const [searchParams, institucionRes, aniosRes] = await Promise.all([
+    props.searchParams,
+    getInstitucionAction(),
+    getAniosAcademicosAction(),
+  ]);
   const currentYear = institucionRes.data?.cicloEscolarActual || new Date().getFullYear();
-  
+
   const anioOrigen = searchParams.anioOrigen ? parseInt(searchParams.anioOrigen) : currentYear;
   const anioDestino = searchParams.anioDestino ? parseInt(searchParams.anioDestino) : currentYear + 1;
 
   const institucionId = institucionRes.data?.id || "";
 
-  // Obtener datos iniciales
-  const [aniosRes, seccionesOrigenRes, seccionesDestinoRes, gradosRes] = await Promise.all([
-    getAniosAcademicosAction(),
+  const [seccionesOrigenRes, seccionesDestinoRes, gradosRes] = await Promise.all([
     getSeccionesAction({ anioAcademico: anioOrigen, institucionId }),
     getSeccionesAction({ anioAcademico: anioDestino, institucionId }),
-    getGradosAction()
+    getGradosAction(),
   ]);
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Cierre de Año y Promociones</h2>
-          <p className="text-muted-foreground">
-            Gestión masiva de estudiantes para el nuevo ciclo escolar {anioDestino}.
-          </p>
-        </div>
-      </div>
-
+    <div className="space-y-4 px-2">
       <Suspense fallback={<PromocionesSkeleton />}>
         <PromocionesView 
           aniosDisponibles={aniosRes.data || [currentYear]}

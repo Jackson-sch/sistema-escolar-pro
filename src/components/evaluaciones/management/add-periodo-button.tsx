@@ -283,7 +283,7 @@ export function AddPeriodoButton({ institucionId }: AddPeriodoButtonProps) {
 
             <Button
               type="submit"
-              className="w-full font-semibold shadow-xl transition-all active:scale-[0.98] rounded-full hover:scale-105"
+              className="w-full font-semibold shadow-xl transition-transform active:scale-[0.98] rounded-full hover:scale-105"
               disabled={isPending}
             >
               {isPending ? "Procesando..." : "Crear Periodo"}

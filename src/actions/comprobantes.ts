@@ -12,40 +12,8 @@ import {
 import { z } from "zod";
 import { sendEmailAction } from "@/actions/email";
 import { sendSmsAction } from "@/actions/sms";
+import { getActiveSedeId } from "@/actions/active-sede";
 
-
-/**
- * Obtiene las deudas pendientes de los hijos de un padre
- */
-export const getDeudaHijosAction = createSafeAction(
-  z.object({ padreId: z.string().optional() }), // Lo dejamos opcional para retrocompatibilidad de cliente, pero se ignora
-  async (_, session) => {
-    const padreId = session.user.id;
-    const relaciones = await prisma.relacionFamiliar.findMany({
-      where: { padreTutorId: padreId },
-      include: {
-        hijo: {
-          include: {
-            cronogramaPagos: {
-              where: { pagado: false },
-              include: { concepto: true },
-              orderBy: { fechaVencimiento: "asc" },
-            },
-          },
-        },
-      },
-    });
-
-    const deudas = relaciones.flatMap((r) =>
-      r.hijo.cronogramaPagos.map((c) => ({
-        ...c,
-        estudianteNombre: `${r.hijo.name} ${r.hijo.apellidoPaterno}`,
-      }))
-    );
-
-    return { success: serialize(deudas) };
-  }
-)
 
 /**
  * Crea un nuevo comprobante de pago
@@ -100,44 +68,33 @@ export const createComprobanteAction = createSafeAction(
 )
 
 /**
- * Obtiene los comprobantes de un padre
- */
-export const getComprobantesAction = createSafeAction(
-  z.object({ padreId: z.string().optional() }),
-  async (_, session) => {
-    const padreId = session.user.id;
-    const comprobantes = await prisma.comprobantePago.findMany({
-      where: { padreId },
-      include: {
-        cronograma: {
-          include: {
-            concepto: true,
-            estudiante: true,
-          },
-        },
-      },
-      orderBy: { createdAt: "desc" },
-    });
-
-    return { success: serialize(comprobantes) };
-  }
-)
-
-/**
  * Obtiene comprobantes pendientes de verificación (para admin)
  */
 export const getPendingComprobantesAction = createSafeAction(
   z.object({}).optional(),
   async (_, session) => {
     const institucionId = session.user.institucionId;
+    const activeSedeId = await getActiveSedeId();
+    const currentYear = new Date().getFullYear();
+
+    const studentWhereCondition: any = {
+      institucionId: institucionId || undefined,
+    };
+
+    if (activeSedeId) {
+      studentWhereCondition.matriculas = {
+        some: {
+          anioAcademico: currentYear,
+          nivelAcademico: { sedeId: activeSedeId },
+        },
+      };
+    }
 
     const comprobantes = await prisma.comprobantePago.findMany({
       where: { 
         estado: "PENDIENTE",
         cronograma: {
-          estudiante: {
-            institucionId: institucionId || undefined
-          }
+          estudiante: studentWhereCondition,
         }
       },
       include: {

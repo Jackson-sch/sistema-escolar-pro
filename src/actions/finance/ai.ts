@@ -1,6 +1,6 @@
 "use server"
 
-import { analizarRiesgoMorosidad, generarRecordatorioEmpatico } from "@/lib/ai-finance"
+import { generarRecordatorioEmpatico } from "@/lib/ai-finance"
 import { createSafeAction } from "@/lib/safe-action"
 import { z } from "zod"
 
@@ -17,13 +17,5 @@ export const getAIReminderAction = createSafeAction(
 )
 
 /**
- * Acción para analizar el riesgo de un estudiante
+ * Acción para analizar el riesgo de un estudiante (descontinuada; usar analizarRiesgoMorosidad directamente)
  */
-export const getStudentRiskAction = createSafeAction(
-  z.object({ estudianteId: z.string() }),
-  async ({ estudianteId }) => {
-    const risk = await analizarRiesgoMorosidad(estudianteId)
-    return { success: risk }
-  },
-  { roles: ["administrativo"] }
-)

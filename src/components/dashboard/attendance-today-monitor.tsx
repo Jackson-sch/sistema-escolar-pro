@@ -27,7 +27,7 @@ export function AttendanceTodayMonitor({
   const latePerc = total > 0 ? (late / total) * 100 : 0;
 
   return (
-    <Card className="liquid-glass border-none h-full overflow-hidden group">
+    <Card className="h-full overflow-hidden rounded-2xl border-border/50 bg-card/80 shadow-sm">
       <CardHeader className="pb-2 relative z-10">
         <CardTitle className="text-lg font-bold flex items-center gap-2">
           <div className="size-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
@@ -62,7 +62,7 @@ export function AttendanceTodayMonitor({
                 strokeDasharray="282.7"
                 strokeDashoffset={282.7 - (282.7 * presentPerc) / 100}
                 strokeLinecap="round"
-                className="text-emerald-500 transition-all duration-1000 ease-in-out"
+                className="text-emerald-500 transition-[color] duration-1000 ease-in-out"
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -109,8 +109,6 @@ export function AttendanceTodayMonitor({
         </div>
       </CardContent>
 
-      {/* Decorative Blur */}
-      <div className="absolute -top-10 -right-10 size-48 bg-emerald-500/5 rounded-full blur-3xl group-hover:bg-emerald-500/10 transition-colors duration-700" />
     </Card>
   );
 }
@@ -134,7 +132,7 @@ function AttendanceDetail({
   };
 
   return (
-    <div className="flex items-center gap-2 p-2 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
+    <div className="flex items-center gap-2 rounded-xl border border-border/40 bg-muted/20 p-2 transition-colors hover:bg-muted/40">
       <div
         className={cn(
           "size-7 rounded-lg flex items-center justify-center shrink-0",

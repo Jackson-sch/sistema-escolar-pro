@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { actualizarEstadoVentaUniformeAction } from "@/actions/uniformes";
@@ -13,7 +14,6 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency, formatDate } from "@/lib/formats";
-import { MagicCard } from "@/components/ui/magic-card";
 
 export default function ReservationCard({ venta }: { venta: any }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -63,12 +63,7 @@ export default function ReservationCard({ venta }: { venta: any }) {
   const statusInfo = getStatusInfo(venta.estado);
 
   return (
-    <MagicCard
-      className="rounded-3xl p-4 py-6 space-y-2"
-      gradientColor="#1447e611"
-      gradientFrom="var(--warning)"
-      gradientTo="var(--primary)"
-    >
+    <div className="space-y-2 rounded-2xl border border-border/50 bg-card/80 p-5 shadow-sm">
       <div className="flex flex-col md:flex-row justify-between gap-4 pb-4">
         <div className="flex items-center gap-4">
           <div
@@ -161,15 +156,18 @@ export default function ReservationCard({ venta }: { venta: any }) {
       </div>
 
       {isOpen && (
-        <div className="pt-4 animate-in slide-in-from-top-4 duration-300">
+        <div className="pt-4 animate-in slide-in-from-top-4 animation-duration-">
           <div className="bg-primary/10 rounded-2xl border border-primary/10 overflow-hidden divide-y divide-primary/10">
             {venta.detalles.map((d: any) => (
               <div key={d.id} className="p-4 flex justify-between items-center">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/10 shadow-sm shrink-0">
-                    <img
+                    <Image
                       src={d.variante.uniforme.imagen}
                       alt={d.variante.uniforme.nombre}
+                      width={40}
+                      height={40}
+                      unoptimized
                       className="h-full w-full rounded-md object-cover"
                     />
                   </div>
@@ -190,6 +188,6 @@ export default function ReservationCard({ venta }: { venta: any }) {
           </div>
         </div>
       )}
-    </MagicCard>
+    </div>
   );
 }

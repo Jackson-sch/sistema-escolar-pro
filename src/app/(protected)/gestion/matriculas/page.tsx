@@ -1,5 +1,6 @@
 import {
   IconCloudDownload,
+  IconSchool,
 } from "@tabler/icons-react";
 import {
   getEnrollmentsAction,
@@ -12,74 +13,78 @@ import { EnrollmentTable } from "@/components/gestion/matriculas/management/enro
 import { AddEnrollmentButton } from "@/components/gestion/matriculas/components/add-enrollment-button";
 import { Button } from "@/components/ui/button";
 import Stats from "@/components/gestion/matriculas/components/stats";
+import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
 import { Suspense } from "react";
 
+export const metadata = {
+  title: "Registro de Matrículas | Sistema Escolar Pro",
+  description: "Control de inscripciones académicas, vacantes y asignación de aulas.",
+};
+
 export default async function MatriculasPage() {
   const { data: institucion } = await getInstitucionAction();
   const currentAnio = institucion?.cicloEscolarActual || 2026;
 
-  // Carga paralela de datos maestros y registros
   const [
     { data: enrollments = [] },
     { data: nivelesAcademicos = [] },
     { data: stats },
   ] = await Promise.all([
-    getEnrollmentsAction(), // Podríamos filtrar también aquí si fuera necesario
+    getEnrollmentsAction(),
     getNivelesAcademicosAction(currentAnio),
     getEnrollmentStatsAction(),
   ]);
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-0 sm:p-4 pt-0 @container/main">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-4 sm:px-2">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
+    <div className="min-h-screen flex flex-col gap-6 p-4 md:p-8 pt-6 @container/main">
+      {/* ── HEADER ── */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
+        <div className="space-y-2">
+          <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-4 py-1 rounded-full text-xxs font-semibold uppercase tracking-widest flex items-center gap-2 w-fit">
+            <IconSchool size={14} />
+            Inscripciones Académicas {currentAnio}
+          </Badge>
+          <h1 className="text-3xl md:text-5xl font-bold tracking-tight leading-none">
             Registro de Matrículas
           </h1>
-          <p className="text-muted-foreground text-xxs sm:text-xs">
-            Control de inscripciones académicas, asignación de aulas y estados
-            de vacantes {currentAnio}.
+          <p className="text-muted-foreground text-sm md:text-base max-w-2xl font-normal leading-relaxed">
+            Control de vacantes por aula, ratificación de estudiantes y emisión de constancias de inscripción.
           </p>
         </div>
-        <div className="flex flex-row gap-2 items-center">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-9 w-9 sm:w-auto sm:px-3 rounded-full"
-                >
-                  <IconCloudDownload className="sm:mr-2 h-4 w-4" />
-                  <span className="hidden sm:inline">Reporte Consolidado</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Reporte Consolidado</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+
+        <div className="flex flex-row gap-3 items-center shrink-0">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="outline" className="rounded-xl h-10 px-4 font-semibold text-xs border-border/40 gap-2 cursor-pointer">
+                <IconCloudDownload className="size-4 text-muted-foreground" />
+                <span className="hidden sm:inline">Reporte Consolidado</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="text-micro font-medium">
+              Descargar consolidado de matrículas en formato excel
+            </TooltipContent>
+          </Tooltip>
 
           <AddEnrollmentButton nivelesAcademicos={nivelesAcademicos as any} />
         </div>
       </div>
 
-      <div className="px-4 sm:px-2 space-y-6">
-        {/* BANNER DE ESTADO RÁPIDO - DASHBOARD STYLE */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Stats stats={stats} />
-        </div>
+      {/* ── BENTO KPIS ── */}
+      <div className="px-1">
+        <Stats stats={stats} />
+      </div>
 
+      {/* ── TABLA DE MATRÍCULAS ── */}
+      <div className="px-1">
         <Suspense
           fallback={
-            <div className="h-[400px] w-full animate-pulse bg-muted/10 rounded-xl" />
+            <div className="h-[400px] w-full animate-pulse bg-muted/10 rounded-2xl border border-border/40" />
           }
         >
           <EnrollmentTable

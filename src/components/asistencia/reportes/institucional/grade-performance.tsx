@@ -29,7 +29,7 @@ export function GradePerformance({ resumen }: GradePerformanceProps) {
 
   return (
     <div className="space-y-6 h-full">
-      <div className="bg-card/40 border border-border/40 rounded-3xl p-6 backdrop-blur-md h-full">
+      <div className="bg-card/80 border border-border/40 rounded-3xl p-6 h-full">
         <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 mb-6 flex items-center justify-between">
           <span>Rendimiento por Grado</span>
           <IconSchool size={14} className="opacity-40" />

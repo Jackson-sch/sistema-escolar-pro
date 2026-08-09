@@ -2,17 +2,10 @@
 
 import { useState, useMemo } from "react";
 import {
-  IconSpeakerphone,
   IconSearch,
-  IconAdjustmentsHorizontal,
 } from "@tabler/icons-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group"
 import { cn } from "@/lib/utils";
 import { FormModal } from "@/components/modals/form-modal";
 import { AnnouncementCard } from "./announcement-card";
@@ -23,8 +16,8 @@ interface AnnouncementListProps {
 }
 
 const CATEGORIES = [
-  { id: "all", label: "Todos" },
-  { id: "importante", label: "Importante" },
+  { id: "all", label: "Todos los Anuncios" },
+  { id: "importante", label: "Importantes" },
   { id: "academico", label: "Académico" },
   { id: "eventos", label: "Eventos" },
   { id: "deportes", label: "Deportes" },
@@ -45,40 +38,41 @@ export function AnnouncementList({ initialAnuncios }: AnnouncementListProps) {
         selectedCategory === "all" ||
         anuncio.categoria?.toLowerCase() === selectedCategory.toLowerCase() ||
         (selectedCategory === "importante" &&
-          (anuncio.urgente || anuncio.importante));
+          (anuncio.urgente || anuncio.importante)) ||
+        (selectedCategory === "eventos" &&
+          (anuncio.categoria?.toLowerCase() === "eventos" ||
+            anuncio.titulo.toLowerCase().includes("evento")));
 
       return matchesSearch && matchesCategory;
     });
   }, [initialAnuncios, search, selectedCategory]);
 
   return (
-    <div className="space-y-8">
-      {/* Search and Filters */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-muted/30 p-4 rounded-3xl border border-border/40">
-        <div className="relative flex-1 max-w-md group">
-          <InputGroup className="rounded-full">
-            <InputGroupAddon>
-              <IconSearch className="size-4" />
-            </InputGroupAddon>
-            <InputGroupInput
-              placeholder="Buscar anuncios..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+    <div className="space-y-6">
+      {/* Barra de Filtros y Búsqueda */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-background/50 border border-border/40 shadow-xs">
+        <div className="relative flex-1 max-w-sm">
+          <IconSearch className="absolute left-3 top-2.5 text-muted-foreground/60 size-4" />
+          <Input
+            placeholder="Buscar por título o contenido..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9 bg-background border-border/40 rounded-xl text-xs h-9"
           />
-        </InputGroup>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 pb-2 lg:pb-0 no-scrollbar">
+        <div className="flex flex-wrap items-center gap-1.5 no-scrollbar">
           {CATEGORIES.map((cat) => (
             <Button
               key={cat.id}
-              variant={selectedCategory === cat.id ? "default" : "secondary"}
+              variant="ghost"
+              size="sm"
               onClick={() => setSelectedCategory(cat.id)}
               className={cn(
-                "rounded-full px-4 text-xs font-bold transition-all",
+                "rounded-xl px-3.5 h-8 text-xs font-semibold transition-[color,background-color,border-color,box-shadow] cursor-pointer",
                 selectedCategory === cat.id
-                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                  : "bg-background hover:bg-muted border border-border/40 text-muted-foreground",
+                  ? "bg-indigo-600 text-white hover:bg-indigo-700 shadow-xs"
+                  : "bg-background/80 hover:bg-muted text-muted-foreground border border-border/30",
               )}
             >
               {cat.label}
@@ -88,16 +82,15 @@ export function AnnouncementList({ initialAnuncios }: AnnouncementListProps) {
       </div>
 
       {filteredAnuncios.length === 0 ? (
-        <div className="flex flex-col items-center justify-center min-h-[400px] border-2 border-dashed border-border/40 rounded-3xl bg-muted/5 text-muted-foreground/40 p-12 text-center">
-          <div className="size-20 rounded-full bg-muted flex items-center justify-center mb-6">
-            <IconSearch className="size-10" />
+        <div className="flex flex-col items-center justify-center min-h-[300px] border border-dashed border-border/40 rounded-2xl bg-muted/10 p-8 text-center">
+          <div className="size-14 rounded-2xl bg-muted/20 flex items-center justify-center mb-3 text-muted-foreground">
+            <IconSearch className="size-7" />
           </div>
-          <h3 className="text-xl font-bold mb-2 text-foreground/40">
-            No se encontraron resultados
+          <h3 className="text-sm font-bold text-foreground mb-1">
+            No se encontraron publicaciones
           </h3>
-          <p className="text-sm max-w-sm">
-            Intenta ajustar tus términos de búsqueda o filtros para encontrar lo
-            que buscas.
+          <p className="text-xs text-muted-foreground max-w-xs mb-4">
+            Intenta ajustar los términos de búsqueda o cambiar la categoría seleccionada.
           </p>
           <Button
             variant="outline"
@@ -105,14 +98,13 @@ export function AnnouncementList({ initialAnuncios }: AnnouncementListProps) {
               setSearch("");
               setSelectedCategory("all");
             }}
-            className="mt-4 text-primary font-bold rounded-full"
+            className="text-xs font-semibold rounded-xl h-8 border-border/40"
           >
             Limpiar filtros
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {/* Create Button Card */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           <AnnouncementCard
             isCreateCard
             onCreateClick={() => setIsCreateModalOpen(true)}

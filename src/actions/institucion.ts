@@ -65,10 +65,15 @@ export async function getSedesAction(institucionId?: string) {
  */
 export async function updateInstitucionAction(id: string, values: any) {
   try {
+    const session = await (await import("@/auth")).auth();
+    if (!session?.user?.id) {
+      return { error: "No autenticado" };
+    }
+
     const { cicloEscolarActual, fechaInicioClases, fechaFinClases, ...rest } =
       values;
 
-    let logoProcessed = undefined;
+    const logoProcessed = undefined;
     if (values.logo instanceof File) {
       // Si es un archivo, lo convertimos a Base64 en el servidor o lo manejamos
       // Por ahora, asumimos que el cliente enviará Base64 o que el servidor lo manejará.

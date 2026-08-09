@@ -17,7 +17,7 @@ interface TrendChartProps {
 
 export function TrendChart({ trendData }: TrendChartProps) {
   return (
-    <div className="bg-card/40 border border-border/40 rounded-3xl p-8 backdrop-blur-md shadow-2xl relative overflow-hidden group h-full flex flex-col">
+    <div className="bg-card/80 border border-border/40 rounded-3xl p-8 shadow-lg relative overflow-hidden group h-full flex flex-col">
       <div className="flex items-center justify-between mb-8">
         <div className="space-y-1">
           <h3 className="text-sm font-black tracking-widest text-primary uppercase">Tendencia de Participación</h3>
@@ -126,7 +126,7 @@ export function TrendChart({ trendData }: TrendChartProps) {
 function CustomTooltip({ active, payload, label }: any) {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-background/95 backdrop-blur-xl border border-border/50 p-4 rounded-2xl shadow-2xl space-y-3 ring-1 ring-primary/10">
+      <div className="bg-background/95 border border-border/50 p-4 rounded-2xl shadow-lg space-y-3 ring-1 ring-primary/10">
         <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 border-b border-border/50 pb-2">
           Día {label} del periodo
         </p>

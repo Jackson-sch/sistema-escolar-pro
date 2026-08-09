@@ -11,6 +11,8 @@ interface Student {
   apellidoMaterno?: string | null;
   image?: string | null;
   nivelAcademico?: {
+    seccion?: string | null;
+    nivel?: { nombre: string } | null;
     grado: { nombre: string };
   } | null;
 }
@@ -29,31 +31,31 @@ export function PortalStudentSelector({
   showGeneralOption = false,
 }: PortalStudentSelectorProps) {
   return (
-    <div className="flex items-center gap-2 overflow-x-auto scrollbar-none rounded-xl py-1 pb-3">
+    <div className="flex items-center gap-2.5 overflow-x-auto scrollbar-none py-1">
       {showGeneralOption && (
         <button
           onClick={() => onSelect("todos")}
           className={cn(
-            "flex items-center gap-2 min-w-[120px] p-2 rounded-xl transition-all text-left border shrink-0",
+            "flex items-center gap-2.5 min-w-[140px] p-2.5 rounded-xl transition-[color,background-color,border-color,box-shadow] text-left border shrink-0 cursor-pointer",
             selectedId === "todos"
-              ? "bg-primary/5 border-primary shadow-primary/5"
-              : "bg-background/40 border-border/40 hover:border-primary/30 text-muted-foreground",
+              ? "bg-indigo-500/10 border-indigo-500/40 shadow-xs"
+              : "bg-card/80 border-border/40 hover:border-indigo-500/30 text-muted-foreground",
           )}
         >
-          <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shrink-0">
+          <div className="size-9 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 shrink-0">
             <IconUsers className="size-4" />
           </div>
           <div className="flex flex-col leading-tight min-w-0">
             <span
               className={cn(
                 "font-bold text-xs truncate",
-                selectedId === "todos" ? "text-primary" : "text-foreground",
+                selectedId === "todos" ? "text-indigo-600 dark:text-indigo-400" : "text-foreground",
               )}
             >
               General
             </span>
-            <span className="text-[9px] opacity-60 truncate">
-              Institucional
+            <span className="text-[10px] text-muted-foreground font-medium truncate mt-0.5">
+              Todos los Hijos
             </span>
           </div>
         </button>
@@ -61,37 +63,60 @@ export function PortalStudentSelector({
 
       {students.map((student) => {
         const isActive = selectedId === student.id;
-        const initials =
-          `${student.name?.[0] || ""}${student.apellidoPaterno?.[0] || ""}`.toUpperCase();
+
+        // Nombre completo formateado
+        const fullName = [
+          student.name,
+          student.apellidoPaterno,
+          student.apellidoMaterno,
+        ]
+          .filter(Boolean)
+          .join(" ");
+
+        const initials = `${student.name?.[0] || ""}${
+          student.apellidoPaterno?.[0] || ""
+        }`.toUpperCase();
+
+        const gradeDetail = student.nivelAcademico
+          ? `${student.nivelAcademico.grado.nombre}${
+              student.nivelAcademico.seccion
+                ? ` "${student.nivelAcademico.seccion}"`
+                : ""
+            }${
+              student.nivelAcademico.nivel?.nombre
+                ? ` • ${student.nivelAcademico.nivel.nombre}`
+                : ""
+            }`
+          : "Estudiante";
 
         return (
           <button
             key={student.id}
             onClick={() => onSelect(student.id)}
             className={cn(
-              "flex items-center gap-2 min-w-[130px] p-2 rounded-xl transition-all text-left border shrink-0",
+              "flex items-center gap-2.5 min-w-[210px] p-2.5 rounded-xl transition-[color,background-color,border-color,box-shadow] text-left border shrink-0 cursor-pointer",
               isActive
-                ? "bg-primary/5 border-primary shadow-md shadow-primary/5"
-                : "bg-background/40 border-border/40 hover:border-primary/30 text-muted-foreground",
+                ? "bg-indigo-500/10 border-indigo-500/40 shadow-xs"
+                : "bg-card/80 border-border/40 hover:border-indigo-500/30 text-muted-foreground",
             )}
           >
             <div className="relative shrink-0">
               <Avatar
                 className={cn(
-                  "size-8 border",
-                  isActive ? "border-primary/40" : "border-transparent",
+                  "size-9 border transition-colors",
+                  isActive ? "border-indigo-500/40" : "border-border/30",
                 )}
               >
                 <AvatarImage
                   src={student.image || undefined}
                   className="object-cover"
                 />
-                <AvatarFallback className="bg-primary/20 text-primary text-[10px] font-bold">
+                <AvatarFallback className="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold text-xs">
                   {initials}
                 </AvatarFallback>
               </Avatar>
               {isActive && (
-                <div className="absolute -bottom-0.5 -right-0.5 size-2.5 bg-primary border-2 border-background rounded-full" />
+                <div className="absolute -bottom-0.5 -right-0.5 size-2.5 bg-indigo-600 border-2 border-card rounded-full" />
               )}
             </div>
 
@@ -99,13 +124,14 @@ export function PortalStudentSelector({
               <span
                 className={cn(
                   "font-bold truncate text-xs capitalize",
-                  isActive ? "text-primary" : "text-foreground",
+                  isActive ? "text-indigo-600 dark:text-indigo-400" : "text-foreground",
                 )}
+                title={fullName}
               >
-                {student.name?.toLowerCase()}
+                {fullName}
               </span>
-              <span className="text-[9px] opacity-60 truncate uppercase tracking-tight font-medium">
-                {student.nivelAcademico?.grado.nombre || "Estudiante"}
+              <span className="text-[10px] text-muted-foreground font-medium truncate mt-0.5">
+                {gradeDetail}
               </span>
             </div>
           </button>

@@ -33,6 +33,7 @@ export const ComprobanteTicketHtml = React.forwardRef<
   HTMLDivElement,
   ComprobanteTicketHtmlProps
 >(({ pago, estudiante, institucion }, ref) => {
+  const fechaGeneracion = new Date().toLocaleString("es-PE");
   return (
     <div
       ref={ref}
@@ -164,7 +165,7 @@ export const ComprobanteTicketHtml = React.forwardRef<
       {/* Footer */}
       <div className="text-center text-[8px] text-slate-400 space-y-0.5">
         <p>Comprobante electrónico</p>
-        <p>{new Date().toLocaleString("es-PE")}</p>
+        <p>{fechaGeneracion}</p>
         <p className="mt-1">¡Gracias por su pago!</p>
       </div>
     </div>

@@ -35,7 +35,7 @@ export function ResumenInstitucionalCard({
   const ciclo = cicloEscolarActual || new Date().getFullYear();
 
   return (
-    <MagicCard className="rounded-2xl p-6 bg-card/30 border-border/40 flex flex-col gap-6">
+    <MagicCard className="rounded-2xl p-6 bg-card/80 border-border/40 flex flex-col gap-6">
       <div className="flex flex-col gap-1">
         <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
           Resumen Institucional
@@ -91,9 +91,16 @@ export function ResumenInstitucionalCard({
             {(fechaInicio || fechaFin) && (
               <span className="text-[10px] text-muted-foreground/70">
                 {fechaInicio
-                  ? new Date(fechaInicio).toLocaleDateString()
+                  ? new Date(fechaInicio).toLocaleDateString("es-PE", {
+                      timeZone: "America/Lima",
+                    })
                   : "..."}{" "}
-                - {fechaFin ? new Date(fechaFin).toLocaleDateString() : "..."}
+                -{" "}
+                {fechaFin
+                  ? new Date(fechaFin).toLocaleDateString("es-PE", {
+                      timeZone: "America/Lima",
+                    })
+                  : "..."}
               </span>
             )}
           </div>

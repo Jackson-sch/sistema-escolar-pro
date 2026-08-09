@@ -15,30 +15,30 @@ interface ComunicacionesViewProps {
   eventos: any[];
 }
 
+const COMUNICACIONES_TABS = [
+  { 
+    id: "anuncios", 
+    label: "Anuncios", 
+    icon: <IconSpeakerphone className="size-4" /> 
+  },
+  { 
+    id: "eventos", 
+    label: "Calendario", 
+    icon: <IconCalendar className="size-4" /> 
+  },
+];
+
 export function ComunicacionesView({
   anuncios,
   eventos,
 }: ComunicacionesViewProps) {
   const [activeTab, setActiveTab] = useState("anuncios");
 
-  const tabs = [
-    { 
-      id: "anuncios", 
-      label: "Anuncios", 
-      icon: <IconSpeakerphone className="size-4" /> 
-    },
-    { 
-      id: "eventos", 
-      label: "Calendario", 
-      icon: <IconCalendar className="size-4" /> 
-    },
-  ];
-
   return (
     <div className="space-y-6">
       <div className="flex justify-start">
         <AnimatedTabs
-          tabs={tabs}
+          tabs={COMUNICACIONES_TABS}
           activeTab={activeTab}
           onTabChange={setActiveTab}
         />

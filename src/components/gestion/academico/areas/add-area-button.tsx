@@ -2,13 +2,12 @@
 
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { IconBooks } from "@tabler/icons-react";
+import { IconPlus } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { FormModal } from "@/components/modals/form-modal";
@@ -32,26 +31,24 @@ export function AddAreaButton({ institucionId, niveles }: AddAreaButtonProps) {
 
   return (
     <>
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              onClick={() => setOpen(true)}
-              className="h-9 w-9 sm:w-auto sm:px-4 rounded-full"
-            >
-              <IconBooks className="sm:mr-2 h-5 w-5" />
-              <span className="hidden sm:inline">Nueva Área</span>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Registrar Nueva Área Académica</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            onClick={() => setOpen(true)}
+            className="rounded-xl h-9 px-4 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 gap-1.5 cursor-pointer"
+          >
+            <IconPlus className="size-4" />
+            <span>Nueva Área</span>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Registrar Nueva Área Académica (Alt + N)</p>
+        </TooltipContent>
+      </Tooltip>
 
       <FormModal
-        title="Configuración de Malla"
-        description="Defina una nueva categoría pedagógica para organizar los cursos de la institución."
+        title="Configuración de Malla Curricular"
+        description="Defina una nueva área pedagógica para organizar las asignaturas de la institución."
         isOpen={open}
         onOpenChange={setOpen}
         className="sm:max-w-md"

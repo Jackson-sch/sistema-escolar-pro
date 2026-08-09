@@ -110,7 +110,7 @@ function CourseFilters({
               key={n.id}
               value={n.id}
             >
-              {n.grado.nombre} "{n.seccion}"
+              {n.grado.nombre} &quot;{n.seccion}&quot;
             </SelectItem>
           ))}
         </SelectContent>

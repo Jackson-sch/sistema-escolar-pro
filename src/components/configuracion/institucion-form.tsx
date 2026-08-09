@@ -19,9 +19,7 @@ import {
 import { LogoInstitucionalCard } from "./institucion/logo-institucional-card";
 import { ResumenInstitucionalCard } from "./institucion/resumen-institucional-card";
 import { IconLoader2, IconDeviceFloppy } from "@tabler/icons-react";
-
-import { useFormShortcuts } from "@/hooks/use-form-shortcuts";
-import { useEffect } from "react";
+import { FormKeyboardHelpBar } from "@/components/common/form-keyboard-help-bar";
 
 interface InstitucionFormProps {
   initialData: any;
@@ -31,7 +29,7 @@ export function InstitucionForm({ initialData }: InstitucionFormProps) {
   const [isPending, setIsPending] = React.useState(false);
 
   const form = useForm<InstitucionFormValues>({
-    // @ts-ignore
+    // @ts-expect-error - el tipo del resolver de zod difiere del esperado por RHF v7
     resolver: zodResolver(institucionFormSchema),
     defaultValues: {
       nombreInstitucion: initialData?.nombreInstitucion || "",
@@ -68,7 +66,6 @@ export function InstitucionForm({ initialData }: InstitucionFormProps) {
 
     setIsPending(true);
     try {
-      // Ahora los valores ya contienen la URL del logo subido via API
       const res = await updateInstitucionAction(institucionId, values);
 
       if (res.success) {
@@ -84,15 +81,10 @@ export function InstitucionForm({ initialData }: InstitucionFormProps) {
     }
   };
 
-  useFormShortcuts({
-    onSubmit: form.handleSubmit(onSubmit as any),
-    isLoading: isPending,
-  });
-
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit as any)} className="space-y-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <form onSubmit={form.handleSubmit(onSubmit as any)} className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Left Column: Sidebar (Logo & Summary) */}
           <div className="lg:col-span-4 flex flex-col gap-6 sticky top-6">
             <LogoInstitucionalCard
@@ -108,21 +100,24 @@ export function InstitucionForm({ initialData }: InstitucionFormProps) {
             <UbicacionContactoCard control={form.control} />
             <CalendarioSistemaCard control={form.control} />
 
-            <div className="flex justify-end pt-4">
+            {/* Guía de Atajos de Teclado */}
+            <FormKeyboardHelpBar />
+
+            <div className="flex justify-end pt-2">
               <Button
                 type="submit"
-                className="px-8 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-95 text-sm"
+                className="rounded-xl px-6 h-10 font-semibold text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 gap-2 min-w-[200px] cursor-pointer"
                 disabled={isPending}
               >
                 {isPending ? (
                   <>
-                    <IconLoader2 className="mr-2 size-4 animate-spin" />
-                    Guardando...
+                    <IconLoader2 className="size-4 animate-spin" />
+                    <span>Guardando...</span>
                   </>
                 ) : (
                   <>
-                    <IconDeviceFloppy className="mr-2 size-4" />
-                    Guardar Configuración
+                    <IconDeviceFloppy className="size-4" />
+                    <span>Guardar Configuración</span>
                   </>
                 )}
               </Button>

@@ -1,18 +1,33 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useMemo, useTransition } from "react";
 import {
-  Search,
-  Filter,
-  ArrowUpDown,
-  Plus,
-  Minus,
-  History,
-  AlertTriangle,
-  PackageCheck,
-  Building2,
-  Loader2,
-} from "lucide-react";
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  flexRender,
+  ColumnDef,
+  SortingState,
+} from "@tanstack/react-table";
+import {
+  IconSearch,
+  IconBuilding,
+  IconPlus,
+  IconMinus,
+  IconArrowsSort,
+  IconArrowUp,
+  IconArrowDown,
+  IconPackage,
+  IconChevronLeft,
+  IconChevronRight,
+  IconAlertTriangle,
+  IconCheck,
+  IconLoader2,
+  IconDeviceFloppy,
+} from "@tabler/icons-react";
+import { Card } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -33,16 +48,10 @@ import {
 } from "@/components/ui/select";
 import { registrarMovimientoInventarioAction } from "@/actions/uniformes";
 import { toast } from "sonner";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Label } from "../ui/label";
+import { FormModal } from "@/components/modals/form-modal";
+import { FormKeyboardHelpBar } from "@/components/common/form-keyboard-help-bar";
 import { formatCurrency } from "@/lib/formats";
+import { cn } from "@/lib/utils";
 
 interface InventoryTableProps {
   variantes: any[];
@@ -50,8 +59,9 @@ interface InventoryTableProps {
 }
 
 export function InventoryTable({ variantes, sedes }: InventoryTableProps) {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [globalFilter, setGlobalFilter] = useState("");
   const [selectedSede, setSelectedSede] = useState("all");
+  const [sorting, setSorting] = useState<SortingState>([]);
   const [adjustmentModal, setAdjustmentModal] = useState<{
     open: boolean;
     variante: any | null;
@@ -60,142 +70,241 @@ export function InventoryTable({ variantes, sedes }: InventoryTableProps) {
     variante: null,
   });
 
-  const filteredVariantes = variantes.filter((v) => {
-    const matchesSearch =
-      v.uniforme.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      v.talla.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesSede = selectedSede === "all" || v.sedeId === selectedSede;
-    return matchesSearch && matchesSede;
+  // Filtrado de datos por sede y búsqueda global
+  const filteredData = useMemo(() => {
+    return variantes.filter((v) => {
+      const matchesSede = selectedSede === "all" || v.sedeId === selectedSede;
+      return matchesSede;
+    });
+  }, [variantes, selectedSede]);
+
+  // Definición de Columnas de TanStack Table
+  const columns = useMemo<ColumnDef<any>[]>(
+    () => [
+      {
+        accessorKey: "uniforme.nombre",
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="p-0 text-xs font-semibold hover:bg-transparent"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Prenda Escolar
+            <RenderSortIcon isSorted={column.getIsSorted()} />
+          </Button>
+        ),
+        cell: ({ row }) => (
+          <span className="font-bold text-xs text-foreground">
+            {row.original.uniforme?.nombre}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "uniforme.categoria.nombre",
+        header: "Categoría",
+        cell: ({ row }) => (
+          <Badge
+            variant="outline"
+            className="bg-muted/10 border-border/40 font-semibold text-[10px] uppercase tracking-wider text-muted-foreground rounded-md px-2 py-0.5"
+          >
+            {row.original.uniforme?.categoria?.nombre || "General"}
+          </Badge>
+        ),
+      },
+      {
+        accessorKey: "talla",
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="p-0 text-xs font-semibold hover:bg-transparent"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Talla
+            <RenderSortIcon isSorted={column.getIsSorted()} />
+          </Button>
+        ),
+        cell: ({ row }) => (
+          <span className="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-md text-[10px] font-bold font-mono border border-indigo-500/20">
+            {row.original.talla}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "sede.nombre",
+        header: "Sede / Campus",
+        cell: ({ row }) => (
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <IconBuilding className="size-3.5 opacity-60 text-indigo-500" />
+            <span>{row.original.sede?.nombre}</span>
+          </div>
+        ),
+      },
+      {
+        accessorKey: "stock",
+        header: ({ column }) => (
+          <div className="text-right">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="p-0 text-xs font-semibold hover:bg-transparent"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+              Stock Actual
+              <RenderSortIcon isSorted={column.getIsSorted()} />
+            </Button>
+          </div>
+        ),
+        cell: ({ row }) => {
+          const stock = row.original.stock || 0;
+          return (
+            <div className="text-right">
+              <Badge
+                variant="outline"
+                className={cn(
+                  "rounded-md text-[10px] font-bold px-2 py-0.5 border-none font-mono",
+                  stock === 0 && "bg-rose-500/10 text-rose-600 dark:text-rose-400",
+                  stock > 0 && stock <= 5 && "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+                  stock > 5 && "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                )}
+              >
+                {stock === 0 ? "Agotado" : `${stock} unids`}
+              </Badge>
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "precio",
+        header: ({ column }) => (
+          <div className="text-right">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="p-0 text-xs font-semibold hover:bg-transparent"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+              Precio (S/)
+              <RenderSortIcon isSorted={column.getIsSorted()} />
+            </Button>
+          </div>
+        ),
+        cell: ({ row }) => (
+          <div className="text-right font-bold text-xs font-mono text-foreground">
+            {formatCurrency(row.original.precio)}
+          </div>
+        ),
+      },
+      {
+        id: "acciones",
+        header: () => <div className="text-right">Acción</div>,
+        cell: ({ row }) => (
+          <div className="text-right">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                setAdjustmentModal({ open: true, variante: row.original })
+              }
+              className="h-8 rounded-xl px-3 border-border/40 text-xs font-semibold gap-1 hover:bg-indigo-500/10 hover:text-indigo-600 cursor-pointer"
+            >
+              <IconArrowsSort className="size-3.5" />
+              <span>Ajustar</span>
+            </Button>
+          </div>
+        ),
+      },
+    ],
+    []
+  );
+
+  const table = useReactTable({
+    data: filteredData,
+    columns,
+    state: {
+      sorting,
+      globalFilter,
+    },
+    onSortingChange: setSorting,
+    onGlobalFilterChange: setGlobalFilter,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      pagination: {
+        pageSize: 25,
+      },
+    },
   });
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center bg-card/40 backdrop-blur-xl p-4 rounded-xl border border-border/40 shadow-xl">
-        <div className="relative w-full md:w-96">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
-          <Input
-            placeholder="Buscar por prenda o talla..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 bg-muted/10 border-border/40 focus:bg-muted/20 transition-all rounded-xl"
-          />
-        </div>
+    <div className="space-y-4">
+      {/* Barra de Filtros e Insumos */}
+      <InventoryToolbar
+        globalFilter={globalFilter}
+        onGlobalFilterChange={setGlobalFilter}
+        selectedSede={selectedSede}
+        onSelectedSedeChange={setSelectedSede}
+        sedes={sedes}
+      />
 
-        <div className="flex gap-2 w-full md:w-auto">
-          <Select value={selectedSede} onValueChange={setSelectedSede}>
-            <SelectTrigger className="w-full md:w-56 bg-muted/10 border-border/40 rounded-xl text-foreground">
-              <Building2 className="h-4 w-4 mr-2 text-muted-foreground/60" />
-              <SelectValue placeholder="Sede / Campus" />
-            </SelectTrigger>
-            <SelectContent className="bg-card/90 backdrop-blur-xl border-border/40 rounded-xl">
-              <SelectItem value="all" className="rounded-lg">
-                Todas las sedes
-              </SelectItem>
-              {sedes.map((s) => (
-                <SelectItem key={s.id} value={s.id} className="rounded-lg">
-                  {s.nombre}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <div className="bg-card/40 backdrop-blur-xl rounded-2xl border border-border/40 shadow-2xl overflow-hidden">
+      {/* Tabla TanStack con Paginación Integrada */}
+      <Card className="border-border/40 overflow-hidden rounded-2xl bg-card/80 shadow-xl">
         <Table>
-          <TableHeader className="bg-muted/5">
-            <TableRow className="hover:bg-transparent border-border/40">
-              <TableHead className="font-black text-[10px] uppercase tracking-widest text-muted-foreground/60">
-                Prenda
-              </TableHead>
-              <TableHead className="font-black text-[10px] uppercase tracking-widest text-muted-foreground/60">
-                Categoría
-              </TableHead>
-              <TableHead className="font-black text-[10px] uppercase tracking-widest text-muted-foreground/60">
-                Talla
-              </TableHead>
-              <TableHead className="font-black text-[10px] uppercase tracking-widest text-muted-foreground/60">
-                Sede
-              </TableHead>
-              <TableHead className="font-black text-[10px] uppercase tracking-widest text-muted-foreground/60 text-right">
-                Stock Actual
-              </TableHead>
-              <TableHead className="font-black text-[10px] uppercase tracking-widest text-muted-foreground/60 text-right">
-                Precio
-              </TableHead>
-              <TableHead className="font-black text-[10px] uppercase tracking-widest text-muted-foreground/60 text-right">
-                Acciones
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredVariantes.map((v) => (
-              <TableRow
-                key={v.id}
-                className="hover:bg-muted/5 transition-colors border-border/40"
-              >
-                <TableCell className="font-bold text-foreground">
-                  {v.uniforme.nombre}
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    variant="outline"
-                    className="bg-muted/10 border-border/40 font-bold text-[10px] uppercase tracking-tight text-muted-foreground"
-                  >
-                    {v.uniforme.categoria?.nombre || "General"}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <span className="bg-primary/10 text-primary px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border border-primary/20">
-                    {v.talla}
-                  </span>
-                </TableCell>
-                <TableCell className="text-muted-foreground/80 font-medium">
-                  <div className="flex items-center gap-1.5 text-xs">
-                    <Building2 className="h-3.5 w-3.5 opacity-40 text-primary" />
-                    {v.sede.nombre}
-                  </div>
-                </TableCell>
-                <TableCell className="text-right">
-                  <div
-                    className={`font-black text-sm ${v.stock <= 5 ? "text-amber-500" : "text-foreground"}`}
-                  >
-                    {v.stock}
-                  </div>
-                </TableCell>
-                <TableCell className="text-right font-black text-sm text-foreground/80">
-                  {formatCurrency(v.precio)}
-                </TableCell>
-                <TableCell className="text-right">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() =>
-                      setAdjustmentModal({ open: true, variante: v })
-                    }
-                    className="text-primary hover:text-primary hover:bg-primary/10 font-bold rounded-xl"
-                  >
-                    <ArrowUpDown className="h-4 w-4 mr-1.5" />
-                    Ajustar
-                  </Button>
-                </TableCell>
+          <TableHeader className="bg-muted/30 sticky top-0 z-10">
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id} className="hover:bg-transparent border-border/20">
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id} className="h-10 text-xs font-semibold px-4">
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
-
-            {filteredVariantes.length === 0 && (
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows.length === 0 ? (
               <TableRow>
-                <TableCell
-                  colSpan={7}
-                  className="h-32 text-center text-slate-400 font-medium"
-                >
-                  No hay registros de inventario para mostrar
+                <TableCell colSpan={columns.length} className="h-44 text-center">
+                  <div className="flex flex-col items-center justify-center space-y-2 text-muted-foreground/60">
+                    <IconAlertTriangle className="size-8 text-muted-foreground/40" />
+                    <p className="text-xs font-semibold">No hay registros de inventario coincidentes</p>
+                    <p className="text-[11px]">Ajusta el filtro de sede o la búsqueda.</p>
+                  </div>
                 </TableCell>
               </TableRow>
+            ) : (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  className="hover:bg-indigo-500/5 transition-colors border-border/20"
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id} className="px-4 py-2.5">
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
             )}
           </TableBody>
         </Table>
-      </div>
 
+        {/* Paginación TanStack */}
+        <InventoryPagination table={table} />
+      </Card>
+
+      {/* Modal de Ajuste de Stock Estilizado */}
       {adjustmentModal.open && (
         <StockAdjustmentModal
           open={adjustmentModal.open}
@@ -203,6 +312,118 @@ export function InventoryTable({ variantes, sedes }: InventoryTableProps) {
           variante={adjustmentModal.variante}
         />
       )}
+    </div>
+  );
+}
+
+/* ─── Sub-components ─── */
+
+function RenderSortIcon({ isSorted }: { isSorted: boolean | string }) {
+  if (isSorted === "asc") return <IconArrowUp className="size-3.5 ml-1 text-indigo-500" />;
+  if (isSorted === "desc") return <IconArrowDown className="size-3.5 ml-1 text-indigo-500" />;
+  return <IconArrowsSort className="size-3.5 ml-1 opacity-40" />;
+}
+
+/* Barra de filtros: búsqueda global + selector de sede */
+function InventoryToolbar({
+  globalFilter,
+  onGlobalFilterChange,
+  selectedSede,
+  onSelectedSedeChange,
+  sedes,
+}: {
+  globalFilter: string;
+  onGlobalFilterChange: (value: string) => void;
+  selectedSede: string;
+  onSelectedSedeChange: (value: string) => void;
+  sedes: any[];
+}) {
+  return (
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 rounded-2xl bg-background/50 border border-border/40 shadow-xs">
+      <div className="relative flex-1 max-w-sm w-full">
+        <IconSearch className="absolute left-3 top-2.5 text-muted-foreground/60 size-4" />
+        <Input
+          placeholder="Buscar por prenda, talla o categoría..."
+          value={globalFilter ?? ""}
+          onChange={(e) => onGlobalFilterChange(e.target.value)}
+          className="pl-9 bg-background border-border/40 rounded-xl text-xs h-9"
+        />
+      </div>
+
+      <div className="flex items-center gap-3 w-full sm:w-auto">
+        <Select value={selectedSede} onValueChange={onSelectedSedeChange}>
+          <SelectTrigger className="w-full sm:w-52 bg-background border-border/40 rounded-xl text-xs h-9 font-medium">
+            <IconBuilding className="size-3.5 mr-1.5 text-muted-foreground/60" />
+            <SelectValue placeholder="Filtrar por Sede" />
+          </SelectTrigger>
+          <SelectContent className="rounded-xl border-border/40">
+            <SelectItem value="all" className="text-xs">
+              Todas las sedes
+            </SelectItem>
+            {sedes.map((s) => (
+              <SelectItem key={s.id} value={s.id} className="text-xs">
+                {s.nombre}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+  );
+}
+
+/* Paginación integrada de TanStack */
+function InventoryPagination({ table }: { table: any }) {
+  return (
+    <div className="p-3 border-t border-border/30 flex flex-col sm:flex-row items-center justify-between gap-3 bg-background/50 text-xs">
+      <div className="flex items-center gap-2 text-muted-foreground font-medium">
+        <span>
+          Mostrando {table.getRowModel().rows.length} de {table.getFilteredRowModel().rows.length} registros
+        </span>
+        <span className="text-border">|</span>
+        <span className="flex items-center gap-1">
+          Filas por página:
+          <Select
+            value={`${table.getState().pagination.pageSize}`}
+            onValueChange={(value) => table.setPageSize(Number(value))}
+          >
+            <SelectTrigger className="h-7 w-[65px] rounded-lg border-border/40 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl border-border/40">
+              {[10, 25, 50, 100].map((pageSize) => (
+                <SelectItem key={pageSize} value={`${pageSize}`} className="text-xs">
+                  {pageSize}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </span>
+      </div>
+
+      <div className="flex items-center gap-1.5">
+        <Button
+          variant="outline"
+          size="sm"
+          className="rounded-xl h-8 px-2.5 border-border/40 text-xs"
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+        >
+          <IconChevronLeft className="size-3.5 mr-1" /> Anterior
+        </Button>
+        <span className="text-muted-foreground font-medium px-2">
+          Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount() || 1}
+        </span>
+        <Button
+          variant="outline"
+          size="sm"
+          className="rounded-xl h-8 px-2.5 border-border/40 text-xs"
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+        >
+          Siguiente <IconChevronRight className="size-3.5 ml-1" />
+        </Button>
+      </div>
     </div>
   );
 }
@@ -235,9 +456,9 @@ function StockAdjustmentModal({
         motivo:
           motivo ||
           (tipo === "ENTRADA"
-            ? "Carga de stock"
+            ? "Ingreso de stock"
             : tipo === "SALIDA"
-              ? "Venta directa"
+              ? "Salida de mercadería"
               : "Ajuste manual"),
       });
 
@@ -251,128 +472,142 @@ function StockAdjustmentModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] border-border/40 dark:bg-card/40 backdrop-blur-xl shadow-2xl rounded-3xl overflow-hidden animate-in fade-in zoom-in-95">
-        <DialogHeader className="space-y-1">
-          <DialogTitle className="flex items-center gap-2 text-xl font-black text-foreground">
-            <PackageCheck className="h-5 w-5 text-primary" />
-            Ajustar Inventario
-          </DialogTitle>
-          <DialogDescription className="text-muted-foreground/60 text-xs font-medium">
-            {variante.uniforme.nombre} - Talla {variante.talla} (
-            {variante.sede.nombre})
-          </DialogDescription>
-        </DialogHeader>
+    <FormModal
+      isOpen={open}
+      onOpenChange={onOpenChange}
+      title="Ajuste de Stock e Inventario"
+      description={`${variante?.uniforme?.nombre} — Talla ${variante?.talla} (${variante?.sede?.nombre})`}
+      className="sm:max-w-[450px]"
+    >
+      <div className="space-y-4 px-1 py-1">
+        {/* Selector de Tipo de Movimiento */}
+        <div className="grid grid-cols-3 gap-2 p-1.5 bg-background/50 rounded-xl border border-border/40">
+          <Button
+            type="button"
+            variant={tipo === "ENTRADA" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setTipo("ENTRADA")}
+            className={cn(
+              "rounded-lg font-semibold text-xs h-8 cursor-pointer",
+              tipo === "ENTRADA" ? "bg-emerald-600 text-white shadow-md" : "text-muted-foreground"
+            )}
+          >
+            <IconPlus className="size-3.5 mr-1" /> Entrada
+          </Button>
+          <Button
+            type="button"
+            variant={tipo === "SALIDA" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setTipo("SALIDA")}
+            className={cn(
+              "rounded-lg font-semibold text-xs h-8 cursor-pointer",
+              tipo === "SALIDA" ? "bg-rose-600 text-white shadow-md" : "text-muted-foreground"
+            )}
+          >
+            <IconMinus className="size-3.5 mr-1" /> Salida
+          </Button>
+          <Button
+            type="button"
+            variant={tipo === "AJUSTE" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setTipo("AJUSTE")}
+            className={cn(
+              "rounded-lg font-semibold text-xs h-8 cursor-pointer",
+              tipo === "AJUSTE" ? "bg-sky-600 text-white shadow-md" : "text-muted-foreground"
+            )}
+          >
+            <IconArrowsSort className="size-3.5 mr-1" /> Ajuste
+          </Button>
+        </div>
 
-        <div className="grid gap-6 py-6">
-          <div className="grid grid-cols-3 gap-2 p-1.5 bg-muted/10 rounded-2xl border border-border/40">
+        {/* Input de Cantidad con Botones + / - */}
+        <div className="space-y-1.5">
+          <label htmlFor="inventario-cantidad" className="text-xs font-medium text-foreground/80">
+            {tipo === "AJUSTE" ? "Stock Final Reemplazante" : "Unidades del Movimiento"}
+          </label>
+          <div className="flex items-center gap-3 bg-background/50 p-2 rounded-xl border border-border/40">
             <Button
-              variant={tipo === "ENTRADA" ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setTipo("ENTRADA")}
-              className={`rounded-xl font-bold h-10 transition-all ${tipo === "ENTRADA" ? "bg-card text-emerald-500 shadow-lg border border-border/40" : "text-muted-foreground/60"}`}
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={() => setCantidad(Math.max(0, cantidad - 1))}
+              className="rounded-lg size-8 border-border/40 bg-background"
             >
-              <Plus className="h-3.5 w-3.5 mr-1.5" />
-              Entrada
+              <IconMinus className="size-3.5" />
             </Button>
+            <Input
+              id="inventario-cantidad"
+              type="number"
+              value={cantidad}
+              onChange={(e) => setCantidad(parseInt(e.target.value) || 0)}
+              className="text-center font-mono font-bold text-lg h-9 bg-transparent border-none focus-visible:ring-0 shadow-none"
+            />
             <Button
-              variant={tipo === "SALIDA" ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setTipo("SALIDA")}
-              className={`rounded-xl font-bold h-10 transition-all ${tipo === "SALIDA" ? "bg-card text-rose-500 shadow-lg border border-border/40" : "text-muted-foreground/60"}`}
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={() => setCantidad(cantidad + 1)}
+              className="rounded-lg size-8 border-border/40 bg-background"
             >
-              <Minus className="h-3.5 w-3.5 mr-1.5" />
-              Salida
+              <IconPlus className="size-3.5" />
             </Button>
-            <Button
-              variant={tipo === "AJUSTE" ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setTipo("AJUSTE")}
-              className={`rounded-xl font-bold h-10 transition-all ${tipo === "AJUSTE" ? "bg-card text-sky-500 shadow-lg border border-border/40" : "text-muted-foreground/60"}`}
-            >
-              <ArrowUpDown className="h-3.5 w-3.5 mr-1.5" />
-              Ajuste
-            </Button>
-          </div>
-
-          <div className="space-y-6">
-            <div className="space-y-3">
-              <Label>
-                {tipo === "AJUSTE"
-                  ? "Stock Final deseado"
-                  : "Cantidad del movimiento"}
-              </Label>
-              <div className="flex items-center gap-4 bg-muted/5 p-2 rounded-2xl border border-border/40">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setCantidad(Math.max(0, cantidad - 1))}
-                  className="rounded-xl h-10 w-10 border-border/40 bg-card hover:bg-muted/20"
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
-                <Input
-                  type="number"
-                  value={cantidad}
-                  onChange={(e) => setCantidad(parseInt(e.target.value) || 0)}
-                  className="text-center font-black text-xl h-12 bg-transparent border-none focus:ring-0 shadow-none"
-                />
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setCantidad(cantidad + 1)}
-                  className="rounded-xl h-10 w-10 border-border/40 bg-card hover:bg-muted/20"
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <Label>Motivo o Referencia</Label>
-              <Input
-                placeholder="Ej. Guía de remisión #1234"
-                value={motivo}
-                onChange={(e) => setMotivo(e.target.value)}
-                className="bg-muted/10 border-border/40 h-11 rounded-full focus:bg-muted/20"
-              />
-            </div>
-          </div>
-
-          <div className="bg-amber-500/5 p-4 rounded-2xl border border-amber-500/10 flex items-start gap-3">
-            <AlertTriangle className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
-            <div className="text-[10px] text-muted-foreground/80 leading-relaxed font-medium">
-              <span className="font-black text-amber-500 block mb-1 uppercase tracking-wider">
-                Importante
-              </span>
-              Este cambio será registrado en el historial de movimientos y
-              afectará el stock disponible de forma inmediata.
-            </div>
           </div>
         </div>
 
-        <DialogFooter className="gap-3">
+        {/* Motivo o Guía */}
+        <div className="space-y-1.5">
+          <label htmlFor="inventario-motivo" className="text-xs font-medium text-foreground/80">Motivo / Documento de Referencia</label>
+          <Input
+            id="inventario-motivo"
+            placeholder="Ej. Ingreso por Guía de remisión #4582"
+            value={motivo}
+            onChange={(e) => setMotivo(e.target.value)}
+            className="bg-background border-border/40 h-9 rounded-xl text-xs"
+          />
+        </div>
+
+        {/* Banner de Aviso */}
+        <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-start gap-2 text-xs text-amber-700 dark:text-amber-300">
+          <IconAlertTriangle className="size-4 shrink-0 mt-0.5" />
+          <p className="leading-relaxed">
+            Este movimiento actualizará el stock inmediatamente en la sede de <strong>{variante?.sede?.nombre}</strong>.
+          </p>
+        </div>
+
+        {/* Guía de Atajos de Teclado */}
+        <FormKeyboardHelpBar />
+
+        {/* Acciones */}
+        <div className="flex items-center justify-end gap-3 pt-3 border-t border-border/30">
           <Button
+            type="button"
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={isPending}
-            className="border-border/40 bg-muted/10 text-foreground/80 hover:bg-muted/20 rounded-xl h-11 font-bold flex-1"
+            className="rounded-xl px-5 h-10 font-semibold text-xs border-border/40"
           >
             Cancelar
           </Button>
           <Button
+            type="button"
             onClick={handleAdjust}
             disabled={isPending}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 rounded-xl h-11 font-bold flex-1"
+            className="rounded-xl px-6 h-10 font-semibold text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 gap-2 min-w-[160px]"
           >
             {isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <>
+                <IconLoader2 className="size-4 animate-spin" />
+                <span>Actualizando...</span>
+              </>
             ) : (
-              "Confirmar"
+              <>
+                <IconDeviceFloppy className="size-4" />
+                <span>Confirmar Ajuste</span>
+              </>
             )}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </div>
+      </div>
+    </FormModal>
   );
 }

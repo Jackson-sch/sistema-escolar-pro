@@ -47,6 +47,7 @@ export const DocumentWrapper = ({
   const origin = passedOrigin || (typeof window !== 'undefined' 
     ? window.location.origin 
     : (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'))
+  const fechaGeneracion = new Date().toLocaleString('es-PE')
   const verificationUrl = verificationCode
     ? `${origin}/verificar?codigo=${verificationCode}`
     : null
@@ -138,7 +139,7 @@ export const DocumentWrapper = ({
             <Stack direction="horizontal" justify="between" align="center" style={{ width: '100%', borderTopWidth: 0.5, borderTopColor: '#e2e8f0', paddingTop: 10 }}>
               <View style={{ flex: 1, marginRight: 20 }}>
                 <Text style={{ fontSize: 7, color: '#94a3b8' }}>
-                  Documento generado por Sistema de Gestión Escolar PRO | Fecha: {new Date().toLocaleString('es-PE')}
+                  Documento generado por Sistema de Gestión Escolar PRO | Fecha: {fechaGeneracion}
                 </Text>
                 <Text style={{ fontSize: 7, color: '#94a3b8', marginTop: 2 }}>
                   La autenticidad de este documento puede ser verificada mediante el código de control.

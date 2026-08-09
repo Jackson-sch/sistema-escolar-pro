@@ -95,31 +95,31 @@ export function SalesTable({ ventas, adminId }: SalesTableProps) {
     switch (estado) {
       case "RESERVADO":
         return (
-          <Badge className="bg-amber-500/5 text-amber-500 border border-amber-500/20 shadow-[0_2px_8px_rgba(245,158,11,0.05)] px-2.5 py-1 rounded-xl font-black text-[9px] uppercase tracking-wider transition-all duration-300">
+          <Badge className="bg-amber-500/5 text-amber-500 border border-amber-500/20 shadow-[0_2px_8px_rgba(245,158,11,0.05)] px-2.5 py-1 rounded-xl font-black text-[9px] uppercase tracking-wider transition-[color,background-color,border-color,box-shadow,padding,letter-spacing] duration-300">
             <Clock className="size-3 mr-1.5 animate-pulse" /> Reservado
           </Badge>
         );
       case "APROBADO":
         return (
-          <Badge className="bg-emerald-500/5 text-emerald-500 border border-emerald-500/20 shadow-[0_2px_8px_rgba(16,185,129,0.05)] px-2.5 py-1 rounded-xl font-black text-[9px] uppercase tracking-wider transition-all duration-300">
+          <Badge className="bg-emerald-500/5 text-emerald-500 border border-emerald-500/20 shadow-[0_2px_8px_rgba(16,185,129,0.05)] px-2.5 py-1 rounded-xl font-black text-[9px] uppercase tracking-wider transition-[color,background-color,border-color,box-shadow,padding,letter-spacing] duration-300">
             <CheckCircle2 className="size-3 mr-1.5" /> Aprobado
           </Badge>
         );
       case "ENTREGADO":
         return (
-          <Badge className="bg-sky-500/5 text-sky-500 border border-sky-500/20 shadow-[0_2px_8px_rgba(14,165,233,0.05)] px-2.5 py-1 rounded-xl font-black text-[9px] uppercase tracking-wider transition-all duration-300">
+          <Badge className="bg-sky-500/5 text-sky-500 border border-sky-500/20 shadow-[0_2px_8px_rgba(14,165,233,0.05)] px-2.5 py-1 rounded-xl font-black text-[9px] uppercase tracking-wider transition-[color,background-color,border-color,box-shadow,padding,letter-spacing] duration-300">
             <Package className="size-3 mr-1.5" /> Entregado
           </Badge>
         );
       case "EN_PRUEBA":
         return (
-          <Badge className="bg-violet-500/5 text-violet-500 border border-violet-500/20 shadow-[0_2px_8px_rgba(139,92,246,0.05)] px-2.5 py-1 rounded-xl font-black text-[9px] uppercase tracking-wider transition-all duration-300">
+          <Badge className="bg-violet-500/5 text-violet-500 border border-violet-500/20 shadow-[0_2px_8px_rgba(139,92,246,0.05)] px-2.5 py-1 rounded-xl font-black text-[9px] uppercase tracking-wider transition-[color,background-color,border-color,box-shadow,padding,letter-spacing] duration-300">
             <Layers className="size-3 mr-1.5" /> En Prueba
           </Badge>
         );
       case "CANCELADO":
         return (
-          <Badge className="bg-rose-500/5 text-rose-500 border border-rose-500/20 shadow-[0_2px_8px_rgba(244,63,94,0.05)] px-2.5 py-1 rounded-xl font-black text-[9px] uppercase tracking-wider transition-all duration-300">
+          <Badge className="bg-rose-500/5 text-rose-500 border border-rose-500/20 shadow-[0_2px_8px_rgba(244,63,94,0.05)] px-2.5 py-1 rounded-xl font-black text-[9px] uppercase tracking-wider transition-[color,background-color,border-color,box-shadow,padding,letter-spacing] duration-300">
             <XCircle className="size-3 mr-1.5" /> Cancelado
           </Badge>
         );
@@ -137,19 +137,19 @@ export function SalesTable({ ventas, adminId }: SalesTableProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center bg-card/25 backdrop-blur-xl p-5 rounded-2xl border border-border/20 shadow-xl">
+      <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center bg-card/25 p-5 rounded-2xl border border-border/20 shadow-xl">
         <div className="relative w-full md:w-96">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
           <Input
             placeholder="Buscar por estudiante o código..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 bg-muted/10 border-border/30 focus:border-primary/50 focus:bg-muted/15 focus:ring-1 focus:ring-primary/30 transition-all rounded-xl shadow-inner"
+            className="pl-10 bg-muted/10 border-border/30 focus:border-primary/50 focus:bg-muted/15 focus:ring-1 focus:ring-primary/30 transition-[background-color,border-color,box-shadow] rounded-xl shadow-inner"
           />
         </div>
       </div>
 
-      <div className="bg-card/20 backdrop-blur-md rounded-2xl border border-border/25 shadow-2xl overflow-hidden transition-all duration-300">
+      <div className="bg-card/20 rounded-2xl border border-border/25 shadow-lg overflow-hidden transition-[background-color,border-color,box-shadow,backdrop-filter] duration-300">
         <Table>
           <TableHeader className="bg-muted/5">
             <TableRow className="hover:bg-transparent border-border/30">
@@ -181,7 +181,7 @@ export function SalesTable({ ventas, adminId }: SalesTableProps) {
               <TableRow
                 key={v.id}
                 onClick={() => setSelectedVenta(v)}
-                className="hover:bg-primary/5 active:bg-primary/10 transition-all duration-300 border-border/10 cursor-pointer group"
+                className="hover:bg-primary/5 active:bg-primary/10 transition-colors duration-300 border-border/10 cursor-pointer group"
               >
                 <TableCell className="py-4">
                   <span className="font-mono text-xs font-black text-primary bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-xl shadow-inner select-all">
@@ -219,7 +219,7 @@ export function SalesTable({ ventas, adminId }: SalesTableProps) {
                       e.stopPropagation();
                       setSelectedVenta(v);
                     }}
-                    className="rounded-full hover:bg-primary/10 hover:text-primary transition-all duration-200 hover:scale-105 active:scale-95"
+                    className="rounded-full hover:bg-primary/10 hover:text-primary transition-[color,background-color,transform] duration-200 hover:scale-105 active:scale-95"
                   >
                     <Eye className="size-4" />
                   </Button>

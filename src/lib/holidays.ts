@@ -1,4 +1,3 @@
-import { isSameDay } from "date-fns";
 
 export interface Holiday {
   date: Date;
@@ -58,9 +57,4 @@ export function getPeruvianHolidays(year: number): Holiday[] {
   ];
 
   return holidays;
-}
-
-export function isHoliday(date: Date): Holiday | undefined {
-  const holidays = getPeruvianHolidays(date.getFullYear());
-  return holidays.find(h => isSameDay(h.date, date));
 }

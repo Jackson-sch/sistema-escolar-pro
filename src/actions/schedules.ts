@@ -2,6 +2,7 @@
 import { serialize } from "@/lib/dto";
 
 import prisma from "@/lib/prisma"
+import { auth } from "@/auth";
 import { revalidatePath } from "next/cache"
 
 const REVALIDATE_PATH = "/gestion/academico/horarios"
@@ -47,6 +48,11 @@ export async function getHorariosBySeccionAction(seccionId: string) {
  */
 export async function upsertHorarioAction(values: any, id?: string) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     if (id) {
       const horario = await prisma.horario.update({
         where: { id },
@@ -75,6 +81,11 @@ export async function upsertHorarioAction(values: any, id?: string) {
  */
 export async function deleteHorarioAction(id: string) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     await prisma.horario.delete({
       where: { id }
     })

@@ -111,14 +111,14 @@ export function LoginForm() {
           </div>
 
           {error && (
-            <div className="bg-destructive/15 p-3 rounded-md flex items-center gap-x-2 text-sm text-destructive animate-in fade-in zoom-in duration-300">
+            <div className="bg-destructive/15 p-3 rounded-md flex items-center gap-x-2 text-sm text-destructive animate-in fade-in zoom-in animation-duration-">
               <IconAlertCircle className="h-4 w-4 shrink-0" />
               <p>{error}</p>
             </div>
           )}
 
           {success && (
-            <div className="bg-emerald-500/15 p-3 rounded-md flex items-center gap-x-2 text-sm text-emerald-500 animate-in fade-in zoom-in duration-300">
+            <div className="bg-emerald-500/15 p-3 rounded-md flex items-center gap-x-2 text-sm text-emerald-500 animate-in fade-in zoom-in animation-duration-">
               <IconCircleCheck className="h-4 w-4 shrink-0" />
               <p>{success}</p>
             </div>
@@ -127,7 +127,7 @@ export function LoginForm() {
           <Button
             disabled={isPending}
             type="submit"
-            className="w-full h-11 transition-all active:scale-[0.98] hover:scale-105"
+            className="w-full h-11 transition-transform active:scale-[0.98] hover:scale-105"
           >
             {isPending && <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />}
             {isPending ? "Iniciando sesión..." : "Ingresar al sistema"}

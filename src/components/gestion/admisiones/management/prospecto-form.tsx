@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -35,10 +35,12 @@ import {
   IconCalendar,
   IconScan,
   IconLoader2,
+  IconDeviceFloppy,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { useMemo } from "react";
 import { LevelSegmentedControl } from "@/components/common/level-segmented-control";
+import { FormKeyboardHelpBar } from "@/components/common/form-keyboard-help-bar";
 
 interface ProspectoFormProps {
   grados: any[];
@@ -48,9 +50,9 @@ interface ProspectoFormProps {
   id?: string;
 }
 
-// ── Shared styles ─────────────────────────────────────────────────────────────
+// ── Shared styles (EduNova Pro) ───────────────────────────────────────────────
 const inputClass =
-  "rounded-full border-border/40 bg-background/50 pl-9 h-10 text-sm transition-shadow focus-visible:ring-primary/25";
+  "rounded-xl border-border/40 bg-background pl-9 h-9 text-xs transition-shadow focus-visible:ring-primary/25";
 const labelClass =
   "text-[11px] font-bold uppercase tracking-wider text-muted-foreground/60 mb-1";
 
@@ -82,8 +84,10 @@ function Section({
 }) {
   return (
     <div className="space-y-3">
-      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
+      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 flex items-center gap-2">
+        <span className="h-px flex-1 bg-border/30" />
         {title}
+        <span className="h-px flex-1 bg-border/30" />
       </p>
       {children}
     </div>
@@ -168,10 +172,16 @@ export function ProspectoForm({
     }
   };
 
+  const onSubmitRef = useRef(onSubmit);
+
   useEffect(() => {
-    setOnSubmit(() => form.handleSubmit(onSubmit)());
+    onSubmitRef.current = onSubmit;
+  });
+
+  useEffect(() => {
+    setOnSubmit(() => form.handleSubmit(onSubmitRef.current)());
     return () => setOnSubmit(undefined);
-  }, [form, onSubmit, setOnSubmit]);
+  }, [form, setOnSubmit]);
 
   const { isDirty } = form.formState;
   useEffect(() => {
@@ -190,20 +200,20 @@ export function ProspectoForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-5">
 
         {/* ── OCR Banner ─────────────────────────────────────────────────── */}
-        <div className="flex items-center justify-between gap-4 rounded-2xl border border-primary/15 bg-primary/5 px-4 py-3">
+        <div className="flex items-center justify-between gap-4 rounded-xl border border-indigo-500/20 bg-indigo-500/5 px-4 py-3">
           <div className="flex items-center gap-3">
-            <div className="flex size-8 items-center justify-center rounded-full bg-primary/10">
-              <IconScan className="size-4 text-primary" />
+            <div className="flex size-9 items-center justify-center rounded-xl bg-indigo-500/10 border border-indigo-500/20">
+              <IconScan className="size-4 text-indigo-600 dark:text-indigo-400" />
             </div>
             <div>
-              <p className="text-[11px] font-black uppercase tracking-wider text-primary">
-                Registro automático
+              <p className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400">
+                Registro automático con OCR
               </p>
-              <p className="text-[11px] text-muted-foreground">
-                Escanea el DNI para rellenar los datos
+              <p className="text-[10px] text-muted-foreground">
+                Escanea el DNI para rellenar los datos del postulante
               </p>
             </div>
           </div>
@@ -348,10 +358,10 @@ export function ProspectoForm({
             levels={nivelesDisponibles}
             value={selectedNivel}
             onChange={handleNivelChange}
-            className="mb-4"
+            className="mb-3"
           />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <FormField
               control={form.control}
               name="gradoInteresId"
@@ -362,7 +372,7 @@ export function ProspectoForm({
                     <FormControl>
                       <SelectTrigger
                         className={cn(
-                          "rounded-full border-border/40 bg-background/50 h-10 text-sm w-full",
+                          "rounded-xl border-border/40 bg-background h-9 text-xs w-full",
                           "transition-shadow focus:ring-primary/25",
                         )}
                       >
@@ -372,14 +382,14 @@ export function ProspectoForm({
                         </div>
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent className="border-border/40 backdrop-blur-xl rounded-2xl">
+                    <SelectContent className="border-border/50 bg-popover shadow-md rounded-xl">
                       {filteredGrados.length === 0 ? (
                         <div className="px-4 py-6 text-center text-xs text-muted-foreground italic">
                           No hay grados para este nivel
                         </div>
                       ) : (
                         filteredGrados.map((g) => (
-                          <SelectItem key={g.id} value={g.id} className="text-sm rounded-lg">
+                          <SelectItem key={g.id} value={g.id} className="text-xs rounded-lg">
                             {g.nombre}
                           </SelectItem>
                         ))
@@ -414,29 +424,35 @@ export function ProspectoForm({
           </div>
         </Section>
 
+        {/* ── Keyboard Shortcuts ───────────────────────────────────────────── */}
+        <FormKeyboardHelpBar />
+
         {/* ── Actions ────────────────────────────────────────────────────── */}
-        <div className="flex items-center justify-end gap-2 border-t border-border/30 pt-4">
+        <div className="flex items-center justify-end gap-3 border-t border-border/30 pt-4">
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             onClick={onSuccess}
-            className="rounded-full px-5 text-sm font-medium text-muted-foreground hover:text-foreground hover:scale-105"
+            className="rounded-xl px-5 h-10 font-semibold text-xs border-border/40"
             disabled={loading}
           >
             Cancelar
           </Button>
           <Button
             type="submit"
-            className="rounded-full px-7 text-sm font-semibold gap-2 min-w-[160px] hover:scale-105"
+            className="rounded-xl px-6 h-10 font-semibold text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 gap-2 min-w-[170px]"
             disabled={loading}
           >
             {loading ? (
               <>
                 <IconLoader2 className="size-4 animate-spin" />
-                Registrando...
+                <span>Registrando...</span>
               </>
             ) : (
-              id ? "Actualizar Prospecto" : "Guardar Prospecto"
+              <>
+                <IconDeviceFloppy className="size-4" />
+                <span>{id ? "Actualizar Prospecto" : "Guardar Prospecto"}</span>
+              </>
             )}
           </Button>
         </div>

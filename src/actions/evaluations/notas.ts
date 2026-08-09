@@ -6,11 +6,30 @@ import { serialize } from "@/lib/dto";
 import { createSafeAction } from "@/lib/safe-action";
 import { z } from "zod";
 import { auth } from "@/auth";
+import { logAuditEvent } from "@/lib/audit";
 
 const REVALIDATE_PATH = "/evaluaciones";
 
 export async function getNotasEvaluacionAction(evaluacionId: string) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return { error: "No autorizado" };
+    }
+
+    const evaluacion = await prisma.evaluacion.findUnique({
+      where: { id: evaluacionId },
+      select: { curso: { select: { institucionId: true } } },
+    });
+
+    if (
+      !evaluacion ||
+      (session.user.institucionId &&
+        evaluacion.curso.institucionId !== session.user.institucionId)
+    ) {
+      return { error: "Evaluación no encontrada o acceso denegado" };
+    }
+
     const notas = await prisma.nota.findMany({
       where: { evaluacionId },
       include: {
@@ -35,6 +54,11 @@ export async function getNotasEvaluacionAction(evaluacionId: string) {
 
 export async function getEstudiantesCursoAction(cursoId: string) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return { error: "No autorizado" };
+    }
+
     const curso = await prisma.curso.findUnique({
       where: { id: cursoId },
       include: {
@@ -42,8 +66,12 @@ export async function getEstudiantesCursoAction(cursoId: string) {
       },
     });
 
-    if (!curso?.nivelAcademicoId) {
-      return { error: "El curso no tiene sección asignada" };
+    if (
+      !curso?.nivelAcademicoId ||
+      (session.user.institucionId &&
+        curso.institucionId !== session.user.institucionId)
+    ) {
+      return { error: "El curso no tiene sección asignada o acceso denegado" };
     }
 
     const estudiantes = await prisma.user.findMany({
@@ -67,89 +95,6 @@ export async function getEstudiantesCursoAction(cursoId: string) {
     return { error: "No se pudieron obtener los estudiantes" };
   }
 }
-
-export const upsertNotaAction = createSafeAction(
-  z.object({
-    estudianteId: z.string(),
-    evaluacionId: z.string(),
-    cursoId: z.string(),
-    valor: z.number(),
-    valorLiteral: z.string().optional(),
-    comentario: z.string().optional(),
-  }),
-  async (values, session) => {
-    try {
-      if (session.user.role === "profesor") {
-        const evaluacion = await prisma.evaluacion.findUnique({
-          where: { id: values.evaluacionId },
-          include: { curso: true }
-        });
-        
-        if (!evaluacion || evaluacion.cursoId !== values.cursoId) {
-            return { error: "Inconsistencia en datos de evaluación" };
-        }
-
-        const asignacion = await prisma.curso.findFirst({
-          where: {
-            id: values.cursoId,
-            profesorId: session.user.id,
-          }
-        });
-
-        if (!asignacion) {
-          return { error: "No tiene permiso para registrar notas en este curso" };
-        }
-      } else if (session.user.role !== "administrativo") {
-        return { error: "No autorizado" };
-      }
-
-      let valorFinal = values.valor;
-      if (values.valorLiteral) {
-        const mapping: Record<string, number> = {
-          AD: 20,
-          A: 17,
-          B: 13,
-          C: 10,
-        };
-        if (mapping[values.valorLiteral]) {
-          valorFinal = mapping[values.valorLiteral];
-        }
-      }
-
-      const nota = await prisma.nota.upsert({
-        where: {
-          estudianteId_evaluacionId: {
-            estudianteId: values.estudianteId,
-            evaluacionId: values.evaluacionId,
-          },
-        },
-        update: {
-          valor: valorFinal,
-          valorLiteral: values.valorLiteral,
-          comentario: values.comentario,
-        },
-        create: {
-          estudianteId: values.estudianteId,
-          evaluacionId: values.evaluacionId,
-          cursoId: values.cursoId,
-          valor: valorFinal,
-          valorLiteral: values.valorLiteral,
-          comentario: values.comentario,
-        },
-      });
-
-      revalidatePath(REVALIDATE_PATH);
-      return {
-        success: "Nota registrada",
-        data: serialize(nota),
-      };
-    } catch (error) {
-      console.error("Error upserting nota:", error);
-      return { error: "No se pudo registrar la nota" };
-    }
-  },
-  { roles: ["administrativo", "profesor"] }
-);
 
 export const registrarNotasMasivasAction = createSafeAction(
   z.object({
@@ -175,7 +120,7 @@ export const registrarNotasMasivasAction = createSafeAction(
       }
 
       const operations = notas.map((nota) => {
-        let valorFinal = nota.valor;
+        let valorFinal = Math.min(20, Math.max(0, nota.valor));
         if (nota.valorLiteral) {
           const mapping: Record<string, number> = {
             AD: 20, A: 17, B: 13, C: 10,
@@ -209,6 +154,23 @@ export const registrarNotasMasivasAction = createSafeAction(
       });
 
       const results = await prisma.$transaction(operations);
+
+      // Bitácora de Auditoría
+      logAuditEvent({
+        accion: "UPDATE",
+        entidad: "Nota",
+        entidadId: evaluacionId,
+        detalles: {
+          evaluacionId,
+          cursoId,
+          totalNotas: results.length,
+        },
+        usuarioId: session.user.id,
+        usuarioNombre: session.user.name || undefined,
+        usuarioEmail: session.user.email || undefined,
+        institucionId: session.user.institucionId || undefined,
+      });
+
       revalidatePath(REVALIDATE_PATH);
       return { success: `${results.length} notas registradas correctamente` };
     } catch (error) {

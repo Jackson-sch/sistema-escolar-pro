@@ -227,7 +227,7 @@ function ConceptoFormContent({
           </Button>
           <Button
             type="submit"
-            className="w-full sm:w-auto rounded-full px-8 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300 hover:scale-105"
+            className="w-full sm:w-auto rounded-full px-8 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-[box-shadow,transform] duration-300 hover:scale-105"
             disabled={isPending}
           >
             {isPending ? (

@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useSyncExternalStore } from "react";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { SedeDialog } from "./sede-dialog";
 import {
   IconPlus,
   IconSearch,
-  IconFilter,
   IconChevronRight,
   IconMapPin,
   IconMail,
@@ -14,18 +16,14 @@ import {
   IconStar,
   IconEdit,
   IconTrash,
+  IconCheck,
 } from "@tabler/icons-react";
-import { deleteSedeAction } from "@/actions/sedes";
+import { deleteSedeAction, setSedePrincipalAction } from "@/actions/sedes";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { SedeMap } from "./sede-map";
 import { cn } from "@/lib/utils";
 import { ConfirmModal } from "@/components/modals/confirm-modal";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
 
 interface SedesListProps {
   initialData: any[];
@@ -36,22 +34,30 @@ export function SedesList({ initialData }: SedesListProps) {
   const [selectedSede, setSelectedSede] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeSedeId, setActiveSedeId] = useState<string | undefined>(
-    initialData.find((s) => s.esPrincipal)?.id || initialData[0]?.id,
+    () => initialData.find((s) => s.esPrincipal)?.id || initialData[0]?.id,
   );
   const [confirmDelete, setConfirmDelete] = useState<{
     id: string;
     nombre: string;
   } | null>(null);
+  const [confirmPrincipal, setConfirmPrincipal] = useState<{
+    id: string;
+    nombre: string;
+  } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isSettingPrincipal, setIsSettingPrincipal] = useState(false);
   const router = useRouter();
 
   const handleSedeClick = useCallback((id: string) => {
     setActiveSedeId(id);
   }, []);
 
-  // Client-side mount guard for the map
-  const [isClient, setIsClient] = useState(false);
-  useEffect(() => setIsClient(true), []);
+  // Detección de hidratación sin setState síncrono en el efecto
+  const isClient = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
 
   const filteredSedes = initialData.filter(
     (sede) =>
@@ -78,130 +84,156 @@ export function SedesList({ initialData }: SedesListProps) {
     setConfirmDelete(null);
   };
 
+  const executeSetPrincipal = async () => {
+    if (!confirmPrincipal) return;
+    setIsSettingPrincipal(true);
+    const res = await setSedePrincipalAction(confirmPrincipal.id);
+    if (res.error) {
+      toast.error(res.error);
+    } else {
+      toast.success(res.success || "Sede establecida como principal");
+      router.refresh();
+    }
+    setIsSettingPrincipal(false);
+    setConfirmPrincipal(null);
+  };
+
   return (
-    <div className="flex flex-col lg:flex-row h-auto lg:h-[calc(100vh-200px)] lg:min-h-[600px] lg:max-h-[850px] border border-border/40 rounded-3xl lg:overflow-hidden bg-background/50 backdrop-blur-sm shadow-2xl">
+    <div className="flex flex-col lg:flex-row h-auto lg:h-[calc(100vh-220px)] lg:min-h-[600px] lg:max-h-[850px] border border-border/40 rounded-2xl lg:overflow-hidden bg-background/50 shadow-xl">
       {/* Sidebar List (40%) */}
-      <aside className="w-full lg:w-[40%] flex flex-col border-b lg:border-b-0 lg:border-r-0 border-border/40 bg-card/20 z-10 transition-all duration-300">
-        <div className="p-6 space-y-4 border-b border-border/40 bg-background/30">
-          <div className="flex items-center justify-between pt-2">
-            <h2 className="text-xl font-bold tracking-tight">
+      <aside className="w-full lg:w-[40%] flex flex-col border-b lg:border-b-0 lg:border-r border-border/40 bg-card/80 z-10">
+        <div className="p-4 space-y-3 border-b border-border/30 bg-background/40">
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-bold text-foreground">
               Sedes Institucionales
             </h2>
             <Button
               size="sm"
-              className="bg-primary hover:bg-primary/90 text-white rounded-full text-xs font-semibold flex items-center gap-2 transition-all shadow-lg shadow-primary/20"
+              className="rounded-xl px-3.5 h-8 font-semibold text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 gap-1.5 cursor-pointer"
               onClick={() => {
                 setSelectedSede(null);
                 setOpen(true);
               }}
             >
-              <IconPlus className="h-3.5 w-3.5" strokeWidth={3} />
-              Nueva Sede
+              <IconPlus className="size-3.5" />
+              <span>Nueva Sede</span>
             </Button>
           </div>
 
-          <div className="flex items-center gap-3">
-            <InputGroup className="flex-1 glass rounded-full flex items-center px-2 gap-2 focus-within:ring-2 ring-primary/40 transition-all">
-              <InputGroupAddon>
-                <IconSearch className="h-4 w-4 text-muted-foreground" />
-              </InputGroupAddon>
-              <InputGroupInput
-                placeholder="Buscar por nombre, código..."
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </InputGroup>
+          <div className="relative w-full">
+            <IconSearch className="absolute left-3 top-2.5 text-muted-foreground/60 size-4" />
+            <Input
+              placeholder="Buscar por nombre o código..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 bg-background border-border/40 rounded-xl text-xs h-9"
+            />
           </div>
         </div>
 
         {/* Scrollable List */}
-        <div className="flex-1 lg:overflow-y-auto custom-scrollbar p-5 space-y-4 min-h-[400px]">
+        <div className="flex-1 lg:overflow-y-auto p-4 space-y-3 min-h-[400px]">
           {filteredSedes.map((sede) => (
             <div
               key={sede.id}
               onClick={() => setActiveSedeId(sede.id)}
               className={cn(
-                "glass p-4 rounded-2xl cursor-pointer transition-all duration-300 group hover:scale-[1.01] border-l-4",
+                "p-3.5 rounded-2xl cursor-pointer transition-colors border border-border/30 bg-background/40 hover:bg-background/80 group relative",
                 activeSedeId === sede.id
-                  ? "active-card border-l-primary scale-[1.01]"
-                  : "border-l-transparent hover:border-l-primary/30",
-                !sede.activo && "opacity-60",
+                  ? "border-indigo-500/50 bg-indigo-500/10 shadow-xs"
+                  : "hover:border-indigo-500/20",
+                !sede.activo && "opacity-50",
               )}
             >
-              <div className="flex gap-4">
-                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden shrink-0 relative border border-border/20">
+              <div className="flex gap-3">
+                <div className="size-16 rounded-xl overflow-hidden shrink-0 relative border border-border/30 bg-muted/20">
                   {sede.logo ? (
-                    <img
+                    <Image
                       alt={sede.nombre}
+                      width={64}
+                      height={64}
                       className="w-full h-full object-cover"
                       src={sede.logo}
                     />
                   ) : (
-                    <div className="w-full h-full bg-primary/5 flex items-center justify-center">
-                      <IconBuilding className="h-8 w-8 text-primary/30" />
+                    <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
+                      <IconBuilding className="size-6" />
                     </div>
-                  )}
-                  {sede.esPrincipal && (
-                    <div className="absolute inset-0 bg-primary/5"></div>
                   )}
                 </div>
 
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-start gap-2">
                     <div className="min-w-0">
-                      <h3 className="font-bold text-base sm:text-lg flex items-center gap-2 truncate">
-                        <IconBuilding className="h-4 w-4 text-primary shrink-0" />
+                      <h3 className="font-bold text-xs text-foreground flex items-center gap-1.5 truncate">
+                        <IconBuilding className="size-3.5 text-indigo-500 shrink-0" />
                         <span className="truncate">{sede.nombre}</span>
                         {sede.esPrincipal && (
-                          <IconStar className="h-3.5 w-3.5 text-amber-500 fill-amber-500 shrink-0" />
+                          <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 text-[9px] px-1.5 py-0 rounded-md font-bold flex items-center gap-0.5">
+                            <IconStar className="size-3 fill-amber-500 text-amber-500" />
+                            Principal
+                          </Badge>
                         )}
                       </h3>
                       {sede.codigoIdentifier && (
-                        <span className="text-[10px] px-2 py-0.5 rounded bg-foreground/5 text-muted-foreground font-mono uppercase">
+                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-muted/40 text-muted-foreground font-mono uppercase mt-0.5 inline-block">
                           Cod: {sede.codigoIdentifier}
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {!sede.esPrincipal && (
+                        <button
+                          title="Establecer como Sede Principal"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setConfirmPrincipal({ id: sede.id, nombre: sede.nombre });
+                          }}
+                          className="p-1 hover:bg-amber-500/10 rounded-lg text-amber-500 transition-colors"
+                        >
+                          <IconStar className="size-3.5" />
+                        </button>
+                      )}
                       <button
+                        title="Editar Sede"
                         onClick={(e) => {
                           e.stopPropagation();
                           setSelectedSede(sede);
                           setOpen(true);
                         }}
-                        className="p-1.5 hover:bg-primary/10 rounded-lg text-blue-500 transition-colors"
+                        className="p-1 hover:bg-indigo-500/10 rounded-lg text-indigo-600 dark:text-indigo-400 transition-colors"
                       >
-                        <IconEdit className="h-4 w-4" />
+                        <IconEdit className="size-3.5" />
                       </button>
                       <button
+                        title="Eliminar Sede"
                         disabled={sede.esPrincipal}
                         onClick={(e) => {
                           e.stopPropagation();
                           handleDelete(sede.id, sede.nombre);
                         }}
                         className={cn(
-                          "p-1.5 rounded-lg transition-colors",
+                          "p-1 rounded-lg transition-colors",
                           sede.esPrincipal
-                            ? "text-muted-foreground/30"
-                            : "hover:bg-red-500/10 text-red-500",
+                            ? "text-muted-foreground/30 cursor-not-allowed"
+                            : "hover:bg-rose-500/10 text-rose-500",
                         )}
                       >
-                        <IconTrash className="h-4 w-4" />
+                        <IconTrash className="size-3.5" />
                       </button>
                     </div>
                   </div>
 
-                  <div className="mt-3 space-y-1.5 text-xs text-muted-foreground">
+                  <div className="mt-2 space-y-1 text-[11px] text-muted-foreground">
                     {sede.direccion && (
-                      <div className="flex items-center gap-2 truncate">
-                        <IconMapPin className="h-3 w-3 shrink-0" />
+                      <div className="flex items-center gap-1.5 truncate">
+                        <IconMapPin className="size-3 shrink-0 text-indigo-500" />
                         <span className="truncate">{sede.direccion}</span>
                       </div>
                     )}
                     {sede.email && (
-                      <div className="flex items-center gap-2 truncate">
-                        <IconMail className="h-3 w-3 shrink-0" />
+                      <div className="flex items-center gap-1.5 truncate">
+                        <IconMail className="size-3 shrink-0 text-indigo-500" />
                         <span className="truncate">{sede.email}</span>
                       </div>
                     )}
@@ -209,10 +241,10 @@ export function SedesList({ initialData }: SedesListProps) {
                 </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-border/20 flex justify-between items-center text-[11px] text-muted-foreground/60">
-                <div className="flex flex-col gap-1">
-                  <span className="font-medium">
-                    Niveles asociados: {sede.nivelesAcademicos?.length || 0}
+              <div className="mt-3 pt-2.5 border-t border-border/20 flex justify-between items-center text-[10px] text-muted-foreground">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="font-semibold">
+                    Niveles: {sede.nivelesAcademicos?.length || 0}
                   </span>
                   {sede.nivelesAcademicos?.length > 0 && (
                     <div className="flex flex-wrap gap-1">
@@ -225,37 +257,35 @@ export function SedesList({ initialData }: SedesListProps) {
                       )
                         .filter(Boolean)
                         .map((nombre: any) => (
-                          <span
+                          <Badge
                             key={nombre}
-                            className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/5 text-primary/70 border border-primary/10"
+                            variant="outline"
+                            className="text-[9px] px-1.5 py-0 rounded-md bg-indigo-500/10 text-indigo-600 border-none font-semibold"
                           >
                             {nombre}
-                          </span>
+                          </Badge>
                         ))}
                     </div>
                   )}
                 </div>
-                <span className="text-primary font-bold flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  Ver detalles{" "}
-                  <IconChevronRight className="h-3 w-3" strokeWidth={3} />
+                <span className="text-indigo-600 dark:text-indigo-400 font-semibold flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                  Ver en mapa <IconChevronRight className="size-3" />
                 </span>
               </div>
             </div>
           ))}
 
           {filteredSedes.length === 0 && (
-            <div className="h-full flex flex-col items-center justify-center py-20 text-center">
-              <IconBuilding className="h-12 w-12 text-muted-foreground/20 mb-4" />
-              <p className="text-sm text-muted-foreground">
-                No se encontraron sedes
-              </p>
+            <div className="h-full flex flex-col items-center justify-center py-16 text-center text-muted-foreground/60">
+              <IconBuilding className="size-10 text-muted-foreground/30 mb-2" />
+              <p className="text-xs font-semibold">No se encontraron sedes</p>
             </div>
           )}
         </div>
       </aside>
 
       {/* Main Map View (60%) */}
-      <main className="hidden lg:block lg:flex-1 relative rounded-r-3xl bg-card/20 select-none">
+      <main className="hidden lg:block lg:flex-1 relative rounded-r-2xl bg-card/20 select-none">
         {isClient ? (
           <SedeMap
             sedes={initialData}
@@ -263,7 +293,7 @@ export function SedesList({ initialData }: SedesListProps) {
             onSedeClick={handleSedeClick}
           />
         ) : (
-          <div className="w-full h-full bg-muted/10 animate-pulse rounded-3xl" />
+          <div className="w-full h-full bg-muted/10 animate-pulse rounded-2xl" />
         )}
       </main>
 
@@ -276,6 +306,19 @@ export function SedesList({ initialData }: SedesListProps) {
         sede={selectedSede}
       />
 
+      {/* Modal de Confirmación para Asignar Sede Principal */}
+      <ConfirmModal
+        isOpen={!!confirmPrincipal}
+        onClose={() => setConfirmPrincipal(null)}
+        onConfirm={executeSetPrincipal}
+        title="Asignar como Sede Principal"
+        description={`¿Desea establecer "${confirmPrincipal?.nombre}" como la Sede Principal? Esta acción actualizará los datos básicos de la institución con la dirección y contacto de esta sede.`}
+        loading={isSettingPrincipal}
+        variant="warning"
+        confirmText="Establecer Principal"
+      />
+
+      {/* Modal de Confirmación para Eliminar */}
       <ConfirmModal
         isOpen={!!confirmDelete}
         onClose={() => setConfirmDelete(null)}

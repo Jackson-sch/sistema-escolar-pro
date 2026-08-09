@@ -33,48 +33,46 @@ export async function getGradeReportDataAction(
       return { error: "Estudiante no encontrado o sin sección asignada" };
     }
 
-    // 2. Obtener todos los periodos del año académico (aseguramos que al menos se mencionen los 4 bimestres)
-    const allPeriodos = await prisma.periodoAcademico.findMany({
-      where: {
-        anioEscolar: anioAcademico,
-        institucionId: student.institucionId || undefined,
-      },
-      orderBy: { numero: "asc" },
-    });
-
-    // 3. Obtener todos los cursos asignados a la sección del estudiante
-    const cursos = await prisma.curso.findMany({
-      where: {
-        nivelAcademicoId: student.nivelAcademicoId,
-        anioAcademico: anioAcademico,
-        activo: true,
-      },
-      include: {
-        areaCurricular: true,
-        profesor: {
-          select: { name: true, apellidoPaterno: true, apellidoMaterno: true },
+    // 2-4. Obtener periodos, cursos y notas en paralelo (independientes entre sí)
+    const [allPeriodos, cursos, notas] = await Promise.all([
+      prisma.periodoAcademico.findMany({
+        where: {
+          anioEscolar: anioAcademico,
+          institucionId: student.institucionId || undefined,
         },
-      },
-      orderBy: { areaCurricular: { orden: "asc" } },
-    });
-
-    // 4. Obtener todas las notas del estudiante para ese año
-    const notas = await prisma.nota.findMany({
-      where: {
-        estudianteId: studentId,
-        curso: {
+        orderBy: { numero: "asc" },
+      }),
+      prisma.curso.findMany({
+        where: {
           nivelAcademicoId: student.nivelAcademicoId,
           anioAcademico: anioAcademico,
+          activo: true,
         },
-      },
-      include: {
-        evaluacion: {
-          include: {
-            tipoEvaluacion: true,
+        include: {
+          areaCurricular: true,
+          profesor: {
+            select: { name: true, apellidoPaterno: true, apellidoMaterno: true },
           },
         },
-      },
-    });
+        orderBy: { areaCurricular: { orden: "asc" } },
+      }),
+      prisma.nota.findMany({
+        where: {
+          estudianteId: studentId,
+          curso: {
+            nivelAcademicoId: student.nivelAcademicoId,
+            anioAcademico: anioAcademico,
+          },
+        },
+        include: {
+          evaluacion: {
+            include: {
+              tipoEvaluacion: true,
+            },
+          },
+        },
+      }),
+    ]);
 
     const getLiteral = (valor: number) => {
       if (valor >= 17) return "AD";
@@ -315,14 +313,13 @@ export async function getConstanciaDataAction(studentId: string) {
       return { error: "Estudiante no encontrado" };
 
     return {
-      data: JSON.parse(
-        JSON.stringify({
-          student: {
-            id: student.id,
-            name: student.name,
-            apellidoPaterno: student.apellidoPaterno,
-            apellidoMaterno: student.apellidoMaterno,
-            dni: student.dni,
+      data: structuredClone({
+        student: {
+          id: student.id,
+          name: student.name,
+          apellidoPaterno: student.apellidoPaterno,
+          apellidoMaterno: student.apellidoMaterno,
+          dni: student.dni,
             nivelAcademico: {
               seccion: student.nivelAcademico.seccion,
               grado: { nombre: student.nivelAcademico.grado.nombre },
@@ -332,7 +329,6 @@ export async function getConstanciaDataAction(studentId: string) {
           institucion: student.nivelAcademico.institucion,
           anioAcademico: student.nivelAcademico.anioAcademico,
         }),
-      ),
     };
   } catch (error) {
     console.error("Error fetching constancia data:", error);
@@ -367,12 +363,11 @@ export async function getEnrollmentDataAction(studentId: string) {
     const matriculaDoc = enrollment as any;
 
     return {
-      data: JSON.parse(
-        JSON.stringify({
-          enrollment: {
-            id: matriculaDoc.id,
-            anioAcademico: matriculaDoc.anioAcademico,
-            estudiante: matriculaDoc.estudiante,
+      data: structuredClone({
+        enrollment: {
+          id: matriculaDoc.id,
+          anioAcademico: matriculaDoc.anioAcademico,
+          estudiante: matriculaDoc.estudiante,
             nivelAcademico: matriculaDoc.nivelAcademico
               ? {
                   seccion: matriculaDoc.nivelAcademico.seccion,
@@ -385,7 +380,6 @@ export async function getEnrollmentDataAction(studentId: string) {
           },
           institucion: matriculaDoc.nivelAcademico?.institucion,
         }),
-      ),
     };
   } catch (error) {
     console.error("Error fetching enrollment data:", error);

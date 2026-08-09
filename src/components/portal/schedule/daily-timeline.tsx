@@ -1,22 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { format, isAfter, isBefore, isWithinInterval, parse } from "date-fns";
+import { format, isAfter, isBefore, parse } from "date-fns";
 import { es } from "date-fns/locale";
 import {
   IconMapPin,
   IconUser,
   IconCheck,
-  IconUsersGroup,
   IconClock,
+  IconSparkles,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 interface Horario {
   id: string;
   diaSemana: number;
-  horaInicio: string; // ej: "08:00"
-  horaFin: string; // ej: "09:30"
+  horaInicio: string;
+  horaFin: string;
   aula?: string;
   curso: {
     nombre: string;
@@ -27,7 +28,7 @@ interface Horario {
 
 interface DailyTimelineProps {
   horarios: Horario[];
-  currentDate?: Date; // Opcional, por defecto new Date()
+  currentDate?: Date;
 }
 
 export function DailyTimeline({
@@ -36,7 +37,6 @@ export function DailyTimeline({
 }: DailyTimelineProps) {
   const [now, setNow] = useState(currentDate);
 
-  // Update time every minute (optional for real-time progress)
   useEffect(() => {
     const interval = setInterval(() => {
       setNow(new Date());
@@ -44,17 +44,15 @@ export function DailyTimeline({
     return () => clearInterval(interval);
   }, []);
 
-  const currentDayOfWeek = now.getDay(); // 0 (Domingo) - 6 (Sábado)
+  const currentDayOfWeek = now.getDay();
   const isWeekend = currentDayOfWeek === 0 || currentDayOfWeek === 6;
 
-  // Mapeamos el día (Lunes = 1 en la BD, etc.)
-  const activeDay = isWeekend ? 1 : currentDayOfWeek; // Si es finde, mostramos lunes as fallback
+  const activeDay = isWeekend ? 1 : currentDayOfWeek;
 
   const todaySchedule = horarios
     .filter((h) => h.diaSemana === activeDay)
     .sort((a, b) => a.horaInicio.localeCompare(b.horaInicio));
 
-  // Determine the status of a class
   const getClassStatus = (horaInicio: string, horaFin: string) => {
     const todayStr = format(now, "yyyy-MM-dd");
     const start = parse(`${todayStr} ${horaInicio}`, "yyyy-MM-dd HH:mm", now);
@@ -78,53 +76,58 @@ export function DailyTimeline({
     return Math.round((elapsed / totalDuration) * 100);
   };
 
-  // Real status (removed demo mock logic)
-
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="space-y-6 animate-in fade-in animation-duration-">
       {/* Header Date Info */}
-      <div className="space-y-1">
-        <h2 className="text-2xl font-black tracking-tight text-foreground flex items-center gap-2 capitalize">
-          {format(now, "EEEE, dd 'de' MMMM", { locale: es })}
-        </h2>
-        <p className="text-sm font-medium text-muted-foreground/60">
-          Programación del día • Semestre Regular
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-card/80 border border-border/40 shadow-xs">
+        <div>
+          <h2 className="text-xl font-bold tracking-tight text-foreground capitalize flex items-center gap-2">
+            <IconClock className="size-5 text-indigo-500" />
+            {format(now, "EEEE, dd 'de' MMMM", { locale: es })}
+          </h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {isWeekend
+              ? "Fin de semana (Mostrando programación del Lunes)"
+              : "Programación de clases para la jornada de hoy"}
+          </p>
+        </div>
+
+        <Badge variant="outline" className="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20 text-xs font-bold px-3 py-1 rounded-xl w-fit">
+          {todaySchedule.length} materias hoy
+        </Badge>
       </div>
 
       {todaySchedule.length === 0 ? (
-        <div className="rounded-3xl border border-dashed border-border/40 p-12 text-center bg-card/20">
-          <p className="text-sm font-bold text-muted-foreground/60 uppercase tracking-widest">
+        <div className="rounded-2xl border border-dashed border-border/40 p-12 text-center bg-card/80">
+          <p className="text-sm font-bold text-muted-foreground">
             No hay clases programadas para hoy
           </p>
         </div>
       ) : (
-        <div className="relative pl-4 md:pl-8">
-          {/* Vertical Timeline Line */}
-          <div className="absolute top-4 bottom-4 left-[15px] md:left-[31px] w-px bg-border/40" />
+        <div className="relative pl-4 md:pl-6">
+          {/* Vertical Line */}
+          <div className="absolute top-4 bottom-4 left-[15px] md:left-[23px] w-px bg-border/40" />
 
-          <div className="space-y-6">
-            {todaySchedule.map((item, index) => {
+          <div className="space-y-4">
+            {todaySchedule.map((item) => {
               const realStatus = getClassStatus(item.horaInicio, item.horaFin);
-
-              const status = realStatus;
               const progress = getProgress(item.horaInicio, item.horaFin);
 
-              const isPast = status === "past";
-              const isActive = status === "active";
+              const isPast = realStatus === "past";
+              const isActive = realStatus === "active";
 
               return (
                 <div key={item.id} className="relative group">
                   {/* Timeline Dot */}
-                  <div className="absolute -left-4 md:-left-8 top-1/2 -translate-y-1/2 flex items-center justify-center">
+                  <div className="absolute -left-4 md:-left-6 top-6 -translate-y-1/2 flex items-center justify-center">
                     <div
                       className={cn(
-                        "size-3 rounded-full border-2 bg-background z-10 transition-colors duration-300",
+                        "size-3.5 rounded-full border-2 bg-background z-10 transition-[background-color,border-color,box-shadow]",
                         isActive
-                          ? "border-primary bg-primary shadow-[0_0_12px_rgba(59,130,246,0.5)] size-3.5"
+                          ? "border-indigo-600 bg-indigo-600 shadow-md shadow-indigo-500/40 size-4"
                           : isPast
-                            ? "border-muted-foreground/30 bg-muted-foreground/30"
-                            : "border-border/50 bg-muted/50",
+                            ? "border-emerald-500 bg-emerald-500"
+                            : "border-border/60 bg-card",
                       )}
                     />
                   </div>
@@ -132,126 +135,69 @@ export function DailyTimeline({
                   {/* Card Content */}
                   <div
                     className={cn(
-                      "ml-6 md:ml-8 rounded-2xl border transition-all duration-300 overflow-hidden relative",
+                      "ml-6 md:ml-8 rounded-2xl border transition-[background-color,border-color,box-shadow,opacity,padding,margin] duration-300 overflow-hidden relative p-5",
                       isActive
-                        ? "bg-primary/10 border-primary/40 shadow-[0_8px_32px_-12px_rgba(59,130,246,0.3)]"
-                        : "bg-card/60 border-border/60 hover:bg-card/80 hover:border-border/80 dark:bg-card/40 dark:border-border/30 dark:hover:bg-card/60 dark:hover:border-border/50",
+                        ? "bg-indigo-500/10 border-indigo-500/30 shadow-md"
+                        : isPast
+                          ? "bg-card/80 border-border/30 opacity-75"
+                          : "bg-card/80 border-border/40 hover:bg-card shadow-xs",
                     )}
                   >
                     {/* Active State Progress Line */}
                     {isActive && (
-                      <div className="absolute bottom-0 left-0 h-1 bg-primary/20 w-full" />
-                    )}
-                    {isActive && (
                       <div
-                        className="absolute bottom-0 left-0 h-1 bg-primary rounded-r-full transition-all duration-1000 ease-out"
+                        className="absolute bottom-0 left-0 h-1 bg-indigo-600 rounded-r-full transition-[width] duration-1000"
                         style={{ width: `${progress}%` }}
                       />
                     )}
 
-                    <div className="p-5 md:p-6 w-full flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      {/* Left: Time and Details */}
-                      <div className="space-y-3 flex-1 min-w-0">
+                    <div className="w-full flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      {/* Left: Details */}
+                      <div className="space-y-2 flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span
-                            className={cn(
-                              "text-[11px] font-black tracking-widest uppercase",
-                              isActive
-                                ? "text-primary"
-                                : isPast
-                                  ? "text-muted-foreground/50"
-                                  : "text-muted-foreground/80",
-                            )}
-                          >
-                            <IconClock className="inline-block size-3.5 mr-1" />
+                          <span className="text-[10px] font-mono font-bold text-muted-foreground flex items-center gap-1">
+                            <IconClock className="size-3.5 text-indigo-500" />
                             {item.horaInicio} - {item.horaFin}
-                            {isActive && " • AHORA"}
                           </span>
+                          {isActive && (
+                            <Badge className="bg-indigo-600 text-white border-none text-[9px] font-bold uppercase px-2 py-0 rounded-md animate-pulse">
+                              En Curso ({progress}%)
+                            </Badge>
+                          )}
+                          {isPast && (
+                            <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[9px] font-bold uppercase px-2 py-0 rounded-md">
+                              Concluida
+                            </Badge>
+                          )}
                         </div>
 
-                        <h3
-                          className={cn(
-                            "text-xl md:text-2xl font-black tracking-tight leading-tight",
-                            isPast
-                              ? "text-muted-foreground/60"
-                              : "text-foreground dark:text-white",
-                          )}
-                        >
+                        <h3 className="text-lg md:text-xl font-bold tracking-tight text-foreground">
                           {item.curso.nombre}
                         </h3>
 
-                        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 pt-1">
+                        <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground pt-0.5">
                           {item.curso.profesor && (
-                            <div
-                              className={cn(
-                                "flex items-center gap-1.5 text-xs font-bold",
-                                isPast
-                                  ? "text-muted-foreground/40"
-                                  : "text-muted-foreground/70",
-                              )}
-                            >
-                              <IconUser className="size-4 opacity-70" />
+                            <div className="flex items-center gap-1.5 font-medium">
+                              <IconUser className="size-3.5 text-indigo-500" />
                               <span className="capitalize">
-                                {item.curso.profesor.name.toLowerCase()}{" "}
+                                Prof. {item.curso.profesor.name.toLowerCase()}{" "}
                                 {item.curso.profesor.apellidoPaterno.toLowerCase()}
                               </span>
                             </div>
                           )}
 
-                          {item.aula ? (
-                            <div
-                              className={cn(
-                                "flex items-center gap-1.5 text-xs font-bold",
-                                isPast
-                                  ? "text-muted-foreground/40"
-                                  : "text-muted-foreground/70",
-                              )}
-                            >
-                              <IconMapPin className="size-4 opacity-70" />
-                              <span>{item.aula}</span>
-                            </div>
-                          ) : (
-                            <div
-                              className={cn(
-                                "flex items-center gap-1.5 text-xs font-bold",
-                                isPast
-                                  ? "text-muted-foreground/40"
-                                  : "text-warning",
-                              )}
-                            >
-                              <IconMapPin className="size-4 opacity-70" />
-                              <span>
-                                {isPast ? "Clase Culminada" : "Aula Pendiente"}
-                              </span>
-                            </div>
-                          )}
+                          <div className="flex items-center gap-1.5 font-medium">
+                            <IconMapPin className="size-3.5 text-indigo-500" />
+                            <span>{item.aula || "Aula General"}</span>
+                          </div>
                         </div>
                       </div>
 
-                      {/* Right: Status Indicators */}
-                      <div className="flex items-center shrink-0">
-                        {isActive && (
-                          <div className="bg-primary/10 border border-primary/20 px-4 py-2 rounded-xl flex flex-col items-center justify-center">
-                            <span className="text-[9px] font-black text-primary/80 uppercase tracking-widest mb-0.5">
-                              Progreso
-                            </span>
-                            <span className="text-lg font-black text-primary tabular-nums leading-none">
-                              {progress}%
-                            </span>
-                          </div>
-                        )}
-
-                        {isPast && (
-                          <div className="size-10 rounded-full bg-muted/30 border border-border/40 flex items-center justify-center">
-                            <IconCheck className="size-5 text-muted-foreground/40" />
-                          </div>
-                        )}
-
-                        {!isActive && !isPast && (
-                          <div className="size-10 rounded-full bg-card/50 border border-border/40 flex items-center justify-center hover:bg-card transition-colors cursor-pointer group-hover:border-primary/30">
-                            <IconUsersGroup className="size-4 text-muted-foreground/60 group-hover:text-primary transition-colors" />
-                          </div>
-                        )}
+                      {/* Right: Area Tag */}
+                      <div className="shrink-0">
+                        <Badge variant="outline" className="bg-background/80 text-foreground border-border/40 font-bold text-[10px] uppercase tracking-wider px-3 py-1 rounded-xl">
+                          {item.curso.areaCurricular.nombre}
+                        </Badge>
                       </div>
                     </div>
                   </div>

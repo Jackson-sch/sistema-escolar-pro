@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Evaluaciones | EduPeru Pro",
+  title: "Evaluaciones | EduNova Pro",
   description: "Gestión de evaluaciones y calificaciones",
 }
 

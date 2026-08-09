@@ -26,7 +26,7 @@ export function LogoInstitucionalCard({
   // The functionality relies on ImageUpload inner logic.
 
   return (
-    <MagicCard className="rounded-2xl p-6 bg-card/30 border-border/40 overflow-hidden flex flex-col gap-6">
+    <MagicCard className="rounded-2xl p-6 bg-card/80 border-border/40 overflow-hidden flex flex-col gap-6">
       <div className="flex flex-col gap-1">
         <h3 className="text-sm font-bold text-foreground">
           Logo Institucional
@@ -60,7 +60,7 @@ export function LogoInstitucionalCard({
 
       <Button
         variant="ghost"
-        className="w-full rounded-xl bg-primary/10 hover:bg-primary/20 text-primary font-semibold text-xs h-10 transition-all active:scale-95"
+        className="w-full rounded-xl bg-primary/10 hover:bg-primary/20 text-primary font-semibold text-xs h-10 transition-[background-color,transform] active:scale-95"
         // This button is decorative/secondary call to action, mainly relying on ImageUpload's click area
         // In a real scenario we might pass a ref to ImageUpload to trigger click from here
         onClick={() =>

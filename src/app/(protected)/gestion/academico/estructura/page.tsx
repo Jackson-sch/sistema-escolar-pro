@@ -18,26 +18,23 @@ export const metadata = {
 export default async function EstructuraPage(props: {
   searchParams: Promise<{ anio?: string }>;
 }) {
-  const searchParams = await props.searchParams;
-  const institucionRes = await getInstitucionAction();
+  // Fetch independent data in parallel (incl. searchParams)
+  const [searchParams, institucionRes, gradosRes, tutoresRes, sedesRes] =
+    await Promise.all([
+      props.searchParams,
+      getInstitucionAction(),
+      getGradosAction(), // Fetch all grades for now, we filter in client
+      getTutoresAction(),
+      getSedesAction(),
+    ]);
   const currentCycle = institucionRes.data?.cicloEscolarActual || new Date().getFullYear();
   const selectedYear = searchParams.anio ? parseInt(searchParams.anio) : currentCycle;
 
   const institucionId = institucionRes.data?.id || "";
 
-  // Fetch initial data
-  const [
-    nivelesRes, 
-    gradosRes, 
-    seccionesRes, 
-    tutoresRes,
-    sedesRes
-  ] = await Promise.all([
+  const [nivelesRes, seccionesRes] = await Promise.all([
     getNivelesAction(institucionId),
-    getGradosAction(), // Fetch all grades for now, we filter in client
     getSeccionesAction({ anioAcademico: selectedYear, institucionId }),
-    getTutoresAction(),
-    getSedesAction()
   ]);
 
   return (

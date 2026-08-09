@@ -90,7 +90,21 @@ export function AchievementsTab({ studentId }: AchievementsTabProps) {
   };
 
   useEffect(() => {
-    fetchAchievements();
+    let ignore = false;
+    getStudentAchievementsAction(studentId)
+      .then((res) => {
+        if (ignore) return;
+        if (res.data) setAchievements(res.data);
+      })
+      .catch(() => {
+        if (!ignore) toast.error("Error al cargar logros");
+      })
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+    return () => {
+      ignore = true;
+    };
   }, [studentId]);
 
   const onDelete = async () => {
@@ -151,8 +165,8 @@ export function AchievementsTab({ studentId }: AchievementsTabProps) {
               <div
                 key={logro.id}
                 className={cn(
-                  "group relative overflow-hidden rounded-2xl border p-5 transition-all duration-300",
-                  "bg-background/40 backdrop-blur-sm border-border/40 hover:border-amber-500/20 hover:shadow-xl hover:shadow-amber-500/5",
+                  "group relative overflow-hidden rounded-2xl border p-5 transition-[background-color,border-color,box-shadow,backdrop-filter] duration-300",
+                  "bg-card/80 border-border/40 hover:border-amber-500/20 hover:shadow-lg hover:shadow-amber-500/5",
                 )}
               >
                 {/* Glow efecto en hover */}
@@ -190,7 +204,7 @@ export function AchievementsTab({ studentId }: AchievementsTabProps) {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="size-8 rounded-full text-muted-foreground hover:text-red-500 md:opacity-0 md:group-hover:opacity-100 transition-all"
+                          className="size-8 rounded-full text-muted-foreground hover:text-red-500 md:opacity-0 md:group-hover:opacity-100 transition-[color]"
                           onClick={() => setDeletingId(logro.id)}
                         >
                           <IconTrash className="size-4" />
@@ -217,7 +231,7 @@ export function AchievementsTab({ studentId }: AchievementsTabProps) {
 
                     {logro.descripcion && (
                       <p className="mt-3 text-xs text-muted-foreground/80 leading-relaxed italic line-clamp-2">
-                        "{logro.descripcion}"
+                        &quot;{logro.descripcion}&quot;
                       </p>
                     )}
                   </div>

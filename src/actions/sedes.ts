@@ -1,6 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
+import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -10,7 +11,7 @@ const SedeSchema = z.object({
   nombre: z.string().min(1, "El nombre es obligatorio"),
   direccion: z.string().optional(),
   telefono: z.string().optional(),
-  email: z.string().email("Email inválido").optional().or(z.literal("")),
+  email: z.email("Email inválido").optional().or(z.literal("")),
   director: z.string().optional(),
   codigoIdentifier: z.string().optional(),
   logo: z.string().optional(),
@@ -21,7 +22,6 @@ const SedeSchema = z.object({
 
 export async function getSedesAction() {
   try {
-    // Asumimos que solo hay una institución por ahora, igual que en institucion.ts
     const institucion = await prisma.institucionEducativa.findFirst();
 
     if (!institucion) {
@@ -33,9 +33,10 @@ export async function getSedesAction() {
         institucionId: institucion.id,
         activo: true,
       },
-      orderBy: {
-        nombre: "asc",
-      },
+      orderBy: [
+        { esPrincipal: "desc" },
+        { nombre: "asc" },
+      ],
       include: {
         nivelesAcademicos: {
           select: {
@@ -58,6 +59,11 @@ export async function getSedesAction() {
 
 export async function createSedeAction(values: z.infer<typeof SedeSchema>) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     const validatedFields = SedeSchema.safeParse(values);
 
     if (!validatedFields.success) {
@@ -71,7 +77,6 @@ export async function createSedeAction(values: z.infer<typeof SedeSchema>) {
 
     const { nombre } = validatedFields.data;
 
-    // Verificar nombre duplicado
     const existingSede = await prisma.sede.findFirst({
       where: {
         institucionId: institucion.id,
@@ -107,6 +112,11 @@ export async function updateSedeAction(
   values: z.infer<typeof SedeSchema>,
 ) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     const validatedFields = SedeSchema.safeParse(values);
 
     if (!validatedFields.success) {
@@ -123,7 +133,6 @@ export async function updateSedeAction(
       },
     });
 
-    // Si es la sede principal, sincronizar datos con la institución
     if (existing?.esPrincipal && existing.institucionId) {
       await prisma.institucionEducativa.update({
         where: { id: existing.institucionId },
@@ -147,9 +156,59 @@ export async function updateSedeAction(
   }
 }
 
+export async function setSedePrincipalAction(sedeId: string) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
+    const targetSede = await prisma.sede.findUnique({ where: { id: sedeId } });
+    if (!targetSede) {
+      return { error: "Sede no encontrada" };
+    }
+
+    // Desmarcar todas las sedes como principal
+    await prisma.sede.updateMany({
+      where: { institucionId: targetSede.institucionId },
+      data: { esPrincipal: false },
+    });
+
+    // Marcar la sede seleccionada como principal
+    await prisma.sede.update({
+      where: { id: sedeId },
+      data: { esPrincipal: true, activo: true },
+    });
+
+    // Sincronizar datos principales con la institución
+    if (targetSede.institucionId) {
+      await prisma.institucionEducativa.update({
+        where: { id: targetSede.institucionId },
+        data: {
+          nombreInstitucion: targetSede.nombre,
+          direccion: targetSede.direccion || undefined,
+          telefono: targetSede.telefono || undefined,
+          email: targetSede.email || undefined,
+          logo: targetSede.logo || undefined,
+        },
+      });
+    }
+
+    revalidatePath(REVALIDATE_PATH);
+    return { success: `"${targetSede.nombre}" es ahora la Sede Principal` };
+  } catch (error: any) {
+    console.error("Error setting sede principal:", error);
+    return { error: "Error al marcar la sede como principal" };
+  }
+}
+
 export async function deleteSedeAction(id: string) {
   try {
-    // Verificar si tiene dependencias
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     const sede = await prisma.sede.findUnique({
       where: { id },
       include: {
@@ -170,21 +229,11 @@ export async function deleteSedeAction(id: string) {
       };
     }
 
-    // Soft delete o hard delete?
-    // Si no tiene dependencias, hard delete es mejor para limpiar.
-    // Pero si queremos historico, soft delete.
-    // El usuario "agregar sedes" -> "eliminar sedes".
-    // Vamos con hard delete si count es 0, si no error.
-
     if (sede?._count.nivelesAcademicos === 0) {
       await prisma.sede.delete({
         where: { id },
       });
     } else {
-      // Fallback to soft delete if logic allows, but here I blocked it.
-      // Let's allow soft delete if dependencies exist?
-      // user didn't ask for complicated logic.
-      // simpler: JUST UPDATE activo = false
       await prisma.sede.update({
         where: { id },
         data: { activo: false },

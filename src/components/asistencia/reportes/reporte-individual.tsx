@@ -30,7 +30,7 @@ export function ReporteIndividual({ data, estudianteNombre, isPending }: Reporte
       <div className="min-h-[400px] flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-dashed border-border/40 bg-muted/10">
         <div className="relative mb-6">
           <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full" />
-          <div className="relative bg-card p-6 rounded-2xl border border-border shadow-2xl">
+          <div className="relative bg-card p-6 rounded-2xl border border-border shadow-lg">
             <IconCalendar className="w-14 h-14 text-primary/60" />
           </div>
         </div>
@@ -50,8 +50,8 @@ export function ReporteIndividual({ data, estudianteNombre, isPending }: Reporte
   }), { P: 0, F: 0, T: 0, J: 0 })
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="flex flex-col md:flex-row gap-8 items-start justify-between bg-card/30 border border-border/40 rounded-2xl p-8 backdrop-blur-sm shadow-xs">
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 animation-duration-">
+      <div className="flex flex-col md:flex-row gap-8 items-start justify-between bg-card/80 border border-border/40 rounded-2xl p-8 shadow-xs">
         <div className="space-y-2">
           <span className="text-[10px] font-semibold text-primary/60">Análisis Individual</span>
           <h3 className="text-3xl font-bold tracking-tighter capitalize leading-tight max-w-[400px]">
@@ -67,7 +67,7 @@ export function ReporteIndividual({ data, estudianteNombre, isPending }: Reporte
             { label: 'Tardanzas', value: totales.T, color: 'text-amber-500', bg: 'bg-amber-500/10' },
             { label: 'Justificadas', value: totales.J, color: 'text-sky-500', bg: 'bg-sky-500/10' },
           ].map((stat) => (
-            <div key={stat.label} className="text-center min-w-[100px] py-4 px-2 rounded-xl transition-all hover:bg-muted/30">
+            <div key={stat.label} className="text-center min-w-[100px] py-4 px-2 rounded-xl transition-colors hover:bg-muted/30">
               <span className={cn("block text-2xl font-bold tracking-tighter", stat.color)}>{stat.value}</span>
               <span className="text-[10px] font-semibold text-muted-foreground/80">{stat.label}</span>
             </div>
@@ -75,7 +75,7 @@ export function ReporteIndividual({ data, estudianteNombre, isPending }: Reporte
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border/40 bg-card/30 backdrop-blur-sm overflow-hidden shadow-sm">
+      <div className="rounded-2xl border border-border/40 bg-card/80 overflow-hidden shadow-sm">
         <div className="px-6 py-5 border-b border-border/40 flex items-center justify-between bg-muted/20">
           <div className="space-y-1">
             <h3 className="text-base font-bold tracking-tight">Evolución Cronológica</h3>
@@ -113,7 +113,7 @@ export function ReporteIndividual({ data, estudianteNombre, isPending }: Reporte
                         <div className="flex-1 max-w-[100px] h-1.5 bg-muted rounded-full overflow-hidden">
                           <div
                             className={cn(
-                              "h-full transition-all duration-1000",
+                              "h-full transition-[background-color,width] duration-1000",
                               tasa > 90 ? "bg-emerald-500" : tasa > 75 ? "bg-amber-500" : "bg-red-500"
                             )}
                             style={{ width: `${tasa}%` }}

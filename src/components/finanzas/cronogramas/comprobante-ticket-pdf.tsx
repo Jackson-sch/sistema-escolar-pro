@@ -81,6 +81,7 @@ export const ComprobanteTicketPDF = ({
 }: ComprobanteTicketPDFProps) => {
   const studentName = toTitleCase(`${estudiante.apellidoPaterno} ${estudiante.name}`);
   const institucionNombre = toTitleCase(institucion.nombre);
+  const fechaGeneracion = new Date().toLocaleString("es-PE");
 
   return (
     <Document>
@@ -164,7 +165,7 @@ export const ComprobanteTicketPDF = ({
         <Stack direction="vertical" align="center" gap="md" style={{ marginTop: 5 }}>
           <Text style={{ fontSize: 7, color: '#94a3b8', fontStyle: 'italic' }}>Comprobante Electrónico Oficial</Text>
           <Text style={{ fontSize: 7, color: '#94a3b8' }}>
-            {new Date().toLocaleString("es-PE")}
+            {fechaGeneracion}
           </Text>
           <Text style={{ fontSize: 8, fontWeight: 'bold', marginTop: 8, color: '#0f172a' }}>
             *** GRACIAS POR SU PUNTUALIDAD ***

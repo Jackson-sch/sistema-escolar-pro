@@ -21,10 +21,10 @@ export function AddProspectoButton({
     <>
       <Button
         variant="default"
-        className="rounded-full font-bold shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
+        className="rounded-xl h-10 px-4 font-semibold text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 gap-2 cursor-pointer"
         onClick={() => setOpen(true)}
       >
-        <IconUserPlus className="mr-2 h-4 w-4" />
+        <IconUserPlus className="size-4" />
         Registrar Interesado
       </Button>
 

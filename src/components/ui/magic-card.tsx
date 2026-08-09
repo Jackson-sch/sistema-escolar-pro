@@ -1,7 +1,11 @@
 "use client";
 
-import React, { useCallback, useEffect } from "react";
-import { motion, useMotionTemplate, useMotionValue } from "motion/react";
+import React, {
+  useCallback,
+  useEffect,
+  useSyncExternalStore,
+} from "react";
+import { LazyMotion, domAnimation, m, useMotionTemplate, useMotionValue } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 
@@ -26,11 +30,12 @@ export function MagicCard({
   gradientFrom = "#9E7AFF",
   gradientTo = "#FE8BBB",
 }: MagicCardProps) {
-  const [mounted, setMounted] = React.useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  // true solo después de la hidratación (SSR-safe) sin efecto de montaje.
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
 
   const mouseX = useMotionValue(-gradientSize);
   const mouseY = useMotionValue(-gradientSize);
@@ -98,22 +103,22 @@ export function MagicCard({
       onPointerEnter={reset}
     >
       {mounted && (
-        <>
-          <motion.div
-            className="bg-border pointer-events-none absolute inset-0 rounded-[inherit] duration-300 group-hover:opacity-100"
+        <LazyMotion features={domAnimation}>
+          <m.div
+            className="bg-border pointer-events-none absolute inset-0 rounded-[inherit] transition-opacity duration-300 group-hover:opacity-100"
             style={{
               background,
             }}
           />
           <div className="bg-background absolute inset-px rounded-[inherit]" />
-          <motion.div
+          <m.div
             className="pointer-events-none absolute inset-px rounded-[inherit] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
             style={{
               background: gradientBackground,
               opacity: gradientOpacity,
             }}
           />
-        </>
+        </LazyMotion>
       )}
       {!mounted && (
         <>

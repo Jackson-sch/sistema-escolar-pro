@@ -11,6 +11,8 @@ import { getLayoutUserAction, getPendingComprobantesCountAction } from "@/action
 import { CommandPalette } from "@/components/common/command-palette";
 import { SiteFooter } from "@/components/layout/site-footer";
 
+import { OnboardingTourDialog } from "@/components/common/onboarding-tour-dialog";
+
 export const dynamic = "force-dynamic";
 
 export default async function ProtectedLayout({
@@ -60,8 +62,8 @@ export default async function ProtectedLayout({
   const institucionData = institucionRes.data;
 
   const contextData = {
-    estadisticasGenerales: (stats as any).success,
-    resumenFinanciero: (financeStats as any).success,
+    estadisticasGenerales: stats.success,
+    resumenFinanciero: financeStats.success,
     timestamp: new Date().toISOString(),
   };
 
@@ -69,6 +71,7 @@ export default async function ProtectedLayout({
     <div className="[--header-height:calc(var(--spacing)*14)] min-h-screen flex flex-col">
       <SidebarProvider>
         <CommandPalette />
+        <OnboardingTourDialog userRole={user?.role} />
         <AppSidebar
           userRole={user?.role}
           userName={user?.name || session.user.name || undefined}

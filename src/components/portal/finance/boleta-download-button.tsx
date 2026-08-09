@@ -1,9 +1,15 @@
 "use client";
 
 import React from "react";
-import { PDFDownloadLink } from "@react-pdf/renderer";
+import dynamic from "next/dynamic";
 import { ComprobantePDF } from "@/components/finanzas/cronogramas/comprobante-pdf";
-import { IconDownload, IconLoader2 } from "@tabler/icons-react";
+import { IconDownload, IconLoader2, IconFileDownload } from "@tabler/icons-react";
+import { Button } from "@/components/ui/button";
+
+const PDFDownloadLink = dynamic(
+  () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
+  { ssr: false }
+);
 
 interface BoletaDownloadButtonProps {
   pago: {
@@ -44,11 +50,12 @@ export function BoletaDownloadButton({
     ruc: "-",
   },
 }: BoletaDownloadButtonProps) {
-  const [isMounted, setIsMounted] = React.useState(false);
-
-  React.useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  // true solo después de la hidratación (SSR-safe) sin efecto de montaje.
+  const isMounted = React.useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
 
   const pagoData = {
     numeroBoleta: pago.numeroBoleta || `B-${pago.id.slice(-6).toUpperCase()}`,
@@ -73,10 +80,14 @@ export function BoletaDownloadButton({
 
   if (!isMounted) {
     return (
-      <button className="inline-flex items-center gap-2 px-4 py-2 bg-muted rounded-xl text-sm font-bold opacity-50 cursor-not-allowed">
-        <IconLoader2 className="size-4 animate-spin" />
-        Cargando...
-      </button>
+      <Button
+        disabled
+        size="sm"
+        className="rounded-xl h-8 px-3 text-xs font-semibold bg-muted text-muted-foreground opacity-60 gap-1.5"
+      >
+        <IconLoader2 className="size-3.5 animate-spin" />
+        <span>Cargando...</span>
+      </Button>
     );
   }
 
@@ -90,21 +101,27 @@ export function BoletaDownloadButton({
         />
       }
       fileName={fileName}
-      className="inline-flex items-center gap-2 px-4 py-2 bg-muted rounded-xl text-sm font-bold hover:bg-primary/50 transition-colors"
+      className="inline-block"
     >
-      {({ loading }) =>
-        loading ? (
-          <>
-            <IconLoader2 className="size-4 animate-spin" />
-            
-          </>
-        ) : (
-          <>
-            <IconDownload className="size-4" />
-            
-          </>
-        )
-      }
+      {({ loading }) => (
+        <Button
+          size="sm"
+          disabled={loading}
+          className="rounded-xl h-8 px-3 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs gap-1.5 cursor-pointer"
+        >
+          {loading ? (
+            <>
+              <IconLoader2 className="size-3.5 animate-spin" />
+              <span>Generando...</span>
+            </>
+          ) : (
+            <>
+              <IconFileDownload className="size-3.5" />
+              <span>Descargar PDF</span>
+            </>
+          )}
+        </Button>
+      )}
     </PDFDownloadLink>
   );
 }

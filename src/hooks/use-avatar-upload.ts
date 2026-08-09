@@ -51,6 +51,7 @@ export function useAvatarUpload({
           body: formData,
         });
 
+        if (!response.ok) throw new Error(`Error de subida (${response.status})`);
         const data = await response.json();
         if (data.error) throw new Error(data.error);
 

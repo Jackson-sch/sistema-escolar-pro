@@ -80,7 +80,10 @@ export function ChangePasswordDialog({
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 mt-2">
           <div className="space-y-2">
-            <Label htmlFor="newPassword" className="text-xs font-bold uppercase tracking-wider">
+            <Label
+              htmlFor="newPassword"
+              className="text-xs font-bold uppercase tracking-wider"
+            >
               Nueva Contraseña
             </Label>
             <div className="relative">
@@ -115,7 +118,10 @@ export function ChangePasswordDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword" className="text-xs font-bold uppercase tracking-wider">
+            <Label
+              htmlFor="confirmPassword"
+              className="text-xs font-bold uppercase tracking-wider"
+            >
               Confirmar Contraseña
             </Label>
             <div className="relative">

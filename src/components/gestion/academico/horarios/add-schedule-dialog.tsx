@@ -37,20 +37,22 @@ import { BLOQUES_HORARIO, DIAS } from "@/lib/constants";
 const formSchema = z.object({
   cursoId: z.string().min(1, "Debe seleccionar un curso"),
   diaSemana: z.string().min(1, "Debe seleccionar un día"),
-  duracion: z.enum(["SIMPLE", "DOBLE"]).default("SIMPLE"),
+  duracion: z.enum(["SIMPLE", "DOBLE"]),
   horaInicio: z.string().min(1, "Hora de inicio requerida"),
   horaFin: z.string().min(1, "Hora de fin requerida"),
   aula: z.string().optional(),
 });
 
+type FormValues = z.infer<typeof formSchema>;
+
 interface Course {
   id: string;
   nombre: string;
-  horasSemanales?: number;
+  horasSemanales?: number | null;
   profesor?: {
     name: string;
     apellidoPaterno: string;
-  };
+  } | null;
 }
 
 interface Schedule {
@@ -59,7 +61,7 @@ interface Schedule {
   diaSemana: number;
   horaInicio: string;
   horaFin: string;
-  aula?: string;
+  aula?: string | null;
 }
 
 interface AddScheduleDialogProps {
@@ -81,7 +83,7 @@ export function AddScheduleDialog({
 }: AddScheduleDialogProps) {
   const [loading, setLoading] = useState(false);
 
-  const form = useForm<any>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       cursoId: "",
@@ -117,7 +119,7 @@ export function AddScheduleDialog({
   const limiteAlcanzado =
     totalHorasMalla > 0 && horasRegistradas + nuevasHoras > totalHorasMalla;
 
-  const onSubmit = async (values: any) => {
+  const onSubmit = async (values: FormValues) => {
     if (limiteAlcanzado) {
       toast.warning("Esta asignación superará la carga académica sugerida");
     }
@@ -166,7 +168,7 @@ export function AddScheduleDialog({
                     <Badge
                       variant={limiteAlcanzado ? "destructive" : "outline"}
                       className={cn(
-                        "text-[9px] h-5 transition-all",
+                        "text-[9px] h-5 transition-[color,background-color,border-color,height]",
                         !limiteAlcanzado &&
                           "bg-blue-500/10 text-blue-400 border-blue-500/20",
                       )}
@@ -288,7 +290,7 @@ export function AddScheduleDialog({
                     onValueChange={(val) => {
                       field.onChange(val);
                       const bloqueActual = BLOQUES_CLASE_SOLO.find(
-                        (b: any) => b.inicio === val,
+                        (b) => b.inicio === val,
                       );
                       if (bloqueActual) {
                         if (selectedDuracion === "SIMPLE") {
@@ -297,7 +299,7 @@ export function AddScheduleDialog({
                           // Bloque Doble: Siguiente bloque de clase
                           const indexSiguiente =
                             BLOQUES_CLASE_SOLO.findIndex(
-                              (b: any) => b.inicio === val,
+                              (b) => b.inicio === val,
                             ) + 1;
                           if (indexSiguiente < BLOQUES_CLASE_SOLO.length) {
                             form.setValue(
@@ -321,7 +323,7 @@ export function AddScheduleDialog({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent className="bg-[#09090b] border-white/10">
-                      {BLOQUES_CLASE_SOLO.map((b: any) => (
+                      {BLOQUES_CLASE_SOLO.map((b) => (
                         <SelectItem key={b.inicio} value={b.inicio}>
                           {b.inicio}
                         </SelectItem>
@@ -366,7 +368,7 @@ export function AddScheduleDialog({
                   <Input
                     placeholder="Ej. Aula 102"
                     {...field}
-                    className="w-full rounded-full transition-all focus:bg-white/10"
+                    className="w-full rounded-full transition-colors focus:bg-white/10"
                   />
                 </FormControl>
                 <FormMessage />
@@ -378,7 +380,7 @@ export function AddScheduleDialog({
             <Button
               type="submit"
               className={cn(
-                "w-full rounded-full transition-all duration-300 shadow-lg hover:scale-105",
+                "w-full rounded-full transition-transform duration-300 shadow-lg hover:scale-105",
                 limiteAlcanzado
                   ? "bg-amber-600 hover:bg-amber-700 shadow-amber-600/20"
                   : "bg-blue-600 hover:bg-blue-700 shadow-blue-600/20",

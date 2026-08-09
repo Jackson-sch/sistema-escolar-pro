@@ -9,9 +9,17 @@ import {
   IconCopy, // <-- Nuevo import
   IconCheck, // <-- Nuevo import
 } from "@tabler/icons-react";
+import dynamic from "next/dynamic";
 import { toast } from "sonner";
-import { PDFDownloadLink } from "@react-pdf/renderer";
-import { ConstanciaMatriculaPDF } from "@/components/gestion/matriculas/components/constancia-pdf";
+
+const PDFDownloadLink = dynamic(
+  () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
+  { ssr: false }
+);
+const ConstanciaMatriculaPDF = dynamic<any>(
+  () => import("@/components/gestion/matriculas/components/constancia-pdf").then((mod) => mod.ConstanciaMatriculaPDF),
+  { ssr: false }
+);
 import { getEnrollmentDataAction } from "@/actions/reports";
 import { registerDocumentAction } from "@/actions/documents";
 import { generateVerificationCode } from "@/lib/pdf-utils";

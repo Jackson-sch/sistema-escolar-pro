@@ -7,8 +7,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-plus-jakarta-sans), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), monospace;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -97,9 +97,6 @@
       opacity: 0.4;
     }
   }
-  --color-liquid-gradient-start: oklch(0.97 0.014 254.604 / 40%);
-  --color-liquid-gradient-end: oklch(0.97 0.014 254.604 / 10%);
-  --animate-liquid-spin: spin 4s linear infinite;
 }
 
 :root {
@@ -225,18 +222,6 @@
 }
 
 @layer utilities {
-  .glass {
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  .light .glass {
-    background: rgba(255, 255, 255, 0.7);
-    border: 1px solid rgba(0, 0, 0, 0.05);
-  }
-
   .custom-scrollbar {
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
@@ -277,77 +262,6 @@
   /* Text Micro 11px */
   .text-micro {
     font-size: 11px;
-  }
-
-  /* Liquid Glass Utility v2.5 - OKLCH & Tailwind v4 Native */
-  .liquid-glass {
-    position: relative;
-    background: linear-gradient(
-      135deg,
-      var(--color-liquid-gradient-start) 0%,
-      var(--color-liquid-gradient-end) 100%
-    );
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid oklch(1 0 0 / 40%);
-    box-shadow: 0 8px 32px 0 oklch(0 0 0 / 15%);
-    overflow: hidden;
-    transition: all 0.5s ease;
-
-    &::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 40%;
-      background: linear-gradient(
-        180deg,
-        oklch(1 0 0 / 30%) 0%,
-        oklch(1 0 0 / 0%) 100%
-      );
-      pointer-events: none;
-    }
-
-    &::after {
-      content: "";
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(
-        to bottom right,
-        transparent 35%,
-        oklch(1 0 0 / 5%) 50%,
-        transparent 65%
-      );
-      transform: rotate(30deg) translateY(-100%);
-      transition: transform 2.0s cubic-bezier(0.25, 1, 0.5, 1);
-      pointer-events: none;
-    }
-
-    &:hover::after {
-      transform: rotate(30deg) translateY(100%);
-    }
-  }
-
-  .dark .liquid-glass {
-    background: linear-gradient(
-      135deg,
-      oklch(0.141 0.005 285.823 / 60%) 0%,
-      oklch(0.141 0.005 285.823 / 20%) 100%
-    );
-    border: 1px solid oklch(1 0 0 / 10%);
-    box-shadow: 0 8px 32px 0 oklch(0 0 0 / 50%);
-
-    &::before {
-      background: linear-gradient(
-        180deg,
-        oklch(1 0 0 / 8%) 0%,
-        oklch(1 0 0 / 0%) 100%
-      );
-    }
   }
 
   /* Hide scrollbar for Chrome, Safari and Opera */
@@ -394,4 +308,55 @@
 }
 .animate-spin-slow-reverse {
   animation: spin-slow-reverse 25s linear infinite;
+}
+
+@media print {
+  /* Ocultar absolutamente todo en el cuerpo por defecto */
+  body * {
+    visibility: hidden !important;
+  }
+
+  /* Mostrar únicamente el contenedor del horario y sus descendientes */
+  #printable-schedule-area,
+  #printable-schedule-area * {
+    visibility: visible !important;
+  }
+
+  /* Posicionar el área de horario limpia en la parte superior e izquierda de la página impresa */
+  #printable-schedule-area {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 1rem !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  /* Ocultar elementos de acción o interactivos */
+  .no-print,
+  .print\:hidden,
+  button {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  .print\:flex {
+    display: flex !important;
+  }
+}
+
+/* Accessibility: reduce motion for users who prefer it (WCAG 2.3.3) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

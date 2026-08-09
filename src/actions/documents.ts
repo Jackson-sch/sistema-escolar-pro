@@ -2,6 +2,7 @@
 import { serialize } from "@/lib/dto";
 
 import prisma from "@/lib/prisma"
+import { auth } from "@/auth";
 import { revalidatePath } from "next/cache"
 
 /**
@@ -51,6 +52,11 @@ export async function registerDocumentAction(data: {
   datosAdicionales?: any
 }) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     let tipo = await prisma.tipoDocumento.findUnique({
       where: { codigo: data.tipoDocumentoCodigo }
     })

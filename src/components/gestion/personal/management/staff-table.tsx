@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useQueryState, parseAsString, parseAsInteger } from "nuqs";
-import { ColumnDef } from "@tanstack/react-table";
+import { ColumnDef, type Table } from "@tanstack/react-table";
 import { DataTable } from "@/components/ui/data-table";
 import {
   Select,
@@ -12,25 +12,34 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+interface StaffTableMeta {
+  instituciones?: unknown[];
+  estados?: Array<{ id: string; nombre: string }>;
+  cargos?: unknown[];
+}
+
 interface StaffTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  meta?: any;
+  meta?: StaffTableMeta;
 }
 
-interface StaffFiltersProps {
-  table: any;
+interface StaffFiltersProps<TData> {
+  table: Table<TData>;
   estadoFilter: string;
   rolFilter: string;
-  meta: any;
+  meta: StaffTableMeta & {
+    setEstadoFilter: (value: string) => void;
+    setRolFilter: (value: string) => void;
+  };
 }
 
-function StaffFilters({
+function StaffFilters<TData>({
   table,
   estadoFilter,
   rolFilter,
   meta,
-}: StaffFiltersProps) {
+}: StaffFiltersProps<TData>) {
   useEffect(() => {
     table
       .getColumn("estado")
@@ -51,7 +60,7 @@ function StaffFilters({
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="ALL">Cualquier Estado</SelectItem>
-          {meta?.estados?.map((e: any) => (
+          {meta?.estados?.map((e) => (
             <SelectItem key={e.id} value={e.nombre}>
               {e.nombre}
             </SelectItem>
@@ -130,7 +139,7 @@ export function StaffTable<TData, TValue>({
       onPageSizeChange={setLimit}
       showColumnVisibility={false}
     >
-      {(table: any) => (
+      {(table) => (
         <StaffFilters
           table={table}
           estadoFilter={estadoFilter}

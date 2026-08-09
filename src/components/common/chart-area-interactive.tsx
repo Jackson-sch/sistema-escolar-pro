@@ -38,7 +38,9 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function ChartAreaInteractive({ data = [] }: ChartAreaInteractiveProps) {
+const EMPTY_CHART_DATA: { date: string; revenue: number }[] = [];
+
+export function ChartAreaInteractive({ data = EMPTY_CHART_DATA }: ChartAreaInteractiveProps) {
   const isMobile = useIsMobile();
   const [timeRange, setTimeRange] = React.useState("90d");
 

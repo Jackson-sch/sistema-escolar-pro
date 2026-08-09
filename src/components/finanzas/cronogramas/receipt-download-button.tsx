@@ -1,9 +1,14 @@
+import dynamic from "next/dynamic";
 import { IconFileDownload } from "@tabler/icons-react";
-import { PDFDownloadLink } from "@react-pdf/renderer";
 import { ComprobantePDF } from "@/components/finanzas/cronogramas/comprobante-pdf";
 import { ComprobanteTicketPDF } from "@/components/finanzas/cronogramas/comprobante-ticket-pdf";
 import { Button } from "@/components/ui/button";
 import type { FormatoComprobante } from "@/lib/comprobante-constants";
+
+const PDFDownloadLink = dynamic(
+  () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
+  { ssr: false }
+);
 
 interface ReceiptDownloadButtonProps {
   paymentData: {
@@ -59,6 +64,7 @@ export const ReceiptDownloadButton = ({
       {({ loading }) => (
         <Button
           variant="outline"
+          size="sm"
           className="w-full rounded-full gap-2 font-medium"
           disabled={loading}
         >

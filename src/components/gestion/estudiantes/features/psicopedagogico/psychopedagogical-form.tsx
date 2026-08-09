@@ -2,7 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTransition, useEffect, useState } from "react";
+import { useTransition, useEffect, useState, useRef } from "react";
 import {
   IconMessageReport,
   IconCalendar,
@@ -53,8 +53,8 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { FormModal } from "@/components/modals/form-modal";
 import { CategoryForm } from "./category-form";
-
 import { useFormModal } from "@/components/modals/form-modal-context";
+import { FormKeyboardHelpBar } from "@/components/common/form-keyboard-help-bar";
 
 const psychSchema = z.object({
   estudianteId: z.string().min(1, "Estudiante es requerido"),
@@ -103,7 +103,14 @@ export function PsychopedagogicalForm({
   };
 
   useEffect(() => {
-    loadCategories();
+    let ignore = false;
+    getIncidentCategoriesAction({}).then((res) => {
+      if (ignore) return;
+      if (res.success) setCategories(res.success);
+    });
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   const onSubmit = (values: PsychValues) => {
@@ -118,10 +125,16 @@ export function PsychopedagogicalForm({
     });
   };
 
+  const onSubmitRef = useRef(onSubmit);
+
   useEffect(() => {
-    setOnSubmit(() => form.handleSubmit(onSubmit)());
+    onSubmitRef.current = onSubmit;
+  });
+
+  useEffect(() => {
+    setOnSubmit(() => form.handleSubmit(onSubmitRef.current)());
     return () => setOnSubmit(undefined);
-  }, [form, onSubmit, setOnSubmit]);
+  }, [form, setOnSubmit]);
 
   const { isDirty } = form.formState;
 
@@ -133,23 +146,23 @@ export function PsychopedagogicalForm({
   return (
     <>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-1 py-1">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
             <FormField
               control={form.control}
               name="fecha"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel className="text-[11px] font-bold tracking-wider text-muted-foreground/70 ml-1">
-                    Fecha del Evento
+                  <FormLabel className="text-xs font-medium text-foreground/80">
+                    Fecha del Registro
                   </FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
-                          variant={"outline"}
+                          variant="outline"
                           className={cn(
-                            "w-full pl-3 text-left font-normal bg-muted/5 border-border/40 rounded-xl",
+                            "w-full pl-3 text-left font-medium bg-background border-border/40 rounded-xl text-xs h-9 justify-between",
                             !field.value && "text-muted-foreground",
                           )}
                         >
@@ -158,12 +171,12 @@ export function PsychopedagogicalForm({
                           ) : (
                             <span>Seleccionar fecha</span>
                           )}
-                          <IconCalendar className="ml-auto h-4 w-4 opacity-50" />
+                          <IconCalendar className="size-4 opacity-50 ml-1" />
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
                     <PopoverContent
-                      className="w-auto p-0 rounded-xl border-border/40"
+                      className="w-auto p-0 rounded-2xl border-border/40"
                       align="start"
                     >
                       <Calendar
@@ -188,36 +201,36 @@ export function PsychopedagogicalForm({
               name="categoriaId"
               render={({ field }) => (
                 <FormItem>
-                  <div className="flex items-center justify-between ml-1">
-                    <FormLabel className="text-[11px] font-bold tracking-wider text-muted-foreground/70">
-                      Tipo de Registro
+                  <div className="flex items-center justify-between">
+                    <FormLabel className="text-xs font-medium text-foreground/80">
+                      Tipo / Categoría
                     </FormLabel>
                     <Button
                       type="button"
                       variant="ghost"
-                      size="icon"
-                      className="size-5 rounded-full hover:bg-primary/10 text-primary hover:scale-105"
+                      size="sm"
+                      className="h-5 px-1.5 text-[11px] text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10 font-semibold rounded-md gap-1"
                       onClick={() => setShowCategoryModal(true)}
                     >
-                      <IconPlus className="size-3" />
+                      <IconPlus className="size-3" /> Nueva
                     </Button>
                   </div>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger className="w-full bg-muted/5 border-border/40 rounded-xl">
+                      <SelectTrigger className="w-full bg-background border-border/40 rounded-xl text-xs h-9 font-medium">
                         <SelectValue placeholder="Seleccionar categoría" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent className="rounded-xl border-border/40">
                       {categories.length > 0 ? (
                         categories.map((cat) => (
-                          <SelectItem key={cat.id} value={cat.id}>
+                          <SelectItem key={cat.id} value={cat.id} className="text-xs font-medium">
                             {cat.nombre}
                           </SelectItem>
                         ))
                       ) : (
-                        <SelectItem value="none" disabled>
-                          No hay categorías
+                        <SelectItem value="none" disabled className="text-xs">
+                          Sin categorías registradas
                         </SelectItem>
                       )}
                     </SelectContent>
@@ -233,16 +246,16 @@ export function PsychopedagogicalForm({
             name="motivo"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-[11px] font-bold tracking-wider text-muted-foreground/70 ml-1">
-                  Motivo / Título
+                <FormLabel className="text-xs font-medium text-foreground/80">
+                  Motivo / Título de la Incidencia
                 </FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <IconMessageReport className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <IconMessageReport className="absolute left-3 top-2.5 size-4 text-muted-foreground/60" />
                     <Input
                       {...field}
-                      placeholder="Ej. Seguimiento conductual"
-                      className="pl-10 bg-muted/5 border-border/40 rounded-xl"
+                      placeholder="Ej. Seguimiento conductual en aula"
+                      className="pl-9 bg-background border-border/40 rounded-xl text-xs h-9"
                     />
                   </div>
                 </FormControl>
@@ -256,16 +269,16 @@ export function PsychopedagogicalForm({
             name="descripcion"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-[11px] font-bold tracking-wider text-muted-foreground/70 ml-1">
+                <FormLabel className="text-xs font-medium text-foreground/80">
                   Descripción del Incidente / Sesión
                 </FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <IconNotes className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <IconNotes className="absolute left-3 top-3 size-4 text-muted-foreground/60" />
                     <Textarea
                       {...field}
-                      placeholder="Detalle lo ocurrido o lo conversado en la sesión..."
-                      className="pl-10 min-h-32 bg-muted/5 border-border/40 rounded-xl resize-none"
+                      placeholder="Describa detalladamente los hechos u observaciones..."
+                      className="pl-9 min-h-[90px] bg-background border-border/40 rounded-xl text-xs p-3 resize-none"
                     />
                   </div>
                 </FormControl>
@@ -279,22 +292,19 @@ export function PsychopedagogicalForm({
             name="recomendaciones"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-[11px] font-bold tracking-wider text-muted-foreground/70 ml-1">
+                <FormLabel className="text-xs font-medium text-foreground/80">
                   Recomendaciones / Acuerdos
                 </FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <IconStethoscope className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <IconStethoscope className="absolute left-3 top-3 size-4 text-muted-foreground/60" />
                     <Textarea
                       {...field}
-                      placeholder="Acciones a seguir o acuerdos rectificativos..."
-                      className="pl-10 min-h-24 bg-muted/5 border-border/40 rounded-xl resize-none"
+                      placeholder="Pautas o acuerdos de compromiso asumidos..."
+                      className="pl-9 min-h-[70px] bg-background border-border/40 rounded-xl text-xs p-3 resize-none"
                     />
                   </div>
                 </FormControl>
-                <FormDescription className="text-[10px] ml-1">
-                  Opcional. Ayuda al seguimiento preventivo.
-                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -304,40 +314,64 @@ export function PsychopedagogicalForm({
             control={form.control}
             name="visibleParaPadres"
             render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-xl border border-border/40 p-4 bg-muted/5 shadow-sm">
-                <div className="space-y-0.5">
-                  <FormLabel className="text-sm font-semibold flex items-center gap-2">
-                    <IconEye className="size-4 text-primary" />
-                    Visible para los padres
-                  </FormLabel>
-                  <FormDescription className="text-xs">
-                    Si se activa, el padre/tutor podrá ver este registro en su
-                    portal.
-                  </FormDescription>
-                </div>
-                <FormControl>
+              <FormItem>
+                <label
+                  className={cn(
+                    "flex cursor-pointer items-center justify-between rounded-xl border p-3 transition-[background-color,border-color]",
+                    field.value
+                      ? "bg-indigo-500/10 border-indigo-500/30"
+                      : "bg-background border-border/40 hover:bg-muted/40",
+                  )}
+                >
+                  <div className="space-y-0.5">
+                    <p
+                      className={cn(
+                        "text-xs font-semibold flex items-center gap-1.5",
+                        field.value
+                          ? "text-indigo-600 dark:text-indigo-400"
+                          : "text-foreground",
+                      )}
+                    >
+                      <IconEye className="size-4" />
+                      Visible para los Apoderados
+                    </p>
+                    <p className="text-[11px] text-muted-foreground">
+                      Permite que los padres consulten esta observación en su portal.
+                    </p>
+                  </div>
                   <Switch
                     checked={field.value}
                     onCheckedChange={field.onChange}
+                    className="data-[state=checked]:bg-indigo-600"
                   />
-                </FormControl>
+                </label>
               </FormItem>
             )}
           />
 
-          <Button
-            disabled={isPending}
-            type="submit"
-            className="w-full rounded-full hover:scale-105"
-          >
-            {isPending ? (
-              <IconLoader2 className="animate-spin" />
-            ) : (
-              <>
-                <IconDeviceFloppy className="mr-2" /> Guardar Registro
-              </>
-            )}
-          </Button>
+          {/* Guía de Atajos de Teclado */}
+          <FormKeyboardHelpBar />
+
+          {/* Botón de Enviar */}
+          <div className="pt-2">
+            <Button
+              disabled={isPending}
+              type="submit"
+              className="w-full rounded-xl h-10 font-semibold text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 gap-2"
+            >
+              {isPending ? (
+                <>
+                  <IconLoader2 className="size-4 animate-spin" />
+                  <span>Guardando...</span>
+                </>
+              ) : (
+                <>
+                  <IconDeviceFloppy className="size-4" />
+                  <span>{initialData ? "Guardar Cambios" : "Registrar Incidencia / Informe"}</span>
+                </>
+              )}
+            </Button>
+          </div>
         </form>
       </Form>
 

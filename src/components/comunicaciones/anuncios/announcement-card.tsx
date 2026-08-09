@@ -7,6 +7,7 @@ import {
   IconClock,
   IconEye,
   IconPlus,
+  IconSpeakerphone,
 } from "@tabler/icons-react";
 import { EditAnnouncementButton } from "./edit-announcement-button";
 import { ViewAnnouncementDialog } from "./view-announcement-dialog";
@@ -15,7 +16,6 @@ import { formatDate } from "@/lib/formats";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { MagicCard } from "@/components/ui/magic-card";
-import { useTheme } from "next-themes";
 
 interface AnnouncementCardProps {
   anuncio?: any;
@@ -29,23 +29,22 @@ export function AnnouncementCard({
   onCreateClick,
 }: AnnouncementCardProps) {
   const [showDetail, setShowDetail] = useState(false);
-  const { theme } = useTheme();
 
   if (isCreateCard) {
     return (
-      <article className="group relative bg-muted/10 dark:bg-card/40 rounded-2xl overflow-hidden border-2 border-dashed border-slate-200 dark:border-white/10 flex flex-col items-center justify-center p-8 text-center min-h-[400px]">
-        <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-muted flex items-center justify-center mb-4 transition-all group-hover:scale-110">
-          <IconPlus className="size-8 text-slate-400" />
+      <article className="group relative bg-background/40 hover:bg-background/80 rounded-2xl overflow-hidden border-2 border-dashed border-border/50 flex flex-col items-center justify-center p-8 text-center min-h-[380px] transition-colors">
+        <div className="size-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-4 transition-transform group-hover:scale-110 text-indigo-500">
+          <IconPlus className="size-7" />
         </div>
-        <h3 className="text-lg font-bold font-display text-muted-foreground dark:text-muted-foreground">
+        <h3 className="text-base font-bold text-foreground">
           Crear Nuevo Anuncio
         </h3>
-        <p className="text-muted-foreground dark:text-muted-foreground text-sm mt-2 max-w-[200px]">
+        <p className="text-muted-foreground text-xs mt-1.5 max-w-[200px]">
           Comparte noticias importantes con tu comunidad hoy.
         </p>
         <Button
           onClick={onCreateClick}
-          className="mt-6 px-6 py-2 rounded-full text-sm"
+          className="mt-5 px-5 h-9 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20"
         >
           Empezar
         </Button>
@@ -54,7 +53,6 @@ export function AnnouncementCard({
   }
 
   const isImportant = anuncio.urgente || anuncio.importante;
-  // Precise check for image existence
   const hasImage =
     typeof anuncio.imagen === "string" &&
     anuncio.imagen.trim().length > 0 &&
@@ -62,9 +60,14 @@ export function AnnouncementCard({
 
   return (
     <>
-      <article onClick={() => setShowDetail(true)}>
-        <MagicCard className="group relative bg-card rounded-2xl overflow-hidden border border-border/50 shadow-sm transition-all hover:-translate-y-1 cursor-pointer flex flex-col h-full">
-          <div className="relative h-56 overflow-hidden bg-zinc-100 dark:bg-zinc-900 focus-within:ring-2 focus-within:ring-primary">
+      <article>
+        <button
+          type="button"
+          onClick={() => setShowDetail(true)}
+          className="w-full text-left bg-transparent p-0 border-0 cursor-pointer flex flex-col h-full"
+        >
+          <MagicCard className="group relative bg-card rounded-2xl overflow-hidden border border-border/40 shadow-xs transition-transform hover:-translate-y-1 cursor-pointer flex flex-col h-full w-full">
+          <div className="relative h-48 overflow-hidden bg-muted/20">
             {hasImage ? (
               <>
                 <Image
@@ -72,125 +75,103 @@ export function AnnouncementCard({
                   alt={anuncio.titulo}
                   fill
                   unoptimized
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 ease-out bg-zinc-800"
+                  sizes="(max-width: 768px) 100vw, 420px"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                 />
-                <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/10 to-transparent pointer-events-none z-10" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none z-10" />
               </>
             ) : (
-              <div className="w-full h-full p-5 font-mono text-[11px] text-zinc-400 leading-tight bg-zinc-900/50">
-                <div className="flex gap-1.5 mb-5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-destructive/60 shadow-sm shadow-destructive/20"></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-warning/60 shadow-sm shadow-warning/20"></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-success/60 shadow-sm shadow-success/20"></div>
+              <div className="w-full h-full bg-gradient-to-br from-indigo-900/80 via-indigo-600/40 to-slate-900 p-5 flex flex-col justify-between relative overflow-hidden">
+                <div className="size-10 rounded-2xl bg-white/10 flex items-center justify-center text-white">
+                  <IconSpeakerphone className="size-5" />
                 </div>
-                <p className="opacity-90">
-                  <span className="text-violet-400 font-bold">import</span>{" "}
-                  &#123; <span className="text-sky-300">Vacaciones</span> &#125;{" "}
-                  <span className="text-violet-400">from</span>{" "}
-                  <span className="text-emerald-400">'school-api'</span>;
-                </p>
-                <p className="mt-1.5 text-zinc-500 italic">
-                  // Protocolo de actualización trimestral
-                </p>
-                <p className="mt-1">
-                  <span className="text-violet-400 font-bold">const</span>{" "}
-                  <span className="text-amber-200">config</span> = &#123;
-                </p>
-                <p className="pl-4">
-                  version: <span className="text-emerald-400">'2.0.4'</span>,
-                </p>
-                <p className="pl-4">
-                  status: <span className="text-emerald-400">'STABLE'</span>,
-                </p>
-                <p className="pl-4">
-                  priority: <span className="text-rose-400">true</span>
-                </p>
-                <p>&#125;;</p>
-                <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent pointer-events-none z-10" />
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-200">
+                    {anuncio.categoria || "COMUNICADO OFICIAL"}
+                  </span>
+                  <p className="text-white text-xs font-bold truncate mt-0.5">
+                    {anuncio.titulo}
+                  </p>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none z-10" />
               </div>
             )}
 
-            {/* Overlay Content */}
-            <div className="absolute inset-0 p-4 z-20 flex flex-col justify-end pointer-events-none">
+            {/* Overlay Badges */}
+            <div className="absolute inset-0 p-3 z-20 flex flex-col justify-end pointer-events-none">
               <div className="flex items-center justify-between gap-2 w-full">
-                <div className="flex gap-2">
+                <div className="flex gap-1.5">
                   {anuncio.fijado && (
-                    <span className="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest bg-primary text-white shadow-lg flex items-center gap-1.5 border border-primary/20">
+                    <span className="px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-wider bg-indigo-600 text-white shadow-xs flex items-center gap-1">
                       <IconPin className="size-3" /> FIJADO
                     </span>
                   )}
                   {isImportant && (
-                    <span className="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest bg-destructive text-white shadow-lg flex items-center gap-1.5 border border-destructive/20">
+                    <span className="px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-wider bg-rose-600 text-white shadow-xs flex items-center gap-1">
                       <IconAlertTriangle className="size-3" /> URGENTE
                     </span>
                   )}
                 </div>
-                <span className="text-white text-[10px] font-bold flex items-center gap-1.5 bg-black/60 px-2.5 py-1 rounded-lg border border-white/10 backdrop-blur-sm">
-                  <IconClock className="size-3 text-info" />{" "}
+                <span className="text-white text-[10px] font-medium flex items-center gap-1 bg-black/60 px-2 py-0.5 rounded-lg border border-white/10">
+                  <IconClock className="size-3 text-indigo-300" />{" "}
                   {formatDate(anuncio.fechaPublicacion, "dd MMM")}
                 </span>
               </div>
             </div>
 
             <div
-              className="absolute top-4 right-4 z-30 opacity-0 group-hover:opacity-100 transition-all scale-90 group-hover:scale-100 focus-within:opacity-100 focus-within:scale-100"
+              className="absolute top-3 right-3 z-30 opacity-0 group-hover:opacity-100 transition-opacity"
               onClick={(e) => e.stopPropagation()}
             >
               <EditAnnouncementButton anuncio={anuncio} />
             </div>
           </div>
 
-          <div className="p-6 flex flex-col flex-1">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/80">
+          <div className="p-5 flex flex-col flex-1">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
                 {anuncio.dirigidoA || "TODOS"}
               </span>
               <div className="h-px flex-1 bg-border/40" />
             </div>
 
-            <h3 className="text-xl font-bold font-display text-foreground mb-3 transition-colors line-clamp-2">
+            <h3 className="text-base font-bold text-foreground mb-2 leading-snug line-clamp-2">
               {anuncio.titulo}
             </h3>
-            <p className="text-muted-foreground text-sm leading-relaxed mb-6 line-clamp-2">
-              {anuncio.resumen || anuncio.contenido.substring(0, 150) + "..."}
+            <p className="text-muted-foreground text-xs leading-relaxed mb-4 line-clamp-2">
+              {anuncio.resumen || anuncio.contenido?.substring(0, 140) + "..."}
             </p>
 
-            <div className="mt-auto pt-6 border-t border-border/50 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <Avatar className="w-10 h-10 border-2 border-primary/50 shadow-md">
-                    <AvatarImage src={anuncio.autor?.image} />
-                    <AvatarFallback className="bg-primary text-white text-[10px] font-bold">
-                      {anuncio.autor?.name?.[0]?.toUpperCase() || "A"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-success border-[3px] border-background rounded-full shadow-sm" />
-                </div>
+            <div className="mt-auto pt-4 border-t border-border/40 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <Avatar className="size-8 border border-border/40">
+                  <AvatarImage src={anuncio.autor?.image} />
+                  <AvatarFallback className="bg-indigo-600 text-white text-[10px] font-bold">
+                    {anuncio.autor?.name?.[0]?.toUpperCase() || "A"}
+                  </AvatarFallback>
+                </Avatar>
                 <div>
-                  <p className="text-[12px] font-bold text-foreground leading-none">
-                    {(anuncio.autor?.name || "SISTEMA").toUpperCase()}{" "}
-                    {(anuncio.autor?.apellidoPaterno || "").toUpperCase()}
+                  <p className="text-xs font-bold text-foreground leading-none capitalize">
+                    {anuncio.autor?.name || "Sistema"}{" "}
+                    {anuncio.autor?.apellidoPaterno || ""}
                   </p>
-                  <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mt-1.5">
+                  <p className="text-[10px] text-muted-foreground capitalize mt-0.5">
                     {anuncio.autor?.role === "profesor"
                       ? "Docente"
                       : anuncio.autor?.role === "administrativo"
                         ? "Administración"
-                        : anuncio.autor?.role === "estudiante"
-                          ? "Estudiante"
-                          : anuncio.autor?.role === "padre"
-                            ? "Padre de Familia"
-                            : "Sistema"}
+                        : "Institucional"}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-1.5 text-muted-foreground text-xs font-semibold tabular-nums opacity-60">
-                <IconEye className="size-4" />
+              <div className="flex items-center gap-1 text-muted-foreground text-xs font-medium tabular-nums">
+                <IconEye className="size-3.5" />
                 <span>{(anuncio.vistas || 0).toLocaleString()}</span>
               </div>
             </div>
           </div>
         </MagicCard>
+        </button>
       </article>
 
       <ViewAnnouncementDialog

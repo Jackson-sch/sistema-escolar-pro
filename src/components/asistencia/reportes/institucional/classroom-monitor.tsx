@@ -4,8 +4,18 @@ import { IconSchool } from "@tabler/icons-react"
 import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
 
+interface SeccionResumen {
+  id: string
+  nombre: string
+  nivelNombre: string
+  perc: number
+  tardanzas: number
+  total: number
+  presentes: number
+}
+
 interface ClassroomMonitorProps {
-  resumen: any[]
+  resumen: SeccionResumen[]
 }
 
 export function ClassroomMonitor({ resumen }: ClassroomMonitorProps) {
@@ -19,7 +29,7 @@ export function ClassroomMonitor({ resumen }: ClassroomMonitorProps) {
             <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-50">Seguimiento operativo por sección</p>
           </div>
         </div>
-        <div className="px-4 py-1.5 rounded-full bg-background/40 border border-border/40 backdrop-blur-sm">
+        <div className="px-4 py-1.5 rounded-full bg-muted/50 border border-border/30">
           <span className="text-[9px] font-bold text-muted-foreground">
             {resumen.length} Secciones Analizadas
           </span>
@@ -35,15 +45,15 @@ export function ClassroomMonitor({ resumen }: ClassroomMonitorProps) {
           return (
             <div
               key={section.id}
-              className="group relative rounded-3xl border border-border/40 bg-card p-6 transition-all duration-500 hover:border-primary/40 backdrop-blur-md overflow-hidden liquid-glass"
+              className="group relative rounded-2xl border border-border/50 bg-card/80 shadow-sm p-6 transition-[border-color,box-shadow] duration-500 hover:border-primary/40 hover:shadow-md overflow-hidden"
             >
               {/* Flow Glow (Blob animado con color de estado) */}
               <div 
-                className="absolute -top-10 -left-10 w-32 h-32 rounded-full blur-3xl opacity-0 group-hover:opacity-20 transition-all duration-700 animate-blob"
+                className="absolute -top-10 -left-10 w-32 h-32 rounded-full blur-3xl opacity-0 group-hover:opacity-20 transition-opacity duration-700 animate-blob"
                 style={{ backgroundColor: statusColor }}
               />
               <div 
-                className="absolute -bottom-10 -right-10 w-32 h-32 rounded-full blur-3xl opacity-0 group-hover:opacity-10 transition-all duration-700 animate-blob"
+                className="absolute -bottom-10 -right-10 w-32 h-32 rounded-full blur-3xl opacity-0 group-hover:opacity-10 transition-opacity duration-700 animate-blob"
                 style={{ backgroundColor: statusColor, animationDelay: '2s' }}
               />
 
@@ -53,7 +63,7 @@ export function ClassroomMonitor({ resumen }: ClassroomMonitorProps) {
                     <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">{section.nivelNombre}</p>
                     <h4 className="text-sm font-black uppercase tracking-tighter text-foreground group-hover:text-primary transition-colors">{section.nombre}</h4>
                   </div>
-                  <div className="p-2 rounded-2xl bg-background/40 border border-border/40 group-hover:border-primary/30 transition-all duration-300">
+                  <div className="p-2 rounded-2xl bg-muted/50 border border-border/30 group-hover:border-primary/30 transition-[border-color] duration-300">
                     <IconSchool className="size-3.5 text-muted-foreground/60 group-hover:text-primary" />
                   </div>
                 </div>

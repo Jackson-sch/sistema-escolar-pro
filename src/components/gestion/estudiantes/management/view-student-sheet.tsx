@@ -16,7 +16,7 @@ import { StudentProfileHeader } from "@/components/gestion/estudiantes/component
 import { StudentGeneralInfo } from "@/components/gestion/estudiantes/components/student-general-info";
 import { StudentActionsFooter } from "@/components/gestion/estudiantes/components/student-actions-footer";
 import { AnimatedTabs } from "@/components/ui/animated-tabs";
-import { AnimatePresence, motion } from "framer-motion";
+import { LazyMotion, domAnimation, m, AnimatePresence } from "framer-motion";
 
 interface ViewStudentSheetProps {
   student: StudentTableType;
@@ -47,7 +47,7 @@ export function ViewStudentSheet({
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-lg p-0 border-l border-border/40 bg-background/95 backdrop-blur-xl flex flex-col">
+      <SheetContent className="w-full sm:max-w-lg p-0 border-l border-border/40 bg-background/95 flex flex-col">
         <SheetHeader className="sr-only">
           <SheetTitle>Expediente: {student.name}</SheetTitle>
           <SheetDescription>Detalles completos del estudiante</SheetDescription>
@@ -68,36 +68,38 @@ export function ViewStudentSheet({
           <ScrollArea className="flex-1 min-h-0">
             <div className="p-6">
               <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeTab}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  {activeTab === "general" && (
-                    <StudentGeneralInfo student={student} />
-                  )}
+                <LazyMotion features={domAnimation}>
+                  <m.div
+                    key={activeTab}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {activeTab === "general" && (
+                      <StudentGeneralInfo student={student} />
+                    )}
 
-                  {activeTab === "familia" && (
-                    <FamilyManagementTab
-                      studentId={student.id}
-                      familyRelations={(student as any).padresTutores || []}
-                    />
-                  )}
+                    {activeTab === "familia" && (
+                      <FamilyManagementTab
+                        studentId={student.id}
+                        familyRelations={(student as any).padresTutores || []}
+                      />
+                    )}
 
-                  {activeTab === "disciplina" && (
-                    <DisciplineTab studentId={student.id} />
-                  )}
+                    {activeTab === "disciplina" && (
+                      <DisciplineTab studentId={student.id} />
+                    )}
 
-                  {activeTab === "asistencia" && (
-                    <AchievementsTab studentId={student.id} />
-                  )}
+                    {activeTab === "asistencia" && (
+                      <AchievementsTab studentId={student.id} />
+                    )}
 
-                  {activeTab === "salud" && (
-                    <HealthManagementTab student={student} />
-                  )}
-                </motion.div>
+                    {activeTab === "salud" && (
+                      <HealthManagementTab student={student} />
+                    )}
+                  </m.div>
+                </LazyMotion>
               </AnimatePresence>
             </div>
           </ScrollArea>

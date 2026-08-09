@@ -197,7 +197,7 @@ export function UpdateDueDateModal({
                   </SelectContent>
                 </Select>
                 <FormDescription className="text-xs ml-1">
-                  Deja en "Toda la institución" para actualizar todos los niveles.
+                  Deja en &ldquo;Toda la institución&rdquo; para actualizar todos los niveles.
                 </FormDescription>
               </FormItem>
             )}

@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useEffectEvent,
+  useRef,
+  useState,
+} from "react";
 import {
   IconMapPin,
   IconSearch,
@@ -27,6 +33,9 @@ interface NominatimResult {
   lon: string;
 }
 
+// Default center (Peru) - Mantenido como constante de módulo estable
+const DEFAULT_CENTER: [number, number] = [-79.000787, -8.083672];
+
 export function LocationPicker({
   value,
   onChange,
@@ -36,6 +45,7 @@ export function LocationPicker({
   const mapInstance = useRef<any>(null);
   const maplibreRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
+  const [markerEpoch, setMarkerEpoch] = useState(0);
   const [isMapReady, setIsMapReady] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState<NominatimResult[]>([]);
@@ -43,9 +53,6 @@ export function LocationPicker({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const suggestionsRef = useRef<HTMLDivElement>(null);
-
-  // Default center (Peru)
-  const defaultCenter: [number, number] = [-79.000787, -8.083672];
 
   // Initialize map
   useEffect(() => {
@@ -55,13 +62,12 @@ export function LocationPicker({
     import("maplibre-gl").then((maplibregl) => {
       if (cancelled || !mapContainer.current) return;
 
-      // @ts-ignore
       import("maplibre-gl/dist/maplibre-gl.css");
 
       maplibreRef.current = maplibregl.default || maplibregl;
       const ml = maplibreRef.current;
 
-      const initialCenter = value ? [value.lng, value.lat] : defaultCenter;
+      const initialCenter = value ? [value.lng, value.lat] : DEFAULT_CENTER;
 
       const map = new ml.Map({
         container: mapContainer.current,
@@ -110,7 +116,12 @@ export function LocationPicker({
         placeMarker(lat, lng, ml, map);
         onChange({ lat, lng });
       });
-    });
+    })
+      .catch((error) => {
+        if (!cancelled) {
+          console.error("Error al inicializar el mapa:", error);
+        }
+      });
 
     return () => {
       cancelled = true;
@@ -127,28 +138,6 @@ export function LocationPicker({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Sync marker when value changes externally
-  useEffect(() => {
-    if (!isMapReady || !maplibreRef.current || !mapInstance.current) return;
-    if (value) {
-      placeMarker(
-        value.lat,
-        value.lng,
-        maplibreRef.current,
-        mapInstance.current,
-      );
-      mapInstance.current.easeTo({
-        center: [value.lng, value.lat],
-        zoom: 16,
-        duration: 500,
-      });
-    } else if (markerRef.current) {
-      markerRef.current.remove();
-      markerRef.current = null;
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value?.lat, value?.lng, isMapReady]);
 
   const placeMarker = useCallback(
     (lat: number, lng: number, ml: any, map: any) => {
@@ -186,15 +175,56 @@ export function LocationPicker({
         .setLngLat([lng, lat])
         .addTo(map);
 
-      marker.on("dragend", () => {
-        const lngLat = marker.getLngLat();
-        onChange({ lat: lngLat.lat, lng: lngLat.lng });
-      });
-
       markerRef.current = marker;
+      setMarkerEpoch((e) => e + 1);
     },
-    [disabled, onChange],
+    [disabled],
   );
+
+  // Sync marker when value changes externally
+  useEffect(() => {
+    if (!isMapReady || !maplibreRef.current || !mapInstance.current) return;
+    if (value) {
+      placeMarker(
+        value.lat,
+        value.lng,
+        maplibreRef.current,
+        mapInstance.current,
+      );
+      mapInstance.current.easeTo({
+        center: [value.lng, value.lat],
+        zoom: 16,
+        duration: 500,
+      });
+    } else if (markerRef.current) {
+      markerRef.current.remove();
+      markerRef.current = null;
+    }
+  }, [value, isMapReady, placeMarker]);
+
+  // Effect Event: siempre ve el onChange más reciente sin resuscribir el
+  // listener de "dragend" cuando el padre vuelve a renderizar con otro callback.
+  const handleMarkerChange = useEffectEvent(
+    (coords: { lat: number; lng: number } | null) => {
+      onChange(coords);
+    },
+  );
+
+  // Register the dragend listener on the active marker with proper cleanup.
+  // Re-runs whenever a new marker is created (markerEpoch).
+  useEffect(() => {
+    const marker = markerRef.current;
+    if (!marker) return;
+
+    const handleDragEnd = () => {
+      const lngLat = marker.getLngLat();
+      handleMarkerChange({ lat: lngLat.lat, lng: lngLat.lng });
+    };
+    marker.on("dragend", handleDragEnd);
+    return () => {
+      marker.off("dragend", handleDragEnd);
+    };
+  }, [markerEpoch]);
 
   // Nominatim search with debounce
   const handleSearch = useCallback((query: string) => {
@@ -215,6 +245,11 @@ export function LocationPicker({
           `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5&countrycodes=pe&accept-language=es&addressdetails=1`,
           { headers: { "User-Agent": "SistemaEscolarPro/1.0" } },
         );
+        if (!res.ok) {
+          setSuggestions([]);
+          setShowSuggestions(false);
+          return;
+        }
         const data: NominatimResult[] = await res.json();
         setSuggestions(data);
         setShowSuggestions(data.length > 0);
@@ -253,10 +288,11 @@ export function LocationPicker({
     if (markerRef.current) {
       markerRef.current.remove();
       markerRef.current = null;
+      setMarkerEpoch((e) => e + 1);
     }
     if (mapInstance.current) {
       mapInstance.current.easeTo({
-        center: defaultCenter,
+        center: DEFAULT_CENTER,
         zoom: 13,
         duration: 500,
       });
@@ -281,7 +317,7 @@ export function LocationPicker({
     <div className="space-y-2">
       {/* Search bar */}
       <div className="relative" ref={suggestionsRef}>
-        <InputGroup className="rounded-full transition-all px-2">
+        <InputGroup className="rounded-full transition-colors px-2">
           <InputGroupAddon>
             {isSearching ? (
               <IconLoader2 className="h-4 w-4 text-muted-foreground animate-spin shrink-0" />
@@ -292,6 +328,7 @@ export function LocationPicker({
           <InputGroupInput
             type="text"
             placeholder="Buscar dirección..."
+            aria-label="Buscar dirección"
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
             onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}

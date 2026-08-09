@@ -2,15 +2,15 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { getBoletasPortalAction } from "@/actions/portal";
 import { formatCurrency } from "@/lib/formats";
-import { IconCheck, IconReceipt, IconCalendar } from "@tabler/icons-react";
-import { Badge } from "@/components/ui/badge";
-import StatCard from "@/components/common/stat-card";
-import { cn } from "@/lib/utils";
+import { IconCheck, IconReceipt, IconFileText } from "@tabler/icons-react";
 import { BoletasTable } from "@/components/portal/finance/boletas-table";
 import { BoletaColumnType } from "@/components/portal/finance/boletas-columns";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { IconFileDownload } from "@tabler/icons-react";
+import { Badge } from "@/components/ui/badge";
+
+export const metadata = {
+  title: "Boletas de Pago | Portal de Familia",
+  description: "Historial de comprobantes de pago, descargas en PDF e impresiones electrónicas.",
+};
 
 export default async function BoletasPage() {
   const session = await auth();
@@ -19,12 +19,10 @@ export default async function BoletasPage() {
     redirect("/login");
   }
 
-  // Obtener datos vía server action
   const boletasRes = await getBoletasPortalAction({});
   const {
     institucion,
     relaciones = [],
-    comprobantesAprobados = [],
   } = boletasRes.success || {};
 
   const institucionData = institucion
@@ -39,14 +37,13 @@ export default async function BoletasPage() {
       }
     : undefined;
 
-  // Combinar pagos de cronogramas pagados que tienen número de boleta oficial
   const allBoletas: BoletaColumnType[] = relaciones
     .flatMap((r: any) =>
       r.hijo.cronogramaPagos.map((c: any) => {
         const ultimoPago = c.pagos[0];
         return {
           id: c.id,
-          numeroBoleta: ultimoPago.numeroBoleta, // Ya filtrado por el server action
+          numeroBoleta: ultimoPago.numeroBoleta,
           concepto: c.concepto.nombre,
           monto: ultimoPago?.monto || c.monto,
           fechaPago: ultimoPago?.fechaPago || c.updatedAt,
@@ -74,78 +71,59 @@ export default async function BoletasPage() {
         new Date(b.fechaPago).getTime() - new Date(a.fechaPago).getTime(),
     );
 
-  // Calcular métricas
   const totalPagado = allBoletas.reduce(
     (acc: number, b) => acc + Number(b.monto),
     0,
   );
 
-  const stats = [
-    {
-      title: "TOTAL INVERTIDO",
-      value: formatCurrency(totalPagado),
-      icon: IconCheck,
-      iconColor: "text-green-500",
-      glowColor: "#22c55e",
-      description: "Acumulado histórico de pagos",
-    },
-    {
-      title: "DOCUMENTOS",
-      value: allBoletas.length.toString(),
-      icon: IconReceipt,
-      iconColor: "text-blue-500",
-      glowColor: "#3b82f6",
-      description: "Comprobantes disponibles",
-    },
-    {
-      title: "PRÓX. PAGO",
-      value: "—",
-      icon: IconCalendar,
-      iconColor: "text-amber-500",
-      glowColor: "#f59e0b",
-      description: "Pendiente administrativo",
-    },
-  ];
-
   return (
-    <div className="flex flex-1 flex-col gap-6 md:gap-10 p-4 sm:p-6 md:p-10 pt-0 @container/main animate-in fade-in duration-700 min-h-screen max-w-full overflow-hidden">
-      {/* Sección de Encabezado */}
-      <div className="space-y-1 mt-4 md:mt-0">
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-          Mis Boletas de Notas
-        </h1>
-        <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed">
-          Descarga y revisa las boletas de calificaciones oficiales.
-        </p>
-      </div>
-
-      {/* Grid de Métricas Premium */}
-      <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-        {stats.map((stat, i) => (
-          <div
-            key={stat.title}
-            className={cn(
-              "animate-in fade-in slide-in-from-bottom-4",
-              i === 2 && "sm:col-span-2 lg:col-span-1", // El tercer card ocupa dos columnas en tablets para balancear
-            )}
-            style={{
-              animationDelay: `${i * 100}ms`,
-              animationFillMode: "both",
-            }}
-          >
-            <StatCard
-              {...stat}
-              className="h-full border-primary/5 bg-card/40 backdrop-blur-md"
-            />
-          </div>
-        ))}
-      </div>
-
-      <div className="grid gap-8 lg:grid-cols-12 max-w-full overflow-hidden">
-        {/* Tabla de Historial (Refactorización a DataTable) */}
-        <div className="lg:col-span-12 w-full overflow-hidden">
-          <BoletasTable data={allBoletas} />
+    <div className="min-h-screen flex flex-col gap-6 p-4 md:p-8 pt-6 @container/main">
+      {/* ── HEADER ── */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
+        <div className="space-y-2">
+          <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-4 py-1 rounded-full text-xxs font-semibold uppercase tracking-widest flex items-center gap-2 w-fit">
+            <IconFileText size={14} />
+            Comprobantes Electrónicos
+          </Badge>
+          <h1 className="text-3xl md:text-5xl font-bold tracking-tight leading-none">
+            Boletas de Pago
+          </h1>
+          <p className="text-muted-foreground text-sm md:text-base max-w-2xl font-normal leading-relaxed">
+            Consulta e impresión de comprobantes oficiales generados tras la verificación de pagos.
+          </p>
         </div>
+      </div>
+
+      {/* ── BENTO KPIS FINANCIEROS ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-1">
+        {/* KPI 1: Invertido */}
+        <div className="p-4 rounded-2xl bg-card/80 border border-border/50 shadow-sm flex items-center justify-between transition-[background-color,box-shadow] hover:bg-card hover:shadow-md">
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Total Invertido Acumulado</span>
+            <h3 className="text-2xl md:text-3xl font-bold font-mono text-foreground mt-0.5">{formatCurrency(totalPagado)}</h3>
+            <p className="text-[11px] text-muted-foreground/80 mt-1">Histórico de pensiones abonadas</p>
+          </div>
+          <div className="size-11 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/20">
+            <IconCheck className="size-5" />
+          </div>
+        </div>
+
+        {/* KPI 2: Boletas Emitidas */}
+        <div className="p-4 rounded-2xl bg-card/80 border border-border/50 shadow-sm flex items-center justify-between transition-[background-color,box-shadow] hover:bg-card hover:shadow-md">
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Documentos Emitidos</span>
+            <h3 className="text-2xl md:text-3xl font-bold font-mono text-foreground mt-0.5">{allBoletas.length}</h3>
+            <p className="text-[11px] text-muted-foreground/80 mt-1">Comprobantes listos para descarga</p>
+          </div>
+          <div className="size-11 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 border border-indigo-500/20">
+            <IconReceipt className="size-5" />
+          </div>
+        </div>
+      </div>
+
+      {/* ── TABLA DE BOLETAS ── */}
+      <div className="px-1">
+        <BoletasTable data={allBoletas} />
       </div>
     </div>
   );

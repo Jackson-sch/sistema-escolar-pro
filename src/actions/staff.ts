@@ -2,9 +2,10 @@
 import { serialize } from "@/lib/dto";
 
 import prisma from "@/lib/prisma";
+import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { deleteFile } from "@/lib/storage";
-import { Role } from "../../prisma/client";
+import { Role } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 /**
@@ -12,11 +13,17 @@ import bcrypt from "bcryptjs";
  */
 export async function getStaffAction() {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return { error: "No autorizado" };
+    }
+
     const staff = await prisma.user.findMany({
       where: {
         role: {
           in: ["profesor", "administrativo"] as Role[],
         },
+        institucionId: session.user.institucionId || undefined,
       },
       include: {
         estado: true,
@@ -27,7 +34,9 @@ export async function getStaffAction() {
         createdAt: "desc",
       },
     });
-    return { data: serialize(staff) };
+
+    const safeStaff = staff.map(({ password, ...userWithoutPassword }) => userWithoutPassword);
+    return { data: serialize(safeStaff) };
   } catch (error) {
     console.error("Error fetching staff:", error);
     return { error: "No se pudo obtener la lista de personal" };
@@ -83,6 +92,11 @@ export async function getCargosAction() {
  */
 export async function createStaffAction(values: any) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     const hashedPassword = await bcrypt.hash(values.dni, 10);
 
     // Al crear personal, por defecto debe cambiar su contraseña al primer ingreso
@@ -113,6 +127,11 @@ export async function createStaffAction(values: any) {
  */
 export async function updateStaffAction(id: string, values: any) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     // Si se está actualizando la imagen, eliminar la anterior físicamente
     if (Object.prototype.hasOwnProperty.call(values, "image")) {
       const currentStaff = await prisma.user.findUnique({
@@ -146,6 +165,11 @@ export async function updateStaffAction(id: string, values: any) {
  */
 export async function deleteStaffAction(id: string) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     // Proteger al usuario admin global
     const user = await prisma.user.findUnique({
       where: { id },

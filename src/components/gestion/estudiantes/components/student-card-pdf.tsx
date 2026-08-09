@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import {
   Document,
@@ -104,7 +102,7 @@ export const StudentCardPDF = ({
 
                 <View style={{ marginTop: 2 }}>
                   <Text style={{ fontSize: 4, color: "#94a3b8", fontWeight: "bold" }}>GRADO / NIVEL</Text>
-                  <View style={{ backgroundColor: "#0f172a", padding: "1 4", borderRadius: 2, alignSelf: "flex-start" }}>
+                  <View style={{ backgroundColor: "#0f172a", paddingVertical: 1, paddingHorizontal: 4, borderRadius: 2, alignSelf: "flex-start" }}>
                     <Text style={{ fontSize: 5, color: "#ffffff", fontWeight: "bold" }}>
                       {student.nivelAcademico?.grado.nombre || "N/A"} - {student.nivelAcademico?.nivel.nombre || "N/A"}
                     </Text>

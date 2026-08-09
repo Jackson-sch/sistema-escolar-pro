@@ -44,7 +44,7 @@ export function AsistenciaTable({
         data.map((alumno, index) => (
           <div
             key={alumno.id}
-            className="flex flex-col md:grid md:grid-cols-12 gap-3.5 md:gap-3 items-stretch md:items-center bg-card/40 hover:bg-card/60 border border-border/40 p-4 md:p-2.5 rounded-2xl transition-all group shadow-sm hover:shadow-md"
+            className="flex flex-col md:grid md:grid-cols-12 gap-3.5 md:gap-3 items-stretch md:items-center bg-card/80 hover:bg-card/95 border border-border/40 p-4 md:p-2.5 rounded-2xl transition-[background-color,box-shadow] group shadow-sm hover:shadow-md"
           >
             {/* ID & Mobile Header */}
             <div className="flex items-center justify-between md:col-span-1">
@@ -89,7 +89,7 @@ export function AsistenciaTable({
                     onJustificacionChange(alumno.id, e.target.value)
                   }
                   placeholder="Agregar nota..."
-                  className="bg-muted/10 border-border/40 focus:border-primary/30 rounded-xl h-9 text-xs placeholder:text-muted-foreground/40 text-muted-foreground transition-all pl-3.5 w-full"
+                  className="bg-muted/10 border-border/40 focus:border-primary/30 rounded-xl h-9 text-xs placeholder:text-muted-foreground/40 text-muted-foreground transition-[border-color] pl-3.5 w-full"
                 />
               </div>
             </div>

@@ -2,7 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState, useTransition, useRef } from "react";
 import { IconLoader2, IconTarget } from "@tabler/icons-react";
 import { toast } from "sonner";
 import { useFormModal } from "@/components/modals/form-modal-context";
@@ -98,10 +98,16 @@ export function CompetencyForm({
     return () => setIsDirty(false);
   }, [isDirty, setIsDirty]);
 
+  const onSubmitRef = useRef(onSubmit);
+
   useEffect(() => {
-    setOnSubmit(() => form.handleSubmit(onSubmit)());
+    onSubmitRef.current = onSubmit;
+  });
+
+  useEffect(() => {
+    setOnSubmit(() => form.handleSubmit(onSubmitRef.current)());
     return () => setOnSubmit(undefined);
-  }, [form, onSubmit, setOnSubmit]);
+  }, [form, setOnSubmit]);
 
   return (
     <Form {...form}>

@@ -38,6 +38,7 @@ export const ComprobanteHtml = React.forwardRef<
 >(({ pago, estudiante, institucion }, ref) => {
   const studentFull = toTitleCase(`${estudiante.apellidoPaterno} ${estudiante.apellidoMaterno}, ${estudiante.name}`);
   const institucionNombre = toTitleCase(institucion.nombre);
+  const fechaGeneracion = new Date().toLocaleString("es-PE");
 
   return (
     <div
@@ -222,7 +223,7 @@ export const ComprobanteHtml = React.forwardRef<
       {/* Footer */}
       <footer className="mt-16 pt-6 border-t border-slate-100 flex justify-between items-center text-[10px] font-bold text-slate-400 relative z-10">
         <p>Comprobante de pago electrónico oficial — Sistema Escolar Pro</p>
-        <p>Generado el {new Date().toLocaleString("es-PE")}</p>
+        <p>Generado el {fechaGeneracion}</p>
       </footer>
     </div>
   );

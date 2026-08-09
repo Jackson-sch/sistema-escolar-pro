@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import { useTransition, useState } from "react";
 import {
   Shirt,
@@ -35,6 +37,7 @@ import {
 import { ConfirmModal } from "@/components/modals/confirm-modal";
 import { UniformBasicModal } from "./uniform-basic-modal";
 import { UniformVariantsModal } from "./uniform-variants-modal";
+import { cn } from "@/lib/utils";
 
 interface UniformListProps {
   uniforms: any[];
@@ -51,7 +54,6 @@ export function UniformList({ uniforms, categories, sedes }: UniformListProps) {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [uniformToDelete, setUniformToDelete] = useState<any>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isPending, startTransition] = useTransition();
 
   const filteredUniforms = uniforms.filter((u) => {
     const matchesSearch =
@@ -88,30 +90,31 @@ export function UniformList({ uniforms, categories, sedes }: UniformListProps) {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center bg-card/40 backdrop-blur-xl p-4 rounded-xl border border-border/40 shadow-xl">
-        <div className="relative w-full md:w-96">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
+    <div className="space-y-4">
+      {/* Filtros y Acciones */}
+      <div className="flex flex-col sm:flex-row gap-3 justify-between items-center bg-background/50 p-3.5 rounded-2xl border border-border/40 shadow-xs">
+        <div className="relative w-full sm:w-80">
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/60" />
           <Input
-            placeholder="Buscar uniformes..."
+            placeholder="Buscar prendas por nombre o detalle..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 bg-muted/10 border-border/40 focus:bg-muted/20 transition-all rounded-xl"
+            className="pl-9 bg-background border-border/40 rounded-xl text-xs h-9"
           />
         </div>
 
-        <div className="flex gap-2 w-full md:w-auto">
+        <div className="flex gap-2.5 w-full sm:w-auto">
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-full md:w-48 bg-muted/10 border-border/40 rounded-xl text-foreground">
-              <Filter className="h-4 w-4 mr-2 text-muted-foreground/60" />
+            <SelectTrigger className="w-full sm:w-48 bg-background border-border/40 rounded-xl text-xs h-9 font-medium">
+              <Filter className="h-3.5 w-3.5 mr-1.5 text-muted-foreground/60" />
               <SelectValue placeholder="Categoría" />
             </SelectTrigger>
-            <SelectContent className="bg-card/90 backdrop-blur-xl border-border/40 rounded-xl">
-              <SelectItem value="all" className="rounded-lg">
+            <SelectContent className="rounded-xl border-border/40">
+              <SelectItem value="all" className="text-xs">
                 Todas las categorías
               </SelectItem>
               {categories.map((cat) => (
-                <SelectItem key={cat.id} value={cat.id} className="rounded-lg">
+                <SelectItem key={cat.id} value={cat.id} className="text-xs">
                   {cat.nombre}
                 </SelectItem>
               ))}
@@ -123,15 +126,16 @@ export function UniformList({ uniforms, categories, sedes }: UniformListProps) {
               setEditingUniform(null);
               setIsBasicModalOpen(true);
             }}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 transition-all active:scale-95 rounded-xl h-10 px-5 font-bold"
+            className="rounded-xl px-4 h-9 font-semibold text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 gap-1.5 cursor-pointer shrink-0"
           >
-            <Plus className="h-4 w-4 mr-2" />
-            Nuevo
+            <Plus className="h-4 w-4" />
+            <span>Nueva Prenda</span>
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {/* Grid de Uniformes */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {filteredUniforms.map((uniform) => (
           <UniformCard
             key={uniform.id}
@@ -149,12 +153,10 @@ export function UniformList({ uniforms, categories, sedes }: UniformListProps) {
         ))}
 
         {filteredUniforms.length === 0 && (
-          <div className="col-span-full py-20 flex flex-col items-center justify-center text-slate-400 bg-slate-50/50 rounded-2xl border-2 border-dashed border-slate-200">
-            <AlertCircle className="h-12 w-12 mb-4 opacity-20" />
-            <p className="text-lg font-medium">No se encontraron uniformes</p>
-            <p className="text-sm">
-              Intenta con otros términos de búsqueda o filtros
-            </p>
+          <div className="col-span-full py-16 flex flex-col items-center justify-center text-muted-foreground/60 bg-background/40 rounded-2xl border border-dashed border-border/40 space-y-2">
+            <AlertCircle className="h-10 w-10 text-muted-foreground/40" />
+            <p className="text-xs font-semibold text-foreground">No se encontraron prendas registradas</p>
+            <p className="text-[11px]">Intenta modificar los términos de búsqueda o filtros.</p>
           </div>
         )}
       </div>
@@ -179,7 +181,7 @@ export function UniformList({ uniforms, categories, sedes }: UniformListProps) {
         onConfirm={onConfirmDelete}
         loading={isDeleting}
         title="Eliminar Uniforme"
-        description={`¿Estás seguro de que deseas eliminar "${uniformToDelete?.nombre}"? Esta acción eliminará el registro y su imagen permanentemente.`}
+        description={`¿Estás seguro de que deseas eliminar "${uniformToDelete?.nombre}"? Esta acción borrará la prenda y sus datos asociados.`}
         variant="danger"
       />
     </div>
@@ -198,89 +200,100 @@ function UniformCard({
   onDelete: () => void;
 }) {
   const totalStock =
-    uniform.variantes?.reduce((acc: number, v: any) => acc + v.stock, 0) || 0;
+    uniform.variantes?.reduce((acc: number, v: any) => acc + (v.stock || 0), 0) || 0;
   const variantCount = uniform.variantes?.length || 0;
 
   return (
-    <Card className="group overflow-hidden p-0 border-border/40 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 bg-card/40 backdrop-blur-xl rounded-3xl animate-in fade-in zoom-in-95">
+    <Card className="group overflow-hidden p-0 border-border/40 transition-[box-shadow,transform] duration-300 hover:shadow-xl hover:-translate-y-0.5 bg-card/80 rounded-2xl">
       <div className="aspect-4/3 relative bg-muted/10 overflow-hidden">
         {uniform.imagen ? (
-          <img
+          <Image
             src={uniform.imagen}
             alt={uniform.nombre}
-            className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-110"
+            fill
+            sizes="(max-width: 768px) 50vw, 33vw"
+            unoptimized
+            className="object-cover transition-transform duration-700 group-hover:scale-105"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-muted-foreground/20">
-            <Shirt className="h-16 w-16" />
+          <div className="w-full h-full flex items-center justify-center text-muted-foreground/30 bg-muted/20">
+            <Shirt className="h-12 w-12" />
           </div>
         )}
-        <Badge className="absolute top-4 right-4 bg-background/80 text-foreground border-border/40 shadow-lg backdrop-blur-md px-3 py-1 font-bold text-[10px] uppercase tracking-wider">
-          {uniform.categoria?.nombre}
+        <Badge className="absolute top-3 right-3 bg-background/90 text-foreground border-border/40 shadow-xs px-2.5 py-0.5 font-bold text-[10px] uppercase tracking-wider rounded-lg">
+          {uniform.categoria?.nombre || "General"}
         </Badge>
-        <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 h-1/2 flex items-end p-4">
-          <div className="flex gap-2 w-full translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+
+        {/* Acciones flotantes en Hover */}
+        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/95 via-background/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 h-1/2 flex items-end p-3">
+          <div className="flex gap-2 w-full">
             <Button
-              variant="secondary"
+              variant="outline"
               size="sm"
               onClick={onEdit}
-              className="flex-1 bg-white/10 hover:bg-white/20 text-white border-white/10 backdrop-blur-md rounded-xl font-bold h-10"
+              className="flex-1 bg-background/90 hover:bg-background border-border/40 rounded-xl text-xs font-semibold h-8"
             >
-              <Edit2 className="h-4 w-4 mr-2" />
-              Info
+              <Edit2 className="h-3.5 w-3.5 mr-1 text-indigo-500" />
+              Editar
             </Button>
             <Button
-              variant="secondary"
+              variant="outline"
               size="sm"
               onClick={onManageVariants}
-              className="flex-1 bg-white/10 hover:bg-white/20 text-white border-white/10 backdrop-blur-md rounded-xl font-bold h-10"
+              className="flex-1 bg-background/90 hover:bg-background border-border/40 rounded-xl text-xs font-semibold h-8"
             >
-              <Ruler className="h-4 w-4 mr-2" />
+              <Ruler className="h-3.5 w-3.5 mr-1 text-amber-500" />
               Tallas
             </Button>
             <Button
-              variant="destructive"
+              variant="outline"
               size="icon"
               onClick={onDelete}
-              className="h-10 w-10 bg-rose-500/80 hover:bg-rose-500 text-white border-none backdrop-blur-md rounded-xl shadow-lg"
+              className="size-8 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 border-rose-500/30 rounded-xl"
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-3.5 w-3.5" />
             </Button>
           </div>
         </div>
       </div>
 
-      <CardHeader className="p-5 pb-0">
-        <CardTitle className="text-lg font-black text-foreground line-clamp-1 tracking-tight">
+      <CardHeader className="p-4 pb-0">
+        <CardTitle className="text-sm font-bold text-foreground line-clamp-1">
           {uniform.nombre}
         </CardTitle>
-        <CardDescription className="line-clamp-2 text-xs font-medium text-muted-foreground/60 min-h-10 mt-1">
+        <CardDescription className="line-clamp-2 text-xs font-normal text-muted-foreground/80 min-h-8 mt-1">
           {uniform.descripcion || "Sin descripción disponible"}
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="p-5 pt-5 flex justify-between items-center border-t border-border/40 mt-5 bg-muted/5">
-        <div className="flex flex-col gap-1">
-          <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground/60 font-black">
-            Stock Total
+      <CardContent className="p-4 pt-3 flex justify-between items-center border-t border-border/30 mt-3 bg-background/30">
+        <div className="flex flex-col">
+          <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold">
+            Stock Físico
           </span>
-          <div className="flex items-center gap-1.5">
-            <Package className="h-3.5 w-3.5 text-primary" />
-            <span
-              className={`text-sm font-black ${totalStock <= 5 ? "text-amber-500" : "text-foreground"}`}
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <Package className="h-3.5 w-3.5 text-indigo-500" />
+            <Badge 
+              variant="outline" 
+              className={cn(
+                "rounded-md text-[10px] font-bold px-1.5 py-0 border-none",
+                totalStock === 0 && "bg-rose-500/10 text-rose-600",
+                totalStock > 0 && totalStock <= 5 && "bg-amber-500/10 text-amber-600",
+                totalStock > 5 && "bg-emerald-500/10 text-emerald-600"
+              )}
             >
-              {totalStock} unidades
-            </span>
+              {totalStock === 0 ? "Agotado" : `${totalStock} unids`}
+            </Badge>
           </div>
         </div>
-        <div className="flex flex-col items-end gap-1">
-          <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground/60 font-black">
-            Variantes
+        <div className="flex flex-col items-end">
+          <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold">
+            Tallas
           </span>
-          <div className="flex items-center gap-1.5">
-            <Layers className="h-3.5 w-3.5 text-muted-foreground/40" />
-            <span className="text-sm font-bold text-muted-foreground/80">
-              {variantCount} tallas
+          <div className="flex items-center gap-1 mt-0.5">
+            <Layers className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="text-xs font-semibold font-mono text-foreground">
+              {variantCount}
             </span>
           </div>
         </div>

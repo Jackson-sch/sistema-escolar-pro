@@ -1,5 +1,4 @@
 "use server";
-import { serialize } from "@/lib/dto";
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
@@ -84,39 +83,6 @@ export const registrarPagoAction = createSafeAction(
 );
 
 /**
- * Obtiene el resumen de deudas por estudiante
- */
-export const getResumenDeudaAction = createSafeAction(
-  z.object({ estudianteId: z.string() }),
-  async ({ estudianteId }, session) => {
-    const institucionId = session.user.institucionId;
-
-    const deudas = await prisma.cronogramaPago.findMany({
-      where: {
-        estudianteId,
-        pagado: false,
-        estudiante: { institucionId },
-      },
-      include: { concepto: true },
-    });
-
-    const totalDeuda = deudas.reduce(
-      (acc, d) => acc + (d.monto - d.montoPagado),
-      0,
-    );
-    const cuotasPendientes = deudas.length;
-
-    return {
-      success: {
-        deudas: serialize(deudas),
-        totalDeuda,
-        cuotasPendientes,
-      },
-    };
-  },
-  { roles: ["administrativo"] }
-);
-
 /**
  * Obtiene el siguiente número de comprobante autoincremental
  */
@@ -161,7 +127,7 @@ export const anularPagoAction = createSafeAction(
     const institucionId = session.user.institucionId;
 
     try {
-      const result = await prisma.$transaction(async (tx) => {
+      await prisma.$transaction(async (tx) => {
         const pago = await tx.pago.findUnique({
           where: { id: pagoId },
           include: {

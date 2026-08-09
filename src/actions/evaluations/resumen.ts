@@ -148,7 +148,7 @@ export const getAsistenciaEstudianteAction = createSafeAction(
   async ({ estudianteId, periodoId, anioEscolar }, session) => {
     try {
       const anio = anioEscolar || new Date().getFullYear();
-      let whereClause: any = {
+      const whereClause: any = {
         estudianteId,
         estudiante: { institucionId: session.user.institucionId || undefined }
       };

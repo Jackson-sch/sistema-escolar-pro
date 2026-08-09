@@ -38,10 +38,10 @@ function ProspectoFilters({
   return (
     <div className="flex flex-wrap items-center gap-2">
       <Select value={estadoFilter} onValueChange={meta.setEstadoFilter}>
-        <SelectTrigger className="w-[160px] h-9 bg-muted/5 border-border/40 text-[11px] font-medium transition-all focus:ring-primary/20 rounded-full">
+        <SelectTrigger className="w-[160px] h-9 bg-muted/5 border-border/40 text-[11px] font-medium transition-shadow focus:ring-primary/20 rounded-full">
           <SelectValue placeholder="Estado" />
         </SelectTrigger>
-        <SelectContent className="border-border/40 backdrop-blur-xl">
+        <SelectContent className="border-border/50 bg-popover shadow-md">
           <SelectItem value="ALL" className="text-[11px] font-medium">
             Todos los estados
           </SelectItem>

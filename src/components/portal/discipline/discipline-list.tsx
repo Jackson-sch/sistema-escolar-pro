@@ -35,8 +35,8 @@ interface DisciplineListProps {
 export function DisciplineList({ records }: DisciplineListProps) {
   if (records.length === 0) {
     return (
-      <Card className="border-dashed p-12 text-center animate-in fade-in slide-in-from-bottom-4 duration-500 rounded-3xl">
-        <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-muted">
+      <Card className="rounded-2xl border-dashed border-border/50 bg-card/80 p-12 text-center shadow-sm">
+        <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-xl bg-muted">
           <IconChecklist className="size-8 text-muted-foreground" />
         </div>
         <p className="text-lg font-bold">Sin registros compartidos</p>
@@ -49,27 +49,26 @@ export function DisciplineList({ records }: DisciplineListProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {records.map((record, index) => (
         <Card
           key={record.id}
-          className="overflow-hidden border-border/40 bg-card/50 transition-all hover:shadow-lg hover:shadow-primary/5 rounded-3xl animate-in fade-in slide-in-from-bottom-4 duration-500"
-          style={{ animationDelay: `${index * 100}ms` }}
+          className="overflow-hidden rounded-2xl border-border/50 bg-card/80 shadow-sm transition-colors hover:border-primary/30"
         >
           <div className="flex flex-col md:flex-row">
             {/* Left side: Date & Category */}
-            <div className="md:w-64 bg-muted/20 p-6 flex flex-col justify-between border-b md:border-b-0 md:border-r border-border/40">
+            <div className="flex flex-col justify-between border-b border-border/50 bg-muted/20 p-5 md:w-60 md:border-r md:border-b-0">
               <div className="space-y-4">
                 <Badge
                   variant="secondary"
-                  className="bg-primary/10 text-primary border-none text-[10px] uppercase font-black tracking-widest px-3 py-1"
+                  className="border-primary/20 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary"
                 >
                   {record.categoria.nombre}
                 </Badge>
                 <div>
                   <div className="flex items-center gap-2 text-primary">
                     <IconCalendar className="size-4" />
-                    <span className="text-sm font-bold uppercase tracking-tighter">
+                    <span className="text-sm font-semibold">
                       {format(new Date(record.fecha), "PPP", { locale: es })}
                     </span>
                   </div>
@@ -80,7 +79,7 @@ export function DisciplineList({ records }: DisciplineListProps) {
               </div>
 
               <div className="mt-8 flex items-center gap-3">
-                <div className="size-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+                <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <IconUser className="size-4" />
                 </div>
                 <div>
@@ -96,15 +95,15 @@ export function DisciplineList({ records }: DisciplineListProps) {
             </div>
 
             {/* Right side: Content */}
-            <div className="flex-1 p-6 space-y-6 bg-card/30">
+            <div className="flex-1 space-y-5 p-5">
               <div className="space-y-2">
                 <div className="flex items-start gap-3">
                   <IconMessageCircle className="size-5 text-primary mt-1 shrink-0" />
-                  <h3 className="text-xl font-bold tracking-tight text-foreground/90">
+                  <h3 className="text-lg font-semibold text-foreground">
                     {record.motivo || "Registro de Seguimiento"}
                   </h3>
                 </div>
-                <div className="ml-8 p-4 bg-background/50 rounded-2xl border border-border/20">
+                <div className="ml-8 rounded-xl border border-border/50 bg-muted/20 p-4">
                   <p className="text-sm leading-relaxed text-muted-foreground">
                     {record.descripcion}
                   </p>
@@ -112,15 +111,15 @@ export function DisciplineList({ records }: DisciplineListProps) {
               </div>
 
               {record.recomendaciones && (
-                <div className="space-y-3 bg-emerald-500/5 border border-emerald-500/10 p-5 rounded-2xl">
+                <div className="space-y-3 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
                   <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
                     <IconFileText className="size-4" />
-                    <h4 className="text-xs font-black uppercase tracking-widest">
+                    <h4 className="text-xs font-semibold">
                       Recomendaciones y Acuerdos
                     </h4>
                   </div>
                   <p className="text-sm text-muted-foreground/90 italic pl-6 border-l-2 border-emerald-500/20">
-                    "{record.recomendaciones}"
+                    &quot;{record.recomendaciones}&quot;
                   </p>
                 </div>
               )}

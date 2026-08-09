@@ -26,7 +26,7 @@ export function FinancialHealthCard({
   const pendingPerc = total > 0 ? (pending / total) * 100 : 0;
 
   return (
-    <Card className="liquid-glass border-none h-full overflow-hidden group">
+    <Card className="h-full overflow-hidden rounded-2xl border-border/50 bg-card/80 shadow-sm">
       <CardHeader className="pb-2 relative z-10">
         <CardTitle className="text-lg font-bold flex items-center gap-2">
           <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
@@ -44,17 +44,17 @@ export function FinancialHealthCard({
           </div>
           <div className="h-3 w-full bg-muted/30 rounded-full overflow-hidden flex">
             <div
-              className="h-full bg-emerald-500 transition-all duration-1000 ease-out"
+              className="h-full bg-emerald-500 transition-[width] duration-1000 ease-out"
               style={{ width: `${collectedPerc}%` }}
               title={`Recaudado: ${collectedPerc.toFixed(1)}%`}
             />
             <div
-              className="h-full bg-amber-500 transition-all duration-1000 ease-out"
+              className="h-full bg-amber-500 transition-[width] duration-1000 ease-out"
               style={{ width: `${pendingPerc}%` }}
               title={`Por Vencer: ${pendingPerc.toFixed(1)}%`}
             />
             <div
-              className="h-full bg-red-500 transition-all duration-1000 ease-out"
+              className="h-full bg-red-500 transition-[width] duration-1000 ease-out"
               style={{ width: `${overduePerc}%` }}
               title={`Vencido: ${overduePerc.toFixed(1)}%`}
             />
@@ -91,8 +91,6 @@ export function FinancialHealthCard({
         </div>
       </CardContent>
 
-      {/* Decorative Blur */}
-      <div className="absolute -bottom-20 -left-20 size-64 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors duration-700" />
     </Card>
   );
 }
@@ -117,7 +115,7 @@ function FinanceItem({
   };
 
   return (
-    <div className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
+    <div className="flex items-center justify-between rounded-xl border border-border/40 bg-muted/20 p-3 transition-colors hover:bg-muted/40">
       <div className="flex items-center gap-3">
         <div
           className={cn(

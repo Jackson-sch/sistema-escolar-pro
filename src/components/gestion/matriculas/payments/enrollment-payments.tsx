@@ -32,21 +32,27 @@ export function EnrollmentPayments({ estudianteId }: EnrollmentPaymentsProps) {
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
-    async function fetchData() {
-      if (!estudianteId) return;
-      setLoading(true);
-      try {
-        const res = await getCronogramaAction({ estudianteId });
+    if (!estudianteId) return;
+    setLoading(true);
+    let cancelled = false;
+
+    getCronogramaAction({ estudianteId })
+      .then((res) => {
+        if (cancelled) return;
         if (res.success) {
           setPayments(res.success);
         }
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchData();
+      })
+      .catch((error) => {
+        if (!cancelled) console.error(error);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [estudianteId]);
 
   if (loading) {
@@ -81,6 +87,7 @@ export function EnrollmentPayments({ estudianteId }: EnrollmentPaymentsProps) {
   }
 
   // Cálculos
+  const today = new Date();
   const totalDeuda = payments.reduce(
     (acc, p) =>
       p.pagado ? acc : acc + (Number(p.monto) - Number(p.montoPagado)),
@@ -129,7 +136,7 @@ export function EnrollmentPayments({ estudianteId }: EnrollmentPaymentsProps) {
           <div className="space-y-3 pr-4">
             {payments.map((p) => {
               const isVencido =
-                new Date(p.fechaVencimiento) < new Date() && !p.pagado;
+                new Date(p.fechaVencimiento) < today && !p.pagado;
               const pendiente = Number(p.monto) - Number(p.montoPagado);
 
               return (

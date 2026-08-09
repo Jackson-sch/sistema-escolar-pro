@@ -3,7 +3,7 @@
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
-import { Turno } from "../../prisma/client";
+import { Turno } from "@prisma/client";
 
 export async function getPoliticasAsistenciaAction() {
   try {

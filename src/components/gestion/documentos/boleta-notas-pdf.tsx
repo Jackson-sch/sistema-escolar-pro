@@ -88,8 +88,8 @@ export const BoletaNotasPDF = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {notas.map((n, i) => (
-              <TableRow key={i}>
+            {notas.map((n) => (
+              <TableRow key={`${n.area}-${n.competencia}`}>
                 <TableCell width="35%">
                   <Text style={{ fontSize: 9, fontWeight: 'bold' }}>{n.area}</Text>
                 </TableCell>

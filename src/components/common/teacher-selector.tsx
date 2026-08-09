@@ -114,7 +114,7 @@ export function TeacherSelector({
                     onClick={() => onSelect(teacher.id)}
                     disabled={isLoading || isSelected}
                     className={cn(
-                      "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border text-left transition-all duration-200 disabled:opacity-50 group",
+                      "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border text-left transition-opacity duration-200 disabled:opacity-50 group",
                       isSelected
                         ? "bg-primary/10 border-primary/25 text-primary shadow-sm"
                         : "bg-card border-border/40 hover:border-primary/25 hover:bg-primary/5 hover:translate-x-0.5"

@@ -45,13 +45,13 @@ export function AssignTeacherDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-sm p-0 gap-0 border-none shadow-2xl bg-card overflow-hidden">
+      <DialogContent className="sm:max-w-sm p-0 gap-0 border-none shadow-lg bg-card overflow-hidden">
         <DialogHeader className="p-5 pb-3 border-b border-border/40">
           <DialogTitle className="text-base font-bold tracking-tight">
             Asignar Docente
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground">
-            Curso: {course?.nombre} · {course?.nivelAcademico?.grado?.nombre} "{course?.nivelAcademico?.seccion}"
+            Curso: {course?.nombre} · {course?.nivelAcademico?.grado?.nombre} &quot;{course?.nivelAcademico?.seccion}&quot;
           </DialogDescription>
         </DialogHeader>
 

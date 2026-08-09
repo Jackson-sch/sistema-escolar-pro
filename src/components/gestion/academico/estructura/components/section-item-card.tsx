@@ -26,18 +26,28 @@ interface SectionItemCardProps {
   onEdit: () => void;
   onDelete: () => void;
   onAssignTutor: () => void;
+  onSelectSection?: () => void;
 }
 
-export function SectionItemCard({ seccion, onEdit, onDelete, onAssignTutor }: SectionItemCardProps) {
+export function SectionItemCard({
+  seccion,
+  onEdit,
+  onDelete,
+  onAssignTutor,
+  onSelectSection,
+}: SectionItemCardProps) {
   const enrollment = seccion._count?.matriculas || 0;
   const capacity = seccion.capacidad;
   const occupancyRate = (enrollment / capacity) * 100;
-  
+
   // Custom color or default emerald
   const sectionColor = seccion.color || "#10b981";
 
   return (
-    <Card className="group relative overflow-hidden bg-background/20 hover:bg-background/40 transition-all duration-500 border-border/40 hover:border-primary/20 shadow-sm hover:shadow-2xl hover:shadow-primary/5 rounded-2xl">
+    <Card
+      onClick={onSelectSection}
+      className="group relative overflow-hidden bg-background/20 hover:bg-background/40 transition-[background-color,border-color,box-shadow] duration-500 border-border/40 hover:border-primary/40 shadow-sm hover:shadow-lg hover:shadow-primary/10 rounded-2xl cursor-pointer"
+    >
       {/* Dynamic Glow Effect */}
       <div 
         className="absolute -inset-1 opacity-0 group-hover:opacity-10 transition-opacity duration-700 blur-2xl pointer-events-none"
@@ -54,7 +64,7 @@ export function SectionItemCard({ seccion, onEdit, onDelete, onAssignTutor }: Se
               Sección {seccion.seccion}
               {seccion.descripcion && (
                 <span className="text-xs font-normal text-muted-foreground italic">
-                  "{seccion.descripcion}"
+                  &quot;{seccion.descripcion}&quot;
                 </span>
               )}
             </h4>
@@ -64,7 +74,7 @@ export function SectionItemCard({ seccion, onEdit, onDelete, onAssignTutor }: Se
             </div>
           </div>
 
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-[opacity,transform] duration-300 translate-x-2 group-hover:translate-x-0">
             <Button
               variant="ghost"
               size="icon"
@@ -107,7 +117,7 @@ export function SectionItemCard({ seccion, onEdit, onDelete, onAssignTutor }: Se
           </div>
           <div className="h-1.5 w-full bg-muted/40 rounded-full overflow-hidden">
             <div 
-              className="h-full transition-all duration-1000 ease-out rounded-full shadow-[0_0_8px_rgba(var(--primary-rgb),0.3)]"
+              className="h-full transition-[width] duration-1000 ease-out rounded-full shadow-[0_0_8px_rgba(var(--primary-rgb),0.3)]"
               style={{ 
                 width: `${Math.min(occupancyRate, 100)}%`,
                 backgroundColor: sectionColor 
@@ -120,9 +130,9 @@ export function SectionItemCard({ seccion, onEdit, onDelete, onAssignTutor }: Se
         <div className="pt-3 border-t border-border/20 flex items-center justify-between">
           <button 
             onClick={onAssignTutor}
-            className="flex items-center gap-2.5 rounded-lg px-1.5 py-1 -mx-1.5 -my-1 hover:bg-primary/5 transition-all duration-200 group/tutor cursor-pointer"
+            className="flex items-center gap-2.5 rounded-lg px-1.5 py-1 -mx-1.5 -my-1 hover:bg-primary/5 transition-colors duration-200 group/tutor cursor-pointer"
           >
-            <Avatar className="size-7 border border-border/40 ring-2 ring-background shadow-inner group-hover/tutor:ring-primary/30 transition-all">
+            <Avatar className="size-7 border border-border/40 ring-2 ring-background shadow-inner group-hover/tutor:ring-primary/30 transition-shadow">
               <AvatarImage src={seccion.tutor?.image ?? undefined} />
               <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-bold">
                 {seccion.tutor ? seccion.tutor.name[0] : <IconUserCircle className="size-4" />}

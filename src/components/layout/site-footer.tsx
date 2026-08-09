@@ -1,24 +1,25 @@
 "use client";
 
-import { IconHeartFilled, IconShieldCheck, IconCpu } from "@tabler/icons-react";
+import { IconHeartFilled, IconShieldCheck } from "@tabler/icons-react";
+import { BrandIcon } from "@/components/common/brand-logo";
 
 export function SiteFooter() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="w-full mt-10 border-t border-border/40 bg-card/20 backdrop-blur-md px-6 py-4 sm:py-6">
+    <footer className="w-full mt-10 border-t border-border/40 bg-card/80 px-6 py-4 sm:py-6">
       <div className="flex flex-col md:flex-row items-center justify-between gap-4">
         {/* Marca y Versión */}
         <div className="flex items-center gap-3">
-          <div className="bg-primary/10 p-1.5 rounded-lg border border-primary/20">
-            <IconCpu className="size-3.5 text-primary" />
+          <div className="bg-indigo-950/20 p-1.5 rounded-lg border border-indigo-500/20">
+            <BrandIcon size={16} />
           </div>
           <div className="flex flex-col">
             <span className="text-[11px] font-black uppercase tracking-widest text-foreground/80">
-              EduPeru Pro
+              EduNova Pro
             </span>
             <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-tighter">
-              v2.1.0 • Enterprise Edition
+              v2.5.0 • Enterprise Edition
             </span>
           </div>
         </div>

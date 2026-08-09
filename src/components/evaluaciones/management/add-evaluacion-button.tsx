@@ -32,7 +32,7 @@ export function AddEvaluacionButton({
           <Button
             size="sm"
             onClick={() => setOpen(true)}
-            className="rounded-full shadow-lg transition-all active:scale-95"
+            className="rounded-full shadow-lg transition-transform active:scale-95"
           >
             <IconPlus className="mr-2 size-4" />
             Nueva Evaluación

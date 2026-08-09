@@ -32,7 +32,7 @@ export function HealthManagementTab({ student }: HealthManagementTabProps) {
   const { theme } = useTheme();
 
   return (
-    <div className="space-y-6 animate-in fade-in-0 duration-500">
+    <div className="space-y-6 animate-in fade-in-0 animation-duration-">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h3 className="text-lg font-bold tracking-tight">
@@ -55,7 +55,7 @@ export function HealthManagementTab({ student }: HealthManagementTabProps) {
 
       <div className="grid grid-cols-1 gap-6">
         {/* Card: Salud */}
-        <MagicCard gradientColor={theme === "dark" ? "#4FCF8033" : "#D9D9D955"} gradientFrom="#4FCF8033" gradientTo="#D9D9D955" className="relative overflow-hidden border border-border/40 bg-linear-to-br from-emerald-500/5 to-transparent rounded-2xl shadow-sm hover:shadow-md transition-all duration-300">
+        <MagicCard gradientColor={theme === "dark" ? "#4FCF8033" : "#D9D9D955"} gradientFrom="#4FCF8033" gradientTo="#D9D9D955" className="relative overflow-hidden border border-border/40 bg-linear-to-br from-emerald-500/5 to-transparent rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300">
           <div className="p-0 border-b border-emerald-500/10 bg-emerald-500/5">
             <h3 className="text-sm font-bold uppercase tracking-widest text-emerald-600 flex items-center gap-2 py-4 px-6">
               <IconHeartbeat className="h-4 w-4" />
@@ -127,7 +127,7 @@ export function HealthManagementTab({ student }: HealthManagementTabProps) {
         </MagicCard>
 
         {/* Card: Datos Complementarios */}
-        <MagicCard className="relative overflow-hidden border border-border/40 bg-linear-to-br from-blue-500/5 to-transparent rounded-2xl shadow-sm hover:shadow-md transition-all duration-300">
+        <MagicCard className="relative overflow-hidden border border-border/40 bg-linear-to-br from-blue-500/5 to-transparent rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300">
           <div className="p-0 border-b border-blue-500/10 bg-blue-500/5">
             <h3 className="text-sm font-bold uppercase tracking-widest text-blue-600 flex items-center gap-2 py-4 px-6">
               <IconFileDescription className="h-4 w-4" />

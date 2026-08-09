@@ -6,6 +6,7 @@ import { IconBook, IconClock, IconMapPin } from "@tabler/icons-react";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CourseRowActions } from "./course-row-actions";
+import { InlineTeacherSelect } from "./inline-teacher-select";
 
 export type CourseTableType = {
   id: string;
@@ -99,7 +100,7 @@ export const columns: ColumnDef<CourseTableType>[] = [
             <span className="text-sm font-semibold text-foreground leading-snug">
               {nivelAcademico.grado.nombre}{" "}
               <span className="text-muted-foreground font-medium">
-                "{nivelAcademico.seccion}"
+                &quot;{nivelAcademico.seccion}&quot;
               </span>
             </span>
             <span className="text-[11px] text-muted-foreground capitalize">
@@ -118,26 +119,16 @@ export const columns: ColumnDef<CourseTableType>[] = [
       `${row.profesor?.name || "N/A"} ${row.profesor?.apellidoPaterno || ""}`.trim(),
     header: () => <ColHeader>Docente Asignado</ColHeader>,
     size: 220,
-    cell: ({ row }) => {
-      const { profesor } = row.original;
-      const firstName = profesor?.name || "";
-      const lastName = profesor?.apellidoPaterno || "";
-      const fullName = `${firstName} ${lastName} ${profesor?.apellidoMaterno || ""}`.trim();
-      const initials = `${firstName[0] || ""}${lastName[0] || ""}`.toUpperCase();
-      const unassigned = !profesor;
-
+    cell: ({ row, table }) => {
+      const course = row.original;
+      const meta = table.options.meta as any;
       return (
-        <div className="flex items-center gap-2.5">
-          <Avatar className="size-8 ring-1 ring-border/50 shrink-0">
-            <AvatarImage src={profesor?.image ?? undefined} />
-            <AvatarFallback className={`text-[11px] font-bold uppercase ${unassigned ? "bg-muted text-muted-foreground/40" : "bg-linear-to-br from-blue-600/20 to-indigo-700/20 text-blue-400"}`}>
-              {unassigned ? "—" : initials}
-            </AvatarFallback>
-          </Avatar>
-          <span className={`text-sm font-medium capitalize truncate ${unassigned ? "text-muted-foreground/40 italic" : "text-foreground"}`}>
-            {unassigned ? "Sin asignar" : fullName}
-          </span>
-        </div>
+        <InlineTeacherSelect
+          courseId={course.id}
+          currentProfesorId={course.profesorId}
+          currentProfesor={course.profesor}
+          profesores={meta?.profesores || []}
+        />
       );
     },
   },

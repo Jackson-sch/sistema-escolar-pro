@@ -1,6 +1,6 @@
 "use client"
 
-import { motion } from "framer-motion"
+import { LazyMotion, domAnimation, m } from "framer-motion"
 import { IconLoader2 } from "@tabler/icons-react"
 import { StatsGrid } from "./institucional/stats-grid"
 import { TrendChart } from "./institucional/trend-chart"
@@ -46,12 +46,14 @@ export function ReporteInstitucional({
       <div className="flex flex-col items-center justify-center h-[500px] gap-6">
         <div className="relative">
           <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full animate-pulse" />
-          <motion.div
-             animate={{ rotate: 360 }}
-             transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
-          >
-            <IconLoader2 className="h-12 w-12 text-primary" />
-          </motion.div>
+          <LazyMotion features={domAnimation}>
+            <m.div
+               animate={{ rotate: 360 }}
+               transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+            >
+              <IconLoader2 className="h-12 w-12 text-primary" />
+            </m.div>
+          </LazyMotion>
         </div>
         <div className="text-center space-y-1">
           <p className="text-sm font-semibold tracking-wide uppercase text-primary/80 animate-pulse">

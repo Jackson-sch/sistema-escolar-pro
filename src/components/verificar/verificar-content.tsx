@@ -53,6 +53,7 @@ export function VerificarContent() {
           `/api/documentos/verificar?codigo=${targetCode}`
         );
 
+        if (!response.ok) throw new Error("No se pudo verificar el documento");
         const res = await response.json();
 
         if (res.data) {
@@ -78,7 +79,7 @@ export function VerificarContent() {
       setCodigo(queryCodigo);
       handleVerify(queryCodigo);
     }
-  }, [queryCodigo]);
+  }, [queryCodigo, codigo, handleVerify]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,7 +110,7 @@ export function VerificarContent() {
 
         {/* Search Box */}
 
-        <Card className="border-border/40 shadow-2xl shadow-emerald-500/5 bg-emerald-50/10 dark:bg-emerald-500/5 overflow-hidden rounded-3xl p-0">
+        <Card className="border-border/40 shadow-lg shadow-emerald-500/5 bg-emerald-50/10 dark:bg-emerald-500/5 overflow-hidden rounded-3xl p-0">
           <CardHeader className="border-b border-border/40 py-6">
             <CardDescription className="font-bold uppercase tracking-widest text-[10px]">
               Portal de Autenticidad Institucional
@@ -133,7 +134,7 @@ export function VerificarContent() {
                 type="submit"
                 size="lg"
                 disabled={loading}
-                className="h-14 px-8 rounded-2xl bg-emerald-600 hover:bg-emerald-700 font-bold active:scale-95 transition-all hover:scale-105"
+                className="h-14 px-8 rounded-2xl bg-emerald-600 hover:bg-emerald-700 font-bold active:scale-95 transition-[background-color,transform] hover:scale-105"
               >
                 {loading ? (
                   <IconLoader2 className="animate-spin size-6" />
@@ -150,7 +151,7 @@ export function VerificarContent() {
         {/* Results */}
 
         {doc && (
-          <Card className="border-emerald-500/30 bg-emerald-50/10 dark:bg-emerald-500/5 overflow-hidden rounded-3xl animate-in fade-in slide-in-from-bottom-4 duration-500 p-0">
+          <Card className="border-emerald-500/30 bg-emerald-50/10 dark:bg-emerald-500/5 overflow-hidden rounded-3xl animate-in fade-in slide-in-from-bottom-4 animation-duration- p-0">
             <div className="bg-emerald-500/50 px-6 py-4 flex items-center justify-center gap-2">
               <IconShieldCheck className="size-4 text-white" />
 
@@ -257,7 +258,7 @@ export function VerificarContent() {
         )}
 
         {error && (
-          <Card className="border-red-500/30 bg-red-50/10 dark:bg-red-500/5 rounded-3xl animate-in shake duration-500">
+          <Card className="border-red-500/30 bg-red-50/10 dark:bg-red-500/5 rounded-3xl animate-in shake animation-duration-">
             <CardContent className="p-8 flex flex-col items-center justify-center text-center space-y-4">
               <div className="size-16 bg-red-500/10 rounded-full flex items-center justify-center border border-red-500/20">
                 <IconX className="size-8 text-red-500" />
@@ -286,8 +287,8 @@ export function VerificarContent() {
         {/* Footer info */}
 
         <p className="text-center text-xs italic text-slate-400">
-          "Este sistema utiliza firmas digitales criptográficas para garantizar
-          la integridad de los datos."
+          &ldquo;Este sistema utiliza firmas digitales criptográficas para garantizar
+          la integridad de los datos.&rdquo;
         </p>
       </div>
     </div>

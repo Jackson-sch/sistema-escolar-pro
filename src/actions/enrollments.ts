@@ -3,6 +3,7 @@ import { serialize } from "@/lib/dto";
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { getActiveSedeId } from "@/actions/active-sede";
 import { auth } from "@/auth";
 
 /**
@@ -10,7 +11,14 @@ import { auth } from "@/auth";
  */
 export async function getEnrollmentsAction() {
   try {
+    const activeSedeId = await getActiveSedeId();
+    const where: any = {};
+    if (activeSedeId) {
+      where.nivelAcademico = { sedeId: activeSedeId };
+    }
+
     const enrollments = await prisma.matricula.findMany({
+      where,
       include: {
         estudiante: {
           select: {

@@ -8,7 +8,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Ruler, Sparkles, ChevronDown, Info, CheckCircle2, AlertCircle } from "lucide-react";
+import {
+  Ruler,
+  Sparkles,
+  ChevronDown,
+  Info,
+  CheckCircle2,
+  AlertCircle,
+} from "lucide-react";
 import { Label } from "@/components/ui/label";
 
 // ─── Types ─────────────────────────────────────────────────────────────────
@@ -37,15 +44,87 @@ type SizerResult = {
 // Source: standard children's school uniform sizing (LATAM)
 
 const SIZE_CHART: SizeEntry[] = [
-  { size: "4",      ageMin: 3,  ageMax: 3,  heightMin: 95,  heightMax: 105, weightMin: 13, weightMax: 16 },
-  { size: "6",      ageMin: 4,  ageMax: 5,  heightMin: 106, heightMax: 116, weightMin: 17, weightMax: 21 },
-  { size: "8",      ageMin: 6,  ageMax: 7,  heightMin: 117, heightMax: 128, weightMin: 22, weightMax: 27 },
-  { size: "10",     ageMin: 8,  ageMax: 9,  heightMin: 129, heightMax: 140, weightMin: 28, weightMax: 34 },
-  { size: "12",     ageMin: 10, ageMax: 11, heightMin: 141, heightMax: 152, weightMin: 35, weightMax: 43 },
-  { size: "14/16",  ageMin: 12, ageMax: 12, heightMin: 153, heightMax: 160, weightMin: 44, weightMax: 50 },
-  { size: "16 / XS",ageMin: 13, ageMax: 14, heightMin: 161, heightMax: 168, weightMin: 51, weightMax: 58 },
-  { size: "S",      ageMin: 15, ageMax: 16, heightMin: 169, heightMax: 175, weightMin: 59, weightMax: 67 },
-  { size: "S / M",  ageMin: 17, ageMax: 99, heightMin: 176, heightMax: 999, weightMin: 68, weightMax: 999 },
+  {
+    size: "4",
+    ageMin: 3,
+    ageMax: 3,
+    heightMin: 95,
+    heightMax: 105,
+    weightMin: 13,
+    weightMax: 16,
+  },
+  {
+    size: "6",
+    ageMin: 4,
+    ageMax: 5,
+    heightMin: 106,
+    heightMax: 116,
+    weightMin: 17,
+    weightMax: 21,
+  },
+  {
+    size: "8",
+    ageMin: 6,
+    ageMax: 7,
+    heightMin: 117,
+    heightMax: 128,
+    weightMin: 22,
+    weightMax: 27,
+  },
+  {
+    size: "10",
+    ageMin: 8,
+    ageMax: 9,
+    heightMin: 129,
+    heightMax: 140,
+    weightMin: 28,
+    weightMax: 34,
+  },
+  {
+    size: "12",
+    ageMin: 10,
+    ageMax: 11,
+    heightMin: 141,
+    heightMax: 152,
+    weightMin: 35,
+    weightMax: 43,
+  },
+  {
+    size: "14/16",
+    ageMin: 12,
+    ageMax: 12,
+    heightMin: 153,
+    heightMax: 160,
+    weightMin: 44,
+    weightMax: 50,
+  },
+  {
+    size: "16 / XS",
+    ageMin: 13,
+    ageMax: 14,
+    heightMin: 161,
+    heightMax: 168,
+    weightMin: 51,
+    weightMax: 58,
+  },
+  {
+    size: "S",
+    ageMin: 15,
+    ageMax: 16,
+    heightMin: 169,
+    heightMax: 175,
+    weightMin: 59,
+    weightMax: 67,
+  },
+  {
+    size: "S / M",
+    ageMin: 17,
+    ageMax: 99,
+    heightMin: 176,
+    heightMax: 999,
+    weightMin: 68,
+    weightMax: 999,
+  },
 ];
 
 // ─── Core Calculation Logic (pure function, easily testable) ─────────────────
@@ -66,7 +145,10 @@ function computeSize(
       if (height >= entry.heightMin && height <= entry.heightMax) {
         score += 3; // Height is the most reliable signal
         signals.push("estatura");
-      } else if (Math.abs(height - entry.heightMin) <= 5 || Math.abs(height - entry.heightMax) <= 5) {
+      } else if (
+        Math.abs(height - entry.heightMin) <= 5 ||
+        Math.abs(height - entry.heightMax) <= 5
+      ) {
         score += 1; // Near boundary
       }
     }
@@ -75,7 +157,10 @@ function computeSize(
       if (age >= entry.ageMin && age <= entry.ageMax) {
         score += 2;
         signals.push("edad");
-      } else if (Math.abs(age - entry.ageMin) <= 1 || Math.abs(age - entry.ageMax) <= 1) {
+      } else if (
+        Math.abs(age - entry.ageMin) <= 1 ||
+        Math.abs(age - entry.ageMax) <= 1
+      ) {
         score += 0.5;
       }
     }
@@ -84,7 +169,10 @@ function computeSize(
       if (weight >= entry.weightMin && weight <= entry.weightMax) {
         score += 2;
         signals.push("peso");
-      } else if (Math.abs(weight - entry.weightMin) <= 3 || Math.abs(weight - entry.weightMax) <= 3) {
+      } else if (
+        Math.abs(weight - entry.weightMin) <= 3 ||
+        Math.abs(weight - entry.weightMax) <= 3
+      ) {
         score += 0.5;
       }
     }
@@ -110,20 +198,22 @@ function computeSize(
 
   // Show fallback size if runner-up is close
   const fallback =
-    runnerUp && runnerUp.score >= best.score * 0.6
-      ? runnerUp.entry.size
-      : null;
+    runnerUp && runnerUp.score >= best.score * 0.6 ? runnerUp.entry.size : null;
 
   // Build note
   let note: string | null = null;
   if (height !== null && age !== null) {
     const heightEntry = scored.find(
-      (s) => height >= s.entry.heightMin && height <= s.entry.heightMax
+      (s) => height >= s.entry.heightMin && height <= s.entry.heightMax,
     );
     const ageEntry = scored.find(
-      (s) => age >= s.entry.ageMin && age <= s.entry.ageMax
+      (s) => age >= s.entry.ageMin && age <= s.entry.ageMax,
     );
-    if (heightEntry && ageEntry && heightEntry.entry.size !== ageEntry.entry.size) {
+    if (
+      heightEntry &&
+      ageEntry &&
+      heightEntry.entry.size !== ageEntry.entry.size
+    ) {
       note = `La estatura sugiere ${heightEntry.entry.size}, la edad sugiere ${ageEntry.entry.size}. Priorizamos estatura.`;
     }
   }
@@ -141,13 +231,27 @@ function computeSize(
 
 function ConfidenceBadge({ confidence }: { confidence: Confidence }) {
   const map = {
-    alta:  { label: "Alta precisión",   className: "bg-emerald-500/10 text-emerald-700 border-emerald-500/20 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30" },
-    media: { label: "Precisión media",  className: "bg-amber-500/10 text-amber-700 border-amber-500/20 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30" },
-    baja:  { label: "Baja precisión",   className: "bg-rose-500/10 text-rose-700 border-rose-500/20 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/30" },
+    alta: {
+      label: "Alta precisión",
+      className:
+        "bg-emerald-500/10 text-emerald-700 border-emerald-500/20 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30",
+    },
+    media: {
+      label: "Precisión media",
+      className:
+        "bg-amber-500/10 text-amber-700 border-amber-500/20 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30",
+    },
+    baja: {
+      label: "Baja precisión",
+      className:
+        "bg-rose-500/10 text-rose-700 border-rose-500/20 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/30",
+    },
   };
   const { label, className } = map[confidence];
   return (
-    <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full border ${className}`}>
+    <span
+      className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full border ${className}`}
+    >
       {label}
     </span>
   );
@@ -177,17 +281,25 @@ function SizeChartTable({ highlight }: { highlight: string | null }) {
                     : "text-slate-600 dark:text-blue-100/70"
                 }`}
               >
-                <td className={`px-3 py-2 font-black ${isMatch ? "text-indigo-600 dark:text-white" : ""}`}>
+                <td
+                  className={`px-3 py-2 font-black ${isMatch ? "text-indigo-600 dark:text-white" : ""}`}
+                >
                   {row.size}
                 </td>
                 <td className="px-3 py-2 text-center">
-                  {row.ageMin === row.ageMax ? `${row.ageMin}` : `${row.ageMin}–${row.ageMax}`}
+                  {row.ageMin === row.ageMax
+                    ? `${row.ageMin}`
+                    : `${row.ageMin}–${row.ageMax}`}
                 </td>
                 <td className="px-3 py-2 text-center">
-                  {row.heightMax === 999 ? `${row.heightMin}+` : `${row.heightMin}–${row.heightMax}`}
+                  {row.heightMax === 999
+                    ? `${row.heightMin}+`
+                    : `${row.heightMin}–${row.heightMax}`}
                 </td>
                 <td className="px-3 py-2 text-center">
-                  {row.weightMax === 999 ? `${row.weightMin}+` : `${row.weightMin}–${row.weightMax}`}
+                  {row.weightMax === 999
+                    ? `${row.weightMin}+`
+                    : `${row.weightMin}–${row.weightMax}`}
                 </td>
               </tr>
             );
@@ -209,17 +321,22 @@ export default function SmartSizerWidget() {
   const [error, setError] = useState<string | null>(null);
 
   // Derived parsed values (avoids parsing in handlers)
-  const parsed = useMemo(() => ({
-    age:    age    ? parseInt(age, 10)    : null,
-    height: height ? parseInt(height, 10) : null,
-    weight: weight ? parseInt(weight, 10) : null,
-  }), [age, height, weight]);
+  const parsed = useMemo(
+    () => ({
+      age: age ? parseInt(age, 10) : null,
+      height: height ? parseInt(height, 10) : null,
+      weight: weight ? parseInt(weight, 10) : null,
+    }),
+    [age, height, weight],
+  );
 
   // Input validation
   const validationError = useMemo(() => {
     const { height: h, weight: w } = parsed;
-    if (h !== null && (h < 50 || h > 220)) return "Estatura fuera de rango (50–220 cm)";
-    if (w !== null && (w < 5 || w > 150))  return "Peso fuera de rango (5–150 kg)";
+    if (h !== null && (h < 50 || h > 220))
+      return "Estatura fuera de rango (50–220 cm)";
+    if (w !== null && (w < 5 || w > 150))
+      return "Peso fuera de rango (5–150 kg)";
     return null;
   }, [parsed]);
 
@@ -246,26 +363,17 @@ export default function SmartSizerWidget() {
   }, []);
 
   return (
-    <div className="liquid-glass rounded-[2.5rem] p-7 space-y-6 relative overflow-hidden transition-all duration-500 shadow-2xl">
-      {/* Background blobs for liquid-glass depth */}
-      <div className="absolute -top-24 -left-24 w-60 h-60 bg-indigo-500/20 dark:bg-indigo-500/10 rounded-full blur-3xl animate-blob pointer-events-none select-none" />
-      <div className="absolute -bottom-24 -right-24 w-60 h-60 bg-orange-500/15 dark:bg-orange-500/10 rounded-full blur-3xl animate-blob pointer-events-none select-none" />
-
-      {/* Background decoration */}
-      <div className="absolute top-0 right-0 p-8 opacity-[0.05] pointer-events-none select-none dark:text-white text-indigo-950">
-        <Sparkles className="h-36 w-36" />
-      </div>
-
+    <div className="relative space-y-6 overflow-hidden rounded-2xl border border-border/50 bg-card/80 p-6 shadow-sm">
       {/* Header */}
       <div className="flex items-center gap-3 relative z-10">
-        <div className="h-10 w-10 bg-indigo-600/10 dark:bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center shrink-0 border border-indigo-600/20 dark:border-white/10 text-indigo-600 dark:text-white shadow-sm">
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary shadow-sm">
           <Ruler className="h-5 w-5" />
         </div>
         <div>
-          <h3 className="text-xl font-black leading-tight text-indigo-950 dark:text-white">
+          <h3 className="text-lg font-bold leading-tight text-foreground">
             Calculador de Tallas
           </h3>
-          <p className="text-indigo-600/70 dark:text-indigo-200/60 text-[11px] font-bold uppercase tracking-wider">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             Uniforme escolar • Niños 3–17 años
           </p>
         </div>
@@ -279,7 +387,7 @@ export default function SmartSizerWidget() {
             Edad
           </Label>
           <Select value={age} onValueChange={setAge}>
-            <SelectTrigger className="bg-indigo-50/50 dark:bg-white/5 border-slate-200 dark:border-white/10 h-11! w-full rounded-full text-foreground dark:text-white font-bold text-sm shadow-inner transition-all hover:bg-indigo-50 dark:hover:bg-white/10">
+            <SelectTrigger className="h-11! w-full rounded-xl border-border/50 bg-background text-sm font-semibold shadow-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -300,7 +408,7 @@ export default function SmartSizerWidget() {
           <Input
             type="number"
             inputMode="numeric"
-            className="bg-indigo-50/50 dark:bg-white/5 border-slate-200 dark:border-white/10 h-11 w-full rounded-full text-foreground dark:text-white font-bold placeholder:text-muted-foreground/30 text-sm shadow-inner transition-all hover:bg-indigo-50 dark:hover:bg-white/10"
+            className="h-11 w-full rounded-xl border-border/50 bg-background text-sm font-semibold placeholder:text-muted-foreground/50 shadow-sm"
             placeholder="140"
             min={50}
             max={220}
@@ -317,7 +425,7 @@ export default function SmartSizerWidget() {
           <Input
             type="number"
             inputMode="numeric"
-            className="bg-indigo-50/50 dark:bg-white/5 border-slate-200 dark:border-white/10 h-11 w-full rounded-full text-foreground dark:text-white font-bold placeholder:text-muted-foreground/30 text-sm shadow-inner transition-all hover:bg-indigo-50 dark:hover:bg-white/10"
+            className="h-11 w-full rounded-xl border-border/50 bg-background text-sm font-semibold placeholder:text-muted-foreground/50 shadow-sm"
             placeholder="32"
             min={5}
             max={150}
@@ -331,20 +439,24 @@ export default function SmartSizerWidget() {
       {error && (
         <div className="flex items-center gap-2 bg-rose-500/10 dark:bg-rose-500/20 border border-rose-200 dark:border-rose-500/30 rounded-2xl px-4 py-3 relative z-10">
           <AlertCircle className="h-4 w-4 text-rose-500 shrink-0" />
-          <p className="text-rose-700 dark:text-rose-300 text-xs font-bold">{error}</p>
+          <p className="text-rose-700 dark:text-rose-300 text-xs font-bold">
+            {error}
+          </p>
         </div>
       )}
 
       {/* Result card */}
       {result && !error && (
-        <div className="bg-indigo-50/40 dark:bg-white/5 backdrop-blur-sm border border-indigo-100/50 dark:border-white/10 rounded-[1.75rem] p-5 space-y-4 shadow-inner relative z-10 transition-all duration-300">
+        <div className="relative z-10 space-y-4 rounded-2xl border border-border/50 bg-muted/30 p-5 shadow-inner transition-[color,margin,letter-spacing] duration-300">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-[10px] font-black uppercase tracking-widest text-indigo-600/70 dark:text-indigo-200/70 mb-1">
                 Talla Sugerida
               </p>
               <div className="flex items-baseline gap-2.5">
-                <span className="text-4xl font-black leading-none text-indigo-950 dark:text-white">{result.primary}</span>
+                <span className="text-4xl font-black leading-none text-indigo-950 dark:text-white">
+                  {result.primary}
+                </span>
                 {result.fallback && (
                   <span className="text-base font-black text-indigo-950/40 dark:text-white/40">
                     o {result.fallback}
@@ -360,7 +472,10 @@ export default function SmartSizerWidget() {
             <div className="flex items-center gap-1.5 flex-wrap">
               <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
               <p className="text-[11px] text-indigo-950/80 dark:text-indigo-200/80 font-medium">
-                Basado en: <span className="font-black text-indigo-600 dark:text-indigo-400">{result.signals.join(", ")}</span>
+                Basado en:{" "}
+                <span className="font-black text-indigo-600 dark:text-indigo-400">
+                  {result.signals.join(", ")}
+                </span>
               </p>
             </div>
           )}
@@ -369,7 +484,9 @@ export default function SmartSizerWidget() {
           {result.note && (
             <div className="flex items-start gap-1.5 bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-2xl px-3 py-2.5">
               <Info className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-              <p className="text-[11px] text-amber-800 dark:text-amber-200 font-bold leading-normal">{result.note}</p>
+              <p className="text-[11px] text-amber-800 dark:text-amber-200 font-bold leading-normal">
+                {result.note}
+              </p>
             </div>
           )}
 
@@ -386,7 +503,7 @@ export default function SmartSizerWidget() {
         <Button
           onClick={handleCalculate}
           disabled={!!validationError}
-          className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-black rounded-full h-12 text-sm shadow-lg shadow-orange-500/10 hover:shadow-orange-600/20 active:scale-95 transition-all duration-200 relative z-10 border-none"
+          className="relative z-10 h-11 flex-1 rounded-xl text-sm font-bold shadow-sm transition-transform active:scale-[0.98]"
         >
           {result ? "Recalcular" : "Calcular Talla"}
         </Button>
@@ -394,7 +511,7 @@ export default function SmartSizerWidget() {
           <Button
             onClick={handleReset}
             variant="ghost"
-            className="h-12 px-5 rounded-full text-indigo-600 hover:bg-indigo-600/10 dark:text-white/70 dark:hover:bg-white/10 dark:hover:text-white font-bold text-sm transition-all duration-200 relative z-10"
+            className="relative z-10 h-11 rounded-xl px-5 text-sm font-semibold text-primary hover:bg-primary/10"
           >
             Limpiar
           </Button>

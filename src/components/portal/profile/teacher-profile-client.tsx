@@ -46,25 +46,66 @@ interface TeacherProfileClientProps {
 }
 
 const TABS = [
-  { id: "personal", label: "Datos Personales", icon: IconUser, color: "bg-blue-500" },
-  { id: "laboral", label: "Datos Laborales", icon: IconBriefcase, color: "bg-amber-500" },
-  { id: "academico", label: "Perfil Académico", icon: IconCertificate, color: "bg-purple-500" },
-  { id: "contacto", label: "Contacto", icon: IconPhone, color: "bg-emerald-500" },
-  { id: "emergencia", label: "Emergencia", icon: IconHeartbeat, color: "bg-rose-500" },
-  { id: "cursos", label: "Mis Cursos", icon: IconLayoutGrid, color: "bg-indigo-500" },
-  { id: "seguridad", label: "Seguridad", icon: IconLock, color: "bg-slate-500" },
+  {
+    id: "personal",
+    label: "Datos Personales",
+    icon: IconUser,
+    color: "bg-blue-500",
+  },
+  {
+    id: "laboral",
+    label: "Datos Laborales",
+    icon: IconBriefcase,
+    color: "bg-amber-500",
+  },
+  {
+    id: "academico",
+    label: "Perfil Académico",
+    icon: IconCertificate,
+    color: "bg-purple-500",
+  },
+  {
+    id: "contacto",
+    label: "Contacto",
+    icon: IconPhone,
+    color: "bg-emerald-500",
+  },
+  {
+    id: "emergencia",
+    label: "Emergencia",
+    icon: IconHeartbeat,
+    color: "bg-rose-500",
+  },
+  {
+    id: "cursos",
+    label: "Mis Cursos",
+    icon: IconLayoutGrid,
+    color: "bg-indigo-500",
+  },
+  {
+    id: "seguridad",
+    label: "Seguridad",
+    icon: IconLock,
+    color: "bg-slate-500",
+  },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
 
 // ---------- Main Component ----------
-export function TeacherProfileClient({ profile: initialProfile }: TeacherProfileClientProps) {
+export function TeacherProfileClient({
+  profile: initialProfile,
+}: TeacherProfileClientProps) {
   const [profile, setProfile] = useState(initialProfile);
   const [activeTab, setActiveTab] = useState<TabId>("personal");
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const router = useRouter();
 
-  const fullName = [profile.name, profile.apellidoPaterno, profile.apellidoMaterno]
+  const fullName = [
+    profile.name,
+    profile.apellidoPaterno,
+    profile.apellidoMaterno,
+  ]
     .filter(Boolean)
     .join(" ");
 
@@ -101,69 +142,81 @@ export function TeacherProfileClient({ profile: initialProfile }: TeacherProfile
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 w-full animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="flex flex-col lg:flex-row gap-6 w-full animate-in fade-in animation-duration-">
       {/* ── BARRA LATERAL (Izquierda) ── */}
-      <div className="w-full lg:w-80 shrink-0 space-y-6">
+      <div className="w-full lg:w-72 shrink-0 space-y-4">
         {/* Card Identidad */}
-        <Card className="overflow-hidden border-none shadow-2xl bg-card/40 backdrop-blur-xl liquid-glass rounded-[2rem] p-0">
-          <div className="h-32 bg-linear-to-br from-primary/40 via-primary/20 to-transparent" />
-          <div className="px-6 pb-10 -mt-16 flex flex-col items-center text-center">
-            <div className="relative group mb-4">
-              <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
-              <div className="absolute -inset-1.5 rounded-full bg-linear-to-tr from-primary via-primary/40 to-transparent blur-sm opacity-50 group-hover:opacity-80 transition-opacity" />
-              <Avatar className="size-32 border-4 border-background shadow-2xl bg-muted relative z-10 transition-transform group-hover:scale-[1.02]">
-                <AvatarImage src={avatarImage ?? undefined} className="object-cover" />
-                <AvatarFallback className="text-4xl font-black bg-primary text-primary-foreground">
+        <Card className="overflow-hidden rounded-2xl border border-border/40 bg-card/80 shadow-xl">
+          <div className="h-24 bg-linear-to-r from-indigo-600/20 via-primary/10 to-indigo-600/20" />
+          <div className="px-6 pb-6 -mt-12 flex flex-col items-center text-center">
+            <div className="relative group mb-3">
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept="image/*"
+                onChange={handleFileChange}
+              />
+              <Avatar className="size-24 border-4 border-card shadow-xl bg-muted relative z-10">
+                <AvatarImage
+                  src={avatarImage ?? undefined}
+                  className="object-cover"
+                />
+                <AvatarFallback className="text-2xl font-bold bg-indigo-600 text-white">
                   {getInitials(profile.name, profile.apellidoPaterno)}
                 </AvatarFallback>
                 {isUploading && (
                   <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-20 rounded-full">
-                    <IconLoader2 className="size-10 text-white animate-spin" />
+                    <IconLoader2 className="size-8 text-white animate-spin" />
                   </div>
                 )}
               </Avatar>
               {!isUploading && (
-                <Button 
-                  size="icon" 
-                  className="absolute bottom-1 right-1 z-30 rounded-full size-10 shadow-xl border-2 border-background hover:scale-110 active:scale-95 transition-all"
+                <Button
+                  size="icon"
+                  className="absolute bottom-0 right-0 z-30 size-8 rounded-xl border-2 border-card bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs cursor-pointer"
                   onClick={openFilePicker}
                 >
-                  <IconCamera size={18} />
+                  <IconCamera className="size-4" />
                 </Button>
               )}
             </div>
-            
-            <h3 className="text-2xl font-black tracking-tight leading-tight mb-2 capitalize">{fullName}</h3>
-            <Badge variant="secondary" className="rounded-full text-[10px] font-black uppercase tracking-widest px-4 py-1 bg-primary/10 text-primary border-primary/20">
-              {profile.especialidad || "DOCENTE"}
+
+            <h3 className="text-lg font-bold tracking-tight text-foreground capitalize leading-tight mb-1">
+              {fullName}
+            </h3>
+            <Badge
+              variant="outline"
+              className="rounded-full text-[10px] font-bold uppercase tracking-wider px-3 py-0.5 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20"
+            >
+              {profile.especialidad || "DOCENTE DE AULA"}
             </Badge>
           </div>
         </Card>
 
         {/* Menú Navegación */}
-        <Card className="border-none shadow-xl bg-card/40 backdrop-blur-xl liquid-glass rounded-[2rem] p-3">
+        <Card className="rounded-2xl border border-border/40 bg-card/80 p-2 shadow-sm">
           <div className="space-y-1">
             {TABS.map((tab) => {
               const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={cn(
-                    "flex items-center justify-between gap-3 px-5 py-4 rounded-2xl text-[13px] font-black uppercase tracking-tighter transition-all w-full text-left group",
-                    activeTab === tab.id
-                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-[1.02]"
-                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                    "flex w-full items-center justify-between gap-3 rounded-xl px-3.5 py-2.5 text-left text-xs font-semibold transition-[color,background-color,box-shadow] cursor-pointer",
+                    isActive
+                      ? "bg-indigo-600 text-white shadow-xs"
+                      : "text-muted-foreground hover:bg-card/80 hover:text-foreground",
                   )}
                 >
-                  <div className="flex items-center gap-3">
-                    <Icon size={20} strokeWidth={2.5} className={cn(
-                      "transition-colors",
-                      activeTab === tab.id ? "text-white" : "text-muted-foreground group-hover:text-foreground"
-                    )} />
+                  <div className="flex items-center gap-2.5">
+                    <Icon className="size-4 shrink-0" />
                     <span>{tab.label}</span>
                   </div>
-                  {activeTab === tab.id && <IconChevronRight size={18} />}
+                  {isActive && <IconChevronRight className="size-4" />}
                 </button>
               );
             })}
@@ -173,34 +226,43 @@ export function TeacherProfileClient({ profile: initialProfile }: TeacherProfile
 
       {/* ── CONTENIDO PRINCIPAL (Derecha) ── */}
       <div className="flex-1 min-w-0">
-        <Card className="border-none shadow-2xl bg-card/40 backdrop-blur-xl liquid-glass rounded-[2.5rem] min-h-[700px] overflow-hidden">
-          <div className="p-8 md:p-12">
-            <div className="flex items-center gap-6 mb-12">
-              <div className={cn(
-                "size-16 rounded-3xl flex items-center justify-center text-white shadow-2xl transform -rotate-3",
-                TABS.find(t => t.id === activeTab)?.color || "bg-primary"
-              )}>
+        <Card className="min-h-[600px] overflow-hidden rounded-2xl border border-border/40 bg-card/80 shadow-xl">
+          <div className="p-6 md:p-8 space-y-6">
+            <div className="flex items-center gap-3 border-b border-border/20 pb-4">
+              <div
+                className={cn(
+                  "flex size-10 items-center justify-center rounded-xl text-white shadow-xs shrink-0",
+                  TABS.find((t) => t.id === activeTab)?.color || "bg-indigo-600",
+                )}
+              >
                 {(() => {
-                  const Icon = TABS.find(t => t.id === activeTab)?.icon || IconUser;
-                  return <Icon size={32} strokeWidth={2.5} />;
+                  const Icon =
+                    TABS.find((t) => t.id === activeTab)?.icon || IconUser;
+                  return <Icon className="size-5" />;
                 })()}
               </div>
-              <div className="space-y-1">
-                <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter leading-none">
-                  {TABS.find(t => t.id === activeTab)?.label}
+              <div>
+                <h2 className="text-lg font-bold tracking-tight text-foreground">
+                  {TABS.find((t) => t.id === activeTab)?.label}
                 </h2>
-                <div className="h-1 w-20 bg-primary/40 rounded-full" />
+                <p className="text-xs text-muted-foreground">
+                  Gestión y actualización de información personal del docente.
+                </p>
               </div>
             </div>
 
-            <div className="grid gap-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+            <div className="animate-in fade-in animation-duration-">
               {activeTab === "personal" && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                   <InlineEditableField
                     label="Fecha de Nacimiento"
-                    value={profile.fechaNacimiento ? new Date(profile.fechaNacimiento) : null}
+                    value={
+                      profile.fechaNacimiento
+                        ? new Date(profile.fechaNacimiento)
+                        : null
+                    }
                     type="date"
-                    icon={<IconCalendar size={18} />}
+                    icon={<IconCalendar className="size-4" />}
                     onSave={(v) => saveField("fechaNacimiento", v)}
                   />
                   <InlineEditableField
@@ -220,13 +282,13 @@ export function TeacherProfileClient({ profile: initialProfile }: TeacherProfile
                   <InlineEditableField
                     label="Nacionalidad"
                     value={profile.nacionalidad}
-                    icon={<IconWorld size={18} />}
+                    icon={<IconWorld className="size-4" />}
                     onSave={(v) => saveField("nacionalidad", v)}
                   />
                   <InlineEditableField
                     label="DNI / Documento"
                     value={profile.dni}
-                    icon={<IconId size={18} />}
+                    icon={<IconId className="size-4" />}
                     readOnly
                     onSave={() => Promise.resolve()}
                   />
@@ -244,13 +306,21 @@ export function TeacherProfileClient({ profile: initialProfile }: TeacherProfile
                   />
                   <InlineEditableField
                     label="Fecha de Contratación"
-                    value={profile.fechaContratacion ? new Date(profile.fechaContratacion) : null}
+                    value={
+                      profile.fechaContratacion
+                        ? new Date(profile.fechaContratacion)
+                        : null
+                    }
                     type="date"
                     onSave={(v) => saveField("fechaContratacion", v)}
                   />
                   <InlineEditableField
                     label="Fecha de Ingreso"
-                    value={profile.fechaIngreso ? new Date(profile.fechaIngreso) : null}
+                    value={
+                      profile.fechaIngreso
+                        ? new Date(profile.fechaIngreso)
+                        : null
+                    }
                     type="date"
                     onSave={(v) => saveField("fechaIngreso", v)}
                   />
@@ -296,25 +366,30 @@ export function TeacherProfileClient({ profile: initialProfile }: TeacherProfile
                   <InlineEditableField
                     label="Correo Electrónico"
                     value={profile.email}
-                    icon={<IconMail size={18} />}
+                    icon={<IconMail className="size-4" />}
                     readOnly
                     onSave={() => Promise.resolve()}
                   />
                   <InlineEditableField
                     label="Teléfono Móvil"
                     value={profile.telefono}
-                    icon={<IconPhone size={18} />}
+                    icon={<IconPhone className="size-4" />}
                     onSave={(v) => saveField("telefono", v)}
                   />
                   <InlineEditableField
                     label="Dirección Actual"
                     value={profile.direccion}
-                    icon={<IconMapPin size={18} />}
+                    icon={<IconMapPin className="size-4" />}
                     onSave={(v) => saveField("direccion", v)}
                   />
-                  <div className="p-4 rounded-2xl bg-muted/20 border border-border/40">
-                    <p className="text-[10px] font-black uppercase text-muted-foreground mb-1 tracking-widest">Ubigeo (Referencial)</p>
-                    <p className="font-bold text-sm">{`${profile.distrito || ""} - ${profile.provincia || ""}`.trim() || "No especificado"}</p>
+                  <div className="p-4 rounded-xl bg-muted/30 border border-border/40 space-y-1">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                      Ubigeo Referencial
+                    </p>
+                    <p className="font-semibold text-xs text-foreground">
+                      {`${profile.distrito || ""} - ${profile.provincia || ""}`.trim() ||
+                        "No especificado"}
+                    </p>
                   </div>
                 </div>
               )}
@@ -329,37 +404,48 @@ export function TeacherProfileClient({ profile: initialProfile }: TeacherProfile
                   <InlineEditableField
                     label="Teléfono Emergencia"
                     value={profile.telefonoEmergencia}
-                    icon={<IconPhone size={18} />}
+                    icon={<IconPhone className="size-4" />}
                     onSave={(v) => saveField("telefonoEmergencia", v)}
                   />
                 </div>
               )}
 
               {activeTab === "cursos" && (
-                <ScrollArea className="h-[500px] pr-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <ScrollArea className="h-[480px] pr-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {profile.cursosImpartidos?.map((curso: any) => (
                       <div
                         key={curso.id}
-                        className="group relative p-8 rounded-[2.5rem] bg-card/20 border border-border/40 hover:bg-card/40 transition-all hover:scale-[1.02] hover:shadow-2xl"
+                        className="group relative rounded-2xl border border-border/40 bg-card/80 p-5 shadow-xs transition-shadow hover:shadow-md"
                       >
-                        <div className="flex items-center gap-4 mb-4">
+                        <div className="flex items-center gap-3.5 mb-3">
                           <div
-                            className="size-14 rounded-2xl flex items-center justify-center text-white shadow-lg transform group-hover:rotate-6 transition-transform"
-                            style={{ backgroundColor: curso.areaCurricular?.color || "#94a3b8" }}
+                            className="flex size-11 items-center justify-center rounded-xl text-white shadow-xs font-bold text-lg shrink-0"
+                            style={{
+                              backgroundColor:
+                                curso.areaCurricular?.color || "#4f46e5",
+                            }}
                           >
-                            <span className="text-2xl font-black">{curso.areaCurricular?.nombre?.charAt(0)}</span>
+                            <span>
+                              {curso.areaCurricular?.nombre?.charAt(0)}
+                            </span>
                           </div>
-                          <div>
-                            <h4 className="font-black text-lg leading-tight">{curso.nombre}</h4>
-                            <Badge variant="outline" className="mt-1 text-[9px] uppercase font-black tracking-widest bg-background/50">
+                          <div className="min-w-0">
+                            <h4 className="font-bold text-sm text-foreground leading-tight truncate">
+                              {curso.nombre}
+                            </h4>
+                            <Badge
+                              variant="outline"
+                              className="mt-1 text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md border-border/40"
+                            >
                               {curso.nivelAcademico?.nivel?.nombre}
                             </Badge>
                           </div>
                         </div>
-                        <Separator className="bg-border/20 mb-4" />
-                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-70">
-                          {curso.nivelAcademico?.grado?.nombre} - SECCIÓN {curso.nivelAcademico?.seccion}
+                        <Separator className="bg-border/20 mb-3" />
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                          {curso.nivelAcademico?.grado?.nombre} • SECCIÓN{" "}
+                          &quot;{curso.nivelAcademico?.seccion}&quot;
                         </p>
                       </div>
                     ))}
@@ -368,20 +454,24 @@ export function TeacherProfileClient({ profile: initialProfile }: TeacherProfile
               )}
 
               {activeTab === "seguridad" && (
-                <div className="flex flex-col items-center justify-center py-20 text-center">
-                  <div className="size-24 rounded-[2rem] bg-primary/10 text-primary flex items-center justify-center mb-8 shadow-inner">
-                    <IconLock size={48} strokeWidth={2.5} />
+                <div className="flex flex-col items-center justify-center py-16 text-center space-y-4">
+                  <div className="size-16 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 flex items-center justify-center shadow-xs">
+                    <IconLock className="size-8" />
                   </div>
-                  <h3 className="text-2xl font-black mb-2">Seguridad de la Cuenta</h3>
-                  <p className="text-muted-foreground text-sm font-bold max-w-xs mb-10 opacity-70">
-                    Cambia tu contraseña periódicamente para mantener tu cuenta segura.
-                  </p>
+                  <div className="space-y-1 max-w-sm">
+                    <h3 className="text-lg font-bold text-foreground">
+                      Seguridad de la Cuenta
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      Actualiza tu contraseña regularmente para mantener la seguridad de tus accesos al portal.
+                    </p>
+                  </div>
                   <Button
-                    className="rounded-2xl font-black px-10 py-7 h-auto shadow-2xl shadow-primary/30 hover:scale-[1.05] transition-all text-lg gap-3"
                     onClick={() => setShowPasswordDialog(true)}
+                    className="rounded-xl h-10 px-5 font-semibold text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 gap-2 cursor-pointer"
                   >
-                    <IconLock size={20} />
-                    Actualizar Contraseña
+                    <IconLock className="size-4" />
+                    <span>Actualizar Contraseña</span>
                   </Button>
                 </div>
               )}
@@ -390,7 +480,10 @@ export function TeacherProfileClient({ profile: initialProfile }: TeacherProfile
         </Card>
       </div>
 
-      <ChangePasswordDialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog} />
+      <ChangePasswordDialog
+        open={showPasswordDialog}
+        onOpenChange={setShowPasswordDialog}
+      />
     </div>
   );
 }

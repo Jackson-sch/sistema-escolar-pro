@@ -4,6 +4,7 @@ import { serialize } from "@/lib/dto";
 import prisma from "@/lib/prisma";
 import { createSafeAction } from "@/lib/safe-action";
 import { z } from "zod";
+import { getActiveSedeId } from "@/actions/active-sede";
 
 /**
  * Obtiene estadísticas generales del dashboard para directivos/administradores
@@ -12,7 +13,21 @@ export const getDashboardStatsAction = createSafeAction(
   z.object({}).optional(),
   async (_, session) => {
     const institucionId = session.user.institucionId;
+    const activeSedeId = await getActiveSedeId();
     const currentYear = new Date().getFullYear();
+
+    const studentWhereCondition: any = {
+      institucionId: institucionId || undefined,
+    };
+
+    if (activeSedeId) {
+      studentWhereCondition.matriculas = {
+        some: {
+          anioAcademico: currentYear,
+          nivelAcademico: { sedeId: activeSedeId },
+        },
+      };
+    }
 
     // 1. Estadísticas de Morosidad (Pagos vencidos)
     const now = new Date();
@@ -21,7 +36,7 @@ export const getDashboardStatsAction = createSafeAction(
         prisma.pago.aggregate({
           where: {
             estado: "completado",
-            estudiante: { institucionId: institucionId || undefined },
+            estudiante: studentWhereCondition,
           },
           _sum: { monto: true },
         }),
@@ -29,7 +44,7 @@ export const getDashboardStatsAction = createSafeAction(
           where: {
             estado: "pendiente",
             fechaVencimiento: { lt: now }, // Vencido
-            estudiante: { institucionId: institucionId || undefined },
+            estudiante: studentWhereCondition,
           },
           _sum: { monto: true },
         }),
@@ -37,7 +52,7 @@ export const getDashboardStatsAction = createSafeAction(
           where: {
             estado: "pendiente",
             fechaVencimiento: { gte: now }, // Por vencer
-            estudiante: { institucionId: institucionId || undefined },
+            estudiante: studentWhereCondition,
           },
           _sum: { monto: true },
         }),
@@ -54,7 +69,7 @@ export const getDashboardStatsAction = createSafeAction(
         where: {
           fecha: { gte: today, lt: tomorrow },
           presente: true,
-          estudiante: { institucionId: institucionId || undefined },
+          estudiante: studentWhereCondition,
         },
       }),
       prisma.asistencia.count({
@@ -127,19 +142,21 @@ export const getDashboardStatsAction = createSafeAction(
         const nextDate = new Date(date);
         nextDate.setDate(nextDate.getDate() + 1);
 
-        const total = await prisma.asistencia.count({
-          where: {
-            fecha: { gte: date, lt: nextDate },
-            estudiante: { institucionId: institucionId || undefined },
-          },
-        });
-        const present = await prisma.asistencia.count({
-          where: {
-            fecha: { gte: date, lt: nextDate },
-            presente: true,
-            estudiante: { institucionId: institucionId || undefined },
-          },
-        });
+        const [total, present] = await Promise.all([
+          prisma.asistencia.count({
+            where: {
+              fecha: { gte: date, lt: nextDate },
+              estudiante: { institucionId: institucionId || undefined },
+            },
+          }),
+          prisma.asistencia.count({
+            where: {
+              fecha: { gte: date, lt: nextDate },
+              presente: true,
+              estudiante: { institucionId: institucionId || undefined },
+            },
+          }),
+        ]);
         return {
           date: date.toISOString().split("T")[0],
           rate: total > 0 ? (present / total) * 100 : 0,
@@ -357,7 +374,7 @@ export const getTeacherDashboardAction = createSafeAction(
     const cursoIds = cursos.map((c) => c.id);
 
     // 2. Próximas evaluaciones (próximos 7 días)
-    const upcomingEvaluations = await prisma.evaluacion.findMany({
+    const upcomingEvaluationsPromise = prisma.evaluacion.findMany({
       where: {
         cursoId: { in: cursoIds },
         fecha: {
@@ -378,7 +395,7 @@ export const getTeacherDashboardAction = createSafeAction(
     });
 
     // 3. Alertas de asistencia (estudiantes con falta injustificada reciente)
-    const criticalAttendance = await prisma.asistencia.findMany({
+    const criticalAttendancePromise = prisma.asistencia.findMany({
       where: {
         presente: false,
         estudiante: {
@@ -400,7 +417,7 @@ export const getTeacherDashboardAction = createSafeAction(
     });
 
     // 4. Progreso de calificación (evaluaciones sin notas registradas)
-    const evaluationsToGrade = await prisma.evaluacion.findMany({
+    const evaluationsToGradePromise = prisma.evaluacion.findMany({
       where: {
         cursoId: { in: cursoIds },
         fecha: { lte: new Date() },
@@ -425,7 +442,7 @@ export const getTeacherDashboardAction = createSafeAction(
     // Let's assume 1-7 where 1=Mon.
     const dbDay = today === 0 ? 7 : today;
 
-    const todaySchedule = await prisma.horario.findMany({
+    const todaySchedulePromise = prisma.horario.findMany({
       where: {
         cursoId: { in: cursoIds },
         diaSemana: dbDay,
@@ -440,6 +457,14 @@ export const getTeacherDashboardAction = createSafeAction(
       },
       orderBy: { horaInicio: "asc" },
     });
+
+    const [upcomingEvaluations, criticalAttendance, evaluationsToGrade, todaySchedule] =
+      await Promise.all([
+        upcomingEvaluationsPromise,
+        criticalAttendancePromise,
+        evaluationsToGradePromise,
+        todaySchedulePromise,
+      ]);
 
     return {
       success: {

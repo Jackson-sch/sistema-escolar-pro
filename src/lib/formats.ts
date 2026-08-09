@@ -1,15 +1,17 @@
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 
+const currencyFormatter = new Intl.NumberFormat("es-PE", {
+  style: "currency",
+  currency: "PEN",
+});
+
 /**
  * Format a number as Peruvian currency (PEN)
  * Nota: date-fns no maneja monedas, por lo que se mantiene Intl.NumberFormat
  */
 export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("es-PE", {
-    style: "currency",
-    currency: "PEN",
-  }).format(amount);
+  return currencyFormatter.format(amount);
 }
 
 /* 
@@ -21,29 +23,12 @@ export function formatDate(dateStr: string | Date, pattern = "dd-MM-yyyy"): stri
 }
 
 /**
- * Format a date string to short format (e.g., "lun 16")
- */
-export function formatShortDate(dateStr: string | Date, pattern = "EEE d"): string {
-  const date = new Date(dateStr);
-  // 'EEE' da el día abreviado, 'd' el número del día
-  return format(date, pattern, { locale: es });
-}
-
-/**
  * Format a date string to long format (e.g., "lunes, 16 de diciembre")
  */
 export function formatLongDate(dateStr: string | Date, pattern = "EEEE, d 'de' MMMM"): string {
   const date = new Date(dateStr);
   // 'EEEE' día completo, 'MMMM' mes completo. Se escapa 'de' con comillas simples.
   return format(date, pattern, { locale: es });
-}
-
-/**
- * Format a date to month and year (e.g., "diciembre de 2025")
- */
-export function formatMonthYear(date: string | Date, pattern = "MMMM 'de' yyyy"): string {
-  const dateObj = new Date(date);
-  return format(dateObj, pattern, { locale: es });
 }
 
 /* 

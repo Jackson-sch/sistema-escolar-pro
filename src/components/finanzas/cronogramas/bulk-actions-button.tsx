@@ -59,7 +59,7 @@ export function BulkActionsButton({
         </Tooltip>
         <DropdownMenuContent
           align="end"
-          className="w-56 rounded-xl shadow-xl border-white/5 bg-zinc-950/90 backdrop-blur-xl"
+          className="w-56 rounded-xl shadow-xl border-white/5 bg-zinc-950/90"
         >
           <DropdownMenuLabel className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 px-3 py-2">
             Acciones Masivas

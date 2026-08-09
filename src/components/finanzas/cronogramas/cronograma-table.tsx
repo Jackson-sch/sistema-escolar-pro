@@ -30,46 +30,68 @@ import { anularPagoAction } from "@/actions/finance";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/formats";
 import type { FormatoComprobante } from "@/lib/comprobante-constants";
-import { Badge } from "@/components/ui/badge";
+import { LevelSegmentedControl } from "@/components/common/level-segmented-control";
 
 interface CronogramaTableProps {
   data: CronogramaTableType[];
   conceptos: any[];
+  niveles?: any[];
   institucion?: any;
   formatoComprobante?: FormatoComprobante;
 }
 
 interface CronogramaFiltersProps {
+  levelFilter: string;
   seccionFilter: string;
   estadoFilter: string;
   conceptoFilter: string;
   seccionesDisponibles: any[];
   conceptos: any[];
+  niveles: any[];
   filteredData: any[];
   meta: any;
 }
 
 function CronogramaFilters({
+  levelFilter,
   seccionFilter,
   estadoFilter,
   conceptoFilter,
   seccionesDisponibles,
   conceptos,
-  filteredData,
+  niveles,
   meta,
 }: CronogramaFiltersProps) {
   return (
-    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full">
-      <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 flex-1">
+    <div className="space-y-4 w-full">
+      {/* Control Segmentado de Nivel Educativo */}
+      {niveles && niveles.length > 0 && (
+        <LevelSegmentedControl
+          levels={[
+            { id: "all", label: "TODOS" },
+            ...niveles.map((n: any) => ({ id: n.id, label: n.nombre }))
+          ]}
+          value={levelFilter}
+          onChange={(val) => {
+            meta.setLevelFilter(val);
+            meta.setSeccionFilter("all");
+            meta.setPage(1);
+          }}
+          label="Nivel Educativo"
+        />
+      )}
+
+      {/* Selects Secundarios: Sección, Estado y Concepto */}
+      <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 flex-1">
         <Select value={seccionFilter} onValueChange={meta.setSeccionFilter}>
-          <SelectTrigger className="w-full h-10 bg-background/50 border-border/40 rounded-full text-xs font-black uppercase tracking-wider transition-all focus:ring-2 focus:ring-primary/20 hover:bg-background/80">
+          <SelectTrigger className="w-full h-10 bg-background/50 border-border/40 rounded-xl text-xs font-semibold uppercase tracking-wider transition-[background-color,box-shadow] focus:ring-2 focus:ring-indigo-500/20 hover:bg-background/80">
             <div className="flex items-center gap-2 truncate">
               <IconFilter className="size-4 opacity-40 shrink-0" />
               <SelectValue placeholder="Sección" />
             </div>
           </SelectTrigger>
-          <SelectContent className="border-border/40 bg-background/95 backdrop-blur-xl rounded-2xl">
-            <SelectItem value="all" className="text-xs font-bold">
+          <SelectContent className="border-border/40 bg-background/95 rounded-2xl">
+            <SelectItem value="all" className="text-xs font-semibold">
               TODAS LAS SECCIONES
             </SelectItem>
             {seccionesDisponibles.map(([id, label]) => (
@@ -85,33 +107,36 @@ function CronogramaFilters({
         </Select>
 
         <Select value={estadoFilter} onValueChange={meta.setEstadoFilter}>
-          <SelectTrigger className="w-full h-10 bg-background/50 border-border/40 rounded-full text-xs font-black uppercase tracking-wider transition-all focus:ring-2 focus:ring-primary/20 hover:bg-background/80">
+          <SelectTrigger className="w-full h-10 bg-background/50 border-border/40 rounded-xl text-xs font-semibold uppercase tracking-wider transition-[background-color,box-shadow] focus:ring-2 focus:ring-indigo-500/20 hover:bg-background/80">
             <div className="flex items-center gap-2 truncate">
               <IconCircleDashed className="size-4 opacity-40 shrink-0" />
               <SelectValue placeholder="Estado" />
             </div>
           </SelectTrigger>
-          <SelectContent className="border-border/40 bg-background/95 backdrop-blur-xl rounded-2xl">
-            <SelectItem value="all" className="text-xs font-bold">
+          <SelectContent className="border-border/40 bg-background/95 rounded-2xl">
+            <SelectItem value="all" className="text-xs font-semibold">
               TODOS LOS ESTADOS
             </SelectItem>
-            <SelectItem value="PAID" className="text-xs">PAGADO</SelectItem>
-            <SelectItem value="PENDING" className="text-xs">PENDIENTE</SelectItem>
-            <SelectItem value="EXPIRED" className="text-xs text-red-500 font-bold">VENCIDO</SelectItem>
-            <SelectItem value="PARTIALLY_PAID" className="text-xs">PARCIAL</SelectItem>
+            <SelectItem value="PAID" className="text-xs text-emerald-600 font-semibold">PAGADO</SelectItem>
+            <SelectItem value="PENDING" className="text-xs text-amber-600 font-semibold">PENDIENTE</SelectItem>
+            <SelectItem value="EXPIRED" className="text-xs text-rose-500 font-semibold">VENCIDO</SelectItem>
+            <SelectItem value="PARTIALLY_PAID" className="text-xs text-blue-600 font-semibold">PARCIAL</SelectItem>
+            <SelectItem value="PENDING_VERIFICATION" className="text-xs text-indigo-600 font-semibold">
+              POR VERIFICAR (VOUCHERS)
+            </SelectItem>
             <SelectItem value="VOIDED" className="text-xs opacity-50">ANULADO</SelectItem>
           </SelectContent>
         </Select>
 
         <Select value={conceptoFilter} onValueChange={meta.setConceptoFilter}>
-          <SelectTrigger className="w-full h-10 bg-background/50 border-border/40 rounded-full text-xs font-black uppercase tracking-wider transition-all focus:ring-2 focus:ring-primary/20 hover:bg-background/80 xs:col-span-2 sm:col-span-1 lg:col-span-1">
+          <SelectTrigger className="w-full h-10 bg-background/50 border-border/40 rounded-xl text-xs font-semibold uppercase tracking-wider transition-[background-color,box-shadow] focus:ring-2 focus:ring-indigo-500/20 hover:bg-background/80 xs:col-span-2 sm:col-span-1">
             <div className="flex items-center gap-2 truncate">
               <IconReceipt2 className="size-4 opacity-40 shrink-0" />
               <SelectValue placeholder="Concepto" />
             </div>
           </SelectTrigger>
-          <SelectContent className="border-border/40 bg-background/95 backdrop-blur-xl rounded-2xl">
-            <SelectItem value="all" className="text-xs font-bold">
+          <SelectContent className="border-border/40 bg-background/95 rounded-2xl">
+            <SelectItem value="all" className="text-xs font-semibold">
               TODOS LOS CONCEPTOS
             </SelectItem>
             {conceptos.map((c) => (
@@ -133,6 +158,7 @@ function CronogramaFilters({
 export function CronogramaTable({
   data,
   conceptos,
+  niveles = [],
   institucion,
   formatoComprobante,
 }: CronogramaTableProps) {
@@ -165,6 +191,10 @@ export function CronogramaTable({
   const [searchQuery, setSearchQuery] = useQueryState(
     "q",
     parseAsString.withDefault(""),
+  );
+  const [levelFilter, setLevelFilter] = useQueryState(
+    "nivel",
+    parseAsString.withDefault("all"),
   );
   const [seccionFilter, setSeccionFilter] = useQueryState(
     "seccion",
@@ -203,6 +233,16 @@ export function CronogramaTable({
   const filteredData = React.useMemo(() => {
     let result = [...data];
 
+    // Filtro por Nivel
+    if (levelFilter !== "all") {
+      result = result.filter(
+        (item: any) =>
+          item.estudiante?.nivelAcademico?.nivel?.id === levelFilter ||
+          (item.estudiante?.nivelAcademico?.nivel as any)?.id === levelFilter ||
+          (item.estudiante?.nivelAcademico?.nivel as any)?.nombre?.toLowerCase() === levelFilter.toLowerCase(),
+      );
+    }
+
     // Filtro por sección
     if (seccionFilter !== "all") {
       result = result.filter(
@@ -227,6 +267,12 @@ export function CronogramaTable({
         result = result.filter(
           (item) => !item.pagado && isVencido(item.fechaVencimiento),
         );
+      if (estadoFilter === "PENDING_VERIFICATION")
+        result = result.filter(
+          (item) =>
+            item.pagos?.some((p: any) => p.estado === "pendiente" || p.comprobante) ||
+            (item as any).estado === "PENDING_VERIFICATION",
+        );
       if (estadoFilter === "VOIDED")
         result = result.filter((item) =>
           item.pagos?.some((p: any) => p.estado === "anulado"),
@@ -239,28 +285,37 @@ export function CronogramaTable({
     }
 
     return result;
-  }, [data, seccionFilter, estadoFilter, conceptoFilter]);
+  }, [data, levelFilter, seccionFilter, estadoFilter, conceptoFilter]);
 
   const seccionesDisponibles = React.useMemo(() => {
     const map = new Map();
     data.forEach((item) => {
       const s = item.estudiante.nivelAcademico;
       if (s) {
-        const id = item.estudiante.nivelAcademicoId;
-        map.set(id, `${s.nivel.nombre} - ${s.grado.nombre} "${s.seccion}"`);
+        const nivelObj = s.nivel as any;
+        if (
+          levelFilter === "all" ||
+          nivelObj?.id === levelFilter ||
+          nivelObj?.nombre?.toLowerCase() === levelFilter.toLowerCase()
+        ) {
+          const id = item.estudiante.nivelAcademicoId;
+          map.set(id, `${nivelObj?.nombre || ""} - ${s.grado?.nombre || ""} "${s.seccion}"`);
+        }
       }
     });
     return Array.from(map.entries());
-  }, [data]);
+  }, [data, levelFilter]);
 
   const hasActiveFilters =
     searchQuery !== "" ||
+    levelFilter !== "all" ||
     seccionFilter !== "all" ||
     estadoFilter !== "all" ||
     conceptoFilter !== "all";
 
   const clearFilters = () => {
     setSearchQuery("");
+    setLevelFilter("all");
     setSeccionFilter("all");
     setEstadoFilter("all");
     setConceptoFilter("all");
@@ -274,18 +329,17 @@ export function CronogramaTable({
         <Button
           variant="outline"
           size="sm"
-          className="h-10 px-6 w-full sm:w-auto border-emerald-500/20 text-emerald-600 bg-emerald-500/5 hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-all rounded-xl font-black text-[10px] uppercase tracking-widest gap-2 shadow-sm"
+          className="h-10 px-5 w-full sm:w-auto border-emerald-500/20 text-emerald-600 bg-emerald-500/5 hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-[background-color,border-color] rounded-xl font-semibold text-xs gap-2 shadow-xs"
           title="Exportar a Excel"
           onClick={() =>
             exportToExcel(
               formatCronogramaForExcel(filteredData),
-              "Reporte_Cobranza",
-              "Pagos",
+              `Cronograma_Pagos_${new Date().toISOString().split("T")[0]}`,
             )
           }
         >
           <IconTable className="size-4" />
-          <span>Exportar Data</span>
+          <span>Exportar a Excel</span>
         </Button>
       </div>
 
@@ -293,69 +347,64 @@ export function CronogramaTable({
         columns={columns}
         data={filteredData}
         searchKey="estudiante"
-        searchPlaceholder="Buscar estudiante..."
-        searchValue={searchQuery}
-        onSearchChange={(value) => {
-          setSearchQuery(value);
-          setPage(1);
-        }}
-        onClearFilters={clearFilters}
-        hasActiveFilters={hasActiveFilters}
-        meta={{ institucion }}
-        showColumnVisibility={false}
-        // Controlled pagination
+        searchPlaceholder="Buscar por estudiante (DNI, Nombres)..."
         pageIndex={page - 1}
         pageSize={limit}
-        onPageIndexChange={(index) => setPage(index + 1)}
-        onPageSizeChange={setLimit}
+        onPageIndexChange={(newPageIndex: number) => setPage(newPageIndex + 1)}
+        onPageSizeChange={(newPageSize: number) => setLimit(newPageSize)}
+        hasActiveFilters={hasActiveFilters}
+        onClearFilters={clearFilters}
       >
-        {() => (
-          <CronogramaFilters
-            seccionFilter={seccionFilter}
-            estadoFilter={estadoFilter}
-            conceptoFilter={conceptoFilter}
-            seccionesDisponibles={seccionesDisponibles}
-            conceptos={conceptos}
-            filteredData={filteredData}
-            meta={{ setSeccionFilter, setEstadoFilter, setConceptoFilter }}
-          />
-        )}
+        <CronogramaFilters
+          levelFilter={levelFilter}
+          seccionFilter={seccionFilter}
+          estadoFilter={estadoFilter}
+          conceptoFilter={conceptoFilter}
+          seccionesDisponibles={seccionesDisponibles}
+          conceptos={conceptos}
+          niveles={niveles}
+          filteredData={filteredData}
+          meta={{
+            setLevelFilter,
+            setSeccionFilter,
+            setEstadoFilter,
+            setConceptoFilter,
+            setPage,
+          }}
+        />
       </DataTable>
 
-      {/* Dialog de Pago */}
-      <PagoDialog
-        open={showPagoDialog}
-        onOpenChange={(open) => {
-          setShowPagoDialog(open);
-          if (!open) {
-            setSelectedCronograma(null);
-            setMontoPago("");
-            setNumeroBoleta("");
-          }
-        }}
-        cronograma={selectedCronograma}
-        institucion={institucion}
-        initialMonto={montoPago}
-        initialNumeroBoleta={numeroBoleta}
-        formatoComprobante={formatoComprobante}
-      />
+      {/* Modal para Registrar Pago */}
+      {selectedCronograma && (
+        <PagoDialog
+          open={showPagoDialog}
+          onOpenChange={(openVal) => {
+            setShowPagoDialog(openVal);
+            if (!openVal) setSelectedCronograma(null);
+          }}
+          cronograma={selectedCronograma}
+          initialMonto={montoPago}
+          initialNumeroBoleta={numeroBoleta}
+          institucion={institucion}
+          formatoComprobante={formatoComprobante}
+        />
+      )}
 
-      {/* Dialog de Anulación */}
-      <ConfirmModal
-        isOpen={showVoidDialog}
-        onClose={() => {
-          setShowVoidDialog(false);
-          setSelectedPago(null);
-        }}
-        onConfirm={onAnularPago}
-        loading={isPendingVoid}
-        title="¿Anular este pago?"
-        description={
-          selectedPago
-            ? `Estás a punto de anular el pago ${selectedPago.numeroBoleta || "S/N"} por un monto de ${formatCurrency(selectedPago.monto)} correspondiente a ${selectedPago.concepto}. Esta acción revertirá el saldo del estudiante y marcará el comprobante como anulado.`
-            : ""
-        }
-      />
+      {/* Modal para Confirmar Anulación de Pago */}
+      {selectedPago && (
+        <ConfirmModal
+          isOpen={showVoidDialog}
+          onClose={() => {
+            setShowVoidDialog(false);
+            setSelectedPago(null);
+          }}
+          onConfirm={onAnularPago}
+          title="Anular Pago Registrado"
+          description={`¿Estás seguro de que deseas anular el pago de ${formatCurrency(selectedPago.monto)}? Esta acción reversará el saldo y marcará la boleta como anulada.`}
+          loading={isPendingVoid}
+          variant="danger"
+        />
+      )}
     </div>
   );
 }

@@ -10,11 +10,14 @@ import {
   IconCamera,
   IconTrash,
   IconLoader2,
+  IconBrandWhatsapp,
+  IconSchool,
 } from "@tabler/icons-react";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { cn } from "@/lib/utils";
 import { updateStudentAction } from "@/actions/students";
 import { useAvatarUpload } from "@/hooks/use-avatar-upload";
+import { Button } from "@/components/ui/button";
 
 interface StudentProfileHeaderProps {
   student: StudentTableType;
@@ -42,8 +45,17 @@ export function StudentProfileHeader({
     },
   });
 
+  // Apoderado principal para contacto directo
+  const primaryGuardian = useMemo(() => {
+    const list = (initialStudent as any).padresTutores || [];
+    return (
+      list.find((p: any) => p.contactoPrimario)?.padreTutor ||
+      list[0]?.padreTutor ||
+      null
+    );
+  }, [initialStudent]);
 
-  // Memoizar valores calculados para evitar recálculos innecesarios
+  // Memoizar valores calculados
   const initials = useMemo(() => {
     return `${initialStudent.name?.[0] || ""}${initialStudent.apellidoPaterno?.[0] || ""}`;
   }, [initialStudent.name, initialStudent.apellidoPaterno]);
@@ -53,14 +65,24 @@ export function StudentProfileHeader({
   }, [initialStudent.name, initialStudent.apellidoPaterno, initialStudent.apellidoMaterno]);
 
   // Color del estado con fallback seguro
-  const statusColor = initialStudent.estado?.color || "#6b7280";
+  const statusColor = initialStudent.estado?.color || "#6366F1";
 
   const handleCopyDni = () => {
     copy(initialStudent.dni || "", "DNI copiado al portapapeles");
   };
 
+  const handleOpenWhatsapp = () => {
+    if (!primaryGuardian?.telefono) return;
+    const cleanPhone = primaryGuardian.telefono.replace(/\D/g, "");
+    const fullPhone = cleanPhone.length === 9 ? `51${cleanPhone}` : cleanPhone;
+    const msg = encodeURIComponent(
+      `Estimado(a) ${primaryGuardian.name || "Apoderado"}, le saludamos de la institución educativa con relación al alumno(a) ${fullName}.`
+    );
+    window.open(`https://wa.me/${fullPhone}?text=${msg}`, "_blank");
+  };
+
   return (
-    <div className="relative pt-8 md:pt-12 px-4 md:px-6 overflow-hidden pb-2 bg-background/50">
+    <div className="relative pt-6 md:pt-8 px-4 md:px-6 overflow-hidden pb-4 bg-background/50 border-b border-border/30">
       {/* Decoración de fondo */}
       <div
         className="absolute inset-0 z-0 opacity-[0.03]"
@@ -73,22 +95,14 @@ export function StudentProfileHeader({
 
       {/* Gradientes ambientales */}
       <div
-        className="absolute inset-0 bg-linear-to-b from-primary/5 via-transparent to-transparent z-0"
-        aria-hidden="true"
-      />
-      <div
-        className="absolute -top-24 -right-24 size-64 bg-primary/10 blur-[100px] rounded-full z-0"
-        aria-hidden="true"
-      />
-      <div
-        className="absolute -top-24 -left-24 size-64 bg-primary/10 blur-[100px] rounded-full z-0"
+        className="absolute inset-0 bg-gradient-to-b from-indigo-500/5 via-transparent to-transparent z-0"
         aria-hidden="true"
       />
 
       {/* Contenido principal */}
-      <div className="relative z-10 flex flex-col items-center text-center gap-4">
+      <div className="relative z-10 flex flex-col items-center text-center gap-3">
         {/* Avatar con indicador de estado */}
-        <div className="relative mb-1 group">
+        <div className="relative group">
           <input
             type="file"
             ref={fileInputRef}
@@ -96,16 +110,11 @@ export function StudentProfileHeader({
             accept="image/*"
             onChange={handleFileChange}
           />
-          <div
-            className="absolute inset-0 blur-2xl rounded-full opacity-40 transition-opacity group-hover:opacity-60"
-            style={{ backgroundColor: statusColor }}
-            aria-hidden="true"
-          />
 
-          <div className="relative p-1 rounded-full bg-primary/80 backdrop-blur-sm shadow-xl overflow-visible">
+          <div className="relative p-1 rounded-full bg-indigo-500/10 shadow-lg overflow-visible">
             <Avatar className="size-16 md:size-20 border-2 border-background shadow-inner relative overflow-hidden">
               <AvatarImage src={studentImage ?? undefined} className="object-cover" />
-              <AvatarFallback className="text-2xl md:text-3xl font-black bg-linear-to-br from-primary to-primary/50 text-white uppercase">
+              <AvatarFallback className="text-xl md:text-2xl font-bold bg-indigo-600 text-white uppercase">
                 {initials}
               </AvatarFallback>
 
@@ -121,8 +130,8 @@ export function StudentProfileHeader({
             <button
               disabled={isUploading}
               onClick={handleImageClick}
-              className="absolute -bottom-1 -right-1 size-7 rounded-full bg-primary text-primary-foreground border-2 border-background shadow-md flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-30"
-              title="Cambiar imagen"
+              className="absolute -bottom-1 -right-1 size-7 rounded-full bg-indigo-600 text-white border-2 border-background shadow-md flex items-center justify-center hover:scale-110 active:scale-95 transition-transform z-30 cursor-pointer"
+              title="Cambiar foto de perfil"
             >
               {isUploading ? (
                 <IconLoader2 className="size-3 animate-spin" />
@@ -135,84 +144,87 @@ export function StudentProfileHeader({
             {studentImage && !isUploading && (
               <button
                 onClick={handleDeleteImage}
-                className="absolute -bottom-1 -left-1 size-7 rounded-full bg-red-500 text-white border-2 border-background shadow-md flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-30"
-                title="Eliminar imagen"
+                className="absolute -bottom-1 -left-1 size-7 rounded-full bg-rose-500 text-white border-2 border-background shadow-md flex items-center justify-center hover:scale-110 active:scale-95 transition-transform z-30 cursor-pointer"
+                title="Eliminar foto"
               >
                 <IconTrash className="size-3.5" />
               </button>
             )}
 
-            {/* Indicador circular de estado (Movido arriba si hay botones) */}
+            {/* Indicador de estado */}
             <div
-              className="absolute top-0 right-0 size-3.5 rounded-full border-2 border-background shadow-sm z-30"
+              className="absolute top-0 right-0 size-3.5 rounded-full border-2 border-background shadow-xs z-30"
               style={{ backgroundColor: statusColor }}
-              aria-label={`Estado: ${initialStudent.estado?.nombre || "Desconocido"}`}
-              role="status"
             />
           </div>
         </div>
 
         {/* Nombre del estudiante */}
-        <h1 className="text-xl md:text-2xl font-black tracking-tight text-foreground capitalize drop-shadow-sm line-clamp-2 md:line-clamp-none">
-          {fullName}
-        </h1>
+        <div className="space-y-1">
+          <h1 className="text-lg md:text-xl font-bold tracking-tight text-foreground capitalize drop-shadow-xs line-clamp-1">
+            {fullName}
+          </h1>
 
-        {/* Badges interactivos */}
-        <div className="flex flex-wrap justify-center gap-2.5">
+          {/* Grado / Sección Subtítulo */}
+          {initialStudent.nivelAcademico && (
+            <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 flex items-center justify-center gap-1.5">
+              <IconSchool className="size-3.5" />
+              {initialStudent.nivelAcademico.grado.nombre} &quot;{initialStudent.nivelAcademico.seccion}&quot; · {initialStudent.nivelAcademico.nivel?.nombre || "General"}
+            </p>
+          )}
+        </div>
+
+        {/* Badges interactivos y Contacto */}
+        <div className="flex flex-wrap justify-center items-center gap-2 pt-1">
           {/* Badge DNI copiable */}
           <Badge
             variant="secondary"
             onClick={handleCopyDni}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                handleCopyDni();
-              }
-            }}
             className={cn(
-              "group cursor-pointer pl-2 pr-3 h-7 gap-1.5 transition-all duration-300",
-              "bg-muted/50 hover:bg-muted border-border/40 hover:border-violet-500/30 backdrop-blur-md",
-              "focus:outline-none focus:ring-2 focus:ring-violet-500/50",
+              "group cursor-pointer pl-2 pr-3 h-7 gap-1.5 transition-[border-color] duration-200 border border-border/40 hover:border-indigo-500/30 rounded-xl",
             )}
-            role="button"
-            tabIndex={0}
-            aria-label={`Copiar DNI: ${initialStudent.dni || "S/N"}`}
-            aria-pressed={copied}
+            title="Haga clic para copiar DNI"
           >
-            <div className="p-1 bg-background rounded-full shadow-xs group-hover:text-violet-600 transition-colors">
+            <div className="p-0.5 bg-background rounded-md group-hover:text-indigo-600 transition-colors">
               {copied ? (
-                <IconCheck size={10} stroke={3} aria-label="Copiado" />
+                <IconCheck className="size-3 text-emerald-500" />
               ) : (
-                <IconCopy size={10} />
+                <IconCopy className="size-3 text-muted-foreground" />
               )}
             </div>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground group-hover:text-foreground">
-              {initialStudent.dni || "S/N"}
+            <span className="text-xs font-mono font-semibold text-muted-foreground group-hover:text-foreground">
+              DNI: {initialStudent.dni || "S/N"}
             </span>
           </Badge>
 
-          {/* Badge de estado */}
+          {/* Badge de Estado */}
           {initialStudent.estado && (
             <Badge
               variant="outline"
-              className="h-7 px-3 border shadow-none backdrop-blur-md transition-all hover:brightness-105"
+              className="h-7 px-3 border shadow-none rounded-xl text-xs font-semibold uppercase tracking-wider"
               style={{
                 borderColor: `${statusColor}40`,
                 backgroundColor: `${statusColor}10`,
                 color: statusColor,
               }}
-              role="badge"
-              aria-label={`Estado: ${initialStudent.estado.nombre}`}
             >
-              <span className="text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5">
-                <span
-                  className="size-1.5 rounded-full"
-                  style={{ backgroundColor: statusColor }}
-                  aria-hidden="true"
-                />
-                {initialStudent.estado.nombre}
-              </span>
+              <span className="size-1.5 rounded-full mr-1.5" style={{ backgroundColor: statusColor }} />
+              {initialStudent.estado.nombre}
             </Badge>
+          )}
+
+          {/* Botón WhatsApp Directo */}
+          {primaryGuardian?.telefono && (
+            <Button
+              size="sm"
+              type="button"
+              onClick={handleOpenWhatsapp}
+              className="h-7 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs gap-1.5 shadow-xs transition-[background-color,transform] hover:scale-105 cursor-pointer"
+              title={`Enviar WhatsApp a ${primaryGuardian.name || "Apoderado"} (${primaryGuardian.telefono})`}
+            >
+              <IconBrandWhatsapp className="size-3.5" />
+              <span>WhatsApp</span>
+            </Button>
           )}
         </div>
       </div>

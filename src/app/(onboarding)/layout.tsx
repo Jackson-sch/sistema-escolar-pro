@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { getLayoutUserAction } from "@/actions/auth";
-import { IconSchool } from "@tabler/icons-react";
+import { BrandLogo } from "@/components/common/brand-logo";
 
 export default async function OnboardingLayout({
   children,
@@ -37,15 +37,7 @@ export default async function OnboardingLayout({
 
       {/* Header */}
       <header className="relative z-10 flex items-center justify-between px-6 sm:px-10 py-6">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 backdrop-blur-sm">
-            <IconSchool className="h-5 w-5 text-primary" />
-          </div>
-          <div>
-            <span className="font-bold text-lg tracking-tight">EduPeru Pro</span>
-            <p className="text-xs text-zinc-500">Configuración Inicial</p>
-          </div>
-        </div>
+        <BrandLogo iconSize={36} />
       </header>
 
       {/* Main content */}
@@ -55,7 +47,7 @@ export default async function OnboardingLayout({
 
       {/* Footer */}
       <footer className="relative z-10 text-center py-4 text-xs text-zinc-600">
-        © {new Date().getFullYear()} EduPeru Pro. Todos los derechos reservados.
+        © {new Date().getFullYear()} EduNova Pro. Todos los derechos reservados.
       </footer>
     </div>
   );

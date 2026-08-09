@@ -1,11 +1,10 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import {
   IconTrophy,
   IconPercentage,
-  IconChartInfographic,
+  IconChartBar,
 } from "@tabler/icons-react";
 
 interface StatsSummaryProps {
@@ -23,75 +22,45 @@ export function NotasStatsSummary({
     {
       label: "Promedio General",
       value: `${promedio.toFixed(1)}/20`,
-      icon: IconChartInfographic,
-      color: "text-blue-500",
-      bg: "bg-blue-500/10",
-      border: "border-blue-500/20",
-      glow: "shadow-blue-500/10",
+      sub: "Escala vigesimal acumulada",
+      icon: IconChartBar,
+      color: "text-indigo-600 dark:text-indigo-400",
+      bg: "bg-indigo-500/10 border-indigo-500/20",
     },
     {
-      label: "Asistencia Total",
+      label: "Asistencia Efectiva",
       value: `${asistencia}%`,
+      sub: "Presencia en aulas",
       icon: IconPercentage,
-      color: "text-emerald-500",
-      bg: "bg-emerald-500/10",
-      border: "border-emerald-500/20",
-      glow: "shadow-emerald-500/10",
+      color: "text-emerald-600 dark:text-emerald-400",
+      bg: "bg-emerald-500/10 border-emerald-500/20",
     },
     {
-      label: "Posición Ranking",
+      label: "Mérito Académico",
       value: ranking,
+      sub: "Posición en la sección",
       icon: IconTrophy,
-      color: "text-amber-500",
-      bg: "bg-amber-500/10",
-      border: "border-amber-500/20",
-      glow: "shadow-amber-500/10",
+      color: "text-amber-600 dark:text-amber-400",
+      bg: "bg-amber-500/10 border-amber-500/20",
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {stats.map((stat, index) => (
-        <Card
-          key={index}
-          className={cn(
-            "group relative overflow-hidden rounded-[2rem] border p-6 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl",
-            stat.bg,
-            stat.border,
-            stat.glow,
-          )}
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-3 w-full">
+      {stats.map((stat) => (
+        <div
+          key={stat.label}
+          className="p-4 rounded-2xl bg-card/80 border border-border/50 shadow-sm flex items-center justify-between transition-[background-color,box-shadow] hover:bg-card hover:shadow-md"
         >
-          <div className="flex items-center gap-5">
-            <div
-              className={cn(
-                "flex size-14 items-center justify-center rounded-2xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-6",
-                stat.bg,
-                stat.color,
-              )}
-            >
-              <stat.icon className="size-8" />
-            </div>
-
-            <div className="space-y-0.5">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">
-                {stat.label}
-              </p>
-              <h3
-                className={cn("text-2xl font-black tracking-tight", stat.color)}
-              >
-                {stat.value}
-              </h3>
-            </div>
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{stat.label}</span>
+            <h3 className="text-2xl md:text-3xl font-bold font-mono text-foreground mt-0.5">{stat.value}</h3>
+            <p className="text-[11px] text-muted-foreground/80 mt-1">{stat.sub}</p>
           </div>
-
-          {/* Decorative background circle */}
-          <div
-            className={cn(
-              "absolute -right-8 -top-8 size-24 rounded-full opacity-10 transition-transform duration-700 group-hover:scale-150",
-              stat.bg,
-            )}
-          />
-        </Card>
+          <div className={cn("size-11 rounded-xl border flex items-center justify-center shrink-0 shadow-xs", stat.bg, stat.color)}>
+            <stat.icon className="size-5" />
+          </div>
+        </div>
       ))}
     </div>
   );

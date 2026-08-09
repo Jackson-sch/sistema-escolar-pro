@@ -6,9 +6,17 @@ import {
   IconDownload,
   IconLoader2,
 } from "@tabler/icons-react";
+import dynamic from "next/dynamic";
 import { toast } from "sonner";
-import { PDFDownloadLink } from "@react-pdf/renderer";
-import { ConstanciaEstudiosPDF } from "@/components/gestion/documentos/constancia-estudios-pdf";
+
+const PDFDownloadLink = dynamic(
+  () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
+  { ssr: false }
+);
+const ConstanciaEstudiosPDF = dynamic<any>(
+  () => import("@/components/gestion/documentos/constancia-estudios-pdf").then((mod) => mod.ConstanciaEstudiosPDF),
+  { ssr: false }
+);
 import { getConstanciaDataAction } from "@/actions/reports";
 import { registerDocumentAction } from "@/actions/documents";
 import { generateVerificationCode } from "@/lib/pdf-utils";

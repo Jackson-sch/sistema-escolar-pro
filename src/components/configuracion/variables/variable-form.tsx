@@ -8,6 +8,7 @@ import {
   IconEyeOff,
   IconX,
   IconDeviceFloppy,
+  IconKey,
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -16,27 +17,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { upsertVariableAction } from "@/actions/variables";
 import { VariableSistema } from "./types";
-
+import { FormKeyboardHelpBar } from "@/components/common/form-keyboard-help-bar";
 import { useFormShortcuts } from "@/hooks/use-form-shortcuts";
+import { Card } from "@/components/ui/card";
 
 interface VariableFormProps {
   onVariableSaved: (variable: VariableSistema) => void;
 }
-
-const RECOMMENDED_VARS = [
-  {
-    clave: "GOOGLE_GENERATIVE_AI_API_KEY",
-    descripcion: "Clave API de Google AI para Gemini",
-  },
-  {
-    clave: "GEMINI_MODEL",
-    descripcion: "Nombre del modelo de Gemini a usar",
-    defaultValue: "gemini-1.5-flash-latest",
-  },
-  { clave: "SMTP_HOST", descripcion: "Host del servidor SMTP para correos" },
-  { clave: "SMTP_USER", descripcion: "Usuario SMTP" },
-  { clave: "SMTP_PASS", descripcion: "Contraseña SMTP" },
-];
 
 export function VariableForm({ onVariableSaved }: VariableFormProps) {
   const [newVars, setNewVars] = React.useState<
@@ -99,7 +86,7 @@ export function VariableForm({ onVariableSaved }: VariableFormProps) {
           const after = prev.slice(index + 1);
           return [...before, ...parsed, ...after];
         });
-        toast.success(`${parsed.length} variable(s) detectada(s) y añadida(s)`);
+        toast.success(`${parsed.length} variable(s) detectada(s) y procesada(s)`);
       }
     }
   };
@@ -129,7 +116,7 @@ export function VariableForm({ onVariableSaved }: VariableFormProps) {
     }
 
     if (successCount > 0) {
-      toast.success(`${successCount} variable(s) guardada(s)`);
+      toast.success(`${successCount} variable(s) guardada(s) correctamente`);
       setNewVars([{ key: "", value: "", note: "", sensitive: true }]);
     }
   };
@@ -173,34 +160,39 @@ export function VariableForm({ onVariableSaved }: VariableFormProps) {
 
       if (parsed.length > 0) {
         setNewVars(parsed);
-        toast.success(`${parsed.length} variables importadas`);
+        toast.success(`${parsed.length} variables importadas desde archivo .env`);
       } else {
-        toast.error("No se encontraron variables válidas");
+        toast.error("No se encontraron variables válidas en el archivo");
       }
     };
     input.click();
   };
 
   return (
-    <div className="bg-card border border-border rounded-2xl p-6 space-y-4">
-      <div className="space-y-6 sm:space-y-4">
+    <Card className="bg-card/80 border-border/40 rounded-2xl p-5 shadow-xl space-y-4">
+      <div className="flex items-center justify-between border-b border-border/30 pb-3">
+        <div className="flex items-center gap-2">
+          <IconKey className="size-4 text-indigo-500" />
+          <h3 className="text-sm font-bold text-foreground">Registro de Variables del Sistema</h3>
+        </div>
+        <span className="text-[11px] text-muted-foreground font-medium">
+          Soporta pegado directo de archivos .env
+        </span>
+      </div>
+
+      <div className="space-y-3">
         {newVars.map((v, index) => (
           <div
-            key={index}
-            className="flex flex-col gap-4 sm:grid sm:grid-cols-12 sm:gap-3 items-start"
+            key={v.key}
+            className="grid grid-cols-12 gap-2.5 items-end bg-background/40 p-3 rounded-xl border border-border/30"
           >
             {/* Key */}
-            <div className="w-full sm:col-span-3">
-              <Label
-                className={cn(
-                  "text-xs text-muted-foreground mb-1.5 block",
-                  index !== 0 && "sm:hidden",
-                )}
-              >
-                Key
+            <div className="col-span-12 sm:col-span-4">
+              <Label className="text-xs font-medium text-foreground/80 mb-1 block">
+                Nombre de la Clave (Key)
               </Label>
               <Input
-                placeholder="API_KEY..."
+                placeholder="Ej. API_KEY_SERVICIO"
                 value={v.key}
                 onChange={(e) =>
                   updateNewVar(
@@ -210,122 +202,106 @@ export function VariableForm({ onVariableSaved }: VariableFormProps) {
                   )
                 }
                 onPaste={(e) => handlePaste(e, index)}
-                className="font-mono text-sm rounded-full bg-background w-full"
+                className="font-mono text-xs bg-background border-border/40 rounded-xl h-9"
               />
             </div>
 
             {/* Value */}
-            <div className="w-full sm:col-span-4">
-              <Label
-                className={cn(
-                  "text-xs text-muted-foreground mb-1.5 block",
-                  index !== 0 && "sm:hidden",
-                )}
-              >
-                Value
+            <div className="col-span-12 sm:col-span-4">
+              <Label className="text-xs font-medium text-foreground/80 mb-1 block">
+                Valor (Value)
               </Label>
               <Input
                 type={v.sensitive ? "password" : "text"}
-                placeholder="Valor..."
+                placeholder="Ej. sk_live_99218..."
                 value={v.value}
                 onChange={(e) => updateNewVar(index, "value", e.target.value)}
-                className="font-mono text-sm rounded-full bg-background w-full"
+                className="font-mono text-xs bg-background border-border/40 rounded-xl h-9"
               />
             </div>
 
             {/* Note */}
-            <div className="w-full sm:col-span-3">
-              <Label
-                className={cn(
-                  "text-xs text-muted-foreground mb-1.5 block",
-                  index !== 0 && "sm:hidden",
-                )}
-              >
-                Note
+            <div className="col-span-10 sm:col-span-3">
+              <Label className="text-xs font-medium text-foreground/80 mb-1 block">
+                Descripción / Nota
               </Label>
               <Input
-                placeholder="Descripción..."
+                placeholder="Opcional..."
                 value={v.note}
                 onChange={(e) => updateNewVar(index, "note", e.target.value)}
-                className="text-sm rounded-full bg-background w-full"
+                className="text-xs bg-background border-border/40 rounded-xl h-9"
               />
             </div>
 
             {/* Actions */}
-            <div className="w-full sm:col-span-2 flex flex-col">
-              <Label
-                className={cn(
-                  "text-xs text-muted-foreground mb-1.5 block",
-                  index === 0 ? "opacity-0 sm:opacity-100 sm:block" : "hidden",
-                )}
+            <div className="col-span-2 sm:col-span-1 flex items-center justify-end gap-1 pb-0.5">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="size-8 rounded-lg text-muted-foreground hover:text-foreground cursor-pointer"
+                onClick={() => updateNewVar(index, "sensitive", !v.sensitive)}
+                title={v.sensitive ? "Valor oculto" : "Valor visible"}
               >
-                Acc
-              </Label>
-              <div className="flex items-center justify-end sm:justify-start gap-2 h-10">
+                {v.sensitive ? (
+                  <IconEyeOff className="size-4" />
+                ) : (
+                  <IconEye className="size-4" />
+                )}
+              </Button>
+              {newVars.length > 1 && (
                 <Button
+                  type="button"
                   variant="ghost"
                   size="icon"
-                  className="size-8 rounded-full hover:bg-white/10"
-                  onClick={() => updateNewVar(index, "sensitive", !v.sensitive)}
-                  title={v.sensitive ? "Sensible (oculto)" : "Visible"}
+                  className="size-8 text-rose-500 hover:bg-rose-500/10 rounded-lg cursor-pointer"
+                  onClick={() => removeNewVarRow(index)}
+                  title="Eliminar fila"
                 >
-                  {v.sensitive ? (
-                    <IconEyeOff className="size-4 text-muted-foreground" />
-                  ) : (
-                    <IconEye className="size-4 text-muted-foreground" />
-                  )}
+                  <IconX className="size-4" />
                 </Button>
-                {newVars.length > 1 && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="size-8 text-red-500 hover:bg-red-500/10 rounded-full"
-                    onClick={() => removeNewVarRow(index)}
-                  >
-                    <IconX className="size-4" />
-                  </Button>
-                )}
-              </div>
+              )}
             </div>
           </div>
         ))}
       </div>
 
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-4 border-t border-border">
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+      {/* Guía de Atajos de Teclado */}
+      <FormKeyboardHelpBar />
+
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-border/30">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <Button
+            type="button"
             variant="outline"
             size="sm"
             onClick={addNewVarRow}
-            className="flex-1 sm:flex-none gap-2 rounded-full border-border/40"
+            className="flex-1 sm:flex-none rounded-xl h-9 px-3.5 text-xs font-semibold border-border/40 gap-1.5 cursor-pointer"
           >
             <IconPlus className="size-4" />
-            Añadir Otra
+            <span>Añadir Fila</span>
           </Button>
           <Button
+            type="button"
             variant="outline"
             size="sm"
             onClick={handleImportEnv}
-            className="flex-1 sm:flex-none gap-2 rounded-full border-border/40"
+            className="flex-1 sm:flex-none rounded-xl h-9 px-3.5 text-xs font-semibold border-border/40 gap-1.5 cursor-pointer"
           >
             <IconUpload className="size-4" />
-            Importar .env
+            <span>Importar .env</span>
           </Button>
         </div>
-        <div className="flex flex-col sm:flex-row items-center gap-3">
-          <span className="text-[10px] sm:text-xs text-muted-foreground text-center sm:text-left order-2 sm:order-1">
-            o pega el contenido de .env arriba
-          </span>
-          <Button
-            onClick={handleSaveAll}
-            className="w-full sm:w-auto rounded-full gap-2 shadow-lg shadow-primary/20 order-1 sm:order-2"
-            size="sm"
-          >
-            <IconDeviceFloppy className="size-4" />
-            Guardar Todo
-          </Button>
-        </div>
+
+        <Button
+          type="button"
+          onClick={handleSaveAll}
+          className="w-full sm:w-auto rounded-xl px-6 h-9 font-semibold text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 gap-2 cursor-pointer"
+        >
+          <IconDeviceFloppy className="size-4" />
+          <span>Guardar Variables</span>
+        </Button>
       </div>
-    </div>
+    </Card>
   );
 }

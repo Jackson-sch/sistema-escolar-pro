@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { createSafeAction } from "@/lib/safe-action";
 import { z } from "zod";
+import { sendMultichannelNotificationAction } from "@/actions/notifications";
 
 const REVALIDATE_PATH = "/gestion/estudiantes";
 
@@ -118,6 +119,27 @@ export const upsertPsychopedagogicalAction = createSafeAction(
             categoria: { connect: { id: categoriaId } },
           },
         });
+
+        // Alerta automática multicanal a los padres si el registro es visible para ellos
+        if (visibleParaPadres) {
+          const cat = await prisma.categoriaIncidente.findUnique({
+            where: { id: categoriaId },
+            select: { nombre: true },
+          });
+          const categoriaNombre = cat?.nombre || "Seguimiento Psicopedagógico";
+
+          const subject = `Nuevo reporte psicopedagógico - ${estudiante.name}`;
+          const message = `Estimado padre/tutor: Se ha ingresado un nuevo reporte psicopedagógico de tipo "${categoriaNombre}" para su menor hijo/a ${estudiante.name} ${estudiante.apellidoPaterno || ""}. Motivo: ${motivo}. Le sugerimos ingresar al portal escolar para revisar el detalle y las recomendaciones del especialista.`;
+
+          sendMultichannelNotificationAction({
+            studentId: estudianteId,
+            subject,
+            message,
+            channels: ["EMAIL", "WHATSAPP"], // Canales preferentes por defecto
+          }).catch((err) =>
+            console.error("❌ Error en envío de alerta automática de conducta:", err)
+          );
+        }
       }
 
       revalidatePath(REVALIDATE_PATH);

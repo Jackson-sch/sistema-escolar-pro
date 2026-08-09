@@ -2,7 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTransition } from "react";
+import { useTransition, useEffect, useRef } from "react";
 import {
   IconTrophy,
   IconCalendar,
@@ -45,9 +45,8 @@ import {
   AchievementValues,
 } from "@/lib/validations/achievement";
 import { createAchievementAction } from "@/actions/achievement";
-
 import { useFormModal } from "@/components/modals/form-modal-context";
-import { useEffect } from "react";
+import { FormKeyboardHelpBar } from "@/components/common/form-keyboard-help-bar";
 
 interface AchievementFormProps {
   studentId: string;
@@ -66,7 +65,6 @@ export function AchievementForm({
     defaultValues: {
       titulo: "",
       descripcion: "",
-      //@ts-ignore
       fecha: new Date(),
       categoria: "ACADEMICO",
       institucion: "",
@@ -86,15 +84,21 @@ export function AchievementForm({
           toast.error(res.error);
         }
       } catch (error) {
-        toast.error("Error al guardar el logro");
+        toast.error("Ocurrió un error al guardar el reconocimiento");
       }
     });
   };
 
+  const onSubmitRef = useRef(onSubmit);
+
   useEffect(() => {
-    setOnSubmit(() => form.handleSubmit(onSubmit)());
+    onSubmitRef.current = onSubmit;
+  });
+
+  useEffect(() => {
+    setOnSubmit(() => form.handleSubmit(onSubmitRef.current)());
     return () => setOnSubmit(undefined);
-  }, [form, onSubmit, setOnSubmit]);
+  }, [form, setOnSubmit]);
 
   const { isDirty } = form.formState;
 
@@ -105,22 +109,22 @@ export function AchievementForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-1 py-1">
         <FormField
           control={form.control}
           name="titulo"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-[11px] font-bold tracking-wider text-muted-foreground/70 ml-1">
-                TÍTULO DEL LOGRO
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Título del Logro / Reconocimiento
               </FormLabel>
               <FormControl>
                 <div className="relative">
-                  <IconTrophy className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-amber-500" />
+                  <IconTrophy className="absolute left-3 top-2.5 size-4 text-amber-500" />
                   <Input
                     {...field}
-                    placeholder="Ej. Primer puesto en Matemáticas"
-                    className="pl-10 bg-muted/5 border-border/40 rounded-xl"
+                    placeholder="Ej. Primer Puesto en Olimpiada de Matemáticas"
+                    className="pl-9 bg-background border-border/40 rounded-xl text-xs h-9"
                   />
                 </div>
               </FormControl>
@@ -129,14 +133,14 @@ export function AchievementForm({
           )}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
           <FormField
             control={form.control}
             name="categoria"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-[11px] font-bold tracking-wider text-muted-foreground/70 ml-1">
-                  CATEGORÍA
+                <FormLabel className="text-xs font-medium text-foreground/80">
+                  Categoría
                 </FormLabel>
                 <Select
                   disabled={isPending}
@@ -144,19 +148,19 @@ export function AchievementForm({
                   defaultValue={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger className="bg-muted/5 border-border/40 rounded-xl h-11">
+                    <SelectTrigger className="bg-background border-border/40 rounded-xl text-xs h-9 font-medium w-full">
                       <div className="flex items-center gap-2">
-                        <IconBookmark className="size-4 text-violet-500" />
+                        <IconBookmark className="size-4 text-indigo-500" />
                         <SelectValue placeholder="Seleccionar" />
                       </div>
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent className="border-border/40 bg-popover/95 backdrop-blur-xl">
-                    <SelectItem value="ACADEMICO">Académico</SelectItem>
-                    <SelectItem value="DEPORTIVO">Deportivo</SelectItem>
-                    <SelectItem value="CULTURAL">Cultural</SelectItem>
-                    <SelectItem value="VALORES">Valores</SelectItem>
-                    <SelectItem value="OTROS">Otros</SelectItem>
+                  <SelectContent className="rounded-xl border-border/40">
+                    <SelectItem value="ACADEMICO" className="text-xs font-medium">Académico</SelectItem>
+                    <SelectItem value="DEPORTIVO" className="text-xs font-medium">Deportivo</SelectItem>
+                    <SelectItem value="CULTURAL" className="text-xs font-medium">Cultural</SelectItem>
+                    <SelectItem value="VALORES" className="text-xs font-medium">Valores & Conducta</SelectItem>
+                    <SelectItem value="OTROS" className="text-xs font-medium">Otros Reconocimientos</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -169,30 +173,30 @@ export function AchievementForm({
             name="fecha"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel className="text-[11px] font-bold tracking-wider text-muted-foreground/70 ml-1 mb-2">
-                  FECHA
+                <FormLabel className="text-xs font-medium text-foreground/80">
+                  Fecha de Obtención
                 </FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
-                        variant={"outline"}
+                        variant="outline"
                         className={cn(
-                          "w-full pl-3 text-left font-normal h-11 bg-muted/5 border-border/40 rounded-xl hover:bg-muted/10",
+                          "w-full pl-3 text-left font-medium bg-background border-border/40 rounded-xl text-xs h-9 justify-between",
                           !field.value && "text-muted-foreground",
                         )}
                       >
-                        <IconCalendar className="mr-2 h-4 w-4 text-blue-500" />
                         {field.value ? (
                           format(field.value, "PPP", { locale: es })
                         ) : (
                           <span>Seleccionar fecha</span>
                         )}
+                        <IconCalendar className="size-4 opacity-50 ml-1" />
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
                   <PopoverContent
-                    className="w-auto p-0 border-border/40"
+                    className="w-auto p-0 rounded-2xl border-border/40"
                     align="start"
                   >
                     <Calendar
@@ -218,16 +222,16 @@ export function AchievementForm({
           name="institucion"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-[11px] font-bold tracking-wider text-muted-foreground/70 ml-1">
-                INSTITUCIÓN / ORGANIZADOR
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Institución u Organizador
               </FormLabel>
               <FormControl>
                 <div className="relative">
-                  <IconBuildingCommunity className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-emerald-500" />
+                  <IconBuildingCommunity className="absolute left-3 top-2.5 size-4 text-emerald-500" />
                   <Input
                     {...field}
-                    placeholder="Ej. Ministerio de Educación"
-                    className="pl-10 bg-muted/5 border-border/40 rounded-xl"
+                    placeholder="Ej. Ministerio de Educación / UGEL"
+                    className="pl-9 bg-background border-border/40 rounded-xl text-xs h-9"
                   />
                 </div>
               </FormControl>
@@ -241,16 +245,16 @@ export function AchievementForm({
           name="descripcion"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-[11px] font-bold tracking-wider text-muted-foreground/70 ml-1">
-                DESCRIPCIÓN ADICIONAL
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Descripción o Méritos Destacados (Opcional)
               </FormLabel>
               <FormControl>
                 <div className="relative">
-                  <IconFileDescription className="absolute left-3 top-3 size-4 text-muted-foreground/50" />
+                  <IconFileDescription className="absolute left-3 top-3 size-4 text-muted-foreground/60" />
                   <Textarea
                     {...field}
-                    placeholder="Detalles sobre el logro..."
-                    className="pl-10 min-h-[100px] bg-muted/5 border-border/40 rounded-xl resize-none"
+                    placeholder="Detalles sobre el desempeño destacado del alumno..."
+                    className="pl-9 min-h-[90px] bg-background border-border/40 rounded-xl text-xs p-3 resize-none"
                   />
                 </div>
               </FormControl>
@@ -259,18 +263,27 @@ export function AchievementForm({
           )}
         />
 
+        {/* Guía de Atajos de Teclado */}
+        <FormKeyboardHelpBar />
+
+        {/* Botón de Enviar */}
         <div className="pt-2">
           <Button
             disabled={isPending}
             type="submit"
-            className="w-full rounded-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-lg shadow-primary/20 h-11 hover:scale-105"
+            className="w-full rounded-xl h-10 font-semibold text-xs bg-amber-600 hover:bg-amber-700 text-white shadow-md shadow-amber-500/20 gap-2"
           >
             {isPending ? (
-              <IconLoader2 className="animate-spin mr-2" />
+              <>
+                <IconLoader2 className="size-4 animate-spin" />
+                <span>Guardando...</span>
+              </>
             ) : (
-              <IconDeviceFloppy className="mr-2 size-4" />
+              <>
+                <IconDeviceFloppy className="size-4" />
+                <span>Registrar Logro Destacado</span>
+              </>
             )}
-            Guardar Logro
           </Button>
         </div>
       </form>

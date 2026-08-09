@@ -1,10 +1,18 @@
 "use client"
 
 import { useState } from "react"
+import dynamic from "next/dynamic"
 import { IconFileText, IconLoader2 } from "@tabler/icons-react"
-import { PDFDownloadLink } from "@react-pdf/renderer"
 import { getGradeReportDataAction } from "@/actions/reports"
-import { GradeReportPDF } from "./grade-report-pdf"
+
+const PDFDownloadLink = dynamic(
+  () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
+  { ssr: false }
+)
+const GradeReportPDF = dynamic<any>(
+  () => import("./grade-report-pdf").then((mod) => mod.GradeReportPDF),
+  { ssr: false }
+)
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 
@@ -47,7 +55,7 @@ export function GradeReportButton({ studentId, studentName, anioAcademico = 2025
         {({ loading: pdfLoading }) => (
           <Button
             variant="outline"
-            className="w-full font-semibold border-emerald-500/30 hover:bg-emerald-500/10 hover:text-emerald-500 transition-all active:scale-95 text-emerald-600 rounded-full"
+            className="w-full font-semibold border-emerald-500/30 hover:bg-emerald-500/10 hover:text-emerald-500 transition-[color,background-color,transform] active:scale-95 text-emerald-600 rounded-full"
             disabled={pdfLoading}
           >
             <IconFileText className="size-4 mr-2" />

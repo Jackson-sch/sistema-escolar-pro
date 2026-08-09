@@ -82,6 +82,7 @@ interface DataTableProps<TData, TValue> {
   showColumnVisibility?: boolean;
   enableRowSelection?: boolean;
   ignoredFilterColumns?: string[];
+  onRowClick?: (row: TData) => void;
 }
 
 export function DataTable<TData, TValue>({
@@ -103,9 +104,10 @@ export function DataTable<TData, TValue>({
   pageSize,
   onPageIndexChange,
   onPageSizeChange,
-  showColumnVisibility = true,
+  showColumnVisibility = false,
   enableRowSelection = true,
   ignoredFilterColumns,
+  onRowClick,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
@@ -159,8 +161,13 @@ export function DataTable<TData, TValue>({
     meta,
   });
 
+  const ignoredFilterSet = React.useMemo(
+    () => (ignoredFilterColumns ? new Set(ignoredFilterColumns) : null),
+    [ignoredFilterColumns]
+  );
+
   const isFiltered = table.getState().columnFilters.some((f) => {
-    if (ignoredFilterColumns?.includes(f.id)) return false;
+    if (ignoredFilterSet?.has(f.id)) return false;
     const v = f.value;
     return Array.isArray(v) ? v.length > 0 : v !== "" && v != null;
   });
@@ -188,338 +195,452 @@ export function DataTable<TData, TValue>({
   };
 
   return (
-    <div className="flex flex-col gap-4 liquid-glass rounded-[2.5rem] bg-card/40 backdrop-blur-md border border-border/40 shadow-2xl overflow-hidden p-1">
+    <div className="flex flex-col gap-4 bg-card/80 border border-border/50 rounded-2xl shadow-sm overflow-hidden p-1">
       {/* ── TOOLBAR ─────────────────────────────────────────────── */}
-      <div
-        className={cn(
-          "flex items-start gap-3 p-6",
-          stackFilters ? "flex-col" : "flex-col lg:flex-row lg:items-center",
-        )}
+      <DataTableToolbar
+        table={table}
+        stackFilters={stackFilters}
+        searchKey={searchKey}
+        searchPlaceholder={searchPlaceholder}
+        searchValue={searchValue}
+        onSearchChange={onSearchChange}
+        totalRows={totalRows}
+        showClearFilters={!!showClearFilters}
+        onClearFilters={onClearFilters}
+        showColumnVisibility={showColumnVisibility}
       >
-        {/* Search */}
-        {searchKey && (
-          <InputGroup
-            className={cn(
-              "bg-background/40 rounded-full border-border/40 focus-within:ring-2 focus-within:ring-primary/20 transition-all",
-              stackFilters
-                ? "w-full"
-                : "w-full sm:w-72 lg:w-80 xl:w-96 shrink-0",
-            )}
-          >
-            <InputGroupAddon>
-              <IconSearch className="h-4 w-4 text-muted-foreground/60" />
-            </InputGroupAddon>
-            <InputGroupInput
-              placeholder={searchPlaceholder}
-              value={
-                searchValue !== undefined
-                  ? searchValue
-                  : ((table.getColumn(searchKey)?.getFilterValue() as string) ??
-                    "")
-              }
-              onChange={(e) => {
-                const v = e.target.value;
-                onSearchChange?.(v);
-                table.getColumn(searchKey)?.setFilterValue(v);
-              }}
-              className="h-10 w-full text-sm font-medium placeholder:text-muted-foreground/40"
-            />
-            <InputGroupAddon
-              align="inline-end"
-              className="text-xs uppercase font-black opacity-30 hidden sm:flex border-l border-primary/5 pl-3 ml-2 shrink-0"
-            >
-              {totalRows}
-            </InputGroupAddon>
-          </InputGroup>
-        )}
-
-        {/* Filters + Actions */}
-        <div
-          className={cn(
-            "flex flex-1 flex-wrap items-center gap-2",
-            stackFilters
-              ? "w-full justify-between"
-              : "justify-between lg:justify-end",
-          )}
-        >
-          <div className="flex flex-1 flex-wrap items-center gap-2">
-            {/* Si children es una función, le pasamos el objeto table */}
-            {typeof children === "function" ? children(table) : children}
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0">
-            {showClearFilters && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => {
-                  table.resetColumnFilters();
-                  onClearFilters?.();
-                }}
-                className="rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all duration-200 border-none shadow-none"
-                title="Limpiar filtros"
-              >
-                <IconFilterOff className="size-4" />
-              </Button>
-            )}
-
-            {showColumnVisibility && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="hidden lg:flex h-10 gap-2 rounded-xl px-4 text-xs font-black uppercase tracking-widest bg-background/40"
-                  >
-                    <IconLayoutColumns className="size-4" />
-                    Columnas
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 rounded-2xl bg-background/95 backdrop-blur-xl border-border/40 p-2 shadow-2xl">
-                  <DropdownMenuLabel className="text-xs uppercase tracking-widest text-muted-foreground/60 font-black px-2 py-3">
-                    Configurar Columnas
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator className="bg-border/20" />
-                  <div className="py-2">
-                    {table
-                      .getAllColumns()
-                      .filter(
-                        (col) =>
-                          typeof col.accessorFn !== "undefined" &&
-                          col.getCanHide(),
-                      )
-                      .map((col) => (
-                        <DropdownMenuCheckboxItem
-                          key={col.id}
-                          className="capitalize text-xs font-bold rounded-lg mb-1"
-                          checked={col.getIsVisible()}
-                          onCheckedChange={(v) => col.toggleVisibility(!!v)}
-                        >
-                          {col.id}
-                        </DropdownMenuCheckboxItem>
-                      ))}
-                  </div>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-          </div>
-        </div>
-      </div>
+        {children}
+      </DataTableToolbar>
 
       {/* ── TABLE ───────────────────────────────────────────────── */}
-      <div className="w-full overflow-x-auto">
-        <Table className="min-w-max">
-          <TableHeader>
-            {table.getHeaderGroups().map((hg) => (
-              <TableRow
-                key={hg.id}
-                className="border-b border-border/40 bg-muted/20 hover:bg-muted/20"
-              >
-                {hg.headers.map((header) => (
-                  <TableHead
-                    key={header.id}
-                    colSpan={header.colSpan}
-                    className={cn(
-                      "h-10 px-6 text-xs font-black uppercase tracking-widest text-muted-foreground/60",
-                      "transition-colors duration-200",
-                      header.column.getCanSort() &&
-                        "cursor-pointer select-none hover:text-primary hover:bg-primary/5",
-                    )}
-                    style={{ width: header.column.getSize() }}
-                    onClick={header.column.getToggleSortingHandler()}
-                  >
-                    {!header.isPlaceholder && (
-                      <div className="flex items-center gap-2">
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                        {header.column.getCanSort() && (
-                          <span className="shrink-0 opacity-40">
-                            {header.column.getIsSorted() === "asc" ? (
-                              <IconSortAscending className="size-4 text-primary" />
-                            ) : header.column.getIsSorted() === "desc" ? (
-                              <IconSortDescending className="size-4 text-primary" />
-                            ) : (
-                              <IconArrowsSort className="size-4" />
-                            )}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row, idx) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  className={cn(
-                    "group border-b border-border/20 last:border-0 transition-all duration-200",
-                    "hover:bg-primary/5",
-                    idx % 2 === 0 ? "bg-transparent" : "bg-muted/5",
-                    "data-[state=selected]:bg-primary/10",
-                  )}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell
-                      key={cell.id}
-                      className="px-4 py-1 text-xs text-foreground/80"
-                      style={{ width: cell.column.getSize() }}
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-[400px] p-0"
-                >
-                  <DataTableEmptyState
-                    title={emptyStateTitle}
-                    description={emptyStateDescription}
-                    hasFilters={
-                      table.getState().columnFilters.length > 0 ||
-                      hasActiveFilters
-                    }
-                    onClearFilters={() => {
-                      table.resetColumnFilters();
-                      onClearFilters?.();
-                    }}
-                  />
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      <DataTableTable
+        table={table}
+        columnsCount={columns.length}
+        emptyStateTitle={emptyStateTitle}
+        emptyStateDescription={emptyStateDescription}
+        hasActiveFilters={hasActiveFilters}
+        onClearFilters={onClearFilters}
+        onRowClick={onRowClick}
+      />
 
       {/* ── PAGINATION ──────────────────────────────────────────── */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between p-6 bg-muted/10 border-t border-border/20">
-        {/* Selection count */}
-        {enableRowSelection ? (
-          <p className="text-xs text-muted-foreground shrink-0">
-            <span className="font-semibold text-foreground">
-              {table.getFilteredSelectedRowModel().rows.length}
-            </span>{" "}
-            de{" "}
-            <span className="font-semibold text-foreground">{totalRows}</span>{" "}
-            fila(s) seleccionadas
-          </p>
-        ) : (
-          <p className="text-xs text-muted-foreground shrink-0">
-            Total de{" "}
-            <span className="font-semibold text-foreground">{totalRows}</span>{" "}
-            registros
-          </p>
+      <DataTablePagination
+        table={table}
+        enableRowSelection={enableRowSelection}
+        totalRows={totalRows}
+        pageCount={pageCount}
+        getPageNumbers={getPageNumbers}
+      />
+    </div>
+  );
+}
+
+/* ── Toolbar ─────────────────────────────────────────────────────────────── */
+function DataTableToolbar<TData, TValue>({
+  table,
+  stackFilters,
+  searchKey,
+  searchPlaceholder,
+  searchValue,
+  onSearchChange,
+  totalRows,
+  showClearFilters,
+  onClearFilters,
+  showColumnVisibility,
+  children,
+}: {
+  table: any;
+  stackFilters: boolean;
+  searchKey?: string;
+  searchPlaceholder: string;
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
+  totalRows: number;
+  showClearFilters: boolean;
+  onClearFilters?: () => void;
+  showColumnVisibility: boolean;
+  children?: React.ReactNode | ((table: any) => React.ReactNode);
+}) {
+  return (
+    <div
+      className={cn(
+        "flex items-start gap-3 p-6",
+        stackFilters ? "flex-col" : "flex-col lg:flex-row lg:items-center",
+      )}
+    >
+      {/* Search */}
+      {searchKey && (
+        <InputGroup
+          className={cn(
+            "bg-background/40 rounded-full border-border/40 focus-within:ring-2 focus-within:ring-primary/20 transition-shadow",
+            stackFilters
+              ? "w-full"
+              : "w-full sm:w-72 lg:w-80 xl:w-96 shrink-0",
+          )}
+        >
+          <InputGroupAddon>
+            <IconSearch className="h-4 w-4 text-muted-foreground/60" />
+          </InputGroupAddon>
+          <InputGroupInput
+            placeholder={searchPlaceholder}
+            value={
+              searchValue !== undefined
+                ? searchValue
+                : ((table.getColumn(searchKey)?.getFilterValue() as string) ??
+                  "")
+            }
+            onChange={(e) => {
+              const v = e.target.value;
+              onSearchChange?.(v);
+              table.getColumn(searchKey)?.setFilterValue(v);
+            }}
+            className="h-10 w-full text-sm font-medium placeholder:text-muted-foreground/40"
+          />
+          <InputGroupAddon
+            align="inline-end"
+            className="text-xs uppercase font-black opacity-30 hidden sm:flex border-l border-primary/5 pl-3 ml-2 shrink-0"
+          >
+            {totalRows}
+          </InputGroupAddon>
+        </InputGroup>
+      )}
+
+      {/* Filters + Actions */}
+      <div
+        className={cn(
+          "flex flex-1 flex-wrap items-center gap-2",
+          stackFilters
+            ? "w-full justify-between"
+            : "justify-between lg:justify-end",
         )}
+      >
+        <div className="flex flex-1 flex-wrap items-center gap-2">
+          {/* Si children es una función, le pasamos el objeto table */}
+          {typeof children === "function" ? children(table) : children}
+        </div>
 
-        <div className="flex flex-wrap items-center gap-4">
-          {/* Rows per page */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground whitespace-nowrap font-medium">
-              Filas por página
-            </span>
-            <Select
-              value={`${table.getState().pagination.pageSize}`}
-              onValueChange={(v) => table.setPageSize(Number(v))}
+        <div className="flex items-center gap-2 shrink-0">
+          {showClearFilters && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                table.resetColumnFilters();
+                onClearFilters?.();
+              }}
+              className="rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors duration-200 border-none shadow-none"
+              title="Limpiar filtros"
             >
-              <SelectTrigger className="h-8 w-16 rounded-lg text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent side="top">
-                {[10, 20, 30, 40, 50].map((n) => (
-                  <SelectItem key={n} value={`${n}`} className="text-xs">
-                    {n}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+              <IconFilterOff className="size-4" />
+            </Button>
+          )}
 
-          {/* Page numbers */}
-          <div className="flex items-center gap-1">
-            {/* First */}
-            <PaginationButton
-              onClick={() => table.setPageIndex(0)}
-              disabled={!table.getCanPreviousPage()}
-              className="hidden lg:flex"
-              aria-label="Primera página"
-            >
-              <IconChevronsLeft className="size-3.5" />
-            </PaginationButton>
-
-            {/* Prev */}
-            <PaginationButton
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-              aria-label="Página anterior"
-            >
-              <IconChevronLeft className="size-3.5" />
-            </PaginationButton>
-
-            {/* Numbered pages */}
-            <div className="hidden sm:flex items-center gap-1">
-              {getPageNumbers().map((p, i) =>
-                p === "…" ? (
-                  <span
-                    key={`ellipsis-${i}`}
-                    className="w-8 text-center text-xs text-muted-foreground select-none"
-                  >
-                    …
-                  </span>
-                ) : (
-                  <button
-                    key={p}
-                    onClick={() => table.setPageIndex(p as number)}
-                    className={cn(
-                      "h-8 min-w-8 rounded-lg px-2 text-xs font-medium transition-all duration-100",
-                      (p as number) === pi
-                        ? "bg-primary text-primary-foreground shadow-sm"
-                        : "text-muted-foreground hover:bg-muted hover:text-foreground",
+          {showColumnVisibility && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="hidden lg:flex h-10 gap-2 rounded-xl px-4 text-xs font-black uppercase tracking-widest bg-background/40"
+                >
+                  <IconLayoutColumns className="size-4" />
+                  Columnas
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 rounded-2xl bg-background border-border/40 p-2 shadow-lg">
+                <DropdownMenuLabel className="text-xs uppercase tracking-widest text-muted-foreground/60 font-black px-2 py-3">
+                  Configurar Columnas
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-border/20" />
+                <div className="py-2">
+                  {table
+                    .getAllColumns()
+                    .flatMap((col: any) =>
+                      typeof col.accessorFn !== "undefined" && col.getCanHide()
+                        ? [
+                            <DropdownMenuCheckboxItem
+                              key={col.id}
+                              className="capitalize text-xs font-bold rounded-lg mb-1"
+                              checked={col.getIsVisible()}
+                              onCheckedChange={(v) => col.toggleVisibility(!!v)}
+                            >
+                              {col.id}
+                            </DropdownMenuCheckboxItem>,
+                          ]
+                        : [],
                     )}
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Table body ─────────────────────────────────────────────────────────── */
+function DataTableTable<TData, TValue>({
+  table,
+  columnsCount,
+  emptyStateTitle,
+  emptyStateDescription,
+  hasActiveFilters,
+  onClearFilters,
+  onRowClick,
+}: {
+  table: any;
+  columnsCount: number;
+  emptyStateTitle?: string;
+  emptyStateDescription?: string;
+  hasActiveFilters?: boolean;
+  onClearFilters?: () => void;
+  onRowClick?: (row: TData) => void;
+}) {
+  return (
+    <div className="w-full overflow-x-auto">
+      <Table className="min-w-max">
+        <TableHeader>
+          {table.getHeaderGroups().map((hg: any) => (
+            <TableRow
+              key={hg.id}
+              className="border-b border-border/40 bg-muted/20 hover:bg-muted/20"
+            >
+              {hg.headers.map((header: any) => (
+                <TableHead
+                  key={header.id}
+                  colSpan={header.colSpan}
+                  className={cn(
+                    "h-10 px-6 text-xs font-black uppercase tracking-widest text-muted-foreground/60",
+                    "transition-colors duration-200",
+                    header.column.getCanSort() &&
+                      "cursor-pointer select-none hover:text-primary hover:bg-primary/5",
+                  )}
+                  style={{ width: header.column.getSize() }}
+                  onClick={header.column.getToggleSortingHandler()}
+                >
+                  {!header.isPlaceholder && (
+                    <div className="flex items-center gap-2">
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
+                      {header.column.getCanSort() && (
+                        <span className="shrink-0 opacity-40">
+                          {header.column.getIsSorted() === "asc" ? (
+                            <IconSortAscending className="size-4 text-primary" />
+                          ) : header.column.getIsSorted() === "desc" ? (
+                            <IconSortDescending className="size-4 text-primary" />
+                          ) : (
+                            <IconArrowsSort className="size-4" />
+                          )}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </TableHead>
+              ))}
+            </TableRow>
+          ))}
+        </TableHeader>
+
+        <TableBody>
+          {table.getRowModel().rows?.length ? (
+            table.getRowModel().rows.map((row: any, idx: number) => (
+              <TableRow
+                key={row.id}
+                data-state={row.getIsSelected() && "selected"}
+                onClick={(e) => {
+                  // Evitar clicks de fila si se interactúa con botones, enlaces u otros inputs
+                  const target = e.target as HTMLElement;
+                  if (
+                    target.closest("button") ||
+                    target.closest("a") ||
+                    target.closest("input") ||
+                    target.closest("select") ||
+                    target.closest("[role='menuitem']")
+                  ) {
+                    return;
+                  }
+                  onRowClick?.(row.original);
+                }}
+                className={cn(
+                  "group border-b border-border/20 last:border-0 transition-colors duration-200",
+                  onRowClick && "cursor-pointer hover:bg-primary/5! active:bg-primary/10",
+                  idx % 2 === 0 ? "bg-transparent" : "bg-muted/5",
+                  "data-[state=selected]:bg-primary/10",
+                )}
+              >
+                {row.getVisibleCells().map((cell: any) => (
+                  <TableCell
+                    key={cell.id}
+                    className="px-4 py-1 text-xs text-foreground/80"
+                    style={{ width: cell.column.getSize() }}
                   >
-                    {(p as number) + 1}
-                  </button>
-                ),
-              )}
-            </div>
+                    {flexRender(
+                      cell.column.columnDef.cell,
+                      cell.getContext(),
+                    )}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell
+                colSpan={columnsCount}
+                className="h-[400px] p-0"
+              >
+                <DataTableEmptyState
+                  title={emptyStateTitle}
+                  description={emptyStateDescription}
+                  hasFilters={
+                    table.getState().columnFilters.length > 0 ||
+                    hasActiveFilters
+                  }
+                  onClearFilters={() => {
+                    table.resetColumnFilters();
+                    onClearFilters?.();
+                  }}
+                />
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
 
-            {/* Mobile: current/total */}
-            <span className="sm:hidden text-xs font-medium text-muted-foreground px-2 select-none">
-              {pi + 1} / {pageCount}
-            </span>
+/* ── Pagination ─────────────────────────────────────────────────────────── */
+function DataTablePagination<TData, TValue>({
+  table,
+  enableRowSelection,
+  totalRows,
+  pageCount,
+  getPageNumbers,
+}: {
+  table: any;
+  enableRowSelection: boolean;
+  totalRows: number;
+  pageCount: number;
+  getPageNumbers: () => (number | "…")[];
+}) {
+  const pi = table.getState().pagination.pageIndex;
+  return (
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between p-6 bg-muted/10 border-t border-border/20">
+      {/* Selection count */}
+      {enableRowSelection ? (
+        <p className="text-xs text-muted-foreground shrink-0">
+          <span className="font-semibold text-foreground">
+            {table.getFilteredSelectedRowModel().rows.length}
+          </span>{" "}
+          de{" "}
+          <span className="font-semibold text-foreground">{totalRows}</span>{" "}
+          fila(s) seleccionadas
+        </p>
+      ) : (
+        <p className="text-xs text-muted-foreground shrink-0">
+          Total de{" "}
+          <span className="font-semibold text-foreground">{totalRows}</span>{" "}
+          registros
+        </p>
+      )}
 
-            {/* Next */}
-            <PaginationButton
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-              aria-label="Siguiente página"
-            >
-              <IconChevronRight className="size-3.5" />
-            </PaginationButton>
+      <div className="flex flex-wrap items-center gap-4">
+        {/* Rows per page */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground whitespace-nowrap font-medium">
+            Filas por página
+          </span>
+          <Select
+            value={`${table.getState().pagination.pageSize}`}
+            onValueChange={(v) => table.setPageSize(Number(v))}
+          >
+            <SelectTrigger className="h-8 w-16 rounded-lg text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent side="top">
+              {[10, 20, 30, 40, 50].map((n) => (
+                <SelectItem key={n} value={`${n}`} className="text-xs">
+                  {n}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-            {/* Last */}
-            <PaginationButton
-              onClick={() => table.setPageIndex(pageCount - 1)}
-              disabled={!table.getCanNextPage()}
-              className="hidden lg:flex"
-              aria-label="Última página"
-            >
-              <IconChevronsRight className="size-3.5" />
-            </PaginationButton>
+        {/* Page numbers */}
+        <div className="flex items-center gap-1">
+          {/* First */}
+          <PaginationButton
+            onClick={() => table.setPageIndex(0)}
+            disabled={!table.getCanPreviousPage()}
+            className="hidden lg:flex"
+            aria-label="Primera página"
+          >
+            <IconChevronsLeft className="size-3.5" />
+          </PaginationButton>
+
+          {/* Prev */}
+          <PaginationButton
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            aria-label="Página anterior"
+          >
+            <IconChevronLeft className="size-3.5" />
+          </PaginationButton>
+
+          {/* Numbered pages */}
+          <div className="hidden sm:flex items-center gap-1">
+            {getPageNumbers().map((p, i) =>
+              p === "…" ? (
+                <span
+                  key={`ellipsis-${i}`}
+                  className="w-8 text-center text-xs text-muted-foreground select-none"
+                >
+                  …
+                </span>
+              ) : (
+                <button
+                  key={p}
+                  onClick={() => table.setPageIndex(p as number)}
+                  className={cn(
+                    "h-8 min-w-8 rounded-lg px-2 text-xs font-medium transition-[color,background-color,box-shadow] duration-100",
+                    (p as number) === pi
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                  )}
+                >
+                  {(p as number) + 1}
+                </button>
+              ),
+            )}
           </div>
+
+          {/* Mobile: current/total */}
+          <span className="sm:hidden text-xs font-medium text-muted-foreground px-2 select-none">
+            {pi + 1} / {pageCount}
+          </span>
+
+          {/* Next */}
+          <PaginationButton
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            aria-label="Siguiente página"
+          >
+            <IconChevronRight className="size-3.5" />
+          </PaginationButton>
+
+          {/* Last */}
+          <PaginationButton
+            onClick={() => table.setPageIndex(pageCount - 1)}
+            disabled={!table.getCanNextPage()}
+            className="hidden lg:flex"
+            aria-label="Última página"
+          >
+            <IconChevronsRight className="size-3.5" />
+          </PaginationButton>
         </div>
       </div>
     </div>
@@ -547,7 +668,7 @@ function PaginationButton({
       aria-label={ariaLabel}
       className={cn(
         "flex size-8 items-center justify-center rounded-lg border text-muted-foreground",
-        "transition-all duration-100",
+        "transition-[color,background-color,border-color] duration-100",
         "hover:border-primary/30 hover:bg-primary/5 hover:text-primary",
         "disabled:pointer-events-none disabled:opacity-30",
         className,

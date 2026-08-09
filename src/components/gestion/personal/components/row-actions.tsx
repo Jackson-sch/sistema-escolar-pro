@@ -9,7 +9,7 @@ import {
   ResponsiveRowActions,
   ActionItem,
 } from "@/components/common/responsive-row-actions";
-import { FormModal } from "@/components/modals/form-modal";
+import { FormDrawer } from "@/components/modals/form-drawer";
 
 import { deleteStaffAction } from "@/actions/staff";
 import { StaffForm } from "@/components/gestion/personal/management/staff-form";
@@ -45,9 +45,9 @@ export function StaffRowActions({ row, table }: StaffRowActionsProps) {
 
   // Obtenemos los datos maestros del meta de la tabla
   const metaData = table.options.meta as {
-    instituciones: any[];
-    estados: any[];
-    cargos: any[];
+    instituciones: { id: string; nombreInstitucion: string }[];
+    estados: { id: string; nombre: string }[];
+    cargos: { id: string; nombre: string; codigo: string }[];
   };
 
   const isAdminGlobal = staff.cargo?.codigo === "ADMIN_GLOBAL" || staff.email === "admin@colegio.edu.pe";
@@ -95,7 +95,7 @@ export function StaffRowActions({ row, table }: StaffRowActionsProps) {
         description={`¿Estás seguro de eliminar a ${staff.name} ${staff.apellidoPaterno}? Esta acción no se puede deshacer y el usuario perderá el acceso al sistema.`}
       />
 
-      <FormModal
+      <FormDrawer
         title="Editar Personal"
         description={`Personaliza el expediente laboral de ${staff.name}.`}
         isOpen={showEditDialog}
@@ -109,7 +109,7 @@ export function StaffRowActions({ row, table }: StaffRowActionsProps) {
           estados={metaData?.estados || []}
           cargos={metaData?.cargos || []}
         />
-      </FormModal>
+      </FormDrawer>
 
       {/* Sheet de Perfil Profesional (Expediente) */}
       <StaffProfile

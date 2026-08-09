@@ -207,7 +207,7 @@ export function ReporteHeader({
 
       <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
         {/* Leyenda Técnica */}
-        <div className="flex items-center gap-3 sm:gap-4 text-[10px] font-bold text-muted-foreground bg-background/40 h-10 border border-border/40 rounded-full px-2 backdrop-blur-md shrink-0">
+        <div className="flex items-center gap-3 sm:gap-4 text-[10px] font-bold text-muted-foreground bg-background/40 h-10 border border-border/40 rounded-full px-2 shrink-0">
           <div className="flex items-center gap-1.5">
             <IconCircleFilled className="size-2 text-emerald-500" />{" "}
             <span>Presente</span>
@@ -229,7 +229,7 @@ export function ReporteHeader({
         <Button
           onClick={handleExportXLSX}
           disabled={!data || data.length === 0}
-          className="text-xs px-6 rounded-full shadow-lg shadow-primary/20 transition-all disabled:opacity-50"
+          className="text-xs px-6 rounded-full shadow-lg shadow-primary/20 transition-opacity disabled:opacity-50"
         >
           <IconDownload className="mr-2 h-3.5 w-3.5" />
           Exportar Excel

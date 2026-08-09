@@ -44,10 +44,9 @@ interface InlineEditableFieldProps {
   onSave: (value: string | Date | null) => Promise<void>;
   placeholder?: string;
   formatDisplay?: (value: any) => string;
-  /** When true, the field is displayed as read-only (no edit icon, no click-to-edit). */
+  /** Solo lectura */
   readOnly?: boolean;
 }
-
 
 export function InlineEditableField({
   label,
@@ -92,17 +91,38 @@ export function InlineEditableField({
     }
   }, [isEditing, type]);
 
-  const handleSave = () => {
+  const handleSaveText = () => {
     startTransition(async () => {
       try {
-        if (type === "date") {
-          await onSave(dateValue || null);
-        } else {
-          await onSave(editValue.trim() || null);
-        }
+        await onSave(editValue.trim() || null);
         setIsEditing(false);
       } catch {
-        // Error handled by parent
+        // Manejado por padre
+      }
+    });
+  };
+
+  const handleSaveSelect = (newValue: string) => {
+    setEditValue(newValue);
+    startTransition(async () => {
+      try {
+        await onSave(newValue || null);
+        setIsEditing(false);
+      } catch {
+        // Manejado por padre
+      }
+    });
+  };
+
+  const handleSaveDate = (newDate: Date | undefined) => {
+    setDateValue(newDate);
+    if (!newDate) return;
+    startTransition(async () => {
+      try {
+        await onSave(newDate);
+        setIsEditing(false);
+      } catch {
+        // Manejado por padre
       }
     });
   };
@@ -112,154 +132,202 @@ export function InlineEditableField({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") handleSave();
+    if (e.key === "Enter") handleSaveText();
     if (e.key === "Escape") handleCancel();
   };
 
-  // ── Render editing mode ──
+  // ── Render Modo Edición ──
   if (isEditing) {
     return (
-      <div className="group rounded-xl border border-primary/20 bg-primary/2 p-3 transition-all">
-        <p className="text-[10px] uppercase font-bold tracking-widest text-primary/70 mb-2">
-          {label}
-        </p>
+      <div className="group rounded-xl border border-indigo-500/30 bg-indigo-500/5 p-3 transition-[color,letter-spacing]">
+        <div className="flex items-center justify-between mb-1.5">
+          <p className="text-[10px] uppercase font-bold tracking-wider text-indigo-600 dark:text-indigo-400">
+            {label}
+          </p>
+          {isPending && (
+            <span className="flex items-center gap-1 text-[10px] text-indigo-500 font-medium animate-pulse">
+              <IconLoader2 className="size-3 animate-spin" /> Guardando...
+            </span>
+          )}
+        </div>
 
         <div className="flex items-center gap-2">
           {type === "text" && (
-            <Input
-              ref={inputRef}
-              value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder={placeholder}
-              className="h-8 rounded-lg text-sm flex-1"
-              disabled={isPending}
-            />
+            <>
+              <Input
+                ref={inputRef}
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder={placeholder}
+                className="h-8 rounded-lg text-xs flex-1 bg-background border-border/40"
+                disabled={isPending}
+              />
+              <div className="flex items-center gap-1 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleSaveText}
+                  disabled={isPending}
+                  className="size-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center hover:bg-indigo-700 transition-colors disabled:opacity-50 cursor-pointer"
+                  title="Guardar cambios (Enter)"
+                >
+                  {isPending ? (
+                    <IconLoader2 className="size-3.5 animate-spin" />
+                  ) : (
+                    <IconCheck className="size-3.5" />
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  disabled={isPending}
+                  className="size-7 rounded-lg border border-border text-muted-foreground flex items-center justify-center hover:bg-muted transition-colors disabled:opacity-50 cursor-pointer"
+                  title="Cancelar (Esc)"
+                >
+                  <IconX className="size-3.5" />
+                </button>
+              </div>
+            </>
           )}
 
           {type === "select" && options && (
-            <Select
-              value={editValue}
-              onValueChange={(v) => setEditValue(v)}
-              disabled={isPending}
-            >
-              <SelectTrigger className="h-8 rounded-lg text-sm flex-1">
-                <SelectValue placeholder={placeholder} />
-              </SelectTrigger>
-              <SelectContent className="rounded-xl">
-                {options.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value} className="rounded-lg">
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex items-center gap-2 w-full">
+              <Select
+                value={editValue}
+                onValueChange={handleSaveSelect}
+                disabled={isPending}
+              >
+                <SelectTrigger className="h-8 rounded-lg text-xs flex-1 bg-background border-border/40">
+                  <SelectValue placeholder={placeholder} />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-border/40">
+                  {options.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value} className="rounded-lg text-xs">
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <button
+                type="button"
+                onClick={handleCancel}
+                disabled={isPending}
+                className="size-7 rounded-lg border border-border text-muted-foreground flex items-center justify-center hover:bg-muted transition-colors disabled:opacity-50 shrink-0 cursor-pointer"
+                title="Cancelar"
+              >
+                <IconX className="size-3.5" />
+              </button>
+            </div>
           )}
 
           {type === "date" && (
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "h-8 rounded-lg text-sm flex-1 justify-start text-left font-normal",
-                    !dateValue && "text-muted-foreground"
-                  )}
-                  disabled={isPending}
-                >
-                  <IconCalendar className="size-3.5 mr-2 opacity-50" />
-                  {dateValue
-                    ? format(dateValue, "PPP", { locale: es })
-                    : placeholder}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 rounded-xl" align="start">
-                <Calendar
-                  mode="single"
-                  selected={dateValue}
-                  onSelect={(d) => setDateValue(d)}
-                  initialFocus
-                  captionLayout="dropdown"
-                  fromYear={1950}
-                  toYear={new Date().getFullYear()}
-                />
-              </PopoverContent>
-            </Popover>
+            <div className="flex items-center gap-2 w-full">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "h-8 rounded-lg text-xs flex-1 justify-start text-left font-medium bg-background border-border/40",
+                      !dateValue && "text-muted-foreground"
+                    )}
+                    disabled={isPending}
+                  >
+                    <IconCalendar className="size-3.5 mr-2 opacity-50" />
+                    {dateValue
+                      ? format(dateValue, "PPP", { locale: es })
+                      : placeholder}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 rounded-2xl border-border/40" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={dateValue}
+                    onSelect={handleSaveDate}
+                    initialFocus
+                    captionLayout="dropdown"
+                    fromYear={1950}
+                    toYear={new Date().getFullYear()}
+                    locale={es}
+                  />
+                </PopoverContent>
+              </Popover>
+              <button
+                type="button"
+                onClick={handleCancel}
+                disabled={isPending}
+                className="size-7 rounded-lg border border-border text-muted-foreground flex items-center justify-center hover:bg-muted transition-colors disabled:opacity-50 shrink-0 cursor-pointer"
+                title="Cancelar"
+              >
+                <IconX className="size-3.5" />
+              </button>
+            </div>
           )}
-
-          {/* Save / Cancel */}
-          <div className="flex items-center gap-1 shrink-0">
-            <button
-              onClick={handleSave}
-              disabled={isPending}
-              className="size-7 rounded-lg bg-primary text-primary-foreground flex items-center justify-center hover:opacity-90 transition-opacity disabled:opacity-50"
-            >
-              {isPending ? (
-                <IconLoader2 className="size-3.5 animate-spin" />
-              ) : (
-                <IconCheck className="size-3.5" />
-              )}
-            </button>
-            <button
-              onClick={handleCancel}
-              disabled={isPending}
-              className="size-7 rounded-lg border border-border text-muted-foreground flex items-center justify-center hover:bg-muted transition-colors disabled:opacity-50"
-            >
-              <IconX className="size-3.5" />
-            </button>
-          </div>
         </div>
       </div>
     );
   }
 
-  // ── Render display mode ──
+  // ── Render Modo Lectura / Vista Previa ──
   return (
     <div
       className={cn(
-        "group rounded-xl p-3 transition-colors relative",
+        "group rounded-xl p-2.5 transition-[color,background-color,margin] relative outline-none focus-visible:ring-2 focus-visible:ring-ring",
         !readOnly && "hover:bg-muted/40 cursor-pointer",
       )}
+      role={readOnly ? undefined : "button"}
+      tabIndex={readOnly ? undefined : 0}
       onClick={readOnly ? undefined : startEditing}
+      onKeyDown={
+        readOnly
+          ? undefined
+          : (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                startEditing();
+              }
+            }
+      }
     >
       <div className="flex items-start justify-between gap-3">
-        <div className="flex items-start gap-3 min-w-0 flex-1">
+        <div className="flex items-start gap-2.5 min-w-0 flex-1">
           {icon && (
             <div className="mt-0.5 text-muted-foreground shrink-0">
               {icon}
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground mb-0.5">
+            <p className="text-[10px] uppercase font-semibold tracking-wider text-muted-foreground mb-0.5">
               {label}
             </p>
             {isEmpty ? (
               readOnly ? (
-                <p className="text-sm text-muted-foreground/50 italic">—</p>
+                <p className="text-xs text-muted-foreground/50 italic">—</p>
               ) : (
-                <button className="flex items-center gap-1.5 text-sm text-primary/70 hover:text-primary transition-colors font-medium">
-                  <IconPlus className="size-3.5" />
+                <button className="flex items-center gap-1 text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-medium">
+                  <IconPlus className="size-3" />
                   {placeholder}
                 </button>
               )
             ) : (
-              <p className="text-sm font-medium text-foreground truncate capitalize">
+              <p className="text-xs font-semibold text-foreground truncate capitalize">
                 {displayValue}
               </p>
             )}
           </div>
         </div>
 
-        {/* Edit icon on hover — hidden in readOnly */}
+        {/* Ícono de Lapicero en Hover */}
         {!readOnly && (
           <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               startEditing();
             }}
-            className="opacity-0 group-hover:opacity-100 transition-opacity size-7 rounded-lg border border-border/50 bg-background flex items-center justify-center hover:bg-muted shrink-0 mt-1"
+            className="opacity-0 group-hover:opacity-100 transition-opacity size-6 rounded-md border border-border/40 bg-background flex items-center justify-center hover:bg-muted shrink-0 mt-0.5"
+            title="Editar campo"
           >
-            <IconPencil className="size-3" />
+            <IconPencil className="size-3 text-muted-foreground" />
           </button>
         )}
       </div>

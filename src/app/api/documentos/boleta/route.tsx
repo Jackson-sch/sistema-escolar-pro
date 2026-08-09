@@ -1,10 +1,13 @@
+import "@/lib/react-pdf-polyfill";
+import React from "react";
 import { NextRequest, NextResponse } from "next/server";
-import { renderToBuffer } from "@react-pdf/renderer";
 import { GradeReportPDF } from "@/components/reports/grade-report-pdf";
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
 import { getRankingEstudianteAction } from "@/actions/evaluations";
 import { formatTitleCase } from "@/lib/formats";
+
+import { resolvePdfImage } from "@/lib/pdf-server-utils";
 
 export async function GET(req: NextRequest) {
   const session = await auth();
@@ -21,6 +24,10 @@ export async function GET(req: NextRequest) {
     return new NextResponse("Falta el ID del estudiante", { status: 400 });
   }
 
+  const userId = session.user.id;
+  const userRole = (session.user.role || "").toString().toLowerCase();
+  const userInstitucionId = session.user.institucionId;
+
   try {
     // 1. Obtener datos del estudiante y su institución
     const estudiante = await prisma.user.findUnique({
@@ -29,12 +36,31 @@ export async function GET(req: NextRequest) {
         nivelAcademico: {
           include: { grado: true, nivel: true }
         },
-        institucion: true
+        institucion: true,
       }
     });
 
     if (!estudiante || !estudiante.institucion) {
       return new NextResponse("Estudiante o institución no encontrada", { status: 404 });
+    }
+
+    // Verificar si el usuario autenticado es un familiar/apoderado registrado
+    const relacionFamiliar = await prisma.relacionFamiliar.findFirst({
+      where: {
+        hijoId: estudianteId,
+        padreTutorId: userId,
+      }
+    });
+
+    // Validación de autorización:
+    // Debe ser admin/profesor de la misma institución, o el propio estudiante, o su apoderado
+    const isAdminOrStaff = ["super_admin", "admin", "administrador", "administrativo", "director", "coordinador", "profesor", "docente"].includes(userRole);
+    const isSelf = userId === estudianteId;
+    const isParent = !!relacionFamiliar;
+    const sameInstitution = !userInstitucionId || userInstitucionId === estudiante.institucion.id;
+
+    if ((!isAdminOrStaff && !isSelf && !isParent) || !sameInstitution) {
+      return new NextResponse("Acceso denegado a la boleta del estudiante", { status: 403 });
     }
 
     const cicloScolar = estudiante.institucion.cicloEscolarActual || anio;
@@ -119,7 +145,7 @@ export async function GET(req: NextRequest) {
       estudianteId,
       anioEscolar: cicloScolar
     });
-    const puesto = (rankingRes.success as any)?.posicion || 1;
+    const puesto = rankingRes.success?.posicion || 1;
 
     // 5. Preparar data final para GradeReportPDF
     const puntajes = [0, 1, 2, 3].map(i => {
@@ -139,7 +165,7 @@ export async function GET(req: NextRequest) {
         nivel: estudiante.nivelAcademico?.nivel?.nombre || 'N/A',
         institucion: estudiante.institucion.nombreInstitucion,
         institucionCompleta: estudiante.institucion,
-        logo: estudiante.institucion.logo,
+        logo: resolvePdfImage(estudiante.institucion.logo),
       },
       origin,
       periodos: periodosDelAnio,
@@ -151,9 +177,11 @@ export async function GET(req: NextRequest) {
       }
     };
 
-    const buffer = await renderToBuffer(<GradeReportPDF data={pdfData as any} />);
+    const { pdf } = await import("@react-pdf/renderer");
+    const pdfInstance = pdf(React.createElement(GradeReportPDF, { data: pdfData as any }) as any);
+    const buffer = await pdfInstance.toBuffer();
 
-    return new NextResponse(new Uint8Array(buffer), {
+    return new NextResponse(buffer as any, {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",

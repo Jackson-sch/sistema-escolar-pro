@@ -33,9 +33,7 @@ export function TeacherCard({ teacher }: TeacherCardProps) {
   const extraCourses = (teacher.cursosImpartidos?.length ?? 0) - 3;
 
   return (
-    <div
-      className="group relative flex flex-col rounded-3xl overflow-hidden border border-border/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl bg-card text-card-foreground shadow-sm"
-    >
+    <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/50 bg-card/80 text-card-foreground shadow-sm transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-md">
       {/* ── Banner ── */}
       {/* Usamos bg-primary para que respete el color principal de tu tema shadcn */}
       <div className="relative h-28 overflow-hidden shrink-0 bg-primary/90">
@@ -49,16 +47,12 @@ export function TeacherCard({ teacher }: TeacherCardProps) {
           }}
         />
 
-        {/* Formas decorativas */}
-        <div className="absolute -bottom-6 -right-6 w-32 h-32 rounded-full bg-background/10 blur-2xl" />
-        <div className="absolute -top-4 -left-4 w-24 h-24 rounded-full bg-background/10 blur-xl" />
-
         {/* Badge de Cargo */}
         {teacher.cargo && (
           <div className="absolute top-3 right-3">
-            <Badge 
-              variant="secondary" 
-              className="bg-background/20 hover:bg-background/30 text-primary-foreground border-transparent backdrop-blur-md text-[10px] uppercase tracking-widest font-bold"
+            <Badge
+              variant="secondary"
+              className="bg-background/20 hover:bg-background/30 text-primary-foreground border-transparent text-[10px] uppercase tracking-widest font-bold"
             >
               {teacher.cargo.nombre}
             </Badge>
@@ -69,7 +63,7 @@ export function TeacherCard({ teacher }: TeacherCardProps) {
       {/* ── Cuerpo de la Tarjeta ── */}
       <div className="flex-1 flex flex-col px-5 pb-5 -mt-12 relative">
         {/* Avatar superpuesto */}
-        <Avatar className="size-[72px] border-4 border-card shadow-sm mb-3 ring-2 ring-transparent transition-all duration-300 group-hover:ring-primary/20">
+        <Avatar className="size-[72px] border-4 border-card shadow-sm mb-3 ring-2 ring-transparent transition-shadow duration-300 group-hover:ring-primary/20">
           <AvatarImage src={teacher.image || ""} alt={fullName} />
           <AvatarFallback className="text-xl font-black bg-muted text-muted-foreground">
             {initials || "??"}
@@ -130,7 +124,7 @@ export function TeacherCard({ teacher }: TeacherCardProps) {
         {hasCourses && (
           <div className="mt-auto pt-2">
             <div className="w-full h-px mb-4 bg-border/50" />
-            
+
             <div className="flex items-center gap-1.5 mb-3">
               <IconBook2 className="size-3.5 text-muted-foreground" />
               <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
@@ -139,20 +133,24 @@ export function TeacherCard({ teacher }: TeacherCardProps) {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {visibleCourses.map((curso, idx) => (
+              {visibleCourses.map((curso) => (
                 <Badge
-                  key={idx}
+                  key={curso.nombre}
                   variant="outline"
                   className="bg-primary/5 text-primary border-primary/20 hover:bg-primary/10 text-[10px] py-0.5"
                 >
                   {curso.nombre}
                   <span className="ml-1 opacity-60 font-normal">
-                    {curso.nivelAcademico.grado.nombre} {curso.nivelAcademico.seccion}
+                    {curso.nivelAcademico.grado.nombre}{" "}
+                    {curso.nivelAcademico.seccion}
                   </span>
                 </Badge>
               ))}
               {extraCourses > 0 && (
-                <Badge variant="secondary" className="text-[10px] py-0.5 text-muted-foreground">
+                <Badge
+                  variant="secondary"
+                  className="text-[10px] py-0.5 text-muted-foreground"
+                >
                   +{extraCourses} más
                 </Badge>
               )}

@@ -11,15 +11,14 @@ export default async function AreasPage({
 }: {
   searchParams: Promise<{ nivel?: string; [key: string]: string | undefined }>;
 }) {
-  const resolvedSearchParams = await searchParams;
-  
-  const [
-    { data: instituciones = [] },
-    { data: niveles = [] }
-  ] = await Promise.all([
-    getInstitucionesAction(),
-    getNivelesAction()
-  ]);
+  const [resolvedSearchParams, institucionesRes, nivelesRes] =
+    await Promise.all([
+      searchParams,
+      getInstitucionesAction(),
+      getNivelesAction(),
+    ]);
+  const instituciones = institucionesRes.data || [];
+  const niveles = nivelesRes.data || [];
 
   // Obtener la primera institución disponible
   const mainInstitucionId = instituciones[0]?.id || "";

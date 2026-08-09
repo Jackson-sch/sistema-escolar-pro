@@ -27,30 +27,30 @@ interface ActivityItem {
   user: string;
 }
 
+
 interface RecentActivityProps {
   activities: ActivityItem[];
   className?: string;
 }
 
-export function RecentActivity({ activities, className }: RecentActivityProps) {
-  const getIcon = (type: string) => {
-    switch (type) {
-      case "matricula":
-        return <IconUserPlus className="size-4 text-emerald-500" />;
-      case "pago":
-        return <IconCreditCard className="size-4 text-blue-500" />;
-      case "anuncio":
-        return <IconBell className="size-4 text-amber-500" />;
-      default:
-        return <IconCircleCheck className="size-4 text-muted-foreground" />;
-    }
-  };
+function getActivityIcon(type: string) {
+  switch (type) {
+    case "matricula":
+      return <IconUserPlus className="size-4 text-emerald-500" />;
+    case "pago":
+      return <IconCreditCard className="size-4 text-blue-500" />;
+    case "anuncio":
+      return <IconBell className="size-4 text-amber-500" />;
+    default:
+      return <IconCircleCheck className="size-4 text-muted-foreground" />;
+  }
+}
 
+export function RecentActivity({ activities, className }: RecentActivityProps) {
   return (
     <Card
       className={cn(
-        "liquid-glass border-none flex flex-col overflow-hidden group",
-        className,
+        "flex flex-col overflow-hidden rounded-2xl border-border/50 bg-card/80 shadow-sm",
       )}
     >
       <CardHeader className="pb-4 relative z-10">
@@ -63,15 +63,15 @@ export function RecentActivity({ activities, className }: RecentActivityProps) {
       </CardHeader>
       <CardContent className="flex-1 min-h-0 pb-0 relative z-10">
         <ScrollArea className="h-full pr-4 pb-6">
-          <div className="relative space-y-5 before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-linear-to-b before:from-transparent before:via-muted/50 before:to-transparent">
+          <div className="relative space-y-5 before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-px before:bg-border/70">
             {activities.length > 0 ? (
               activities.map((activity, idx) => (
                 <div
                   key={activity.id + idx}
-                  className="relative flex items-start gap-4 transition-all duration-300 hover:translate-x-1"
+                  className="relative flex items-start gap-4 transition-transform duration-300 hover:translate-x-1"
                 >
-                  <div className="z-10 flex size-10 shrink-0 items-center justify-center rounded-full border bg-background/50 backdrop-blur-md shadow-sm border-white/10 group-hover:border-primary/20 transition-colors">
-                    {getIcon(activity.type)}
+                  <div className="z-10 flex size-10 shrink-0 items-center justify-center rounded-full border border-border/60 bg-card shadow-sm">
+                    {getActivityIcon(activity.type)}
                   </div>
                   <div className="flex flex-col gap-1 min-w-0">
                     <span className="text-sm font-bold truncate leading-tight">
@@ -102,9 +102,6 @@ export function RecentActivity({ activities, className }: RecentActivityProps) {
           </div>
         </ScrollArea>
       </CardContent>
-
-      {/* Subtle Background Glow */}
-      <div className="absolute -bottom-10 -right-10 size-40 bg-primary/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
     </Card>
   );
 }

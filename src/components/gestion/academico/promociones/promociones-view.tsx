@@ -1,87 +1,124 @@
 "use client";
 
 import { useState, useEffect, useTransition, useMemo } from "react";
-import { 
-  IconUsers, 
-  IconArrowRight, 
-  IconSchool, 
-  IconCheck, 
+import {
+  IconArrowRight,
+  IconSchool,
+  IconCheck,
   IconAlertCircle,
-  IconCalendarEvent,
   IconSearch,
   IconFilter,
-  IconClipboardCheck,
   IconRocket,
-  IconChartBar,
   IconCircleCheckFilled,
-  IconArrowLeft
+  IconArrowLeft,
+  IconShieldCheck,
+  IconUserCheck,
+  IconTrendingUp,
+  IconRefresh,
+  IconInfoCircle,
+  IconChevronDown,
+  IconChevronUp,
+  IconSparkles,
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { 
-  getStudentsInSeccionAction 
-} from "@/actions/academic-structure";
+import { getStudentsInSeccionAction } from "@/actions/academic-structure";
 import { promoteStudentsAction } from "@/actions/enrollments";
+import { LevelSegmentedControl } from "@/components/common/level-segmented-control";
+import { StepperItem } from "./stepper-item";
 import { cn } from "@/lib/utils";
+
+interface SeccionPromocion {
+  id: string;
+  seccion?: string;
+  nivel?: { id: string; nombre: string } | null;
+  grado?: { nombre: string } | null;
+}
+
+interface EstudiantePromocion {
+  id: string;
+  name?: string | null;
+  apellidoPaterno?: string | null;
+  apellidoMaterno?: string | null;
+  documentoIdentidad?: string | null;
+}
 
 interface PromocionesViewProps {
   aniosDisponibles: number[];
-  seccionesOrigen: any[];
-  seccionesDestino: any[];
-  grados: any[];
+  seccionesOrigen: SeccionPromocion[];
+  seccionesDestino: SeccionPromocion[];
+  grados: unknown[];
   anioOrigen: number;
   anioDestino: number;
   institucionId: string;
 }
 
+type ActiveTab = "auditoria" | "mapeo" | "ejecucion";
+
+const VALIDATION_ITEMS = [
+  {
+    id: "grades",
+    label: "Cierre de Calificaciones",
+    description: "Promedios anuales y actas finales de notas registradas.",
+    status: "complete",
+    detail: "100% registros completados",
+  },
+  {
+    id: "attendance",
+    label: "Control de Asistencia",
+    description: "Cierre de partes diarios y justificaciones procesadas.",
+    status: "complete",
+    detail: "Cierre de año validado",
+  },
+  {
+    id: "finance",
+    label: "Solvencia Estudiantil",
+    description: "Sincronización de morosidad y estados de pensión.",
+    status: "warning",
+    detail: "3 pensiones en revisión",
+  },
+];
+
 export function PromocionesView({
-  aniosDisponibles,
   seccionesOrigen,
   seccionesDestino,
-  grados,
   anioOrigen,
   anioDestino,
-  institucionId,
 }: PromocionesViewProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [loadingStudents, setLoadingStudents] = useState(false);
-  
+
   // Stepper State
-  const [activeTab, setActiveTab] = useState<"auditoria" | "mapeo" | "ejecucion">("auditoria");
-  
+  const [activeTab, setActiveTab] = useState<ActiveTab>("auditoria");
+
   // States
   const [selectedLevelId, setSelectedLevelId] = useState<string>("all");
   const [sourceSeccionId, setSourceSeccionId] = useState<string>("");
   const [targetSeccionId, setTargetSeccionId] = useState<string>("");
-  const [students, setStudents] = useState<any[]>([]);
+  const [isAutoSelectedTarget, setIsAutoSelectedTarget] =
+    useState<boolean>(false);
+  const [students, setStudents] = useState<EstudiantePromocion[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Validation States (Step 1)
-  const validationItems = [
-    { id: "grades", label: "Cierre de Notas", description: "Todas las notas y promedios finales registrados.", status: "complete" },
-    { id: "attendance", label: "Control de Asistencia", description: "Asistencia institucional validada y cerrada.", status: "complete" },
-    { id: "finance", label: "Solvencia Estudiantil", description: "Sincronización de estados de pago.", status: "warning" },
-  ];
-
-  const niveles = useMemo(() => {
-    const map = new Map();
+  const niveles = useMemo<Array<{ id: string; nombre: string }>>(() => {
+    const map = new Map<string, { id: string; nombre: string }>();
     seccionesOrigen.forEach((s) => {
       if (s.nivel && !map.has(s.nivel.id)) map.set(s.nivel.id, s.nivel);
     });
@@ -98,40 +135,116 @@ export function PromocionesView({
     return seccionesDestino.filter((s) => s.nivel?.id === selectedLevelId);
   }, [seccionesDestino, selectedLevelId]);
 
-  // Obtener estudiantes cuando cambia la sección de origen
-  useEffect(() => {
-    if (sourceSeccionId) {
-      handleFetchStudents(sourceSeccionId);
-    } else {
-      setStudents([]);
-      setSelectedIds([]);
-    }
-  }, [sourceSeccionId]);
+  // Detección e inferencia automática de la sección destino (ej. 2° A -> 3° A)
+  const autoDetectTargetSeccion = (sourceId: string) => {
+    const sourceObj = seccionesOrigen.find((s) => s.id === sourceId);
+    if (!sourceObj) return;
 
-  const handleFetchStudents = async (seccionId: string) => {
-    setLoadingStudents(true);
-    try {
-      const res = await getStudentsInSeccionAction(seccionId);
-      if (res.data) {
-        setStudents(res.data);
-        setSelectedIds(res.data.map((s: any) => s.id)); // Seleccionar todos por defecto
-      } else {
-        toast.error(res.error || "No se pudieron cargar los estudiantes");
+    const sourceNivelId = sourceObj.nivel?.id;
+    const sourceLetter = sourceObj.seccion?.trim().toUpperCase();
+    const gradeName = sourceObj.grado?.nombre || "";
+
+    // Extraer número de grado (ej: "2° Primaria" -> 2, "2do Grado" -> 2)
+    const match = gradeName.match(/\d+/);
+    const currentGradeNum = match ? parseInt(match[0], 10) : null;
+
+    if (currentGradeNum !== null) {
+      const nextGradeNum = currentGradeNum + 1;
+
+      // Buscar en seccionesDestino la sección con mismo nivel, misma letra y grado + 1
+      const matchTarget = seccionesDestino.find((t) => {
+        const sameNivel =
+          t.nivel?.id === sourceNivelId ||
+          t.nivel?.nombre === sourceObj.nivel?.nombre;
+        const sameLetter = t.seccion?.trim().toUpperCase() === sourceLetter;
+        const tMatch = t.grado?.nombre?.match(/\d+/);
+        const tGradeNum = tMatch ? parseInt(tMatch[0], 10) : null;
+        return sameNivel && sameLetter && tGradeNum === nextGradeNum;
+      });
+
+      if (matchTarget) {
+        setTargetSeccionId(matchTarget.id);
+        setIsAutoSelectedTarget(true);
+        toast.info(
+          `Preselección automática: ${matchTarget.nivel?.nombre || ""} ${matchTarget.grado?.nombre || ""} "${matchTarget.seccion}" (${anioDestino}).`,
+          { id: "auto-target-toast" },
+        );
+        return;
       }
-    } catch (error) {
-      toast.error("Error al conectar con el servidor");
-    } finally {
-      setLoadingStudents(false);
+    }
+
+    // Fallback: Si no se encuentra grado + 1, intentar por misma letra de sección
+    const fallbackTarget = seccionesDestino.find((t) => {
+      const sameNivel = t.nivel?.id === sourceNivelId;
+      const sameLetter = t.seccion?.trim().toUpperCase() === sourceLetter;
+      return sameNivel && sameLetter;
+    });
+
+    if (fallbackTarget) {
+      setTargetSeccionId(fallbackTarget.id);
+      setIsAutoSelectedTarget(true);
+    } else {
+      setIsAutoSelectedTarget(false);
     }
   };
 
-  const filteredStudents = students.filter(s => 
-    `${s.name} ${s.apellidoPaterno} ${s.apellidoMaterno}`.toLowerCase().includes(searchQuery.toLowerCase())
+  const handleSourceSeccionChange = (val: string) => {
+    setSourceSeccionId(val);
+    if (val) {
+      autoDetectTargetSeccion(val);
+    } else {
+      setTargetSeccionId("");
+      setIsAutoSelectedTarget(false);
+    }
+  };
+
+  // Carga de estudiantes al cambiar sección origen
+  useEffect(() => {
+    let ignore = false;
+    if (sourceSeccionId) {
+      // El flag de carga se difiere para evitar setState síncrono dentro del efecto
+      const timer = setTimeout(() => setLoadingStudents(true), 0);
+      getStudentsInSeccionAction(sourceSeccionId)
+        .then((res) => {
+          if (ignore) return;
+          if (res.data) {
+            setStudents(res.data);
+            setSelectedIds(res.data.map((s) => s.id));
+          } else {
+            toast.error(res.error || "No se pudieron cargar los estudiantes");
+          }
+        })
+        .catch(() => {
+          if (!ignore) toast.error("Error al conectar con el servidor");
+        })
+        .finally(() => {
+          if (!ignore) setLoadingStudents(false);
+        });
+      return () => {
+        ignore = true;
+        clearTimeout(timer);
+      };
+    }
+    // Limpieza diferida para evitar setState síncrono dentro del efecto
+    const timer = setTimeout(() => {
+      setStudents([]);
+      setSelectedIds([]);
+    }, 0);
+    return () => {
+      ignore = true;
+      clearTimeout(timer);
+    };
+  }, [sourceSeccionId]);
+
+  const filteredStudents = students.filter((s) =>
+    `${s.name} ${s.apellidoPaterno} ${s.apellidoMaterno}`
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase()),
   );
 
   const toggleStudent = (id: string) => {
-    setSelectedIds(prev => 
-      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
     );
   };
 
@@ -139,17 +252,17 @@ export function PromocionesView({
     if (selectedIds.length === filteredStudents.length) {
       setSelectedIds([]);
     } else {
-      setSelectedIds(filteredStudents.map(s => s.id));
+      setSelectedIds(filteredStudents.map((s) => s.id));
     }
   };
 
   const handlePromote = async () => {
     if (selectedIds.length === 0) {
-      toast.error("Selecciona al menos un estudiante");
+      toast.error("Selecciona al menos un estudiante para promover.");
       return;
     }
     if (!targetSeccionId) {
-      toast.error("Selecciona la sección de destino");
+      toast.error("Selecciona la sección de destino para la promoción.");
       return;
     }
 
@@ -159,476 +272,800 @@ export function PromocionesView({
       const res = await promoteStudentsAction(
         selectedIds,
         targetSeccionId,
-        anioDestino
+        anioDestino,
       );
 
       if (res.success) {
         toast.success(res.success);
         router.refresh();
-        // Mantener en ejecución pero permitir finalizar
       } else {
-        toast.error(res.error || "Ocurrió un error");
-        setActiveTab("mapeo"); // Regresar si falló
+        toast.error(res.error || "Ocurrió un error en el proceso");
+        setActiveTab("mapeo");
       }
     });
   };
 
+  const sourceSeccionObj = seccionesOrigen.find(
+    (s) => s.id === sourceSeccionId,
+  );
+  const targetSeccionObj = seccionesDestino.find(
+    (s) => s.id === targetSeccionId,
+  );
+
+  const resetMapping = () => {
+    setActiveTab("mapeo");
+    setSourceSeccionId("");
+    setTargetSeccionId("");
+    setIsAutoSelectedTarget(false);
+  };
+
   return (
-    <div className="space-y-8 pb-20 relative">
-      {/* Background Blobs for Atmosphere */}
-      <div className="absolute top-0 -left-20 w-72 h-72 bg-primary/10 rounded-full blur-[120px] animate-blob pointer-events-none"></div>
-      <div className="absolute bottom-40 -right-20 w-96 h-96 bg-blue-500/10 rounded-full blur-[120px] animate-blob [animation-delay:2s] pointer-events-none"></div>
+    <div className="space-y-6 pb-20 relative">
+      {/* Dynamic Background Glow */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-10 right-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-[140px] pointer-events-none" />
 
-      {/* ── Stepper Header: High Impact ── */}
-      <div className="flex flex-col md:flex-row justify-center items-center gap-4 py-2">
-        <StepperItem 
-          active={activeTab === "auditoria"} 
-          completed={activeTab !== "auditoria"} 
-          icon={<IconClipboardCheck className="size-5" />} 
-          label="Paso 1" 
-          title="Auditoría Académica" 
-          onClick={() => setActiveTab("auditoria")}
-        />
-        <div className="hidden md:block w-12 h-[1px] bg-border/50"></div>
-        <StepperItem 
-          active={activeTab === "mapeo"} 
-          completed={activeTab === "ejecucion"} 
-          icon={<IconFilter className="size-5" />} 
-          label="Paso 2" 
-          title="Mapeo de Secciones" 
-          onClick={() => activeTab !== "auditoria" ? setActiveTab("mapeo") : null}
-          disabled={activeTab === "auditoria"}
-        />
-        <div className="hidden md:block w-12 h-[1px] bg-border/50"></div>
-        <StepperItem 
-          active={activeTab === "ejecucion"} 
-          completed={false} 
-          icon={<IconRocket className="size-5" />} 
-          label="Paso 3" 
-          title="Centro de Control" 
-          disabled={activeTab !== "ejecucion"}
-        />
-      </div>
+      <PromotionGuideCard anioOrigen={anioOrigen} anioDestino={anioDestino} />
 
-      <Separator className="bg-border/20" />
+      <PromotionStepper activeTab={activeTab} onTabChange={setActiveTab} />
 
-      {/* ── Content Based on Stepper ── */}
+      <Separator className="bg-border/30" />
+
+      {/* ── PASO 1: AUDITORÍA ACADÉMICA ── */}
       {activeTab === "auditoria" && (
-        <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-           <div className="text-center space-y-2">
-              <h1 className="text-4xl font-black bg-gradient-to-r from-foreground to-foreground/60 bg-clip-text text-transparent italic uppercase tracking-tighter">
-                Auditoría Académica {anioOrigen}
-              </h1>
-              <p className="text-muted-foreground text-sm max-w-lg mx-auto">
-                Validación inteligente de prerrequisitos institucionales para garantizar una promoción sin errores.
-              </p>
-           </div>
-
-           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {validationItems.map((item) => (
-                <Card key={item.id} className="liquid-glass p-6 rounded-[2.5rem] border-border/40 group hover:scale-[1.02]">
-                  <div className="space-y-4">
-                    <div className={cn(
-                      "size-12 rounded-2xl flex items-center justify-center border transition-all",
-                      item.status === "complete" ? "bg-green-500/10 border-green-500/30 text-green-500" : "bg-warning/10 border-warning/30 text-warning"
-                    )}>
-                      {item.status === "complete" ? <IconCircleCheckFilled className="size-6" /> : <IconAlertCircle className="size-6" />}
-                    </div>
-                    <div className="space-y-1">
-                      <h3 className="font-bold text-base">{item.label}</h3>
-                      <p className="text-xs text-muted-foreground leading-relaxed">
-                        {item.description}
-                      </p>
-                    </div>
-                    <Badge variant={item.status === "complete" ? "secondary" : "outline"} className="rounded-full px-3 py-1">
-                      {item.status === "complete" ? "Validado" : "Revisión Sugerida"}
-                    </Badge>
-                  </div>
-                </Card>
-              ))}
-           </div>
-
-           <Card className="liquid-glass p-8 rounded-[3rem] border-primary/20 bg-primary/5 flex flex-col md:flex-row items-center justify-between gap-6 overflow-visible relative">
-              <div className="absolute -top-10 -right-10 size-40 bg-primary/20 rounded-full blur-3xl animate-blob"></div>
-              <div className="space-y-2 text-center md:text-left z-10">
-                <h2 className="text-2xl font-black italic tracking-tighter">¿SISTEMA LISTO?</h2>
-                <p className="text-sm text-muted-foreground max-w-md">
-                  El año lectivo {anioOrigen} cumple con los estándares institucionales básicos. Puedes proceder al mapeo de secciones para el nuevo ciclo {anioDestino}.
-                </p>
-              </div>
-              <Button 
-                onClick={() => setActiveTab("mapeo")}
-                className="rounded-3xl h-14 px-10 font-bold bg-primary text-primary-foreground shadow-2xl shadow-primary/40 hover:scale-105 active:scale-95 transition-all text-xs uppercase tracking-widest gap-3 z-10"
-              >
-                Configurar Mapeo
-                <IconArrowRight size={18} />
-              </Button>
-           </Card>
-        </div>
+        <AuditoriaTab
+          anioOrigen={anioOrigen}
+          anioDestino={anioDestino}
+          onContinue={() => setActiveTab("mapeo")}
+        />
       )}
 
+      {/* ── PASO 2: MAPEO DE SECCIONES ── */}
       {activeTab === "mapeo" && (
-        <div className="animate-in fade-in zoom-in-95 duration-500">
-           <div className="flex items-center justify-between mb-8">
-              <Button variant="ghost" onClick={() => setActiveTab("auditoria")} className="gap-2 rounded-2xl group">
-                <IconArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-                Volver a Auditoría
-              </Button>
-              <div className="text-right">
-                 <h2 className="text-2xl font-black italic tracking-tighter uppercase">Configuración de Mapeo</h2>
-                 <p className="text-xs text-muted-foreground">Ciclo {anioOrigen} → {anioDestino}</p>
-              </div>
-           </div>
-
-           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              {/* ── Columna Izquierda: Configuración Masiva ── */}
-              <div className="lg:col-span-4 space-y-6">
-                <Card className="liquid-glass p-6 rounded-[2.5rem] border-border/50 bg-card/40 space-y-6">
-                  <div className="flex items-center gap-3">
-                    <div className="size-10 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-                      <IconFilter className="text-primary size-5" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-bold">Filtros Inteligentes</h3>
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Optimización de carga</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                       <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Nivel Educativo</label>
-                       <Select 
-                         value={selectedLevelId} 
-                         onValueChange={(val) => {
-                           setSelectedLevelId(val);
-                           setSourceSeccionId("");
-                           setTargetSeccionId("");
-                         }}
-                       >
-                         <SelectTrigger className="rounded-2xl border-border/40 bg-muted/40 h-12 shadow-sm focus:ring-primary/20">
-                           <SelectValue placeholder="Todos los niveles" />
-                         </SelectTrigger>
-                         <SelectContent className="rounded-2xl border-border/40 backdrop-blur-xl">
-                           <SelectItem value="all">Todos los niveles</SelectItem>
-                           {niveles.map((n: any) => (
-                             <SelectItem key={n.id} value={n.id}>
-                               {n.nombre}
-                             </SelectItem>
-                           ))}
-                         </SelectContent>
-                       </Select>
-                    </div>
-
-                    <div className="p-4 rounded-3xl bg-primary/5 border border-primary/10 space-y-4">
-                        <div className="space-y-2">
-                           <label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/60 ml-1">Origen {anioOrigen}</label>
-                           <Select value={sourceSeccionId} onValueChange={setSourceSeccionId}>
-                             <SelectTrigger className="rounded-2xl border-primary/10 bg-white/50 dark:bg-black/50 h-12 shadow-inner">
-                               <SelectValue placeholder="Selecciona origen..." />
-                             </SelectTrigger>
-                             <SelectContent className="rounded-2xl border-border/40 backdrop-blur-xl">
-                                {filteredSourceSecciones.map((s: any) => (
-                                  <SelectItem key={s.id} value={s.id}>
-                                     {s.nivel.nombre} - {s.grado.nombre} "{s.seccion}"
-                                  </SelectItem>
-                                ))}
-                             </SelectContent>
-                           </Select>
-                        </div>
-
-                        <div className="flex justify-center -my-2 relative z-10 text-primary">
-                           <div className="p-2 rounded-2xl bg-primary text-primary-foreground shadow-lg rotate-90 lg:rotate-0">
-                              <IconArrowRight className="size-4" strokeWidth={3} />
-                           </div>
-                        </div>
-
-                        <div className="space-y-2">
-                           <label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/60 ml-1">Destino {anioDestino}</label>
-                           <Select value={targetSeccionId} onValueChange={setTargetSeccionId}>
-                             <SelectTrigger className="rounded-2xl border-primary/20 bg-primary/5 h-12 shadow-inner">
-                               <SelectValue placeholder="Selecciona destino..." />
-                             </SelectTrigger>
-                             <SelectContent className="rounded-2xl border-border/40 backdrop-blur-xl">
-                                {filteredTargetSecciones.map((s: any) => (
-                                  <SelectItem key={s.id} value={s.id}>
-                                     {s.nivel.nombre} - {s.grado.nombre} "{s.seccion}"
-                                  </SelectItem>
-                                ))}
-                             </SelectContent>
-                           </Select>
-                        </div>
-                    </div>
-                  </div>
-
-                  {seccionesDestino.length === 0 && (
-                    <div className="p-4 rounded-2xl bg-warning/10 border border-warning/20 flex gap-3">
-                       <IconAlertCircle className="size-5 text-warning shrink-0" />
-                       <p className="text-[11px] text-warning/80 leading-relaxed font-medium">
-                         No hay secciones para el ciclo destino. Sincroniza la estructura en el panel de configuración.
-                       </p>
-                    </div>
-                  )}
-                </Card>
-
-                <Card className="p-6 rounded-[2.5rem] border-border/40 bg-blue-500/5 overflow-hidden relative">
-                   <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl"></div>
-                   <div className="space-y-4 relative z-10">
-                      <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
-                         <IconChartBar size={18} />
-                         <span className="text-[10px] font-bold uppercase tracking-widest">Estado del Nivel</span>
-                      </div>
-                      <div className="space-y-1">
-                         <div className="flex justify-between text-[10px] font-bold mb-1">
-                            <span className="text-muted-foreground">PROGRESADO</span>
-                            <span>{niveles.length > 0 ? "12%" : "0%"}</span>
-                         </div>
-                         <div className="h-1.5 w-full bg-border/40 rounded-full overflow-hidden">
-                            <div className="h-full bg-blue-500 rounded-full w-[12%] shadow-sm shadow-blue-500/40"></div>
-                         </div>
-                      </div>
-                   </div>
-                </Card>
-              </div>
-
-              {/* ── Columna Derecha: Selección de Estudiantes GIGANTE ── */}
-              <div className="lg:col-span-8 flex flex-col h-full min-h-[650px]">
-                <Card className="flex-1 liquid-glass rounded-[3rem] border-border/40 flex flex-col overflow-hidden bg-card/30">
-                  <div className="px-8 py-6 border-b border-border/30 flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-white/20 dark:bg-black/20">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-3">
-                         <h3 className="text-lg font-black italic tracking-tighter uppercase">Listado de Promoción</h3>
-                         <Badge variant="secondary" className="rounded-lg px-2 text-[10px] font-bold">
-                           {selectedIds.length} / {students.length}
-                         </Badge>
-                      </div>
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-[0.2em] font-medium">Panel de selección masiva</p>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                       <div className="relative group flex-1 lg:flex-none">
-                         <IconSearch className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                         <Input 
-                           placeholder="Buscar alumno..."
-                           value={searchQuery}
-                           onChange={(e) => setSearchQuery(e.target.value)}
-                           className="pl-11 h-12 w-full lg:w-72 bg-white/40 dark:bg-black/40 border-border/40 rounded-2xl text-sm shadow-inner transition-all focus:ring-primary/20"
-                         />
-                       </div>
-                       <Button 
-                         variant="outline" 
-                         onClick={toggleAll}
-                         className="rounded-2xl h-12 px-6 text-xs font-black uppercase tracking-widest border-border/50 hover:bg-white/50"
-                       >
-                         {selectedIds.length === filteredStudents.length ? "Ninguno" : "Todos"}
-                       </Button>
-                    </div>
-                  </div>
-
-                  <ScrollArea className="flex-1 p-8">
-                    {!sourceSeccionId ? (
-                      <div className="flex flex-col items-center justify-center py-40 text-center space-y-6">
-                         <div className="size-24 rounded-[2.5rem] bg-primary/5 border-2 border-dashed border-primary/20 flex items-center justify-center">
-                            <IconSchool className="size-12 text-primary/20 animate-pulse" />
-                         </div>
-                         <div className="space-y-2">
-                           <h3 className="text-xl font-black italic tracking-tighter uppercase text-muted-foreground/60">Carga de Datos Pendiente</h3>
-                           <p className="text-xs text-muted-foreground/40 max-w-sm mx-auto font-medium">
-                             Define primero la sección de origen para instanciar el proceso de transferencia al ciclo {anioDestino}.
-                           </p>
-                         </div>
-                      </div>
-                    ) : loadingStudents ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {[1, 2, 3, 4, 5, 6].map(i => (
-                          <div key={i} className="h-20 w-full bg-primary/5 animate-pulse rounded-[2rem] border border-primary/10" />
-                        ))}
-                      </div>
-                    ) : filteredStudents.length > 0 ? (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {filteredStudents.map((student) => {
-                          const isSelected = selectedIds.includes(student.id);
-                          return (
-                            <div 
-                              key={student.id}
-                              onClick={() => toggleStudent(student.id)}
-                              className={cn(
-                                "group p-5 rounded-[2.2rem] border-2 transition-all cursor-pointer flex items-center gap-5 relative overflow-hidden",
-                                isSelected 
-                                  ? "bg-primary/10 border-primary/30 shadow-lg shadow-primary/5" 
-                                  : "bg-white/40 dark:bg-black/40 border-transparent hover:border-border/60 hover:bg-white/60"
-                              )}
-                            >
-                              <div className={cn(
-                                "flex items-center justify-center size-8 rounded-[0.9rem] border-2 transition-all",
-                                isSelected ? "bg-primary border-primary text-primary-foreground rotate-0" : "bg-white dark:bg-black border-border/60 rotate-45"
-                              )}>
-                                <IconCheck size={16} className={cn("transition-all", isSelected ? "scale-100 opacity-100" : "scale-0 opacity-0")} strokeWidth={4} />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                 <h4 className="text-[13px] font-black tracking-tight truncate uppercase italic">
-                                   {student.apellidoPaterno} {student.apellidoMaterno}, {student.name}
-                                 </h4>
-                                 <p className="text-[9px] font-bold text-muted-foreground/60 mt-0.5 tracking-wider">CÓDIGO: {student.id.substring(0, 8).toUpperCase()}</p>
-                              </div>
-                              <div className={cn(
-                                "size-2 rounded-full",
-                                isSelected ? "bg-primary animate-pulse" : "bg-muted-foreground/20"
-                              )} />
-                            </div>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                       <div className="text-center py-20 bg-primary/5 rounded-[3rem] border-2 border-dashed border-primary/10">
-                         <p className="text-sm font-black italic uppercase text-primary/40 tracking-widest">Sin alumnos registrados</p>
-                       </div>
-                    )}
-                  </ScrollArea>
-
-                  <div className="px-8 py-6 bg-primary/5 border-t border-primary/10 flex items-center justify-between">
-                     <div className="hidden sm:flex items-center gap-4">
-                       <div className="flex -space-x-3">
-                         {students.slice(0, 4).map((s, i) => (
-                           <div key={i} className="size-10 rounded-2xl bg-white dark:bg-black border-2 border-primary/20 shadow-xl overflow-hidden flex items-center justify-center">
-                              <span className="text-[10px] font-black text-primary uppercase">{s.name[0]}{s.apellidoPaterno[0]}</span>
-                           </div>
-                         ))}
-                         {students.length > 4 && (
-                           <div className="size-10 rounded-2xl bg-primary text-primary-foreground border-2 border-primary border-white flex items-center justify-center text-[10px] font-black shadow-xl">
-                             +{students.length - 4}
-                           </div>
-                         )}
-                       </div>
-                       <div className="space-y-0.5">
-                          <p className="text-[10px] font-black uppercase tracking-widest text-primary italic">Transferencia Lista</p>
-                          <p className="text-[9px] text-muted-foreground font-bold">Se generarán registros para el ciclo {anioDestino}</p>
-                       </div>
-                     </div>
-
-                     <Button 
-                       size="lg"
-                       onClick={handlePromote}
-                       disabled={isPending || !sourceSeccionId || !targetSeccionId || selectedIds.length === 0}
-                       className="rounded-[2rem] h-16 px-10 font-bold bg-primary text-primary-foreground shadow-2xl shadow-primary/30 hover:scale-105 active:scale-95 transition-all text-sm uppercase tracking-[0.1em] gap-3"
-                     >
-                       {isPending ? (
-                         <>OPTIMIZANDO...</>
-                       ) : (
-                         <>
-                           EJECUTAR PROMOCIÓN
-                           <IconRocket size={20} className="animate-bounce" />
-                         </>
-                       )}
-                     </Button>
-                  </div>
-                </Card>
-              </div>
-           </div>
-        </div>
+        <MappingStep
+          anioOrigen={anioOrigen}
+          anioDestino={anioDestino}
+          onBack={() => setActiveTab("auditoria")}
+          niveles={niveles}
+          selectedLevelId={selectedLevelId}
+          onLevelChange={(val) => {
+            setSelectedLevelId(val);
+            setSourceSeccionId("");
+            setTargetSeccionId("");
+            setIsAutoSelectedTarget(false);
+          }}
+          sourceSeccionId={sourceSeccionId}
+          onSourceChange={handleSourceSeccionChange}
+          filteredSourceSecciones={filteredSourceSecciones}
+          targetSeccionId={targetSeccionId}
+          onTargetChange={(val) => {
+            setTargetSeccionId(val);
+            setIsAutoSelectedTarget(false);
+          }}
+          filteredTargetSecciones={filteredTargetSecciones}
+          isAutoSelectedTarget={isAutoSelectedTarget}
+          sourceSeccionObj={sourceSeccionObj}
+          targetSeccionObj={targetSeccionObj}
+          loadingStudents={loadingStudents}
+          filteredStudents={filteredStudents}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          selectedIds={selectedIds}
+          onToggleStudent={toggleStudent}
+          onToggleAll={toggleAll}
+          isPending={isPending}
+          onPromote={handlePromote}
+        />
       )}
 
+      {/* ── PASO 3: CENTRO DE CONTROL Y RESULTADOS ── */}
       {activeTab === "ejecucion" && (
-        <div className="max-w-3xl mx-auto py-12 text-center space-y-8 animate-in zoom-in-50 duration-700">
-           <div className={cn(
-             "size-32 rounded-[3.5rem] flex items-center justify-center mx-auto shadow-2xl transition-all duration-1000",
-             isPending 
-               ? "bg-primary/10 border-4 border-primary/30 shadow-primary/10 animate-liquid-spin" 
-               : "bg-green-500/10 border-4 border-green-500/30 shadow-green-500/10"
-           )}>
-              {isPending ? <IconRocket className="size-16 text-primary" /> : <IconCheck className="size-16 text-green-500" />}
-           </div>
-           
-           <div className="space-y-3">
-              <h2 className="text-4xl font-black italic uppercase tracking-tighter">
-                {isPending ? "Procesando Institución" : "Promoción Exitosa"}
-              </h2>
-              <p className="text-muted-foreground max-w-md mx-auto text-sm">
-                {isPending 
-                  ? "Estamos sincronizando la base de datos académica para el nuevo ciclo lectivo. Por favor, no cierres esta ventana." 
-                  : "Los estudiantes han sido transferidos correctamente a sus nuevas secciones. Los registros de matrícula han sido actualizados."}
-              </p>
-           </div>
-           
-           <div className="w-full h-4 bg-border/20 rounded-full overflow-hidden shadow-inner">
-              <div className={cn(
-                "h-full rounded-full transition-all duration-1000 shadow-lg relative",
-                isPending ? "bg-primary w-[70%] shadow-primary/50" : "bg-green-500 w-full shadow-green-500/50"
-              )}>
-                 {isPending && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"></div>}
-              </div>
-           </div>
-           
-           <p className={cn(
-             "text-[10px] font-black uppercase tracking-[0.4em]",
-             isPending ? "text-primary animate-pulse" : "text-green-500"
-           )}>
-             {isPending ? "Ejecutando Scripts de Migración..." : "Sincronización Completada"}
-           </p>
-
-           {!isPending && (
-              <div className="pt-4 flex flex-col items-center gap-4">
-                 <Button 
-                   onClick={() => {
-                     setActiveTab("auditoria");
-                     setSourceSeccionId("");
-                     setTargetSeccionId("");
-                     setSelectedIds([]);
-                   }}
-                   className="rounded-3xl h-14 px-12 font-black uppercase tracking-widest bg-green-500 hover:bg-green-600 text-white shadow-xl shadow-green-500/20"
-                 >
-                    Finalizar y Volver
-                 </Button>
-                 <p className="text-[9px] text-muted-foreground font-bold tracking-tighter uppercase">
-                    Se han procesado {selectedIds.length} registros exitosamente.
-                 </p>
-              </div>
-           )}
-        </div>
+        <PromotionResultCard
+          isPending={isPending}
+          selectedCount={selectedIds.length}
+          onContinue={resetMapping}
+        />
       )}
     </div>
   );
 }
 
-function StepperItem({ 
-  active, 
-  completed, 
-  icon, 
-  label, 
-  title, 
-  onClick,
-  disabled 
-}: { 
-  active: boolean; 
-  completed: boolean; 
-  icon: React.ReactNode; 
-  label: string; 
-  title: string;
-  onClick?: () => void;
-  disabled?: boolean;
+/* ── Subcomponentes ── */
+
+function PromotionGuideCard({
+  anioOrigen,
+  anioDestino,
+}: {
+  anioOrigen: number;
+  anioDestino: number;
+}) {
+  const [showGuide, setShowGuide] = useState<boolean>(false);
+
+  return (
+    <Card className="p-4 sm:p-5 rounded-2xl border-indigo-500/30 bg-indigo-950/20 space-y-3 relative overflow-hidden shadow-md">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="size-9 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0">
+            <IconInfoCircle className="size-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-xs sm:text-sm font-semibold text-foreground tracking-tight">
+                Guía Operativa: Cierre Escolar y Promoción Masiva
+              </h3>
+              <Badge className="bg-indigo-600 text-white text-[9px] font-semibold px-1.5 py-0.2 rounded">
+                EduNova PRO
+              </Badge>
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Proceso institucional para la transición de alumnos entre el ciclo
+              lectivo{" "}
+              <span className="font-bold text-indigo-400">{anioOrigen}</span> y{" "}
+              <span className="font-bold text-emerald-400">{anioDestino}</span>.
+            </p>
+          </div>
+        </div>
+
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setShowGuide(!showGuide)}
+          className="h-8 px-2.5 rounded-xl text-xs font-semibold text-muted-foreground hover:text-foreground shrink-0 gap-1"
+        >
+          <span>{showGuide ? "Ocultar guía" : "Ver indicaciones"}</span>
+          {showGuide ? (
+            <IconChevronUp className="size-3.5" />
+          ) : (
+            <IconChevronDown className="size-3.5" />
+          )}
+        </Button>
+      </div>
+
+      {/* Contenido Desplegable de las Indicaciones */}
+      {showGuide && (
+        <div className="pt-3 border-t border-indigo-500/20 grid grid-cols-1 md:grid-cols-3 gap-3 animate-in fade-in animation-duration-">
+          <div className="p-3 rounded-xl bg-background/40 border border-border/30 space-y-1">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400">
+              <IconShieldCheck className="size-4 shrink-0" />
+              <span>1. Auditoría Inicial</span>
+            </div>
+            <p className="text-[11px] text-muted-foreground leading-relaxed">
+              Revisa el estado de actas de notas, asistencia y finanzas para
+              certificar que la institución está lista para el cierre.
+            </p>
+          </div>
+
+          <div className="p-3 rounded-xl bg-background/40 border border-border/30 space-y-1">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400">
+              <IconTrendingUp className="size-4 shrink-0" />
+              <span>2. Mapeo de Secciones</span>
+            </div>
+            <p className="text-[11px] text-muted-foreground leading-relaxed">
+              Al elegir una sección origen (ej: 2° A {anioOrigen}), el sistema{" "}
+              <strong className="text-foreground font-semibold">
+                preselecciona automáticamente
+              </strong>{" "}
+              la correlativa (3° A {anioDestino}).
+            </p>
+          </div>
+
+          <div className="p-3 rounded-xl bg-background/40 border border-border/30 space-y-1">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400">
+              <IconRocket className="size-4 shrink-0" />
+              <span>3. Promoción Masiva</span>
+            </div>
+            <p className="text-[11px] text-muted-foreground leading-relaxed">
+              Filtra y confirma los alumnos promovibles. Al hacer clic en
+              Promover, se generan sus matrículas para el nuevo ciclo lectivo.
+            </p>
+          </div>
+        </div>
+      )}
+    </Card>
+  );
+}
+
+function PromotionStepper({
+  activeTab,
+  onTabChange,
+}: {
+  activeTab: ActiveTab;
+  onTabChange: (tab: ActiveTab) => void;
 }) {
   return (
-    <button 
-      onClick={onClick}
-      disabled={disabled}
-      className={cn(
-        "flex items-center gap-4 transition-all duration-500 px-6 py-4 rounded-[2rem] border min-w-[260px]",
-        active 
-          ? "bg-primary/10 border-primary/40 shadow-xl shadow-primary/10 scale-105 z-10" 
-          : completed 
-            ? "bg-green-500/5 border-green-500/20 opacity-80" 
-            : "bg-muted/10 border-transparent opacity-40 grayscale pointer-events-none"
-      )}
-    >
-      <div className={cn(
-        "size-10 rounded-2xl flex items-center justify-center transition-all duration-500",
-        active ? "bg-primary text-primary-foreground shadow-lg rotate-0" : completed ? "bg-green-500 text-white" : "bg-border text-muted-foreground rotate-12"
-      )}>
-        {completed ? <IconCheck className="size-5" strokeWidth={3} /> : icon}
+    <div className="flex flex-col md:flex-row justify-center items-center gap-3 py-1">
+      <StepperItem
+        active={activeTab === "auditoria"}
+        completed={activeTab !== "auditoria"}
+        icon={<IconShieldCheck className="size-4" />}
+        label="Paso 1"
+        title="Auditoría de Cierre"
+        onClick={() => onTabChange("auditoria")}
+      />
+      <div className="hidden md:block w-8 h-0.5 bg-border/40" />
+      <StepperItem
+        active={activeTab === "mapeo"}
+        completed={activeTab === "ejecucion"}
+        icon={<IconTrendingUp className="size-4" />}
+        label="Paso 2"
+        title="Mapeo de Secciones"
+        onClick={() =>
+          activeTab !== "auditoria" ? onTabChange("mapeo") : null
+        }
+        disabled={activeTab === "auditoria"}
+      />
+      <div className="hidden md:block w-8 h-0.5 bg-border/40" />
+      <StepperItem
+        active={activeTab === "ejecucion"}
+        completed={false}
+        icon={<IconRocket className="size-4" />}
+        label="Paso 3"
+        title="Centro de Promoción"
+        disabled={activeTab !== "ejecucion"}
+      />
+    </div>
+  );
+}
+
+function AuditoriaTab({
+  anioOrigen,
+  anioDestino,
+  onContinue,
+}: {
+  anioOrigen: number;
+  anioDestino: number;
+  onContinue: () => void;
+}) {
+  return (
+    <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-3 animation-duration-">
+      <div className="text-center space-y-1.5">
+        <Badge className="bg-indigo-50 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800 rounded-lg px-3 py-1 text-[11px] font-bold">
+          Ciclo Lectivo {anioOrigen} → {anioDestino}
+        </Badge>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+          Auditoría Institucional de Cierre
+        </h1>
+        <p className="text-xs text-muted-foreground max-w-lg mx-auto">
+          Verificación automática de prerrequisitos académicos antes de iniciar
+          la promoción masiva.
+        </p>
       </div>
-      <div className="text-left">
-        <p className={cn("text-[9px] font-black uppercase tracking-widest", active ? "text-primary" : "text-muted-foreground")}>{label}</p>
-        <p className={cn("text-xs font-bold leading-tight", active ? "text-foreground" : "text-muted-foreground")}>{title}</p>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {VALIDATION_ITEMS.map((item) => (
+          <Card
+            key={item.id}
+            className="p-5 rounded-2xl border-border/50 bg-card/80 space-y-4 hover:border-indigo-500/30 transition-[border-color] shadow-xs"
+          >
+            <div className="flex items-center justify-between">
+              <div
+                className={cn(
+                  "size-10 rounded-xl flex items-center justify-center border transition-[color,background-color,border-color]",
+                  item.status === "complete"
+                    ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500"
+                    : "bg-amber-500/10 border-amber-500/30 text-amber-500",
+                )}
+              >
+                {item.status === "complete" ? (
+                  <IconCircleCheckFilled className="size-5" />
+                ) : (
+                  <IconAlertCircle className="size-5" />
+                )}
+              </div>
+              <Badge
+                variant="outline"
+                className={cn(
+                  "text-[10px] font-semibold rounded-lg px-2.5 py-0.5",
+                  item.status === "complete"
+                    ? "border-emerald-500/30 text-emerald-600 bg-emerald-500/5"
+                    : "border-amber-500/30 text-amber-600 bg-amber-500/5",
+                )}
+              >
+                {item.status === "complete" ? "Validado" : "Revisión"}
+              </Badge>
+            </div>
+
+            <div className="space-y-1">
+              <h3 className="font-bold text-sm text-foreground">
+                {item.label}
+              </h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {item.description}
+              </p>
+            </div>
+            <p className="text-[10px] font-semibold text-muted-foreground/70 pt-1 border-t border-border/30">
+              {item.detail}
+            </p>
+          </Card>
+        ))}
       </div>
-    </button>
+
+      <Card className="p-6 rounded-2xl border-indigo-500/20 bg-indigo-950/20 flex flex-col md:flex-row items-center justify-between gap-5 relative overflow-hidden">
+        <div className="space-y-1 text-center md:text-left relative z-10">
+          <h2 className="text-lg font-bold text-foreground flex items-center justify-center md:justify-start gap-2">
+            <IconShieldCheck className="size-5 text-indigo-500" />
+            Sistema Listo para el Mapeo
+          </h2>
+          <p className="text-xs text-muted-foreground max-w-md">
+            El ciclo {anioOrigen} cumple con las verificaciones requeridas.
+            Procede a configurar las secciones de origen y destino.
+          </p>
+        </div>
+        <Button
+          onClick={onContinue}
+          className="rounded-xl h-11 px-6 font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20 transition-colors text-xs gap-2 shrink-0"
+        >
+          <span>Configurar Mapeo</span>
+          <IconArrowRight size={16} />
+        </Button>
+      </Card>
+    </div>
+  );
+}
+
+/* ── Paso 2: Mapeo de Secciones ── */
+
+function MappingStep({
+  anioOrigen,
+  anioDestino,
+  onBack,
+  niveles,
+  selectedLevelId,
+  onLevelChange,
+  sourceSeccionId,
+  onSourceChange,
+  filteredSourceSecciones,
+  targetSeccionId,
+  onTargetChange,
+  filteredTargetSecciones,
+  isAutoSelectedTarget,
+  sourceSeccionObj,
+  targetSeccionObj,
+  loadingStudents,
+  filteredStudents,
+  searchQuery,
+  onSearchChange,
+  selectedIds,
+  onToggleStudent,
+  onToggleAll,
+  isPending,
+  onPromote,
+}: {
+  anioOrigen: number;
+  anioDestino: number;
+  onBack: () => void;
+  niveles: Array<{ id: string; nombre: string }>;
+  selectedLevelId: string;
+  onLevelChange: (val: string) => void;
+  sourceSeccionId: string;
+  onSourceChange: (val: string) => void;
+  filteredSourceSecciones: SeccionPromocion[];
+  targetSeccionId: string;
+  onTargetChange: (val: string) => void;
+  filteredTargetSecciones: SeccionPromocion[];
+  isAutoSelectedTarget: boolean;
+  sourceSeccionObj?: SeccionPromocion;
+  targetSeccionObj?: SeccionPromocion;
+  loadingStudents: boolean;
+  filteredStudents: EstudiantePromocion[];
+  searchQuery: string;
+  onSearchChange: (value: string) => void;
+  selectedIds: string[];
+  onToggleStudent: (id: string) => void;
+  onToggleAll: () => void;
+  isPending: boolean;
+  onPromote: () => void;
+}) {
+  return (
+    <div className="space-y-5 animate-in fade-in animation-duration-">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-card/80 p-4 rounded-2xl border border-border/40">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onBack}
+          className="gap-2 rounded-xl text-xs font-semibold"
+        >
+          <IconArrowLeft size={14} />
+          Volver a Auditoría
+        </Button>
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-semibold text-muted-foreground">
+            Transferencia Lectiva:
+          </span>
+          <Badge className="bg-indigo-600 text-white text-xs font-bold px-3 py-0.5 rounded-md">
+            {anioOrigen} → {anioDestino}
+          </Badge>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <SectionMappingPanel
+          niveles={niveles}
+          selectedLevelId={selectedLevelId}
+          onLevelChange={onLevelChange}
+          sourceSeccionId={sourceSeccionId}
+          onSourceChange={onSourceChange}
+          filteredSourceSecciones={filteredSourceSecciones}
+          targetSeccionId={targetSeccionId}
+          onTargetChange={onTargetChange}
+          filteredTargetSecciones={filteredTargetSecciones}
+          isAutoSelectedTarget={isAutoSelectedTarget}
+          sourceSeccionObj={sourceSeccionObj}
+          targetSeccionObj={targetSeccionObj}
+          anioOrigen={anioOrigen}
+          anioDestino={anioDestino}
+        />
+
+        <StudentsSelectionPanel
+          sourceSeccionId={sourceSeccionId}
+          targetSeccionId={targetSeccionId}
+          loadingStudents={loadingStudents}
+          filteredStudents={filteredStudents}
+          searchQuery={searchQuery}
+          onSearchChange={onSearchChange}
+          selectedIds={selectedIds}
+          onToggleStudent={onToggleStudent}
+          onToggleAll={onToggleAll}
+          isPending={isPending}
+          onPromote={onPromote}
+        />
+      </div>
+    </div>
+  );
+}
+
+function SectionMappingPanel({
+  niveles,
+  selectedLevelId,
+  onLevelChange,
+  sourceSeccionId,
+  onSourceChange,
+  filteredSourceSecciones,
+  targetSeccionId,
+  onTargetChange,
+  filteredTargetSecciones,
+  isAutoSelectedTarget,
+  sourceSeccionObj,
+  targetSeccionObj,
+  anioOrigen,
+  anioDestino,
+}: {
+  niveles: Array<{ id: string; nombre: string }>;
+  selectedLevelId: string;
+  onLevelChange: (val: string) => void;
+  sourceSeccionId: string;
+  onSourceChange: (val: string) => void;
+  filteredSourceSecciones: SeccionPromocion[];
+  targetSeccionId: string;
+  onTargetChange: (val: string) => void;
+  filteredTargetSecciones: SeccionPromocion[];
+  isAutoSelectedTarget: boolean;
+  sourceSeccionObj?: SeccionPromocion;
+  targetSeccionObj?: SeccionPromocion;
+  anioOrigen: number;
+  anioDestino: number;
+}) {
+  return (
+    <div className="lg:col-span-5 space-y-4">
+      <Card className="p-5 rounded-2xl border-border/40 bg-card/80 space-y-5">
+        <div className="flex items-center gap-2.5 pb-3 border-b border-border/30">
+          <div className="size-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+            <IconFilter className="text-indigo-500 size-4" />
+          </div>
+          <div>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">
+              Filtro de Nivel
+            </h3>
+            <p className="text-[10px] text-muted-foreground">
+              Selecciona el nivel académico
+            </p>
+          </div>
+        </div>
+
+        <LevelSegmentedControl
+          levels={[
+            { id: "all", label: "TODOS" },
+            ...niveles.map((n) => ({ id: n.id, label: n.nombre })),
+          ]}
+          value={selectedLevelId}
+          onChange={onLevelChange}
+          label="1. Nivel Educativo"
+        />
+
+        <div className="p-4 rounded-xl bg-muted/20 border border-border/30 space-y-4">
+          {/* Origen */}
+          <div className="space-y-1.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+              2. Sección Origen ({anioOrigen})
+            </span>
+            <Select value={sourceSeccionId} onValueChange={onSourceChange}>
+              <SelectTrigger className="rounded-xl border-border/40 bg-background h-10 text-xs font-medium">
+                <SelectValue placeholder="Selecciona origen..." />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-border/40">
+                {filteredSourceSecciones.map((s) => (
+                  <SelectItem key={s.id} value={s.id} className="text-xs">
+                    {s.nivel?.nombre} - {s.grado?.nombre} &quot;{s.seccion}&quot;
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex justify-center -my-1">
+            <div className="size-7 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow-md">
+              <IconArrowRight
+                className="size-3.5 rotate-90 lg:rotate-0"
+                strokeWidth={3}
+              />
+            </div>
+          </div>
+
+          {/* Destino */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                3. Sección Destino ({anioDestino})
+              </span>
+              {isAutoSelectedTarget && (
+                <Badge
+                  variant="outline"
+                  className="text-[9px] font-semibold bg-emerald-500/10 text-emerald-600 border-emerald-500/30 px-1.5 py-0 gap-1 rounded"
+                >
+                  <IconSparkles className="size-2.5" />
+                  Auto-Sugerido
+                </Badge>
+              )}
+            </div>
+            <Select value={targetSeccionId} onValueChange={onTargetChange}>
+              <SelectTrigger className="rounded-xl border-emerald-500/30 bg-emerald-500/5 h-10 text-xs font-medium">
+                <SelectValue placeholder="Selecciona destino..." />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-border/40">
+                {filteredTargetSecciones.map((s) => (
+                  <SelectItem key={s.id} value={s.id} className="text-xs">
+                    {s.nivel?.nombre} - {s.grado?.nombre} &quot;{s.seccion}&quot;
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Resumen del Mapeo Seleccionado */}
+        {sourceSeccionObj && targetSeccionObj && (
+          <div className="p-3.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-xs space-y-1">
+            <p className="font-bold text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5">
+              <span>Mapeo Establecido</span>
+              {isAutoSelectedTarget && (
+                <span className="text-[10px] font-normal text-emerald-600 dark:text-emerald-400">
+                  (Detección correlativa automática ✨)
+                </span>
+              )}
+            </p>
+            <p className="text-[11px] text-muted-foreground">
+              De{" "}
+              <span className="font-semibold text-foreground">
+                {sourceSeccionObj.grado?.nombre} &quot;{sourceSeccionObj.seccion}
+                &quot;
+              </span>{" "}
+              a{" "}
+              <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                {targetSeccionObj.grado?.nombre} &quot;{targetSeccionObj.seccion}
+                &quot;
+              </span>
+            </p>
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}
+
+function StudentsSelectionPanel({
+  sourceSeccionId,
+  targetSeccionId,
+  loadingStudents,
+  filteredStudents,
+  searchQuery,
+  onSearchChange,
+  selectedIds,
+  onToggleStudent,
+  onToggleAll,
+  isPending,
+  onPromote,
+}: {
+  sourceSeccionId: string;
+  targetSeccionId: string;
+  loadingStudents: boolean;
+  filteredStudents: EstudiantePromocion[];
+  searchQuery: string;
+  onSearchChange: (value: string) => void;
+  selectedIds: string[];
+  onToggleStudent: (id: string) => void;
+  onToggleAll: () => void;
+  isPending: boolean;
+  onPromote: () => void;
+}) {
+  const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+
+  return (
+    <div className="lg:col-span-7 space-y-4">
+      <Card className="p-5 rounded-2xl border-border/40 bg-card/80 space-y-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-border/30">
+          <div className="flex items-center gap-2">
+            <IconUserCheck className="size-4 text-indigo-500" />
+            <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">
+              Estudiantes de la Sección Origen
+            </h3>
+          </div>
+          <Badge
+            variant="outline"
+            className="text-[10px] font-bold rounded-md px-2 py-0.5"
+          >
+            {selectedIds.length} de {filteredStudents.length} Seleccionados
+          </Badge>
+        </div>
+
+        {/* Toolbar: Búsqueda y Botón Seleccionar Todo */}
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+            <Input
+              placeholder="Buscar por apellido o nombre..."
+              value={searchQuery}
+              onChange={(e) => onSearchChange(e.target.value)}
+              className="pl-8 h-9 text-xs rounded-xl border-border/40"
+            />
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onToggleAll}
+            disabled={filteredStudents.length === 0}
+            className="h-9 text-[11px] font-semibold rounded-xl shrink-0"
+          >
+            {selectedIds.length === filteredStudents.length
+              ? "Desmarcar Todos"
+              : "Seleccionar Todos"}
+          </Button>
+        </div>
+
+        {/* Lista de Estudiantes */}
+        {!sourceSeccionId ? (
+          <div className="flex flex-col items-center justify-center h-64 border border-dashed border-border/40 rounded-xl p-6 text-center gap-2 text-muted-foreground">
+            <IconSchool className="size-8 opacity-30" />
+            <p className="text-xs font-semibold">
+              Selecciona una sección de origen para listar los estudiantes.
+            </p>
+          </div>
+        ) : loadingStudents ? (
+          <div className="flex items-center justify-center h-64 text-xs font-semibold text-muted-foreground">
+            Cargando nómina de estudiantes...
+          </div>
+        ) : filteredStudents.length === 0 ? (
+          <div className="flex items-center justify-center h-64 text-xs font-semibold text-muted-foreground">
+            No se encontraron estudiantes en esta sección.
+          </div>
+        ) : (
+          <ScrollArea className="h-[360px] pr-2">
+            <div className="space-y-2">
+              {filteredStudents.map((st) => {
+                const isSelected = selectedSet.has(st.id);
+                return (
+                  <div
+                    key={st.id}
+                    role="checkbox"
+                    aria-checked={isSelected}
+                    tabIndex={0}
+                    onClick={() => onToggleStudent(st.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        onToggleStudent(st.id);
+                      }
+                    }}
+                    className={cn(
+                      "flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-[background-color,border-color] outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                      isSelected
+                        ? "bg-indigo-500/10 border-indigo-500/30"
+                        : "bg-muted/10 border-border/30 hover:bg-muted/20",
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Checkbox
+                        checked={isSelected}
+                        onCheckedChange={() => onToggleStudent(st.id)}
+                      />
+                      <div className="flex flex-col">
+                        <span className="text-xs font-bold text-foreground">
+                          {st.apellidoPaterno} {st.apellidoMaterno}, {st.name}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground font-mono">
+                          DNI: {st.documentoIdentidad || "Sin registro"}
+                        </span>
+                      </div>
+                    </div>
+                    <Badge
+                      variant="outline"
+                      className="text-[10px] font-bold rounded-md bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                    >
+                      Promovible
+                    </Badge>
+                  </div>
+                );
+              })}
+            </div>
+          </ScrollArea>
+        )}
+
+        {/* Accion de Promoción Masiva */}
+        <div className="pt-2 flex justify-end">
+          <Button
+            onClick={onPromote}
+            disabled={selectedIds.length === 0 || !targetSeccionId || isPending}
+            className="rounded-xl h-11 px-6 font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20 text-xs gap-2"
+          >
+            <IconRocket className="size-4" />
+            <span>Promover {selectedIds.length} Estudiante(s)</span>
+          </Button>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function PromotionResultCard({
+  isPending,
+  selectedCount,
+  onContinue,
+}: {
+  isPending: boolean;
+  selectedCount: number;
+  onContinue: () => void;
+}) {
+  return (
+    <div className="max-w-xl mx-auto py-10 text-center space-y-6 animate-in zoom-in-95 animation-duration-">
+      <Card className="p-8 rounded-3xl border-border/40 bg-card/80 space-y-6 shadow-xl">
+        <div
+          className={cn(
+            "size-20 rounded-2xl flex items-center justify-center mx-auto shadow-lg transition-[color,background-color,border-color]",
+            isPending
+              ? "bg-indigo-500/10 border-2 border-indigo-500/30 text-indigo-600 animate-pulse"
+              : "bg-emerald-500/10 border-2 border-emerald-500/30 text-emerald-500",
+          )}
+        >
+          {isPending ? (
+            <IconRefresh className="size-9 animate-spin" />
+          ) : (
+            <IconCheck className="size-9" />
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <h2 className="text-xl font-semibold text-foreground">
+            {isPending
+              ? "Procesando Promoción Masiva..."
+              : "¡Promoción Completada!"}
+          </h2>
+          <p className="text-xs text-muted-foreground leading-relaxed max-w-sm mx-auto">
+            {isPending
+              ? "Actualizando registros de matrícula y asignación de secciones para el nuevo ciclo."
+              : `Se han promovido ${selectedCount} estudiante(s) a la sección destino exitosamente.`}
+          </p>
+        </div>
+
+        {!isPending && (
+          <div className="pt-2 flex flex-col items-center gap-3">
+            <Button
+              onClick={onContinue}
+              className="rounded-xl h-10 px-6 font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-500/20 text-xs"
+            >
+              Continuar con otra sección
+            </Button>
+          </div>
+        )}
+      </Card>
+    </div>
   );
 }

@@ -1,13 +1,11 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
 import {
   IconUserCheck,
   IconUserExclamation,
   IconUserMinus,
   IconClock,
 } from "@tabler/icons-react";
-import { cn } from "@/lib/utils";
 
 interface AttendanceMetricsProps {
   stats: {
@@ -20,74 +18,57 @@ interface AttendanceMetricsProps {
 }
 
 export function AttendanceMetrics({ stats }: AttendanceMetricsProps) {
-  const percentage =
-    stats.total > 0 ? (stats.presentes / stats.total) * 100 : 0;
-
   const items = [
     {
-      label: "Asistencias",
+      label: "Asistencias A Tiempo",
       value: stats.presentes,
+      sub: "Días con ingreso puntual",
       icon: IconUserCheck,
-      color: "text-success",
-      bgColor: "bg-success/10",
+      color: "text-emerald-600 dark:text-emerald-400",
+      bg: "bg-emerald-500/10 border-emerald-500/20",
     },
     {
-      label: "Tardanzas",
+      label: "Tardanzas Registradas",
       value: stats.tardanzas,
+      sub: "Ingresos fuera de horario",
       icon: IconClock,
-      color: "text-warning",
-      bgColor: "bg-warning/10",
+      color: "text-amber-600 dark:text-amber-400",
+      bg: "bg-amber-500/10 border-amber-500/20",
     },
     {
-      label: "Inasistencias",
+      label: "Inasistencias Libres",
       value: stats.faltas,
+      sub: "Faltas no justificadas",
       icon: IconUserMinus,
-      color: "text-destructive",
-      bgColor: "bg-destructive/10",
+      color: "text-rose-600 dark:text-rose-400",
+      bg: "bg-rose-500/10 border-rose-500/20",
     },
     {
-      label: "Justificadas",
+      label: "Faltas Justificadas",
       value: stats.justificadas,
+      sub: "Con permiso formal",
       icon: IconUserExclamation,
-      color: "text-info",
-      bgColor: "bg-info/10",
+      color: "text-sky-600 dark:text-sky-400",
+      bg: "bg-sky-500/10 border-sky-500/20",
     },
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      {items.map((item, index) => (
-        <Card
-          key={index}
-          className="overflow-hidden border-border/50 liquid-glass transition-all hover:shadow-xl hover:shadow-primary/10 relative"
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+      {items.map((item) => (
+        <div
+          key={item.label}
+          className="p-4 rounded-2xl bg-card/80 border border-border/50 shadow-sm flex items-center justify-between transition-[background-color,box-shadow] hover:bg-card hover:shadow-md"
         >
-          {/* Subtle Glow decoration for premium feel */}
-          <div className="absolute top-0 right-0 w-20 h-20 bg-primary/10 rounded-full blur-2xl pointer-events-none" />
-
-          <CardContent className="px-2">
-            <div className="flex items-center gap-4">
-              <div
-                className={cn(
-                  "flex size-10 p-3 items-center justify-center rounded-2xl shadow-inner",
-                  item.bgColor,
-                  item.color,
-                )}
-              >
-                <item.icon className="size-4" />
-              </div>
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground/60">
-                  {item.label}
-                </p>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-black tabular-nums tracking-tighter">
-                    {item.value}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{item.label}</span>
+            <h3 className="text-2xl md:text-3xl font-bold font-mono text-foreground mt-0.5">{item.value}</h3>
+            <p className="text-[11px] text-muted-foreground/80 mt-1">{item.sub}</p>
+          </div>
+          <div className={`size-11 rounded-xl border flex items-center justify-center shrink-0 shadow-xs ${item.bg} ${item.color}`}>
+            <item.icon className="size-5" />
+          </div>
+        </div>
       ))}
     </div>
   );

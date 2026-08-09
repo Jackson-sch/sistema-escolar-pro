@@ -1,4 +1,4 @@
-import { PrismaClient } from "./client";
+import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import bcrypt from "bcryptjs";
@@ -112,21 +112,22 @@ async function main() {
     },
   ];
 
-  let cargoAdmin: any;
-  for (const c of cargos) {
-    const cargo = await prisma.cargo.upsert({
-      where: { codigo: c.codigo },
-      update: {},
-      create: {
-        codigo: c.codigo,
-        nombre: c.nombre,
-        descripcion: c.descripcion,
-        jerarquia: c.jerarquia,
-        sistemico: c.sistemico || false,
-      },
-    });
-    if (c.codigo === "ADMIN_GLOBAL") cargoAdmin = cargo;
-  }
+  const cargoResults = await Promise.all(
+    cargos.map((c) =>
+      prisma.cargo.upsert({
+        where: { codigo: c.codigo },
+        update: {},
+        create: {
+          codigo: c.codigo,
+          nombre: c.nombre,
+          descripcion: c.descripcion,
+          jerarquia: c.jerarquia,
+          sistemico: c.sistemico || false,
+        },
+      })
+    )
+  );
+  const cargoAdmin = cargoResults.find((c) => c.codigo === "ADMIN_GLOBAL");
 
   // 2. Estados de Usuario
   console.log("- Sembrando Estados de Usuario...");
@@ -178,39 +179,43 @@ async function main() {
     { nombre: "SECUNDARIA", grados: ["1ero", "2do", "3ero", "4to", "5to"] },
   ];
 
-  for (const n of niveles) {
-    const nivel = await prisma.nivel.upsert({
-      where: {
-        institucionId_nombre: {
-          institucionId: institucion.id,
-          nombre: n.nombre,
-        },
-      },
-      update: {},
-      create: {
-        nombre: n.nombre,
-        institucionId: institucion.id,
-      },
-    });
-
-    for (let i = 0; i < n.grados.length; i++) {
-      await prisma.grado.upsert({
+  await Promise.all(
+    niveles.map(async (n) => {
+      const nivel = await prisma.nivel.upsert({
         where: {
-          nivelId_codigo: {
-            nivelId: nivel.id,
-            codigo: `G${i + 1}-${n.nombre.substring(0, 3)}`,
+          institucionId_nombre: {
+            institucionId: institucion.id,
+            nombre: n.nombre,
           },
         },
         update: {},
         create: {
-          nombre: n.grados[i],
-          codigo: `G${i + 1}-${n.nombre.substring(0, 3)}`,
-          orden: i + 1,
-          nivelId: nivel.id,
+          nombre: n.nombre,
+          institucionId: institucion.id,
         },
       });
-    }
-  }
+
+      await Promise.all(
+        n.grados.map((gradoNombre, i) =>
+          prisma.grado.upsert({
+            where: {
+              nivelId_codigo: {
+                nivelId: nivel.id,
+                codigo: `G${i + 1}-${n.nombre.substring(0, 3)}`,
+              },
+            },
+            update: {},
+            create: {
+              nombre: gradoNombre,
+              codigo: `G${i + 1}-${n.nombre.substring(0, 3)}`,
+              orden: i + 1,
+              nivelId: nivel.id,
+            },
+          })
+        )
+      );
+    })
+  );
 
   // 5. Usuario Administrador Inicial (SIN institución - se asigna en onboarding)
   console.log("- Sembrando Usuario Administrador...");
@@ -220,19 +225,39 @@ async function main() {
     where: { email: "admin@colegio.edu.pe" },
     update: {
       password: hashedPassword,
-      cargoId: cargoAdmin.id,
+      cargoId: cargoAdmin?.id,
       estadoId: estadoActivo.id,
     },
     create: {
       email: "admin@colegio.edu.pe",
-      name: "Administrador Global",
+      name: "Administrador Institucional",
       password: hashedPassword,
       role: "administrativo",
       dni: "00000000",
-      cargoId: cargoAdmin.id,
+      cargoId: cargoAdmin?.id,
       estadoId: estadoActivo.id,
     },
   });
+
+  // 5.1. Usuario Super Administrador Global (Master Control Panel)
+  console.log("- Sembrando Super Administrador Global...");
+  const superAdminPassword = await bcrypt.hash("superadmin123", 10);
+  await prisma.user.upsert({
+    where: { email: "superadmin@colegio.edu.pe" },
+    update: {
+      password: superAdminPassword,
+      estadoId: estadoActivo.id,
+    },
+    create: {
+      email: "superadmin@colegio.edu.pe",
+      name: "Super Administrador Global",
+      password: superAdminPassword,
+      role: "super_admin",
+      dni: "99999999",
+      estadoId: estadoActivo.id,
+    },
+  });
+
 
   // 6. Tipos de Evaluación
   console.log("- Sembrando Tipos de Evaluación...");
@@ -242,18 +267,20 @@ async function main() {
     { codigo: "SUMA", nombre: "Sumativa", categoria: "SUMATIVA" },
   ];
 
-  for (const t of tiposEval) {
-    await prisma.tipoEvaluacion.upsert({
-      where: { codigo: t.codigo },
-      update: {},
-      create: {
-        codigo: t.codigo,
-        nombre: t.nombre,
-        categoria: t.categoria,
-        sistemico: true,
-      },
-    });
-  }
+  await Promise.all(
+    tiposEval.map((t) =>
+      prisma.tipoEvaluacion.upsert({
+        where: { codigo: t.codigo },
+        update: {},
+        create: {
+          codigo: t.codigo,
+          nombre: t.nombre,
+          categoria: t.categoria,
+          sistemico: true,
+        },
+      })
+    )
+  );
 
   // 7. Categorías de Incidente / Seguimiento Psicopedagógico
   console.log("- Sembrando Categorías de Incidente...");
@@ -278,13 +305,15 @@ async function main() {
     { nombre: "Seguimiento", descripcion: "Continuación de casos previos" },
   ];
 
-  for (const cat of categoriasIncidente) {
-    await (prisma as any).categoriaIncidente.upsert({
-      where: { nombre: cat.nombre },
-      update: {},
-      create: cat,
-    });
-  }
+  await Promise.all(
+    categoriasIncidente.map((cat) =>
+      (prisma as any).categoriaIncidente.upsert({
+        where: { nombre: cat.nombre },
+        update: {},
+        create: cat,
+      })
+    )
+  );
 
 
   // 8. Áreas Curriculares y Competencias (Malla Curricular)
@@ -363,87 +392,100 @@ async function main() {
     },
   ];
 
-  for (const a of mallaCurricular) {
-    const area = await prisma.areaCurricular.upsert({
-      where: {
-        codigo_institucionId: {
+  await Promise.all(
+    mallaCurricular.map(async (a) => {
+      const area = await prisma.areaCurricular.upsert({
+        where: {
+          codigo_institucionId: {
+            codigo: a.codigo,
+            institucionId: institucion.id,
+          },
+        },
+        update: {
+          nombre: a.nombre,
+          color: a.color,
+        },
+        create: {
+          nombre: a.nombre,
           codigo: a.codigo,
+          color: a.color,
           institucionId: institucion.id,
         },
-      },
-      update: {
-        nombre: a.nombre,
-        color: a.color,
-      },
-      create: {
-        nombre: a.nombre,
-        codigo: a.codigo,
-        color: a.color,
-        institucionId: institucion.id,
-      },
-    });
-
-    for (const comp of a.competencias) {
-      await prisma.competencia.create({
-        data: {
-          nombre: comp,
-          areaCurricularId: area.id,
-        },
       });
-    }
-  }
+
+      await Promise.all(
+        a.competencias.map(async (comp) => {
+          const compExistente = await prisma.competencia.findFirst({
+            where: {
+              areaCurricularId: area.id,
+              nombre: comp,
+            },
+          });
+
+          if (!compExistente) {
+            await prisma.competencia.create({
+              data: {
+                nombre: comp,
+                areaCurricularId: area.id,
+              },
+            });
+          }
+        })
+      );
+    })
+  );
 
   // 9. Sedes y Secciones (Nivel Académico)
   console.log("- Sembrando Sedes y Secciones...");
-  const sedeCentral = await prisma.sede.upsert({
-    where: {
-      institucionId_nombre: {
-        institucionId: institucion.id,
-        nombre: "Sede Central",
+  const [sedeCentral, nivelPrimaria] = await Promise.all([
+    prisma.sede.upsert({
+      where: {
+        institucionId_nombre: {
+          institucionId: institucion.id,
+          nombre: "Sede Central",
+        },
       },
-    },
-    update: {},
-    create: {
-      nombre: "Sede Central",
-      direccion: "Av. Principal 456",
-      institucionId: institucion.id,
-    },
-  });
-
-  // Obtener grados para primaria
-  const nivelPrimaria = await prisma.nivel.findFirst({
-    where: { nombre: "PRIMARIA", institucionId: institucion.id },
-  });
+      update: {},
+      create: {
+        nombre: "Sede Central",
+        direccion: "Av. Principal 456",
+        institucionId: institucion.id,
+      },
+    }),
+    prisma.nivel.findFirst({
+      where: { nombre: "PRIMARIA", institucionId: institucion.id },
+    }),
+  ]);
 
   const gradosPrimaria = await prisma.grado.findMany({
     where: { nivelId: nivelPrimaria?.id },
   });
 
-  const secciones = [];
-  for (const grado of gradosPrimaria) {
-    const seccion = await prisma.nivelAcademico.upsert({
-      where: {
-        nivelId_gradoId_seccion_anioAcademico_institucionId: {
+  const secciones = await Promise.all(
+    gradosPrimaria.map((grado) =>
+      prisma.nivelAcademico.upsert({
+        where: {
+          nivelId_gradoId_seccion_anioAcademico_institucionId: {
+            nivelId: nivelPrimaria!.id,
+            gradoId: grado.id,
+            seccion: "A",
+            anioAcademico: 2026,
+            institucionId: institucion.id,
+          },
+        },
+        update: {},
+        create: {
+          seccion: "A",
           nivelId: nivelPrimaria!.id,
           gradoId: grado.id,
-          seccion: "A",
-          anioAcademico: 2026,
           institucionId: institucion.id,
+          sedeId: sedeCentral.id,
+          anioAcademico: 2026,
+          turno: "MANANA",
         },
-      },
-      update: {},
-      create: {
-        seccion: "A",
-        nivelId: nivelPrimaria!.id,
-        gradoId: grado.id,
-        institucionId: institucion.id,
-        sedeId: sedeCentral.id,
-        anioAcademico: 2026,
-        turno: "MANANA",
-      },
-    });
-    secciones.push(seccion);
-  }
+      })
+    )
+  );
 
   // 10. Docentes (Teachers)
   console.log("- Sembrando Docentes de Prueba...");
@@ -474,30 +516,30 @@ async function main() {
     },
   ];
 
-  const docentes = [];
-  for (const d of docentesData) {
-    const docente = await prisma.user.upsert({
-      where: { email: d.email },
-      update: {
-        name: d.name,
-        apellidoPaterno: d.apellidoPaterno,
-        apellidoMaterno: d.apellidoMaterno,
-      },
-      create: {
-        name: d.name,
-        apellidoPaterno: d.apellidoPaterno,
-        apellidoMaterno: d.apellidoMaterno,
-        email: d.email,
-        dni: d.dni,
-        password: hashedPassword,
-        role: "profesor",
-        cargoId: docenteCargo?.id,
-        estadoId: estadoActivo.id,
-        institucionId: institucion.id,
-      },
-    });
-    docentes.push(docente);
-  }
+  const docentes = await Promise.all(
+    docentesData.map((d) =>
+      prisma.user.upsert({
+        where: { email: d.email },
+        update: {
+          name: d.name,
+          apellidoPaterno: d.apellidoPaterno,
+          apellidoMaterno: d.apellidoMaterno,
+        },
+        create: {
+          name: d.name,
+          apellidoPaterno: d.apellidoPaterno,
+          apellidoMaterno: d.apellidoMaterno,
+          email: d.email,
+          dni: d.dni,
+          password: hashedPassword,
+          role: "profesor",
+          cargoId: docenteCargo?.id,
+          estadoId: estadoActivo.id,
+          institucionId: institucion.id,
+        },
+      })
+    )
+  );
 
   // 11. Cursos (Courses)
   console.log("- Sembrando Cursos y asignando a Docentes...");
@@ -518,41 +560,42 @@ async function main() {
   // Asignar cursos al primer grado de primaria (1ero A) para demostración
   const primeraSeccion = secciones[0];
   if (primeraSeccion) {
-    for (let i = 0; i < cursoList.length; i++) {
-      const c = cursoList[i];
-      const area = await prisma.areaCurricular.findUnique({
-        where: {
-          codigo_institucionId: {
-            codigo: c.area,
-            institucionId: institucion.id,
-          },
-        },
-      });
-
-      if (area) {
-        await prisma.curso.upsert({
+    await Promise.all(
+      cursoList.map(async (c, i) => {
+        const area = await prisma.areaCurricular.findUnique({
           where: {
-            codigo_anioAcademico_nivelAcademicoId: {
-              codigo: `${c.codigo}-1A`,
-              anioAcademico: 2026,
-              nivelAcademicoId: primeraSeccion.id,
+            codigo_institucionId: {
+              codigo: c.area,
+              institucionId: institucion.id,
             },
           },
-          update: {},
-          create: {
-            nombre: c.nombre,
-            codigo: `${c.codigo}-1A`,
-            anioAcademico: 2026,
-            areaCurricularId: area.id,
-            nivelAcademicoId: primeraSeccion.id,
-            gradoId: primeraSeccion.gradoId,
-            profesorId: docentes[i % docentes.length].id, // Rotar entre los 3 docentes
-            institucionId: institucion.id,
-            nivelId: primeraSeccion.nivelId,
-          },
         });
-      }
-    }
+
+        if (area) {
+          await prisma.curso.upsert({
+            where: {
+              codigo_anioAcademico_nivelAcademicoId: {
+                codigo: `${c.codigo}-1A`,
+                anioAcademico: 2026,
+                nivelAcademicoId: primeraSeccion.id,
+              },
+            },
+            update: {},
+            create: {
+              nombre: c.nombre,
+              codigo: `${c.codigo}-1A`,
+              anioAcademico: 2026,
+              areaCurricularId: area.id,
+              nivelAcademicoId: primeraSeccion.id,
+              gradoId: primeraSeccion.gradoId,
+              profesorId: docentes[i % docentes.length].id, // Rotar entre los 3 docentes
+              institucionId: institucion.id,
+              nivelId: primeraSeccion.nivelId,
+            },
+          });
+        }
+      })
+    );
   }
 
   // 12. Estudiantes de Prueba
@@ -569,56 +612,64 @@ async function main() {
   await prisma.pago.deleteMany({});
   await prisma.documento.deleteMany({});
   await prisma.logro.deleteMany({});
+  await (prisma as any).detalleVentaUniforme.deleteMany({});
+  await (prisma as any).favoritoUniforme.deleteMany({});
+  await (prisma as any).ventaUniforme.deleteMany({});
+  await (prisma as any).movimientoInventario.deleteMany({});
   await (prisma as any).comprobantePago.deleteMany({});
   await prisma.cronogramaPago.deleteMany({});
   await prisma.user.deleteMany({ where: { role: "estudiante" } });
 
   console.log("- Sembrando Estudiantes de Prueba...");
 
-  for (const s of studentsSeed) {
-    await prisma.user.upsert({
-      where: { dni: s.dni },
-      update: {
-        email: s.email || undefined,
-        estadoId: estadoActivo.id,
-        institucionId: institucion.id,
-      },
-      create: {
-        name: s.name,
-        apellidoPaterno: s.apellidoPaterno,
-        apellidoMaterno: s.apellidoMaterno,
-        dni: s.dni,
-        email: s.email || null,
-        fechaNacimiento: s.fechaNacimiento,
-        sexo: s.sexo,
-        nacionalidad: s.nacionalidad,
-        direccion: s.direccion,
-        departamento: s.departamento,
-        provincia: s.provincia,
-        distrito: s.distrito,
-        ubigeo: s.ubigeo,
-        codigoEstudiante: s.codigoEstudiante,
-        codigoSiagie: s.codigoSiagie,
-        role: "estudiante",
-        estadoId: estadoActivo.id,
-        institucionId: institucion.id,
-        contactoEmergencia: s.nombreApoderado,
-        telefonoEmergencia: s.telefonoApoderado,
-        parentescoContactoEmergencia: s.parentescoApoderado,
-      },
-    });
-  }
+  await Promise.all(
+    studentsSeed.map((s) =>
+      prisma.user.upsert({
+        where: { dni: s.dni },
+        update: {
+          email: s.email || undefined,
+          estadoId: estadoActivo.id,
+          institucionId: institucion.id,
+        },
+        create: {
+          name: s.name,
+          apellidoPaterno: s.apellidoPaterno,
+          apellidoMaterno: s.apellidoMaterno,
+          dni: s.dni,
+          email: s.email || null,
+          fechaNacimiento: s.fechaNacimiento,
+          sexo: s.sexo,
+          nacionalidad: s.nacionalidad,
+          direccion: s.direccion,
+          departamento: s.departamento,
+          provincia: s.provincia,
+          distrito: s.distrito,
+          ubigeo: s.ubigeo,
+          codigoEstudiante: s.codigoEstudiante,
+          codigoSiagie: s.codigoSiagie,
+          role: "estudiante",
+          estadoId: estadoActivo.id,
+          institucionId: institucion.id,
+          contactoEmergencia: s.nombreApoderado,
+          telefonoEmergencia: s.telefonoApoderado,
+          parentescoContactoEmergencia: s.parentescoApoderado,
+        },
+      })
+    )
+  );
 
   // 13. Categorías de Uniformes
   console.log("- Sembrando Categorías de Uniformes...");
   const categoriasUniformes = ["Diario", "Deportivo", "Gala"];
-  for (const nombre of categoriasUniformes) {
-    await (prisma as any).categoriaUniforme.upsert({
-      where: { nombre },
-      update: {},
-      create: { nombre },
-    });
-  }
+  await Promise.all(
+    categoriasUniformes.map((nombre) =>
+      (prisma as any).categoriaUniforme.upsert({
+        where: { nombre },
+        update: {},
+        create: { nombre },
+      })
+    )
+  );
 
   console.log("✅ Proceso de siembra finalizado con éxito.");
 }

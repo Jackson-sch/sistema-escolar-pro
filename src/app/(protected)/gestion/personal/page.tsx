@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
@@ -45,23 +44,21 @@ export default async function PersonalPage() {
           </p>
         </div>
         <div className="flex flex-row gap-2 items-center">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="rounded-full sm:w-auto sm:px-3"
-                >
-                  <IconCloudDownload className="sm:mr-2 h-4 w-4" />
-                  <span className="hidden sm:inline">Exportar</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Exportar Personal</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-full sm:w-auto sm:px-3"
+              >
+                <IconCloudDownload className="sm:mr-2 h-4 w-4" />
+                <span className="hidden sm:inline">Exportar</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Exportar Personal</p>
+            </TooltipContent>
+          </Tooltip>
 
           <AddStaffButton
             instituciones={instituciones as any}

@@ -4,9 +4,10 @@ import { serialize } from "@/lib/dto";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { deleteFile } from "@/lib/storage";
-import { Role } from "../../prisma/client";
+import { Role } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { auth } from "@/auth";
+import { getActiveSedeId } from "@/actions/active-sede";
 
 /**
  * Limpia los datos convirtiendo strings vacíos en undefined para campos que deben ser únicos o nulos.
@@ -46,6 +47,7 @@ export async function getStudentsAction(params?: {
     const role = session?.user?.role;
     const userId = session?.user?.id;
     const institucionId = session?.user?.institucionId;
+    const activeSedeId = await getActiveSedeId();
 
     const page = params?.page || 1;
     const pageSize = params?.pageSize || 25;
@@ -64,6 +66,15 @@ export async function getStudentsAction(params?: {
       role: "estudiante" as Role,
       institucionId: institucionId || undefined,
     };
+
+    if (activeSedeId) {
+      where.matriculas = {
+        some: {
+          anioAcademico: currentYear,
+          nivelAcademico: { sedeId: activeSedeId },
+        },
+      };
+    }
 
     if (estado && estado !== "ALL") {
       where.estado = { nombre: estado };
@@ -228,7 +239,7 @@ export async function getNivelesAcademicosAction(anio?: number, nivelId?: string
       ],
     });
     return { data: serialize(niveles) };
-  } catch (error) {
+  } catch {
     return { error: "Error al cargar niveles académicos" };
   }
 }
@@ -259,6 +270,19 @@ const splitFullName = (fullName: string) => {
  */
 export async function createStudentAction(values: any) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
+    const rawRole = (session.user.role || "").toString().toLowerCase();
+    const allowedRoles = ["super_admin", "admin", "administrador", "director", "coordinador", "administrativo"];
+    if (!allowedRoles.includes(rawRole)) {
+      return { error: "No tienes permiso para registrar estudiantes." };
+    }
+
+    const institucionId = session.user.institucionId;
+
     const {
       nombreApoderado,
       dniApoderado,
@@ -273,6 +297,7 @@ export async function createStudentAction(values: any) {
     const student = await prisma.user.create({
       data: {
         ...sanitizeData(studentData),
+        institucionId: institucionId || studentData.institucionId,
         fechaNacimiento: studentData.fechaNacimiento
           ? new Date(studentData.fechaNacimiento)
           : null,
@@ -340,6 +365,11 @@ export async function createStudentAction(values: any) {
  */
 export async function updateStudentAction(id: string, values: any) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     const {
       nombreApoderado,
       dniApoderado,
@@ -465,6 +495,11 @@ export async function updateStudentAction(id: string, values: any) {
  */
 export async function deleteStudentAction(id: string) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     // Obtener imagen antes de eliminar para limpieza física
     const student = await prisma.user.findUnique({
       where: { id },
@@ -491,11 +526,26 @@ export async function deleteStudentAction(id: string) {
  */
 export async function getGuardianByDniAction(dni: string) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return { error: "No autorizado" };
+    }
+
     const guardian = await prisma.user.findFirst({
       where: {
         dni,
         role: "padre" as Role,
+        institucionId: session.user.institucionId || undefined,
       },
+      select: {
+        id: true,
+        name: true,
+        apellidoPaterno: true,
+        apellidoMaterno: true,
+        dni: true,
+        telefono: true,
+        email: true,
+      }
     });
 
     if (!guardian) return { data: null };
@@ -513,9 +563,13 @@ export async function getGuardianByDniAction(dni: string) {
 export async function searchStudentsAction(query: string) {
   try {
     const session = await auth();
-    const role = session?.user?.role;
-    const userId = session?.user?.id;
-    const institucionId = session?.user?.institucionId;
+    if (!session?.user) {
+      return { error: "No autorizado" };
+    }
+
+    const role = session.user.role;
+    const userId = session.user.id;
+    const institucionId = session.user.institucionId;
 
     const institucion = await prisma.institucionEducativa.findFirst({
       where: institucionId ? { id: institucionId } : undefined,
@@ -581,15 +635,22 @@ export async function searchStudentsAction(query: string) {
     return { error: "No se pudo realizar la búsqueda" };
   }
 }
+
 /**
  * Busca un estudiante por su ID
  */
 export async function getStudentByIdAction(id: string) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return { error: "No autorizado" };
+    }
+
     const student = await prisma.user.findUnique({
       where: {
         id,
         role: "estudiante" as Role,
+        institucionId: session.user.institucionId || undefined,
       },
       select: {
         id: true,
@@ -610,44 +671,8 @@ export async function getStudentByIdAction(id: string) {
     return { error: "Error al buscar el estudiante" };
   }
 }
+
 /**
- * Busca un estudiante por su DNI (Útil para el scanner QR)
- */
-export async function getStudentByDniAction(dni: string) {
-  try {
-    const student = await prisma.user.findFirst({
-      where: {
-        dni,
-        role: "estudiante" as Role,
-      },
-      include: {
-        nivelAcademico: {
-          include: {
-            grado: true,
-            nivel: true,
-          },
-        },
-        asistencias: {
-          where: {
-            fecha: {
-              gte: new Date(new Date().setHours(0, 0, 0, 0)),
-              lte: new Date(new Date().setHours(23, 59, 59, 999)),
-            },
-          },
-          take: 1,
-        },
-      },
-    });
-
-    if (!student) return { error: "Estudiante no encontrado" };
-
-    return { data: serialize(student) };
-  } catch (error) {
-    console.error("Error fetching student by DNI:", error);
-    return { error: "Error al buscar el estudiante" };
-  }
-}
-
 /**
  * Obtiene las estadísticas resumidas para el panel de gestión de estudiantes
  */

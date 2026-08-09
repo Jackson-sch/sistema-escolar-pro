@@ -1,8 +1,13 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import {
+  useForm,
+  UseFormReturn,
+  type FieldError,
+  type FieldErrors,
+} from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTransition } from "react";
+import { useTransition, useRef, useEffect, useMemo } from "react";
 import {
   IconUser,
   IconId,
@@ -11,6 +16,9 @@ import {
   IconLoader2,
   IconBriefcase,
   IconCertificate,
+  IconPhone,
+  IconMapPin,
+  IconDeviceFloppy,
 } from "@tabler/icons-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -45,17 +53,46 @@ import { toast } from "sonner";
 import {
   STAFF_ROLE_OPTIONS,
   ESCALA_MAGISTERIAL_OPTIONS,
+  SEXO_OPTIONS,
 } from "@/lib/constants";
-import { useEffect, useMemo } from "react";
 import { useFormModal } from "@/components/modals/form-modal-context";
+import { FormKeyboardHelpBar } from "@/components/common/form-keyboard-help-bar";
+
+interface StaffInitialData {
+  email?: string;
+  name?: string;
+  apellidoPaterno?: string;
+  apellidoMaterno?: string;
+  dni?: string;
+  sexo?: string;
+  role?: string;
+  cargoId?: string | null;
+  area?: string | null;
+  telefono?: string | null;
+  direccion?: string | null;
+  especialidad?: string | null;
+  titulo?: string | null;
+  numeroContrato?: string | null;
+  colegioProfesor?: string | null;
+  escalaMagisterial?: string | null;
+  fechaIngreso?: Date | string | null;
+  estadoId?: string;
+  institucionId?: string;
+}
 
 interface StaffFormProps {
   id?: string;
-  initialData?: any;
+  initialData?: StaffInitialData;
   onSuccess?: () => void;
   instituciones: { id: string; nombreInstitucion: string }[];
   estados: { id: string; nombre: string }[];
   cargos: { id: string; nombre: string; codigo: string }[];
+}
+
+interface Cargo {
+  id: string;
+  nombre: string;
+  codigo: string;
 }
 
 const ROLE_CARGOS_MAPPING: Record<string, string[]> = {
@@ -107,7 +144,7 @@ export function StaffForm({
           dni: initialData.dni || "",
           email: initialData.email || "",
           sexo: initialData.sexo || "MASCULINO",
-          role: initialData.role || "profesor",
+          role: (initialData.role || "profesor") as StaffValues["role"],
           cargoId: initialData.cargoId || "",
           area: initialData.area || "",
           telefono: initialData.telefono || "",
@@ -156,8 +193,6 @@ export function StaffForm({
 
   const onSubmit = (values: StaffValues) => {
     startTransition(() => {
-      // Sanitizar valores para enviar solo lo que el schema permite
-      // Esto evita errores de Prisma por argumentos desconocidos (como objetos anidados)
       const sanitizedValues = {
         name: values.name,
         apellidoPaterno: values.apellidoPaterno,
@@ -195,10 +230,16 @@ export function StaffForm({
     });
   };
 
+  const onSubmitRef = useRef(onSubmit);
+
   useEffect(() => {
-    setOnSubmit(() => form.handleSubmit(onSubmit)());
+    onSubmitRef.current = onSubmit;
+  });
+
+  useEffect(() => {
+    setOnSubmit(() => form.handleSubmit(onSubmitRef.current)());
     return () => setOnSubmit(undefined);
-  }, [form, onSubmit, setOnSubmit]);
+  }, [form, setOnSubmit]);
 
   const { isDirty } = form.formState;
 
@@ -207,11 +248,13 @@ export function StaffForm({
     return () => setIsDirty(false);
   }, [isDirty, setIsDirty]);
 
-  const onError = (errors: any) => {
+  const onError = (errors: FieldErrors<StaffValues>) => {
     console.error("StaffForm Validation Errors:", errors);
-    const errorMessages = Object.values(errors)
-      .map((error: any) => error.message)
-      .filter(Boolean);
+    const errorMessages = (
+      Object.values(errors) as (FieldError | undefined)[]
+    )
+      .map((error) => error?.message)
+      .filter((message): message is string => Boolean(message));
 
     if (errorMessages.length > 0) {
       toast.error(
@@ -219,7 +262,7 @@ export function StaffForm({
       );
     } else {
       toast.error(
-        "Error de validación en el formulario. Por favor, verifique todos los campos.",
+        "Verifique los campos requeridos del formulario.",
       );
     }
   };
@@ -227,11 +270,10 @@ export function StaffForm({
   const selectedRole = form.watch("role");
 
   const filteredCargos = useMemo(() => {
-    const allowedCodes = ROLE_CARGOS_MAPPING[selectedRole] || [];
-    return cargos.filter((c) => allowedCodes.includes(c.codigo));
+    const allowedCodes = new Set(ROLE_CARGOS_MAPPING[selectedRole] || []);
+    return cargos.filter((c) => allowedCodes.has(c.codigo));
   }, [cargos, selectedRole]);
 
-  // Reset cargo if it's not in the filtered list
   useEffect(() => {
     const currentCargoId = form.getValues("cargoId");
     if (
@@ -246,445 +288,634 @@ export function StaffForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit, onError)}
-        className="space-y-3"
+        className="space-y-6 px-1 py-1"
       >
-        {/* SECCIÓN 1: DATOS PERSONALES */}
-        <div className="p-6 rounded-[2rem] border space-y-4">
-          <div className="flex items-center gap-3 pb-2 border-b border-white/5">
-            <div className="p-2 rounded-xl bg-primary/10 text-primary">
-              <IconUser className="size-5" />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold uppercase tracking-widest text-foreground">
-                Información Personal
-              </h3>
-              <p className="text-[10px] text-muted-foreground font-medium">
-                Datos básicos de identificación del colaborador.
-                <span className="text-primary/80 ml-1">
-                  (El acceso al sistema será con su email y su DNI como
-                  contraseña)
-                </span>
-              </p>
-            </div>
-          </div>
+        <PersonalInfoSection form={form} disabled={isRootAdmin} />
 
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem className="md:col-span-4">
-                  <FormLabel className="text-[10px] font-bold uppercase tracking-wider ml-1 text-muted-foreground/70">
-                    Nombres
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      disabled={isRootAdmin}
-                      placeholder="Ejem: Juan Alberto"
-                      className="rounded-full transition-all px-5"
-                    />
-                  </FormControl>
-                  <FormMessage className="text-[10px]" />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="apellidoPaterno"
-              render={({ field }) => (
-                <FormItem className="md:col-span-4">
-                  <FormLabel className="text-[10px] font-bold uppercase tracking-wider ml-1 text-muted-foreground/70">
-                    Apellido Paterno
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      disabled={isRootAdmin}
-                      placeholder="Pérez"
-                      className="rounded-full transition-all px-5"
-                    />
-                  </FormControl>
-                  <FormMessage className="text-[10px]" />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="apellidoMaterno"
-              render={({ field }) => (
-                <FormItem className="md:col-span-4">
-                  <FormLabel className="text-[10px] font-bold uppercase tracking-wider ml-1 text-muted-foreground/70">
-                    Apellido Materno
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      disabled={isRootAdmin}
-                      placeholder="García"
-                      className="rounded-full transition-all px-5"
-                    />
-                  </FormControl>
-                  <FormMessage className="text-[10px]" />
-                </FormItem>
-              )}
-            />
+        <LaboralSection
+          form={form}
+          disabled={isRootAdmin}
+          isPending={isPending}
+          cargos={filteredCargos}
+          estados={estados}
+        />
 
-            <FormField
-              control={form.control}
-              name="dni"
-              render={({ field }) => (
-                <FormItem className="md:col-span-6">
-                  <FormLabel className="text-[10px] font-bold uppercase tracking-wider ml-1 text-muted-foreground/70">
-                    DNI
-                  </FormLabel>
-                  <FormControl>
-                    <div className="relative group">
-                      <IconId className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
-                      <Input
-                        {...field}
-                        disabled={isRootAdmin}
-                        placeholder="00000000"
-                        maxLength={8}
-                        className="rounded-full transition-all pl-10 pr-5"
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage className="text-[10px]" />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem className="md:col-span-6">
-                  <FormLabel className="text-[10px] font-bold uppercase tracking-wider ml-1 text-muted-foreground/70">
-                    Correo Electrónico
-                  </FormLabel>
-                  <FormControl>
-                    <div className="relative group">
-                      <IconMail className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
-                      <Input
-                        {...field}
-                        disabled={isRootAdmin}
-                        type="email"
-                        placeholder="nombre@colegio.edu.pe"
-                        className="rounded-full transition-all pl-10 pr-5"
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage className="text-[10px]" />
-                </FormItem>
-              )}
-            />
-          </div>
-        </div>
-
-        {/* SECCIÓN 2: VÍNCULO LABORAL */}
-        <div className="p-6 rounded-[2rem] border space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-blue-500/10 text-blue-500">
-              <IconBriefcase className="size-5" />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold uppercase tracking-widest text-foreground">
-                Vínculo Laboral
-              </h3>
-              <p className="text-[10px] text-muted-foreground font-medium">
-                Asignación y cargo institucional
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-            <FormField
-              control={form.control}
-              name="role"
-              render={({ field }) => (
-                <FormItem className="md:col-span-6">
-                  <FormLabel className="text-[10px] font-bold uppercase tracking-wider ml-1 text-muted-foreground/70">
-                    Rol en el Sistema
-                  </FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    disabled={isRootAdmin}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="w-full rounded-full transition-all px-5">
-                        <SelectValue placeholder="Seleccionar Rol" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent className="rounded-xl">
-                      {STAFF_ROLE_OPTIONS.map((option) => (
-                        <SelectItem
-                          key={option.value}
-                          value={option.value}
-                          className="rounded-xl"
-                        >
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage className="text-[10px]" />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="cargoId"
-              render={({ field }) => (
-                <FormItem className="md:col-span-6">
-                  <FormLabel className="text-[10px] font-bold uppercase tracking-wider ml-1 text-muted-foreground/70">
-                    Cargo Específico
-                  </FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    disabled={isRootAdmin}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="w-full rounded-full transition-all px-5">
-                        <SelectValue placeholder="Seleccionar Cargo" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent className="rounded-xl">
-                      {filteredCargos.map((cargo) => (
-                        <SelectItem
-                          key={cargo.id}
-                          value={cargo.id}
-                          className="rounded-xl"
-                        >
-                          {cargo.nombre}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage className="text-[10px]" />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="area"
-              render={({ field }) => (
-                <FormItem className="md:col-span-6">
-                  <FormLabel className="text-[10px] font-bold uppercase tracking-wider ml-1 text-muted-foreground/70">
-                    Área / Departamento
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      disabled={isRootAdmin}
-                      placeholder="Ejem: Académica, Administración"
-                      className="rounded-full transition-all px-5"
-                    />
-                  </FormControl>
-                  <FormMessage className="text-[10px]" />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="fechaIngreso"
-              render={({ field }) => (
-                <FormItem className="md:col-span-6">
-                  <FormLabel className="text-[10px] font-bold uppercase tracking-wider ml-1 text-muted-foreground/70">
-                    Fecha de Ingreso
-                  </FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          disabled={isRootAdmin || isPending}
-                          variant={"outline"}
-                          className={cn(
-                            "w-full rounded-full transition-all px-5 text-left font-normal",
-                            !field.value && "text-muted-foreground",
-                          )}
-                        >
-                          <span className="truncate">
-                            {field.value
-                              ? format(field.value, "PPP", { locale: es })
-                              : "Seleccionar fecha"}
-                          </span>
-                          <IconCalendar className="ml-auto h-4 w-4 opacity-50 shrink-0" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="w-auto p-0 rounded-xl"
-                      align="start"
-                    >
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage className="text-[10px]" />
-                </FormItem>
-              )}
-            />
-          </div>
-        </div>
-
-        {/* SECCIÓN 3: PERFIL PROFESIONAL (Solo si es profesor) */}
         {selectedRole === "profesor" && (
-          <div className="p-6 rounded-[2rem] border space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500">
-                <IconCertificate className="size-5" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold uppercase tracking-widest text-foreground">
-                  Perfil Profesional Docente
-                </h3>
-                <p className="text-[10px] text-muted-foreground font-medium">
-                  Información académica y magisterial
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="especialidad"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-[10px] font-bold uppercase tracking-wider ml-1 text-muted-foreground/70">
-                      Especialidad
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        disabled={isRootAdmin}
-                        placeholder="Ejem: Matemática y Física"
-                        className="rounded-full transition-all px-5"
-                      />
-                    </FormControl>
-                    <FormMessage className="text-[10px]" />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="titulo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-[10px] font-bold uppercase tracking-wider ml-1 text-muted-foreground/70">
-                      Título / Grado Académico
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        disabled={isRootAdmin}
-                        placeholder="Licenciado en Educación"
-                        className="rounded-full transition-all px-5"
-                      />
-                    </FormControl>
-                    <FormMessage className="text-[10px]" />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="colegioProfesor"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-[10px] font-bold uppercase tracking-wider ml-1 text-muted-foreground/70">
-                      N° Colegiatura (CPP)
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        disabled={isRootAdmin}
-                        placeholder="000000"
-                        className="rounded-full transition-all px-5"
-                      />
-                    </FormControl>
-                    <FormMessage className="text-[10px]" />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="escalaMagisterial"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-[10px] font-bold uppercase tracking-wider ml-1 text-muted-foreground/70">
-                      Escala Magisterial
-                    </FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger
-                          className="w-full rounded-full transition-all px-5"
-                          disabled={isRootAdmin}
-                        >
-                          <SelectValue placeholder="Seleccionar" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className="rounded-xl">
-                        {ESCALA_MAGISTERIAL_OPTIONS.map((option) => (
-                          <SelectItem
-                            key={option.value}
-                            value={option.value}
-                            className="rounded-xl"
-                          >
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage className="text-[10px]" />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
+          <ProfesionalSection form={form} disabled={isRootAdmin} />
         )}
 
-        <div className="pt-4 flex flex-col gap-3">
-          {!isRootAdmin && (
-            <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-white/5">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onSuccess}
-                className="w-full sm:w-auto rounded-full border-border/40 hover:bg-accent/50 hover:scale-105"
-                disabled={isPending}
-              >
-                Cancelar
-              </Button>
-              <Button
-                disabled={isPending}
-                type="submit"
-                className="w-full sm:w-auto rounded-full px-8 hover:scale-105"
-              >
-                {isPending && (
-                  <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
-                {isPending
-                  ? "Procesando Expediente..."
-                  : id
-                    ? "Actualizar Personal"
-                    : "Finalizar Registro de Personal"}
-              </Button>
-            </div>
-          )}
-          <p className="text-[10px] text-center text-muted-foreground/50 font-medium pt-2">
-            Al registrar se creará un expediente laboral digital con acceso
-            restringido para directivos.
-          </p>
-        </div>
+        {/* Guía de Atajos de Teclado */}
+        <FormKeyboardHelpBar />
+
+        {/* Acciones */}
+        {!isRootAdmin && (
+          <StaffFormActions
+            isPending={isPending}
+            isEdit={Boolean(id)}
+            onSuccess={onSuccess}
+          />
+        )}
       </form>
     </Form>
+  );
+}
+
+/* ── Subcomponentes ── */
+
+function SectionHeader({
+  icon: Icon,
+  title,
+  description,
+  colorClass,
+}: {
+  icon: React.ElementType;
+  title: string;
+  description: string;
+  colorClass: string;
+}) {
+  return (
+    <div className="flex items-center gap-2.5 pb-2.5 border-b border-border/30">
+      <div
+        className={`size-8 rounded-xl border flex items-center justify-center shrink-0 ${colorClass}`}
+      >
+        <Icon className="size-4" />
+      </div>
+      <div>
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground">
+          {title}
+        </h3>
+        <p className="text-[11px] text-muted-foreground">{description}</p>
+      </div>
+    </div>
+  );
+}
+
+function PersonalInfoSection({
+  form,
+  disabled,
+}: {
+  form: UseFormReturn<StaffValues>;
+  disabled: boolean;
+}) {
+  return (
+    <div className="space-y-4">
+      <SectionHeader
+        icon={IconUser}
+        title="1. Información Personal"
+        description="Datos de identidad y contacto del colaborador. El acceso al sistema se realiza mediante su email y DNI."
+        colorClass="bg-indigo-500/10 border-indigo-500/20 text-indigo-500"
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem className="md:col-span-4">
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Nombres
+              </FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  disabled={disabled}
+                  placeholder="Juan Alberto"
+                  className="bg-background border-border/40 rounded-xl text-xs h-9"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="apellidoPaterno"
+          render={({ field }) => (
+            <FormItem className="md:col-span-4">
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Apellido Paterno
+              </FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  disabled={disabled}
+                  placeholder="Pérez"
+                  className="bg-background border-border/40 rounded-xl text-xs h-9"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="apellidoMaterno"
+          render={({ field }) => (
+            <FormItem className="md:col-span-4">
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Apellido Materno
+              </FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  disabled={disabled}
+                  placeholder="García"
+                  className="bg-background border-border/40 rounded-xl text-xs h-9"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="dni"
+          render={({ field }) => (
+            <FormItem className="md:col-span-4">
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                DNI / Documento Identidad
+              </FormLabel>
+              <FormControl>
+                <div className="relative">
+                  <IconId className="absolute left-3 top-2.5 size-4 text-muted-foreground/60" />
+                  <Input
+                    {...field}
+                    disabled={disabled}
+                    placeholder="01234567"
+                    maxLength={8}
+                    className="pl-9 bg-background border-border/40 rounded-xl text-xs h-9 font-mono"
+                  />
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem className="md:col-span-5">
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Correo Electrónico
+              </FormLabel>
+              <FormControl>
+                <div className="relative">
+                  <IconMail className="absolute left-3 top-2.5 size-4 text-muted-foreground/60" />
+                  <Input
+                    {...field}
+                    disabled={disabled}
+                    type="email"
+                    placeholder="docente@colegio.edu.pe"
+                    className="pl-9 bg-background border-border/40 rounded-xl text-xs h-9"
+                  />
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="sexo"
+          render={({ field }) => (
+            <FormItem className="md:col-span-3">
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Sexo / Género
+              </FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                disabled={disabled}
+              >
+                <FormControl>
+                  <SelectTrigger className="bg-background border-border/40 rounded-xl text-xs h-9 font-medium w-full">
+                    <SelectValue placeholder="Seleccionar" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="rounded-xl border-border/40">
+                  {SEXO_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value} className="text-xs font-medium">
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="telefono"
+          render={({ field }) => (
+            <FormItem className="md:col-span-4">
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Teléfono / WhatsApp
+              </FormLabel>
+              <FormControl>
+                <div className="relative">
+                  <IconPhone className="absolute left-3 top-2.5 size-4 text-muted-foreground/60" />
+                  <Input
+                    {...field}
+                    disabled={disabled}
+                    placeholder="987 654 321"
+                    className="pl-9 bg-background border-border/40 rounded-xl text-xs h-9 font-mono"
+                  />
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="direccion"
+          render={({ field }) => (
+            <FormItem className="md:col-span-8">
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Dirección Domiciliaria
+              </FormLabel>
+              <FormControl>
+                <div className="relative">
+                  <IconMapPin className="absolute left-3 top-2.5 size-4 text-muted-foreground/60" />
+                  <Input
+                    {...field}
+                    disabled={disabled}
+                    placeholder="Av. España 456, Trujillo"
+                    className="pl-9 bg-background border-border/40 rounded-xl text-xs h-9"
+                  />
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+    </div>
+  );
+}
+
+function LaboralSection({
+  form,
+  disabled,
+  isPending,
+  cargos,
+  estados,
+}: {
+  form: UseFormReturn<StaffValues>;
+  disabled: boolean;
+  isPending: boolean;
+  cargos: Cargo[];
+  estados: { id: string; nombre: string }[];
+}) {
+  return (
+    <div className="space-y-4 pt-2">
+      <SectionHeader
+        icon={IconBriefcase}
+        title="2. Vínculo Laboral y Cargo"
+        description="Asignación de rol en el sistema, cargo específico y área de trabajo."
+        colorClass="bg-blue-500/10 border-blue-500/20 text-blue-500"
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5">
+        <FormField
+          control={form.control}
+          name="role"
+          render={({ field }) => (
+            <FormItem className="md:col-span-4">
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Rol en el Sistema
+              </FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                disabled={disabled}
+              >
+                <FormControl>
+                  <SelectTrigger className="bg-background border-border/40 rounded-xl text-xs h-9 font-medium w-full">
+                    <SelectValue placeholder="Seleccionar Rol" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="rounded-xl border-border/40">
+                  {STAFF_ROLE_OPTIONS.map((option) => (
+                    <SelectItem
+                      key={option.value}
+                      value={option.value}
+                      className="text-xs font-medium"
+                    >
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="cargoId"
+          render={({ field }) => (
+            <FormItem className="md:col-span-4">
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Cargo Específico
+              </FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                disabled={disabled}
+              >
+                <FormControl>
+                  <SelectTrigger className="bg-background border-border/40 rounded-xl text-xs h-9 font-medium w-full">
+                    <SelectValue placeholder="Seleccionar Cargo" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="rounded-xl border-border/40">
+                  {cargos.map((cargo) => (
+                    <SelectItem
+                      key={cargo.id}
+                      value={cargo.id}
+                      className="text-xs font-medium"
+                    >
+                      {cargo.nombre}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="area"
+          render={({ field }) => (
+            <FormItem className="md:col-span-4">
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Área / Departamento
+              </FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  disabled={disabled}
+                  placeholder="Académica, Ciencias, etc."
+                  className="bg-background border-border/40 rounded-xl text-xs h-9"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="fechaIngreso"
+          render={({ field }) => (
+            <FormItem className="md:col-span-4">
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Fecha de Ingreso
+              </FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      disabled={disabled || isPending}
+                      variant="outline"
+                      className={cn(
+                        "w-full bg-background border-border/40 rounded-xl text-xs h-9 font-medium justify-between",
+                        !field.value && "text-muted-foreground",
+                      )}
+                    >
+                      <span>
+                        {field.value
+                          ? format(field.value, "PPP", { locale: es })
+                          : "Seleccionar fecha"}
+                      </span>
+                      <IconCalendar className="size-4 opacity-50 shrink-0 ml-1" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="w-auto p-0 rounded-2xl border-border/40"
+                  align="start"
+                >
+                  <Calendar
+                    mode="single"
+                    selected={field.value}
+                    onSelect={field.onChange}
+                    initialFocus
+                    locale={es}
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="estadoId"
+          render={({ field }) => (
+            <FormItem className="md:col-span-4">
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Estado del Personal
+              </FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                disabled={disabled}
+              >
+                <FormControl>
+                  <SelectTrigger className="bg-background border-border/40 rounded-xl text-xs h-9 font-medium w-full">
+                    <SelectValue placeholder="Seleccionar estado" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="rounded-xl border-border/40">
+                  {estados.map((e) => (
+                    <SelectItem key={e.id} value={e.id} className="text-xs font-medium">
+                      {e.nombre}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+    </div>
+  );
+}
+
+function ProfesionalSection({
+  form,
+  disabled,
+}: {
+  form: UseFormReturn<StaffValues>;
+  disabled: boolean;
+}) {
+  return (
+    <div className="space-y-4 pt-2">
+      <SectionHeader
+        icon={IconCertificate}
+        title="3. Perfil Profesional Docente"
+        description="Especialidad pedagógica, colegiatura y escala magisterial."
+        colorClass="bg-amber-500/10 border-amber-500/20 text-amber-500"
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5">
+        <FormField
+          control={form.control}
+          name="especialidad"
+          render={({ field }) => (
+            <FormItem className="md:col-span-6">
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Especialidad
+              </FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  disabled={disabled}
+                  placeholder="Matemática, Comunicación, etc."
+                  className="bg-background border-border/40 rounded-xl text-xs h-9"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="titulo"
+          render={({ field }) => (
+            <FormItem className="md:col-span-6">
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Título / Grado Académico
+              </FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  disabled={disabled}
+                  placeholder="Licenciado en Educación"
+                  className="bg-background border-border/40 rounded-xl text-xs h-9"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="colegioProfesor"
+          render={({ field }) => (
+            <FormItem className="md:col-span-6">
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Colegiatura CPP (Opcional)
+              </FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  disabled={disabled}
+                  placeholder="012345"
+                  className="bg-background border-border/40 rounded-xl text-xs h-9 font-mono"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="escalaMagisterial"
+          render={({ field }) => (
+            <FormItem className="md:col-span-6">
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Escala Magisterial
+              </FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                disabled={disabled}
+              >
+                <FormControl>
+                  <SelectTrigger className="bg-background border-border/40 rounded-xl text-xs h-9 font-medium w-full">
+                    <SelectValue placeholder="Seleccionar Escala" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="rounded-xl border-border/40">
+                  {ESCALA_MAGISTERIAL_OPTIONS.map((option) => (
+                    <SelectItem
+                      key={option.value}
+                      value={option.value}
+                      className="text-xs font-medium"
+                    >
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+    </div>
+  );
+}
+
+function StaffFormActions({
+  isPending,
+  isEdit,
+  onSuccess,
+}: {
+  isPending: boolean;
+  isEdit: boolean;
+  onSuccess?: () => void;
+}) {
+  return (
+    <div className="flex items-center justify-end gap-3 pt-4 border-t border-border/30">
+      {onSuccess && (
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onSuccess}
+          className="rounded-xl px-5 h-10 font-semibold text-xs border-border/40"
+          disabled={isPending}
+        >
+          Cancelar
+        </Button>
+      )}
+      <Button
+        disabled={isPending}
+        type="submit"
+        className="rounded-xl px-6 h-10 font-semibold text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 gap-2 min-w-[180px]"
+      >
+        {isPending ? (
+          <>
+            <IconLoader2 className="size-4 animate-spin" />
+            <span>Procesando...</span>
+          </>
+        ) : (
+          <>
+            <IconDeviceFloppy className="size-4" />
+            <span>{isEdit ? "Guardar Cambios" : "Registrar Colaborador"}</span>
+          </>
+        )}
+      </Button>
+    </div>
   );
 }

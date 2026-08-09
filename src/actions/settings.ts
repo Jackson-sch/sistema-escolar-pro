@@ -1,20 +1,40 @@
 "use server";
 
 import { getSystemVariable } from "@/lib/settings";
+import { auth } from "@/auth";
+
+// Claves que los usuarios autenticados normales pueden solicitar
+const ALLOWED_SETTING_KEYS = [
+  "NOMBRE_INSTITUCION",
+  "LOGO_INSTITUCION",
+  "CICLO_ESCOLAR_ACTUAL",
+  "FORMATO_COMPROBANTE",
+];
 
 /**
  * Obtiene múltiples variables del sistema de forma segura desde el servidor.
- * Útil para componentes de cliente que no pueden importar lib/settings directamente.
  */
 export async function getSystemSettingsAction(keys: string[]) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return { error: "No autorizado" };
+    }
+
+    const rawRole = (session.user.role || "").toString().toLowerCase();
+    const isAdmin = ["super_admin", "admin", "administrador", "director"].includes(rawRole);
+
+    // Filtrar claves no permitidas para usuarios no administradores
+    const safeKeys = isAdmin
+      ? keys
+      : keys.filter((k) => ALLOWED_SETTING_KEYS.includes(k.toUpperCase()));
+
     const results = await Promise.all(
-      keys.map((key) => getSystemVariable(key)),
+      safeKeys.map((key) => getSystemVariable(key)),
     );
 
-    // Mapear de vuelta a un objeto para facilidad de uso
     const settings: Record<string, string> = {};
-    keys.forEach((key, index) => {
+    safeKeys.forEach((key, index) => {
       settings[key] = results[index];
     });
 

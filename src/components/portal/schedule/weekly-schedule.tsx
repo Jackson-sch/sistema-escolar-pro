@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo } from "react";
-import { IconClock } from "@tabler/icons-react";
+import { IconClock, IconUser, IconMapPin, IconCoffee } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 interface Horario {
   id: string;
@@ -23,11 +24,11 @@ interface WeeklyScheduleProps {
 
 export function WeeklySchedule({ horarios }: WeeklyScheduleProps) {
   const dias = [
-    { id: 1, label: "LUN" },
-    { id: 2, label: "MAR" },
-    { id: 3, label: "MIE" },
-    { id: 4, label: "JUE" },
-    { id: 5, label: "VIE" },
+    { id: 1, label: "Lunes" },
+    { id: 2, label: "Martes" },
+    { id: 3, label: "Miércoles" },
+    { id: 4, label: "Jueves" },
+    { id: 5, label: "Viernes" },
   ];
 
   // Definición de bloques base de horario
@@ -56,56 +57,45 @@ export function WeeklySchedule({ horarios }: WeeklyScheduleProps) {
     },
   ];
 
-  // Helper para encontrar el índice de inicio y fin en los bloques base
   const getRowRange = (start: string, end: string) => {
     const startIndex = baseBlocks.findIndex((b) => b.start === start);
     const endIndex = baseBlocks.findIndex((b) => b.end === end);
     if (startIndex === -1) return null;
-    // +2 porque el grid empieza en 2 (después del header)
     return {
       start: startIndex + 2,
       end: (endIndex !== -1 ? endIndex : startIndex) + 3,
     };
   };
 
-  // Assign arbitrary colors to areas for the premium look (based on area name)
   const getAreaColor = (areaName: string) => {
     const name = areaName.toLowerCase();
-    if (name.includes("cienc") || name.includes("mate")) return "teal";
-    if (
-      name.includes("letra") ||
-      name.includes("human") ||
-      name.includes("comunic")
-    )
-      return "orange";
-    if (
-      name.includes("arte") ||
-      name.includes("física") ||
-      name.includes("tall")
-    )
-      return "rose";
-    return "blue"; // fallback
+    if (name.includes("cienc") || name.includes("mate"))
+      return "bg-teal-500/10 border-teal-500/30 text-teal-600 dark:text-teal-400";
+    if (name.includes("letra") || name.includes("human") || name.includes("comunic"))
+      return "bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400";
+    if (name.includes("arte") || name.includes("física") || name.includes("tall"))
+      return "bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400";
+    return "bg-indigo-500/10 border-indigo-500/30 text-indigo-600 dark:text-indigo-400";
   };
 
   return (
-    <div className="animate-in bg-card fade-in zoom-in-95 duration-500 rounded-3xl border border-border/20 p-2 md:p-6 overflow-x-auto">
-      <div className="min-w-[900px]">
-        {/* Unified Grid Container */}
+    <div className="rounded-2xl border border-border/40 bg-card/80 p-4 md:p-6 shadow-xl overflow-x-auto">
+      <div className="min-w-[850px]">
         <div
           className="grid grid-cols-[80px_1fr_1fr_1fr_1fr_1fr] gap-3"
           style={{
-            gridTemplateRows: `auto repeat(${baseBlocks.length}, minmax(40px, auto))`,
+            gridTemplateRows: `auto repeat(${baseBlocks.length}, minmax(44px, auto))`,
           }}
         >
           {/* Header Row */}
-          <div className="col-start-1 h-4" />
+          <div className="col-start-1 h-6" />
           {dias.map((dia, idx) => (
             <div
               key={dia.id}
-              className="text-center pb-3 border-b border-border/30 mb-2"
+              className="text-center py-2 px-3 rounded-xl bg-muted/40 border border-border/30 mb-2"
               style={{ gridColumn: idx + 2, gridRow: 1 }}
             >
-              <span className="block text-[11px] font-black uppercase tracking-[0.2em] text-foreground/80 dark:text-white/70">
+              <span className="text-xs font-bold uppercase tracking-wider text-foreground">
                 {dia.label}
               </span>
             </div>
@@ -114,94 +104,78 @@ export function WeeklySchedule({ horarios }: WeeklyScheduleProps) {
           {/* Time Labels Column */}
           {baseBlocks.map((block, idx) => (
             <div
-              key={`time-${idx}`}
-              className="flex flex-col items-end justify-start pr-4 pt-1 border-r border-border/20 mb-2"
+              key={`time-${block.start}`}
+              className="flex flex-col items-end justify-center pr-3 border-r border-border/20 mb-2"
               style={{ gridColumn: 1, gridRow: idx + 2 }}
             >
-              <span className="text-[11px] font-black tracking-widest text-foreground/70 dark:text-white/50">
+              <span className="text-xs font-mono font-bold text-foreground">
                 {block.label}
               </span>
-              <span className="text-[9px] font-bold text-muted-foreground/40 uppercase mt-0.5">
+              <span className="text-[9px] font-mono text-muted-foreground uppercase">
                 {parseInt(block.label.split(":")[0]) >= 12 ? "PM" : "AM"}
               </span>
             </div>
           ))}
 
-          {/* Free Slots (Base Grid Background) */}
+          {/* Free Slots */}
           {dias.map((dia, dIdx) =>
             baseBlocks.map((block, bIdx) => {
-              // No renderizamos fondo libre si es break o lunch (estos ocupan toda la fila)
               if (block.type) return null;
-
               return (
                 <div
                   key={`free-${dia.id}-${bIdx}`}
-                  className="rounded-2xl border border-dashed border-border/10 bg-card/5 hover:bg-card/10 transition-colors mb-2"
+                  className="rounded-xl border border-dashed border-border/20 bg-muted/5 mb-2"
                   style={{ gridColumn: dIdx + 2, gridRow: bIdx + 2 }}
                 />
               );
             }),
           )}
 
-          {/* Classes with Row Span */}
+          {/* Classes Cards */}
           {horarios.map((item) => {
             const range = getRowRange(item.horaInicio, item.horaFin);
             if (!range) return null;
 
-            const colorType = getAreaColor(item.curso.areaCurricular.nombre);
+            const colorClasses = getAreaColor(item.curso.areaCurricular.nombre);
 
             return (
               <div
                 key={item.id}
-                className="group relative flex flex-col justify-between rounded-2xl p-4 transition-all duration-300 hover:scale-[1.01] hover:-translate-y-0.5 cursor-default overflow-hidden bg-card/40 border border-border/30 shadow-sm hover:shadow-xl z-10 mb-2"
+                className={cn(
+                  "group relative flex flex-col justify-between rounded-xl p-3 border shadow-xs transition-[box-shadow,transform] hover:shadow-md hover:-translate-y-0.5 cursor-pointer z-10 mb-2",
+                  colorClasses,
+                )}
                 style={{
                   gridColumn: item.diaSemana + 1,
                   gridRow: `${range.start} / ${range.end}`,
                 }}
               >
-                {/* Gradient background hover effect */}
-                <div
-                  className={cn(
-                    "absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-300",
-                    colorType === "teal" &&
-                      "bg-linear-to-br from-teal-500 to-transparent",
-                    colorType === "orange" &&
-                      "bg-linear-to-br from-orange-500 to-transparent",
-                    colorType === "rose" &&
-                      "bg-linear-to-br from-rose-500 to-transparent",
-                    colorType === "blue" &&
-                      "bg-linear-to-br from-blue-500 to-transparent",
-                  )}
-                />
-
-                <div className="relative z-10 space-y-1.5 pl-1.5">
-                  <span
-                    className={cn(
-                      "text-[9px] font-black uppercase tracking-widest block",
-                      colorType === "teal" && "text-teal-400",
-                      colorType === "orange" && "text-orange-400",
-                      colorType === "rose" && "text-rose-400",
-                      colorType === "blue" && "text-blue-400",
-                    )}
-                  >
+                <div className="space-y-1">
+                  <span className="text-[9px] font-bold uppercase tracking-wider opacity-80 block truncate">
                     {item.curso.areaCurricular.nombre}
                   </span>
 
-                  <h4 className="font-black text-sm md:text-[15px] leading-tight text-foreground dark:text-white tracking-tight line-clamp-3">
+                  <h4 className="font-bold text-xs leading-snug text-foreground line-clamp-2">
                     {item.curso.nombre}
                   </h4>
 
-                  {/* End time visible in the card too for clarity */}
-                  <span className="text-[10px] font-bold text-muted-foreground/40 block">
+                  <span className="text-[10px] font-mono font-semibold text-muted-foreground flex items-center gap-1 pt-0.5">
+                    <IconClock className="size-3 opacity-70 shrink-0" />
                     {item.horaInicio} - {item.horaFin}
                   </span>
                 </div>
 
-                <div className="relative z-10 mt-2 pl-1.5 space-y-1">
+                <div className="mt-2 pt-1 border-t border-current/10 space-y-0.5">
                   {item.curso.profesor && (
-                    <p className="text-[10px] font-medium text-muted-foreground/60 truncate capitalize">
-                      Prof. {item.curso.profesor.apellidoPaterno.toLowerCase()}{" "}
-                      • {item.aula || "Lab 2"}
+                    <p className="text-[10px] font-medium text-muted-foreground truncate capitalize flex items-center gap-1">
+                      <IconUser className="size-3 opacity-60 shrink-0" />
+                      <span>Prof. {item.curso.profesor.apellidoPaterno.toLowerCase()}</span>
+                    </p>
+                  )}
+                  {item.aula && (
+                    <p className="text-[10px] font-medium text-muted-foreground truncate flex items-center gap-1">
+                      <IconMapPin className="size-3 opacity-60 shrink-0" />
+                      <span>{item.aula}</span>
                     </p>
                   )}
                 </div>
@@ -209,28 +183,30 @@ export function WeeklySchedule({ horarios }: WeeklyScheduleProps) {
             );
           })}
 
-          {/* Breaks and Lunch (Full width) */}
+          {/* Breaks and Lunch */}
           {baseBlocks
-            .filter((b) => b.type)
-            .map((block, idx) => {
+            .flatMap((block, idx) => {
+              if (!block.type) return [];
               const range = getRowRange(
                 block.start,
                 block.fullEnd || block.end,
               );
-              if (!range) return null;
+              if (!range) return [];
 
-              return (
+              const isLunch = block.type === "lunch";
+
+              return [
                 <div
-                  key={`row-break-${idx}`}
-                  className="col-start-2 col-end-7 rounded-2xl bg-card/30 border border-border/10 flex items-center justify-center relative overflow-hidden group mb-2"
+                  key={`row-break-${block.start}`}
+                  className="col-start-2 col-end-7 rounded-xl bg-amber-500/5 border border-amber-500/20 flex items-center justify-center gap-2 mb-2 p-2"
                   style={{ gridRow: `${range.start} / ${range.end}` }}
                 >
-                  <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                  <span className="text-[10px] uppercase tracking-[0.4em] font-black text-muted-foreground/40 drop-shadow-sm">
-                    {block.type === "break" ? "Recreo / Break" : "Almuerzo"}
+                  <IconCoffee className="size-4 text-amber-500" />
+                  <span className="text-[10px] uppercase tracking-widest font-bold text-amber-600 dark:text-amber-400">
+                    {isLunch ? "Receso / Almuerzo" : "Recreo / Break"} ({block.start} - {block.fullEnd})
                   </span>
                 </div>
-              );
+              ];
             })}
         </div>
       </div>

@@ -2,7 +2,16 @@
 
 import { useState } from "react";
 import { formatCurrency, formatDate } from "@/lib/formats";
-import { IconCalendar, IconUpload, IconCreditCard } from "@tabler/icons-react";
+import {
+  IconCalendar,
+  IconUpload,
+  IconCreditCard,
+  IconAlertTriangle,
+  IconReceipt,
+  IconChevronRight,
+  IconHistory,
+  IconCheck,
+} from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -15,26 +24,32 @@ import {
 import { PaymentDrawer } from "./payment-drawer";
 import { PaymentHistoryDrawer } from "./payment-history-drawer";
 import { Badge } from "@/components/ui/badge";
-import StatCard from "@/components/common/stat-card";
+import { StudentSelector } from "@/components/portal/layout/student-selector";
 
 interface DeudasListClientProps {
   hijos: any[];
   deudas: any[];
   historial?: any[];
   selectedHijoId?: string;
-  // Note: we might keep the bancos prop if deudas-list-client is used elsewhere,
-  // but for now we are moving the display to the sidebar.
   bancos?: any[];
 }
 
+const EMPTY_HIJOS: any[] = [];
+const EMPTY_DEUDAS: any[] = [];
+const EMPTY_HISTORIAL: any[] = [];
+
 export function DeudasListClient({
-  deudas,
-  historial = [],
+  hijos = EMPTY_HIJOS,
+  deudas = EMPTY_DEUDAS,
+  historial = EMPTY_HISTORIAL,
+  selectedHijoId,
 }: DeudasListClientProps) {
-  console.log("🚀 ~ DeudasListClient ~ deudas:", deudas)
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [selectedDeuda, setSelectedDeuda] = useState<any>(null);
+
+  // Fecha actual estable para cálculos de vencimiento
+  const today = new Date();
 
   const handlePayNow = (deuda: any) => {
     setSelectedDeuda({
@@ -48,216 +63,255 @@ export function DeudasListClient({
     setDrawerOpen(true);
   };
 
+  // Cálculos de resumen
   const totalBalance = deudas.reduce(
     (acc, d) => acc + (d.monto - Number(d.montoPagado)),
     0,
   );
 
-  const nextDeuda = deudas.length > 0 ? deudas[0] : null;
-  console.log("🚀 ~ DeudasListClient ~ nextDeuda:", nextDeuda)
+  const deudasVencidas = deudas.filter(
+    (d) => new Date(d.fechaVencimiento) < today,
+  );
 
-  const stats = [
-    {
-      title: "BALANCE TOTAL PENDIENTE",
-      value: formatCurrency(totalBalance),
-      icon: IconCreditCard,
-      iconColor: "text-success",
-      glowColor: "#22c55e55", // tu color para el glow (CSS real)
-      className: "shadow-lg",
-      description: "Agradecemos poner al día en sus pagos",
-    },
-    {
-      title: "PRÓXIMA PENSIÓN",
-      value: nextDeuda
-        ? formatDate(nextDeuda.fechaVencimiento, "dd MMM, yyyy")
-        : "Sin Pendientes",
-      icon: IconCalendar,
-      iconColor: "text-warning",
-      glowColor: "#f9731655", // tu color para el glow (CSS real)
-      className: "shadow-lg",
-      description: nextDeuda
-        ? `Monto: ${formatCurrency(nextDeuda.monto - Number(nextDeuda.montoPagado))}`
-        : "No tienes pensiones pendientes",
-    },
-  ];
+  const nextDeuda = deudas.length > 0 ? deudas[0] : null;
 
   return (
-    <div className="space-y-6 md:space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-      {/* Overview Cards */}
-      <div className="grid gap-4 md:gap-6 md:grid-cols-2">
-        {stats.map((stat) => (
-          <StatCard
-            key={stat.title}
-            title={stat.title}
-            value={stat.value}
-            icon={stat.icon}
-            iconColor={stat.iconColor}
-            glowColor={stat.glowColor}
-            className={stat.className}
-            description={stat.description}
-          />
-        ))}
+    <div className="space-y-6 animate-in fade-in animation-duration-">
+      {/* Selector de estudiante si hay múltiples */}
+      {hijos.length > 1 && (
+        <div className="p-3.5 rounded-2xl bg-card/80 border border-border/40 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Filtrar por estudiante:
+            </span>
+          </div>
+          <StudentSelector students={hijos} />
+        </div>
+      )}
+
+      {/* ── BENTO KPIS FINANCIEROS ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* KPI 1: Balance Total Pendiente */}
+        <div className="p-4 rounded-2xl bg-card/80 border border-border/50 shadow-sm flex items-center justify-between transition-[background-color,box-shadow] hover:bg-card hover:shadow-md">
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Deuda Total</span>
+            <h3 className="text-2xl md:text-3xl font-bold font-mono text-foreground mt-0.5">{formatCurrency(totalBalance)}</h3>
+            <p className="text-[11px] text-muted-foreground/80 mt-1">{deudas.length} pensiones por pagar</p>
+          </div>
+          <div className="size-11 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/20">
+            <IconCreditCard className="size-5" />
+          </div>
+        </div>
+
+        {/* KPI 2: Cuotas Vencidas */}
+        <div className="p-4 rounded-2xl bg-card/80 border border-border/50 shadow-sm flex items-center justify-between transition-[background-color,box-shadow] hover:bg-card hover:shadow-md">
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Cuotas Vencidas</span>
+            <h3 className="text-2xl md:text-3xl font-bold font-mono text-rose-600 dark:text-rose-400 mt-0.5">{deudasVencidas.length}</h3>
+            <p className="text-[11px] text-muted-foreground/80 mt-1">
+              {deudasVencidas.length > 0 ? "Requiere pago prioritario" : "Sin morosidad"}
+            </p>
+          </div>
+          <div className="size-11 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0 border border-rose-500/20">
+            <IconAlertTriangle className="size-5" />
+          </div>
+        </div>
+
+        {/* KPI 3: Próxima Pensión */}
+        <div className="p-4 rounded-2xl bg-card/80 border border-border/50 shadow-sm flex items-center justify-between transition-[background-color,box-shadow] hover:bg-card hover:shadow-md">
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Próximo Vencimiento</span>
+            <h3 className="text-2xl md:text-3xl font-bold font-mono text-foreground mt-0.5">
+              {nextDeuda
+                ? formatDate(nextDeuda.fechaVencimiento, "dd MMM")
+                : "Al Día"}
+            </h3>
+            <p className="text-[11px] text-muted-foreground/80 mt-1 truncate max-w-[140px]">
+              {nextDeuda ? nextDeuda.concepto.nombre : "Sin pensiones"}
+            </p>
+          </div>
+          <div className="size-11 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 border border-indigo-500/20">
+            <IconCalendar className="size-5" />
+          </div>
+        </div>
+
+        {/* KPI 4: Historial de Pagos */}
+        <div className="p-4 rounded-2xl bg-card/80 border border-border/50 shadow-sm flex items-center justify-between transition-[background-color,box-shadow] hover:bg-card hover:shadow-md">
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Pagos Auditados</span>
+            <h3 className="text-2xl md:text-3xl font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-0.5">{historial.length}</h3>
+            <p className="text-[11px] text-muted-foreground/80 mt-1">Comprobantes procesados</p>
+          </div>
+          <div className="size-11 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/20">
+            <IconReceipt className="size-5" />
+          </div>
+        </div>
       </div>
 
-      {/* Monthly Fees Table */}
-      <div className="space-y-4 md:space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-2">
-          <h3 className="text-xl md:text-2xl font-black tracking-tight">
-            Pensiones Mensuales
-          </h3>
+      {/* ── TABLA DE PENSIONES PENDIENTES ── */}
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1">
+          <div>
+            <h3 className="text-lg font-bold tracking-tight text-foreground">
+              Pensiones y Cuotas Pendientes
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              Selecciona una pensión para subir tu voucher de transferencia o Yape.
+            </p>
+          </div>
+
           <Button
-            variant="link"
+            variant="outline"
+            size="sm"
             onClick={() => setHistoryOpen(true)}
-            className="w-fit p-2 h-auto text-primary hover:text-primary/80 font-bold text-xxs md:text-xs gap-2 transition-colors"
+            className="rounded-xl h-9 px-3.5 font-semibold text-xs border-border/40 gap-2 cursor-pointer shrink-0"
           >
-            <IconUpload size={14} className="md:size-4" />
-            <span className="underline underline-offset-4 decoration-2">
-              Historial de Pagos
-            </span>
+            <IconHistory className="size-4 text-indigo-500" />
+            <span>Ver Historial de Pagos</span>
           </Button>
         </div>
 
         {/* Desktop View: Table */}
-        <div className="hidden md:block rounded-[1.5rem] border border-white/10 dark:border-white/5 liquid-glass overflow-hidden shadow-2xl">
-          <div className="overflow-x-auto">
-            <Table className="w-full text-left border-collapse">
-              <TableHeader>
-                <TableRow className="border-b border-border bg-accent-foreground/5 text-muted-foreground">
-                  <TableHead className="px-4 py-2 text-xxs font-black uppercase tracking-widest w-2/5">
-                    DESCRIPCIÓN
-                  </TableHead>
-                  <TableHead className="px-4 py-2 text-xxs font-black uppercase tracking-widest">
-                    MONTO
-                  </TableHead>
-                  <TableHead className="px-4 py-2 text-xxs font-black uppercase tracking-widest">
-                    ESTADO
-                  </TableHead>
-                  <TableHead className="px-4 py-2 text-xxs font-black uppercase tracking-widest text-right">
-                    ACCIÓN
-                  </TableHead>
+        <div className="hidden md:block rounded-2xl border border-border/40 bg-card/80 overflow-hidden shadow-xl">
+          <Table className="w-full text-left">
+            <TableHeader>
+              <TableRow className="border-b border-border/30 bg-muted/30 hover:bg-muted/30">
+                <TableHead className="px-5 py-3.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  Concepto / Pensión
+                </TableHead>
+                <TableHead className="px-5 py-3.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  Estudiante
+                </TableHead>
+                <TableHead className="px-5 py-3.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  Vencimiento
+                </TableHead>
+                <TableHead className="px-5 py-3.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  Monto a Pagar
+                </TableHead>
+                <TableHead className="px-5 py-3.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  Estado
+                </TableHead>
+                <TableHead className="px-5 py-3.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground text-right">
+                  Acción
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className="divide-y divide-border/30">
+              {deudas.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={6}
+                    className="px-8 py-16 text-center text-muted-foreground/70 font-medium text-xs"
+                  >
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      <IconCheck className="size-10 text-emerald-500/40" />
+                      <p className="font-bold text-foreground">¡Estás al día en tus pensiones!</p>
+                      <p className="text-muted-foreground">No registras cuotas pendientes de pago en este periodo.</p>
+                    </div>
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody className="divide-y divide-border/5">
-                {deudas.length === 0 ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={5}
-                      className="px-8 py-20 text-center text-muted-foreground/60 font-medium italic"
-                    >
-                      No se encontraron pensiones pendientes para este periodo.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  deudas.map((deuda) => {
-                    const pendiente = deuda.monto - Number(deuda.montoPagado);
-                    const vencida =
-                      new Date(deuda.fechaVencimiento) < new Date();
+              ) : (
+                deudas.map((deuda) => {
+                  const pendiente = deuda.monto - Number(deuda.montoPagado);
+                  const vencida = new Date(deuda.fechaVencimiento) < today;
 
-                    return (
-                      <TableRow
-                        key={deuda.id}
-                        className="group hover:bg-white/1 transition-colors"
-                      >
-                        <TableCell className="px-4 py-2 capitalize">
-                          <p className="font-bold text-[12px] text-foreground dark:text-white/90">
-                            {deuda.concepto.nombre}
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {deuda.estudiante.name}{" "}
-                            {deuda.estudiante.apellidoPaterno}
-                          </p>
-                        </TableCell>
-                        <TableCell className="font-bold text-[15px] text-foreground dark:text-white/90">
-                          {formatCurrency(pendiente)}
-                          <br />
-                          <span className="text-xxs text-muted-foreground mt-1">
-                            Venc:{" "}
-                            {formatDate(deuda.fechaVencimiento, "dd MMM, yyyy")}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[9px] font-black capitalize border border-current bg-current/10 ${
-                              vencida ? "text-rose-500" : "text-warning"
-                            }`}
-                          >
-                            <div className="size-1.5 rounded-full bg-current animate-pulse" />
-                            {vencida ? "VENCIDA" : "PENDIENTE"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="px-4 py-2 text-center">
-                          <Button
-                            variant="link"
-                            title="Pagar Ahora"
-                            onClick={() => handlePayNow(deuda)}
-                            className={`p-0 h-auto font-black text-xs hover:no-underline transition-colors ${
-                              vencida ? "text-rose-500" : "text-primary"
-                            }`}
-                          >
-                            {vencida ? "Resolver" : "Pagar"}
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
-                )}
-              </TableBody>
-            </Table>
-          </div>
+                  return (
+                    <TableRow
+                      key={deuda.id}
+                      className="group hover:bg-muted/40 transition-colors"
+                    >
+                      <TableCell className="px-5 py-4 font-bold text-xs text-foreground">
+                        {deuda.concepto.nombre}
+                      </TableCell>
+                      <TableCell className="px-5 py-4 text-xs text-muted-foreground">
+                        {deuda.estudiante.name} {deuda.estudiante.apellidoPaterno}
+                      </TableCell>
+                      <TableCell className="px-5 py-4 text-xs font-mono text-muted-foreground">
+                        {formatDate(deuda.fechaVencimiento, "dd MMM, yyyy")}
+                      </TableCell>
+                      <TableCell className="px-5 py-4 font-bold font-mono text-sm text-foreground">
+                        {formatCurrency(pendiente)}
+                      </TableCell>
+                      <TableCell className="px-5 py-4">
+                        <Badge
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase border ${
+                            vencida
+                              ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20"
+                              : "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20"
+                          }`}
+                        >
+                          <span className={`size-1.5 rounded-full ${vencida ? "bg-rose-500 animate-pulse" : "bg-amber-500"}`} />
+                          {vencida ? "Vencida" : "Pendiente"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="px-5 py-4 text-right">
+                        <Button
+                          size="sm"
+                          onClick={() => handlePayNow(deuda)}
+                          className={`rounded-xl px-4 h-8 font-semibold text-xs gap-1.5 shadow-xs cursor-pointer ${
+                            vencida
+                              ? "bg-rose-600 hover:bg-rose-700 text-white shadow-rose-500/20"
+                              : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-500/20"
+                          }`}
+                        >
+                          <IconUpload className="size-3.5" />
+                          <span>Subir Voucher</span>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
         </div>
 
         {/* Mobile View: Cards */}
-        <div className="md:hidden space-y-4">
+        <div className="md:hidden space-y-3">
           {deudas.length === 0 ? (
-            <div className="p-12 text-center text-muted-foreground/60 font-medium italic liquid-glass rounded-[1.25rem] border border-white/5">
-              No se encontraron pensiones pendientes.
+            <div className="p-8 text-center text-muted-foreground/70 text-xs font-medium bg-card/80 rounded-2xl border border-border/40">
+              No tienes pensiones pendientes de pago.
             </div>
           ) : (
             deudas.map((deuda) => {
               const pendiente = deuda.monto - Number(deuda.montoPagado);
-              const vencida = new Date(deuda.fechaVencimiento) < new Date();
+              const vencida = new Date(deuda.fechaVencimiento) < today;
 
               return (
                 <div
                   key={deuda.id}
-                  className="p-6 rounded-[1.25rem] border border-white/5 liquid-glass space-y-6 shadow-xl relative overflow-hidden"
+                  className="p-4 rounded-2xl border border-border/40 bg-card/80 space-y-3 shadow-sm relative overflow-hidden"
                 >
-                  {/* Subtle Glow decoration for premium feel */}
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
-                  
-                  <div className="flex justify-between items-start gap-4 relative z-10">
-                    <div className="min-w-0">
-                      <p className="font-bold text-lg text-white/90 uppercase tracking-tight leading-tight truncate">
+                  <div className="flex justify-between items-start gap-2">
+                    <div>
+                      <h4 className="font-bold text-sm text-foreground">
                         {deuda.concepto.nombre}
-                      </p>
-                      <p className="text-[9px] font-black text-muted-foreground/40 mt-1 uppercase tracking-widest truncate">
-                        {deuda.estudiante.name}{" "}
-                        {deuda.estudiante.apellidoPaterno}
+                      </h4>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {deuda.estudiante.name} {deuda.estudiante.apellidoPaterno}
                       </p>
                     </div>
-                    <div
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border border-current bg-current/10 shrink-0 ${
-                        vencida ? "text-rose-500" : "text-orange-500"
+                    <Badge
+                      className={`text-[9px] font-bold px-2 py-0.5 rounded-md border ${
+                        vencida
+                          ? "bg-rose-500/10 text-rose-600 border-rose-500/20"
+                          : "bg-amber-500/10 text-amber-600 border-amber-500/20"
                       }`}
                     >
-                      {vencida ? "VENCIDA" : "PENDIENTE"}
-                    </div>
+                      {vencida ? "Vencida" : "Pendiente"}
+                    </Badge>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border/20">
                     <div>
-                      <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">
-                        MONTO
-                      </p>
-                      <p className="text-xl font-black text-white">
+                      <span className="text-[10px] font-bold uppercase text-muted-foreground">Monto</span>
+                      <p className="text-base font-bold font-mono text-foreground mt-0.5">
                         {formatCurrency(pendiente)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">
-                        VENCIMIENTO
-                      </p>
-                      <p className="text-xs font-bold text-white/70">
+                      <span className="text-[10px] font-bold uppercase text-muted-foreground">Vencimiento</span>
+                      <p className="text-xs font-mono text-muted-foreground mt-0.5">
                         {formatDate(deuda.fechaVencimiento, "dd MMM, yyyy")}
                       </p>
                     </div>
@@ -265,13 +319,14 @@ export function DeudasListClient({
 
                   <Button
                     onClick={() => handlePayNow(deuda)}
-                    className={`w-full h-11 rounded-xl font-black text-xxs uppercase tracking-[0.2em] transition-all active:scale-[0.98] ${
+                    className={`w-full h-9 rounded-xl font-semibold text-xs gap-1.5 mt-2 ${
                       vencida
-                        ? "bg-rose-500 hover:bg-rose-600 text-white shadow-lg shadow-rose-500/20"
-                        : "bg-primary hover:bg-primary/80 text-white shadow-lg shadow-primary/20"
+                        ? "bg-rose-600 hover:bg-rose-700 text-white"
+                        : "bg-indigo-600 hover:bg-indigo-700 text-white"
                     }`}
                   >
-                    {vencida ? "Resolver Ahora" : "Pagar Pensión"}
+                    <IconUpload className="size-4" />
+                    <span>Subir Voucher de Pago</span>
                   </Button>
                 </div>
               );

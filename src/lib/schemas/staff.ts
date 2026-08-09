@@ -5,7 +5,7 @@ export const StaffSchema = z.object({
   apellidoPaterno: z.string().min(1, "El apellido paterno es requerido"),
   apellidoMaterno: z.string().optional().or(z.literal("")),
   dni: z.string().length(8, "El DNI debe tener 8 dígitos"),
-  email: z.string().email("Correo inválido").min(1, "El correo es requerido"),
+  email: z.email("Correo inválido").min(1, "El correo es requerido"),
   sexo: z.string().min(1, "El sexo es requerido"),
   telefono: z.string().optional().or(z.literal("")),
   direccion: z.string().optional().or(z.literal("")),

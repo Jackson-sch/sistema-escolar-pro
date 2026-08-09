@@ -13,8 +13,15 @@ import { NotasFilter } from "@/components/portal/academic/notas-filter";
 import { NotasStatsSummary } from "@/components/portal/academic/notas-stats-summary";
 import { TeacherCommentCard } from "@/components/portal/academic/teacher-comment-card";
 import { Card } from "@/components/ui/card";
-import { IconUser, IconBookOff, IconFileDownload } from "@tabler/icons-react";
+import { IconUser, IconBookOff, IconFileDownload, IconAward } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Suspense } from "react";
+
+export const metadata = {
+  title: "Rendimiento Académico | Portal de Familia",
+  description: "Calificaciones por curso, promedios de periodo y observaciones docentes.",
+};
 
 interface NotasPageProps {
   searchParams: Promise<{ hijoId?: string; periodoId?: string }>;
@@ -36,24 +43,26 @@ export default async function PortalNotasPage({
 
   if (hijos.length === 0) {
     return (
-      <div className="flex flex-1 flex-col gap-6 p-4 sm:p-6 pt-0">
-        <div className="space-y-1 mt-4 md:mt-0">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+      <div className="min-h-screen flex flex-col gap-6 p-4 md:p-8 pt-6 @container/main">
+        <div className="space-y-2 px-2">
+          <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-4 py-1 rounded-full text-xxs font-semibold uppercase tracking-widest flex items-center gap-2 w-fit">
+            <IconAward size={14} />
+            Calificaciones
+          </Badge>
+          <h1 className="text-3xl md:text-5xl font-bold tracking-tight leading-none">
             Rendimiento Académico
           </h1>
-          <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed">
-            Gestión detallada de notas, promedios y retroalimentación
-            pedagógica.
+          <p className="text-muted-foreground text-sm md:text-base max-w-2xl font-normal leading-relaxed">
+            Gestión detallada de notas, promedios por curso y observaciones pedagógicas.
           </p>
         </div>
-        <Card className="border-dashed p-12 text-center bg-card/20 backdrop-blur-xl rounded-[2.5rem]">
+        <Card className="rounded-2xl border-dashed border-border/50 bg-card/80 p-12 text-center shadow-sm">
           <IconUser className="mx-auto size-14 text-muted-foreground/40 mb-4" />
-          <p className="text-xl font-bold tracking-tight">
+          <h3 className="text-xl font-bold tracking-tight text-foreground">
             No tienes hijos vinculados
-          </p>
-          <p className="text-sm text-muted-foreground mt-2 max-w-xs mx-auto">
-            Contacta a secretaría para vincular a tus hijos a tu cuenta y
-            empezar el seguimiento.
+          </h3>
+          <p className="text-xs text-muted-foreground mt-2 max-w-xs mx-auto">
+            Contacta a la oficina de secretaría para vincular a tus estudiantes y habilitar el reporte de notas.
           </p>
         </Card>
       </div>
@@ -62,8 +71,6 @@ export default async function PortalNotasPage({
 
   // 2. Determinar hijo seleccionado
   const selectedHijoId = hijoId || hijos[0].id;
-  const selectedHijo =
-    hijos.find((h: any) => h.id === selectedHijoId) || hijos[0];
 
   // 3. Obtener año académico actual de la institución
   const { data: instituciones = [] } = await getInstitucionesAction();
@@ -98,7 +105,7 @@ export default async function PortalNotasPage({
     periodoId: selectedPeriodoId === "all" ? undefined : selectedPeriodoId,
     anioEscolar: currentYear,
   });
-  const rankingData = (rankingRes.success as any) || { posicion: 0, total: 0 };
+  const rankingData = rankingRes.success || { posicion: 0, total: 0 };
   const rankingStr =
     rankingData.total > 0
       ? `#${rankingData.posicion.toString().padStart(2, "0")} de ${rankingData.total}`
@@ -115,15 +122,19 @@ export default async function PortalNotasPage({
 
   // 8. Extraer comentarios para el rotador
   const allComments = cursosGrupos.flatMap((grupo: any) =>
-    grupo.notas
-      .filter((n: any) => n.comentario && n.comentario.trim() !== "")
-      .map((n: any) => ({
-        comment: n.comentario,
-        teacherName: grupo.curso.profesor?.name
-          ? `${grupo.curso.profesor.name} ${grupo.curso.profesor.apellidoPaterno}`
-          : "Docente del Curso",
-        courseName: grupo.curso.nombre,
-      })),
+    grupo.notas.flatMap((n: any) =>
+      n.comentario && n.comentario.trim() !== ""
+        ? [
+            {
+              comment: n.comentario,
+              teacherName: grupo.curso.profesor?.name
+                ? `${grupo.curso.profesor.name} ${grupo.curso.profesor.apellidoPaterno}`
+                : "Docente del Curso",
+              courseName: grupo.curso.nombre,
+            },
+          ]
+        : [],
+    ),
   );
 
   const displayComments =
@@ -139,22 +150,44 @@ export default async function PortalNotasPage({
         ];
 
   return (
-    <div className="flex flex-1 flex-col gap-8 p-4 sm:p-6 pt-0 @container/main animate-in fade-in duration-1000">
-      {/* Header: Título y Descripción */}
-      <header className="space-y-4 animate-in slide-in-from-top-4 duration-700">
-        <div className="space-y-1">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+    <div className="min-h-screen flex flex-col gap-6 p-4 md:p-8 pt-6 @container/main">
+      {/* ── HEADER ── */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
+        <div className="space-y-2">
+          <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-4 py-1 rounded-full text-xxs font-semibold uppercase tracking-widest flex items-center gap-2 w-fit">
+            <IconAward size={14} />
+            Calificaciones y Libreta
+          </Badge>
+          <h1 className="text-3xl md:text-5xl font-bold tracking-tight leading-none">
             Rendimiento Académico
           </h1>
-          <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed">
-            Gestión detallada de notas, promedios y retroalimentación
-            pedagógica.
+          <p className="text-muted-foreground text-sm md:text-base max-w-2xl font-normal leading-relaxed">
+            Gestión de calificaciones por unidad, cálculo de promedios vigesimales y descarga de libreta oficial.
           </p>
         </div>
 
-        {/* Panel de Control Integrado (Arriba bajo el título) */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-6 items-start">
-          <div className="bg-card/40 backdrop-blur-xl border border-border/40 p-4 rounded-[2rem] shadow-sm space-y-4">
+        <div className="shrink-0">
+          <Button
+            asChild
+            variant="default"
+            className="rounded-xl h-10 px-4 font-semibold text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 gap-2 cursor-pointer"
+          >
+            <a
+              href={`/api/documentos/boleta?estudianteId=${selectedHijoId}&anio=${currentYear}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <IconFileDownload className="size-4" />
+              <span>Boleta Oficial ({currentYear})</span>
+            </a>
+          </Button>
+        </div>
+      </div>
+
+      {/* ── FILTROS Y COMENTARIOS DOCENTES ── */}
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[1fr_380px] px-1">
+        <div className="space-y-4 rounded-2xl border border-border/40 bg-card/80 p-4 shadow-sm">
+          <Suspense fallback={<div className="h-9 rounded-full bg-muted/40 animate-pulse" />}>
             <NotasFilter
               hijos={hijos}
               periodos={periodos.map((p: any) => ({
@@ -164,39 +197,24 @@ export default async function PortalNotasPage({
               currentHijoId={selectedHijoId}
               currentPeriodoId={selectedPeriodoId}
             />
-
-            <div className="pt-2 border-t border-border/20 flex justify-end">
-              <Button 
-                asChild
-                variant="outline"
-                className="rounded-2xl gap-2 font-bold px-6 border-primary/20 hover:bg-primary/5 hover:text-primary transition-all shadow-sm"
-              >
-                <a 
-                  href={`/api/documentos/boleta?estudianteId=${selectedHijoId}&anio=${currentYear}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <IconFileDownload size={18} />
-                  Descargar Boleta Oficial ({currentYear})
-                </a>
-              </Button>
-            </div>
-          </div>
-          <div className="h-full">
-            <TeacherCommentCard comments={displayComments} className="h-full" />
-          </div>
+          </Suspense>
         </div>
-      </header>
+        <div className="h-full">
+          <TeacherCommentCard comments={displayComments} className="h-full" />
+        </div>
+      </div>
 
-      {/* Resumen de Estadísticas */}
-      <NotasStatsSummary
-        promedio={promedioGeneral}
-        asistencia={asistenciaReal}
-        ranking={rankingStr}
-      />
+      {/* ── RESUMEN DE ESTADÍSTICAS KPIS ── */}
+      <div className="px-1">
+        <NotasStatsSummary
+          promedio={promedioGeneral}
+          asistencia={asistenciaReal}
+          ranking={rankingStr}
+        />
+      </div>
 
-      {/* Listado de Cursos - Dos columnas en desktop */}
-      <main className="space-y-6">
+      {/* ── LISTADO DE CURSOS ── */}
+      <main className="space-y-6 px-1">
         {cursosGrupos.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {cursosGrupos.map((grupo: any) => (
@@ -209,23 +227,22 @@ export default async function PortalNotasPage({
             ))}
           </div>
         ) : (
-          <Card className="border-dashed p-16 text-center bg-card/20 backdrop-blur-xl rounded-[2.5rem]">
+          <Card className="rounded-2xl border-dashed border-border/50 bg-card/80 p-12 text-center shadow-sm">
             <IconBookOff className="mx-auto size-12 text-muted-foreground/30 mb-4" />
-            <p className="text-lg font-bold uppercase tracking-tight text-muted-foreground/60">
+            <p className="text-base font-bold uppercase tracking-tight text-muted-foreground">
               Sin evaluaciones oficiales
             </p>
-            <p className="text-xs text-muted-foreground/40 mt-2 max-w-xs mx-auto">
-              Las calificaciones aparecerán una vez finalizada la carga docente
-              del periodo.
+            <p className="text-xs text-muted-foreground/60 mt-1 max-w-xs mx-auto">
+              Las calificaciones aparecerán una vez los docentes registren las notas del periodo.
             </p>
           </Card>
         )}
       </main>
 
       {/* Footer / Nota legal */}
-      <footer className="pt-10 border-t border-border/20">
-        <p className="text-center text-[9px] font-bold uppercase tracking-[0.4em] text-muted-foreground/30">
-          Sistema de Certificación Escolar Académica • Datos Verificados
+      <footer className="border-t border-border/30 pt-6 mt-4">
+        <p className="text-center text-[10px] font-semibold text-muted-foreground/60">
+          Sistema de Certificación Escolar Académica • Datos Oficiales Verificados
         </p>
       </footer>
     </div>

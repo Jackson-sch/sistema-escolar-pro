@@ -1,22 +1,12 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { IconLayersSubtract } from "@tabler/icons-react";
+import { useTransition, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { useEffect } from "react";
 import { useFormModal } from "@/components/modals/form-modal-context";
 
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { FormModal } from "@/components/modals/form-modal";
 import {
   Form,
   FormControl,
@@ -32,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { upsertGradoAction } from "@/actions/academic-structure";
 
@@ -43,45 +34,6 @@ const formSchema = z.object({
 });
 
 type FormValues = z.infer<typeof formSchema>;
-
-interface AddGradoButtonProps {
-  niveles: { id: string; nombre: string }[];
-}
-
-export function AddGradoButton({ niveles }: AddGradoButtonProps) {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <>
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              onClick={() => setOpen(true)}
-              className="h-9 w-9 sm:w-auto sm:px-4 rounded-full"
-            >
-              <IconLayersSubtract className="sm:mr-2 size-4" />
-              <span className="hidden sm:inline">Nuevo Grado</span>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Registrar Nuevo Grado Académico</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-
-      <FormModal
-        title="Nuevo Grado"
-        description="Añade un año escolar dentro de un nivel educativo."
-        isOpen={open}
-        onOpenChange={setOpen}
-        className="sm:max-w-sm"
-      >
-        <GradoForm niveles={niveles} onSuccess={() => setOpen(false)} />
-      </FormModal>
-    </>
-  );
-}
 
 export function GradoForm({
   niveles,

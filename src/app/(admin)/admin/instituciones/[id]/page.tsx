@@ -42,7 +42,7 @@ export default async function InstitucionDetailPage({
       <div className="flex items-center gap-4">
         <Link
           href="/admin/instituciones"
-          className="size-10 rounded-xl bg-zinc-900 border border-white/5 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all"
+          className="size-10 rounded-xl bg-zinc-900 border border-white/5 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
         >
           <IconChevronLeft className="size-5" />
         </Link>
@@ -70,6 +70,7 @@ export default async function InstitucionDetailPage({
                         alt="Logo"
                         className="size-20 object-contain relative z-10"
                         fill
+                        sizes="80px"
                       />
                     ) : (
                       <IconSchool className="size-12 text-zinc-600 opacity-50" />
@@ -243,7 +244,7 @@ export default async function InstitucionDetailPage({
 
         {/* Sidebar de Estadísticas Rápidas */}
         <div className="space-y-6">
-          <div className="rounded-3xl bg-zinc-900 border border-white/5 p-6 shadow-2xl shadow-black/40">
+          <div className="rounded-3xl bg-zinc-900 border border-white/5 p-6 shadow-lg shadow-black/40">
             <h3 className="text-sm font-medium text-zinc-500 uppercase tracking-[0.2em] mb-6">
               Métricas Globales
             </h3>
@@ -295,12 +296,12 @@ export default async function InstitucionDetailPage({
                 <p className="text-xs text-indigo-400 font-medium uppercase tracking-widest mb-3">
               Acción Directa
             </p>
-            <button className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold transition-all active:scale-95 shadow-lg shadow-indigo-600/20">
+            <button className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold transition-[background-color,transform] active:scale-95 shadow-lg shadow-indigo-600/20">
               Configurar Institución
             </button>
             <p className="text-xxs text-zinc-500 mt-4 leading-relaxed italic text-center">
-              "Permite al super admin acceder a la configuración interna de este
-              colegio pedagógicamente."
+              &ldquo;Permite al super admin acceder a la configuración interna de este
+              colegio pedagógicamente.&rdquo;
             </p>
           </div>
         </div>

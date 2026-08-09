@@ -1,12 +1,22 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { IconUser } from "@tabler/icons-react";
+import {
+  IconUser,
+  IconSchool,
+  IconGenderMale,
+  IconGenderFemale,
+  IconCalendarEvent,
+  IconId,
+  IconCircleFilled,
+  IconDotsVertical,
+} from "@tabler/icons-react";
 import { formatDate, formatTime } from "@/lib/formats";
 
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { RowActions } from "@/components/gestion/estudiantes/components/row-actions";
+import { cn } from "@/lib/utils";
 
 export type StudentTableType = {
   id: string;
@@ -49,6 +59,7 @@ export type StudentTableType = {
   institucionId: string;
   estadoId: string;
   image: string | null;
+  telefono: string | null;
   estado: {
     nombre: string;
     color: string | null;
@@ -75,34 +86,45 @@ export type StudentTableType = {
 export const columns: ColumnDef<StudentTableType>[] = [
   {
     id: "estudiante",
-    header: "Estudiante",
+    header: () => (
+      <div className="flex items-center gap-1.5">
+        <IconUser className="size-3.5 text-muted-foreground/60" />
+        <span>Estudiante</span>
+      </div>
+    ),
     accessorFn: (row) =>
-      `${row.name} ${row.apellidoPaterno} ${row.apellidoMaterno} ${row.dni}`,
+      `${row.name} ${row.apellidoPaterno} ${row.apellidoMaterno} ${row.dni} ${row.codigoEstudiante ?? ""}`,
     cell: ({ row }) => {
       const student = row.original;
       const fullName = `${student.name} ${student.apellidoPaterno} ${student.apellidoMaterno}`;
 
       return (
         <div className="flex items-center gap-3">
-          <Avatar className="h-9 w-9 border border-border/40 shadow-sm relative overflow-hidden group">
+          <Avatar className="size-10 border-2 border-border/30 shadow-sm relative overflow-hidden shrink-0">
             <AvatarImage
               src={student.image ?? undefined}
-              className="object-cover transition-transform group-hover:scale-110"
+              className="object-cover transition-transform duration-300 group-hover:scale-110"
             />
-            <AvatarFallback className="bg-blue-500/10 text-blue-500">
-              <IconUser className="size-4" />
+            <AvatarFallback className="bg-primary/5 text-primary font-bold text-xs">
+              {student.name?.charAt(0)?.toUpperCase()}
+              {student.apellidoPaterno?.charAt(0)?.toUpperCase()}
             </AvatarFallback>
           </Avatar>
-          <div className="flex flex-col">
-            <span className="font-bold text-[13px] leading-tight text-foreground/90 capitalize">
+          <div className="flex flex-col min-w-0">
+            <span className="font-bold text-sm leading-tight text-foreground/90 capitalize truncate max-w-[220px]">
               {fullName}
             </span>
-            <span className="text-[11px] text-muted-foreground/70 flex items-center gap-1.5 mt-0.5 font-medium">
-              <span className="text-[9px] px-1 py-0.5 rounded-sm bg-muted/50 border border-border/50 text-muted-foreground/60 leading-none">
-                DNI
+            <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+              {student.codigoEstudiante && (
+                <span className="text-[10px] font-mono font-semibold text-muted-foreground/50 bg-muted/30 px-1.5 py-0.5 rounded-sm border border-border/30 leading-none">
+                  {student.codigoEstudiante}
+                </span>
+              )}
+              <span className="text-[10px] text-muted-foreground/60 font-medium flex items-center gap-1">
+                <IconId className="size-3 text-muted-foreground/40" />
+                {student.dni || "---"}
               </span>
-              {student.dni || "Sin ID"}
-            </span>
+            </div>
           </div>
         </div>
       );
@@ -110,37 +132,39 @@ export const columns: ColumnDef<StudentTableType>[] = [
   },
   {
     id: "nivelAcademico",
-    header: "Grado/Sección",
+    header: () => (
+      <div className="flex items-center gap-1.5">
+        <IconSchool className="size-3.5 text-muted-foreground/60" />
+        <span>Grado/Sección</span>
+      </div>
+    ),
     accessorFn: (row) => row.nivelAcademico?.nivel.nombre || "",
     cell: ({ row }) => {
       const info = row.original.nivelAcademico;
 
       if (!info) {
         return (
-          <div className="flex flex-col">
-            <span className="text-[11px] font-bold text-red-500/70 border border-red-500/20 bg-red-500/5 px-2 py-0.5 rounded-full w-fit uppercase tracking-tighter">
-              Sin Matrícula Activa
-            </span>
-          </div>
+          <span className="text-[10px] font-semibold text-red-500/60 border border-red-500/15 bg-red-500/5 px-2 py-0.5 rounded-full w-fit whitespace-nowrap">
+            Sin Matrícula
+          </span>
         );
       }
 
       return (
-        <div className="flex flex-col">
-          <div className="flex items-center gap-2">
-            <span className="text-[13px] font-semibold text-foreground/80">
-              {info.grado.nombre} - {info.seccion}
+        <div className="flex flex-col gap-0.5">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[13px] font-semibold text-foreground/80 whitespace-nowrap">
+              {info.grado.nombre}
+              <span className="mx-1 text-muted-foreground/30">-</span>
+              {info.seccion}
             </span>
             {info.sede && (
-              <Badge
-                variant="outline"
-                className="text-[9px] font-bold px-1.5 py-0 h-4 bg-blue-500/5 text-blue-500 border-blue-500/20"
-              >
+              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-blue-500/5 text-blue-500 border border-blue-500/15 leading-none">
                 {info.sede.nombre}
-              </Badge>
+              </span>
             )}
           </div>
-          <span className="text-[10px] text-muted-foreground/60 font-semibold tracking-wide mt-0.5">
+          <span className="text-[10px] text-muted-foreground/50 font-semibold tracking-wide">
             {info.nivel.nombre}
           </span>
         </div>
@@ -148,45 +172,109 @@ export const columns: ColumnDef<StudentTableType>[] = [
     },
   },
   {
+    id: "sexo",
+    header: () => (
+      <div className="flex items-center gap-1.5">
+        <IconGenderMale className="size-3.5 text-muted-foreground/60" />
+        <span>Sexo</span>
+      </div>
+    ),
+    accessorFn: (row) => row.sexo,
+    cell: ({ row }) => {
+      const sexo = row.original.sexo;
+      const isMale = sexo?.toLowerCase() === "masculino" || sexo?.toLowerCase() === "m";
+      const isFemale = sexo?.toLowerCase() === "femenino" || sexo?.toLowerCase() === "f";
+      return (
+        <span
+          className={cn(
+            "inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full w-fit whitespace-nowrap border",
+            isMale &&
+              "bg-blue-500/8 text-blue-600 dark:text-blue-400 border-blue-500/15",
+            isFemale &&
+              "bg-pink-500/8 text-pink-600 dark:text-pink-400 border-pink-500/15",
+            !isMale && !isFemale &&
+              "bg-muted/30 text-muted-foreground border-border/30",
+          )}
+        >
+          {isMale ? (
+            <IconGenderMale className="size-3.5" />
+          ) : isFemale ? (
+            <IconGenderFemale className="size-3.5" />
+          ) : null}
+          {sexo || "---"}
+        </span>
+      );
+    },
+  },
+  {
     id: "estado",
-    header: "Estado",
+    header: () => (
+      <div className="flex items-center gap-1.5">
+        <IconCircleFilled className="size-2.5 text-muted-foreground/60" />
+        <span>Estado</span>
+      </div>
+    ),
     accessorFn: (row) => row.estado.nombre,
     cell: ({ row }) => {
       const estado = row.original.estado;
       return (
-        <Badge
+        <span
+          className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full w-fit whitespace-nowrap border"
           style={{
-            borderColor: `${estado.color}30` || undefined,
             color: estado.color || undefined,
-            backgroundColor: `${estado.color}10` || undefined,
+            borderColor: `${estado.color}25` || undefined,
+            backgroundColor: `${estado.color}0d` || undefined,
           }}
-          className="text-[10px] font-bold px-2 py-0 h-5 border shadow-none"
-          variant="outline"
         >
+          <span
+            className="size-1.5 rounded-full shrink-0"
+            style={{
+              backgroundColor: estado.color || undefined,
+              boxShadow: estado.color
+                ? `0 0 6px ${estado.color}50`
+                : undefined,
+            }}
+          />
           {estado.nombre}
-        </Badge>
+        </span>
       );
     },
   },
   {
     accessorKey: "createdAt",
-    header: "Registro",
+    header: () => (
+      <div className="flex items-center gap-1.5">
+        <IconCalendarEvent className="size-3.5 text-muted-foreground/60" />
+        <span>Registro</span>
+      </div>
+    ),
     cell: ({ row }) => {
       const createdAt = row.original.createdAt;
       return (
-        <div className="flex flex-col">
-          <span className="text-[13px] font-semibold text-foreground/80">
-            {formatDate(createdAt)}
-          </span>
-          <span className="text-[11px] text-muted-foreground/60 font-medium mt-0.5 uppercase tracking-tight">
-            {formatTime(createdAt, "HH:mm a")?.toLowerCase()}
-          </span>
+        <div className="flex items-center gap-2">
+          <div className="flex flex-col">
+            <span className="text-[13px] font-semibold text-foreground/80">
+              {formatDate(createdAt)}
+            </span>
+            <span className="text-[10px] text-muted-foreground/50 font-medium mt-0.5">
+              {formatTime(createdAt, "HH:mm a")?.toLowerCase()}
+            </span>
+          </div>
         </div>
       );
     },
   },
   {
     id: "actions",
-    cell: ({ row, table }) => <RowActions row={row} table={table as any} />,
+    header: () => (
+      <div className="flex items-center justify-center">
+        <IconDotsVertical className="size-3.5 text-muted-foreground/40" />
+      </div>
+    ),
+    cell: ({ row, table }) => (
+      <div className="flex justify-center">
+        <RowActions row={row} table={table as any} />
+      </div>
+    ),
   },
 ];

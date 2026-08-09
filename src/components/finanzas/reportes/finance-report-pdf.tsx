@@ -117,8 +117,8 @@ export const FinanceReportPDF = ({ data, institucion }: FinanceReportPDFProps) =
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.topDeudores.map((deudor, i) => (
-                  <TableRow key={i}>
+                {data.topDeudores.map((deudor) => (
+                  <TableRow key={deudor.nombre}>
                     <TableCell width="50%">{deudor.nombre}</TableCell>
                     <TableCell width="20%" align="center">{deudor.cuotas}</TableCell>
                     <TableCell width="30%" align="right">{formatValue(deudor.deuda)}</TableCell>

@@ -6,9 +6,16 @@ import {
 } from "@/actions/portal";
 import { AttendanceMetrics } from "@/components/portal/attendance/attendance-metrics";
 import { AttendanceCalendar } from "@/components/portal/attendance/attendance-calendar";
-import { NotasFilter } from "@/components/portal/academic/notas-filter"; // Reusing the filter component
+import { NotasFilter } from "@/components/portal/academic/notas-filter";
 import { Card } from "@/components/ui/card";
-import { IconUser } from "@tabler/icons-react";
+import { IconUser, IconCalendarCheck, IconInfoCircle } from "@tabler/icons-react";
+import { Badge } from "@/components/ui/badge";
+import { Suspense } from "react";
+
+export const metadata = {
+  title: "Control de Asistencia | Portal de Familia",
+  description: "Monitoreo diario de puntualidad, faltas e inasistencias justificadas.",
+};
 
 interface AsistenciaPageProps {
   searchParams: Promise<{ hijoId?: string; mes?: string; anio?: string }>;
@@ -30,18 +37,22 @@ export default async function PortalAsistenciaPage({
 
   if (hijos.length === 0) {
     return (
-      <div className="flex flex-1 flex-col gap-6 p-4 sm:p-6 pt-0">
-        <div className="space-y-1 mt-4 md:mt-0">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+      <div className="min-h-screen flex flex-col gap-6 p-4 md:p-8 pt-6 @container/main">
+        <div className="space-y-2 px-2">
+          <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-4 py-1 rounded-full text-xxs font-semibold uppercase tracking-widest flex items-center gap-2 w-fit">
+            <IconCalendarCheck size={14} />
+            Asistencia Escolar
+          </Badge>
+          <h1 className="text-3xl md:text-5xl font-bold tracking-tight leading-none">
             Control de Asistencia
           </h1>
-          <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed">
-            Monitorea la puntualidad y asistencia diaria a clases.
+          <p className="text-muted-foreground text-sm md:text-base max-w-2xl font-normal leading-relaxed">
+            Monitorea la puntualidad y el registro diario de asistencia del estudiante.
           </p>
         </div>
-        <Card className="border-dashed p-12 text-center">
-          <IconUser className="mx-auto size-12 text-muted-foreground mb-4" />
-          <p className="text-lg font-bold">No tienes hijos vinculados</p>
+        <Card className="rounded-2xl border-dashed border-border/50 bg-card/80 p-12 text-center shadow-sm">
+          <IconUser className="mx-auto size-14 text-muted-foreground/40 mb-4" />
+          <h3 className="text-xl font-bold tracking-tight text-foreground">No tienes estudiantes asociados</h3>
         </Card>
       </div>
     );
@@ -76,44 +87,63 @@ export default async function PortalAsistenciaPage({
   };
 
   return (
-    <div className="flex flex-1 flex-col gap-8 p-4 sm:p-6 pt-0 animate-in fade-in duration-700">
-      {/* Sección de Encabezado */}
-      <div className="space-y-1 mt-4 md:mt-0">
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-          Control de Asistencia
-        </h1>
-        <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed">
-          Monitorea la puntualidad y asistencia diaria a clases.
-        </p>
+    <div className="min-h-screen flex flex-col gap-6 p-4 md:p-8 pt-6 @container/main">
+      {/* ── HEADER ── */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
+        <div className="space-y-2">
+          <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-4 py-1 rounded-full text-xxs font-semibold uppercase tracking-widest flex items-center gap-2 w-fit">
+            <IconCalendarCheck size={14} />
+            Asistencia Escolar
+          </Badge>
+          <h1 className="text-3xl md:text-5xl font-bold tracking-tight leading-none">
+            Control de Asistencia
+          </h1>
+          <p className="text-muted-foreground text-sm md:text-base max-w-2xl font-normal leading-relaxed">
+            Monitorea la puntualidad, tardanzas e inasistencias registradas diariamente en el aula.
+          </p>
+        </div>
       </div>
 
-      {/* Selector de Hijo (Reutilizamos NotasFilter por ahora ya que tiene la lógica de URL) */}
-      <NotasFilter
-        hijos={hijos}
-        periodos={[]} // Not used here, we could extend it or create a MonthFilter
-        currentHijoId={selectedHijoId}
-        currentPeriodoId=""
-        showPeriodo={false}
-      />
+      {/* Selector de Hijo */}
+      <div className="px-1">
+        <Suspense fallback={<div className="h-9 rounded-full bg-muted/40 animate-pulse" />}>
+          <NotasFilter
+            hijos={hijos}
+            periodos={[]}
+            currentHijoId={selectedHijoId}
+            currentPeriodoId=""
+            showPeriodo={false}
+          />
+        </Suspense>
+      </div>
 
-      <AttendanceMetrics stats={stats} />
+      {/* Métrica de Asistencia */}
+      <div className="px-1">
+        <AttendanceMetrics stats={stats} />
+      </div>
 
-      <AttendanceCalendar
-        asistencias={asistencias as any}
-        currentDate={new Date(currentYear, currentMonth, 1)}
-      />
+      {/* Calendario de Asistencia */}
+      <div className="px-1">
+        <Suspense fallback={<div className="h-56 rounded-2xl bg-muted/40 animate-pulse" />}>
+          <AttendanceCalendar
+            asistencias={asistencias as any}
+            currentDate={new Date(currentYear, currentMonth, 1)}
+          />
+        </Suspense>
+      </div>
 
-      <div className="bg-muted/30 border border-border/50 p-6 rounded-3xl flex items-start gap-4">
-        <div className="size-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
-          <IconUser className="size-6" />
-        </div>
-        <div>
-          <h4 className="font-bold">Nota sobre Registro de Asistencia</h4>
-          <p className="text-xs text-balance text-muted-foreground mt-1">
-            La asistencia es registrada diariamente por el tutor o secretario en
-            el aula. Si nota alguna inconsistencia en el registro de su hijo,
-            por favor comuníquese con la oficina académica.
-          </p>
+      {/* Información Informativa */}
+      <div className="px-1">
+        <div className="flex items-start gap-4 rounded-2xl border border-border/40 bg-card/80 p-5 shadow-sm">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+            <IconInfoCircle className="size-5" />
+          </div>
+          <div>
+            <h4 className="font-bold text-sm text-foreground">Reglamento de Asistencia Escolar</h4>
+            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+              La asistencia se registra durante los primeros 15 minutos del horario de ingreso. Las justificaciones de inasistencia deben ser remitidas a través de la oficina de tutoría en un plazo máximo de 48 horas.
+            </p>
+          </div>
         </div>
       </div>
     </div>

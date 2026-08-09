@@ -22,18 +22,7 @@ interface AssignTutorDialogProps {
 
 export function AssignTutorDialog({ open, onOpenChange, seccion, tutores }: AssignTutorDialogProps) {
   const router = useRouter();
-  const [search, setSearch] = useState("");
   const [assigning, setAssigning] = useState(false);
-
-  const filtered = useMemo(() => {
-    if (!search || search.length < 2) return [];
-    const q = search.toLowerCase();
-    return tutores.filter((t: any) =>
-      t.name?.toLowerCase().includes(q) ||
-      t.apellidoPaterno?.toLowerCase().includes(q) ||
-      t.apellidoMaterno?.toLowerCase().includes(q)
-    );
-  }, [tutores, search]);
 
   const handleAssign = async (tutorId: string | null) => {
     if (!seccion) return;
@@ -54,14 +43,9 @@ export function AssignTutorDialog({ open, onOpenChange, seccion, tutores }: Assi
     }
   };
 
-  const handleOpenChange = (value: boolean) => {
-    if (!value) setSearch("");
-    onOpenChange(value);
-  };
-
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-sm p-0 gap-0 border-none shadow-2xl bg-card overflow-hidden">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-sm p-0 gap-0 border-none shadow-lg bg-card overflow-hidden">
         <DialogHeader className="p-5 pb-3 border-b border-border/40">
           <DialogTitle className="text-base font-bold tracking-tight">
             Asignar Tutor

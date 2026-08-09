@@ -1,6 +1,6 @@
+import React, { Children, type ReactElement, type ReactNode, cloneElement, isValidElement } from 'react';
 import { Text as PDFText, View } from '@react-pdf/renderer';
 import type { Style } from '@react-pdf/types';
-import { Children, type ReactElement, type ReactNode, cloneElement, isValidElement } from 'react';
 import { usePdfxTheme, useSafeMemo } from "@/lib/pdfx-theme-context";
 import { createTableStyles } from './pdfx-table.styles';
 import type {
@@ -222,14 +222,13 @@ export function TableCell({
     textStyle = styles.cellTextCompact;
   }
 
-  const content =
-    typeof children === 'string' || typeof children === 'number' ? (
-      <PDFText style={[textStyle, align ? { textAlign: align } : {}, { margin: 0, padding: 0 }]}>
-        {children}
-      </PDFText>
-    ) : (
-      children
-    );
+  const content = React.isValidElement(children) ? (
+    children
+  ) : (
+    <PDFText style={[textStyle, align ? { textAlign: align } : {}, { margin: 0, padding: 0 }]}>
+      {children}
+    </PDFText>
+  );
 
   return <View style={styleArray}>{content}</View>;
 }

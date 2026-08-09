@@ -33,17 +33,22 @@ export const getEvaluacionColumns = ({
     accessorKey: "nombre",
     header: "Evaluación",
     cell: ({ row }) => {
-      const { tipoEvaluacion } = row.original;
+      const { tipoEvaluacion, _count } = row.original;
+      const isGraded = _count.notas > 0;
       return (
         <div className="flex items-start gap-3 min-w-[180px]">
-          <div className="size-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-            <IconClipboardList className="size-4 text-primary" />
+          <div className={`size-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 border ${
+            isGraded 
+              ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20 shadow-[0_2px_8px_rgba(16,185,129,0.05)]" 
+              : "bg-amber-500/10 text-amber-500 border-amber-500/20 shadow-[0_2px_8px_rgba(245,158,11,0.05)]"
+          }`}>
+            <IconClipboardList className="size-4" />
           </div>
           <div className="flex flex-col gap-0.5">
-            <span className="font-semibold text-sm text-foreground leading-tight">
+            <span className="font-bold text-sm text-foreground leading-tight group-hover:text-primary transition-colors duration-200">
               {row.original.nombre}
             </span>
-            <span className="text-xs text-muted-foreground font-medium">
+            <span className="text-xs text-muted-foreground font-semibold">
               {tipoEvaluacion.nombre}
             </span>
             {row.original.capacidad && (
@@ -69,8 +74,8 @@ export const getEvaluacionColumns = ({
         <div className="flex flex-col gap-1 min-w-[140px]">
           <div className="flex items-center gap-1.5">
             <span className="font-medium text-sm text-foreground/90">
-              {curso.nivelAcademico.grado.nombre} "
-              {curso.nivelAcademico.seccion}"
+              {curso.nivelAcademico.grado.nombre} &quot;
+              {curso.nivelAcademico.seccion}&quot;
             </span>
           </div>
           <span className="text-xs text-muted-foreground flex items-center gap-1 truncate">
@@ -111,6 +116,13 @@ export const getEvaluacionColumns = ({
     id: "tipoId",
   },
   {
+    accessorFn: (row) => row.curso?.nivelAcademico?.id,
+    header: "",
+    cell: () => null,
+    enableColumnFilter: true,
+    id: "nivelAcademicoId",
+  },
+  {
     accessorFn: (row) => row.curso?.id,
     header: "",
     cell: () => null,
@@ -130,13 +142,13 @@ export const getEvaluacionColumns = ({
     cell: ({ row }) => (
       <div className="flex items-center">
         {row.original._count.notas > 0 ? (
-          <Badge variant="secondary" className="font-medium text-xs">
+          <Badge className="bg-emerald-500/5 text-emerald-500 border border-emerald-500/20 px-2.5 py-0.5 rounded-xl font-black text-[9px] uppercase tracking-wider shadow-[0_2px_8px_rgba(16,185,129,0.03)] transition-[color,background-color,border-color,box-shadow,padding,letter-spacing]">
             {row.original._count.notas} Notas
           </Badge>
         ) : (
-          <span className="text-xs text-muted-foreground/60 italic px-2">
-            Sin registros
-          </span>
+          <Badge className="bg-amber-500/5 text-amber-500 border border-amber-500/20 px-2.5 py-0.5 rounded-xl font-black text-[9px] uppercase tracking-wider shadow-[0_2px_8px_rgba(245,158,11,0.03)] transition-[color,background-color,border-color,box-shadow,padding,letter-spacing] animate-pulse">
+            Pendiente
+          </Badge>
         )}
       </div>
     ),

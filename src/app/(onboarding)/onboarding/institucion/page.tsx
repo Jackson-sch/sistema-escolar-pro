@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -44,8 +44,12 @@ const onboardingSchema = z.object({
   provincia: z.string().min(1, "La provincia es requerida"),
   departamento: z.string().min(1, "El departamento es requerido"),
   telefono: z.string().optional().default(""),
-  email: z.string().email("Email inválido").or(z.literal("")).optional().default(""),
-  cicloEscolarActual: z.coerce.number().min(2000).max(2100).default(new Date().getFullYear()),
+  email: z.email("Email inválido").or(z.literal("")).optional().default(""),
+  cicloEscolarActual: z.coerce
+    .number()
+    .min(2000)
+    .max(2100)
+    .default(() => new Date().getFullYear()),
   fechaInicioClases: z.string().min(1, "Fecha de inicio requerida"),
   fechaFinClases: z.string().min(1, "Fecha de fin requerida"),
 });
@@ -79,7 +83,7 @@ export default function OnboardingInstitucionPage() {
   const router = useRouter();
 
   const form = useForm<OnboardingFormValues>({
-    resolver: zodResolver(onboardingSchema) as any,
+    resolver: zodResolver(onboardingSchema) as Resolver<OnboardingFormValues>,
     defaultValues: {
       nombreInstitucion: "",
       codigoModular: "",
@@ -157,7 +161,7 @@ export default function OnboardingInstitucionPage() {
   };
 
   const inputClass =
-    "bg-white/5 border-white/10 text-white placeholder:text-zinc-500 focus:border-primary/50 focus:ring-primary/20 rounded-xl h-11 transition-all";
+    "bg-white/5 border-white/10 text-white placeholder:text-zinc-500 focus:border-primary/50 focus:ring-primary/20 rounded-xl h-11 transition-[border-color,box-shadow]";
   const labelClass = "text-xs font-semibold text-zinc-400 uppercase tracking-wider";
 
   return (
@@ -187,7 +191,7 @@ export default function OnboardingInstitucionPage() {
             <React.Fragment key={step.id}>
               {index > 0 && (
                 <div
-                  className={`h-[2px] w-8 sm:w-12 rounded-full transition-all duration-500 ${
+                  className={`h-[2px] w-8 sm:w-12 rounded-full transition-colors duration-500 ${
                     isComplete ? "bg-primary" : "bg-white/10"
                   }`}
                 />
@@ -197,7 +201,7 @@ export default function OnboardingInstitucionPage() {
                 onClick={() => {
                   if (isComplete) setCurrentStep(index);
                 }}
-                className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-300 ${
+                className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-colors duration-300 ${
                   isActive
                     ? "bg-primary/15 text-primary border border-primary/30 shadow-lg shadow-primary/10"
                     : isComplete
@@ -218,7 +222,7 @@ export default function OnboardingInstitucionPage() {
       </div>
 
       {/* Form card */}
-      <div className="liquid-glass rounded-2xl p-6 sm:p-8 space-y-6">
+      <div className="rounded-2xl border border-white/10 bg-zinc-950/60 p-6 sm:p-8 space-y-6 shadow-lg">
         <div className="space-y-1">
           <h2 className="text-lg font-bold">{STEPS[currentStep].title}</h2>
           <p className="text-sm text-zinc-400">
@@ -226,10 +230,10 @@ export default function OnboardingInstitucionPage() {
           </p>
         </div>
 
-        <form onSubmit={form.handleSubmit(onSubmit as any)}>
+        <form onSubmit={form.handleSubmit(onSubmit as SubmitHandler<OnboardingFormValues>)}>
           {/* Step 1: Identidad */}
           {currentStep === 0 && (
-            <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
+            <div className="space-y-5 animate-in fade-in slide-in-from-right-4 animation-duration-">
               <div className="space-y-2">
                 <Label className={labelClass}>Nombre de la Institución *</Label>
                 <Input
@@ -260,7 +264,7 @@ export default function OnboardingInstitucionPage() {
                   <Label className={labelClass}>Tipo de Gestión *</Label>
                   <Select
                     value={watch("tipoGestion")}
-                    onValueChange={(v) => form.setValue("tipoGestion", v as any)}
+                    onValueChange={(v) => form.setValue("tipoGestion", v as OnboardingFormValues["tipoGestion"])}
                   >
                     <SelectTrigger className={inputClass}>
                       <SelectValue />
@@ -278,7 +282,7 @@ export default function OnboardingInstitucionPage() {
                   <Label className={labelClass}>Modalidad *</Label>
                   <Select
                     value={watch("modalidad")}
-                    onValueChange={(v) => form.setValue("modalidad", v as any)}
+                    onValueChange={(v) => form.setValue("modalidad", v as OnboardingFormValues["modalidad"])}
                   >
                     <SelectTrigger className={inputClass}>
                       <SelectValue />
@@ -296,7 +300,7 @@ export default function OnboardingInstitucionPage() {
 
           {/* Step 2: Ubicación */}
           {currentStep === 1 && (
-            <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
+            <div className="space-y-5 animate-in fade-in slide-in-from-right-4 animation-duration-">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className={labelClass}>UGEL *</Label>
@@ -383,7 +387,7 @@ export default function OnboardingInstitucionPage() {
 
           {/* Step 3: Calendario */}
           {currentStep === 2 && (
-            <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
+            <div className="space-y-5 animate-in fade-in slide-in-from-right-4 animation-duration-">
               <div className="space-y-2">
                 <Label className={labelClass}>Año Escolar Actual *</Label>
                 <Input
@@ -488,7 +492,7 @@ export default function OnboardingInstitucionPage() {
               <Button
                 type="button"
                 onClick={handleNext}
-                className="rounded-xl gap-2 px-6 shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95"
+                className="rounded-xl gap-2 px-6 shadow-lg shadow-primary/20 transition-transform hover:scale-[1.02] active:scale-95"
               >
                 Siguiente
                 <IconArrowRight className="size-4" />
@@ -497,7 +501,7 @@ export default function OnboardingInstitucionPage() {
               <Button
                 type="submit"
                 disabled={isPending}
-                className="bg-gradient-to-r from-zinc-900 to-violet-600 hover:from-zinc-800 hover:to-violet-500 text-white rounded-xl gap-2 px-8 shadow-lg shadow-primary/25 transition-all hover:scale-[1.02] active:scale-95"
+                className="bg-gradient-to-r from-zinc-900 to-violet-600 hover:from-zinc-800 hover:to-violet-500 text-white rounded-xl gap-2 px-8 shadow-lg shadow-primary/25 transition-[background-image,transform] hover:scale-[1.02] active:scale-95"
               >
                 {isPending ? (
                   <>

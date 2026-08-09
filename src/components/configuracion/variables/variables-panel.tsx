@@ -14,11 +14,21 @@ import { sendSmsAction } from "@/actions/sms";
 import { sendEmailAction } from "@/actions/email";
 import { ComprobanteFormatConfig } from "./comprobante-format-config";
 import { FORMATO_COMPROBANTE_KEY } from "@/lib/comprobante-constants";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Info, Cloudy, Copy, Check, Send, Mail } from "lucide-react";
+import { 
+  IconInfoCircle, 
+  IconCloud, 
+  IconCopy, 
+  IconCheck, 
+  IconSend, 
+  IconMail,
+  IconSparkles,
+  IconFlask
+} from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ConfirmModal } from "@/components/modals/confirm-modal";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 interface VariablesPanelProps {
   initialData: VariableSistema[];
@@ -33,7 +43,7 @@ function CopyableCode({
 }) {
   const [copied, setCopied] = React.useState(false);
 
-  const onCopy = (e: React.MouseEvent) => {
+  const onCopy = (e: React.SyntheticEvent) => {
     e.stopPropagation();
     navigator.clipboard.writeText(code);
     setCopied(true);
@@ -42,22 +52,25 @@ function CopyableCode({
   };
 
   return (
-    <li
-      className="group flex items-center justify-between hover:bg-blue-200/50 dark:hover:bg-blue-800/20 px-2 py-0.5 rounded transition-all cursor-pointer border border-transparent hover:border-blue-300/30"
-      onClick={onCopy}
-      title="Click para copiar"
-    >
-      <span className="flex items-center gap-2 overflow-hidden">
-        <code className="bg-blue-200/30 dark:bg-blue-900/40 px-1 rounded text-blue-900 dark:text-blue-100">
-          {code}
-        </code>
-        {children}
-      </span>
-      {copied ? (
-        <Check className="h-3 w-3 text-green-600 shrink-0" />
-      ) : (
-        <Copy className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity text-blue-600 shrink-0" />
-      )}
+    <li>
+      <button
+        type="button"
+        className="group flex w-full items-center justify-between hover:bg-indigo-500/10 px-2 py-1 rounded-lg transition-[background-color,border-color] cursor-pointer border border-transparent hover:border-indigo-500/20 text-left bg-transparent"
+        onClick={onCopy}
+        title="Click para copiar clave"
+      >
+        <span className="flex items-center gap-1.5 overflow-hidden">
+          <code className="bg-muted/40 px-1.5 py-0.5 rounded text-[11px] font-mono text-foreground font-semibold">
+            {code}
+          </code>
+          {children}
+        </span>
+        {copied ? (
+          <IconCheck className="size-3.5 text-emerald-500 shrink-0" />
+        ) : (
+          <IconCopy className="size-3.5 opacity-0 group-hover:opacity-100 transition-opacity text-indigo-500 shrink-0" />
+        )}
+      </button>
     </li>
   );
 }
@@ -69,9 +82,7 @@ export function VariablesPanel({ initialData }: VariablesPanelProps) {
   const formatoComprobante =
     initialData.find((v) => v.clave === FORMATO_COMPROBANTE_KEY)?.valor || "A4";
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
-  const [variableToDeleteId, setVariableToDeleteId] = React.useState<
-    string | null
-  >(null);
+  const variableToDeleteIdRef = React.useRef<string | null>(null);
   const [isDeleting, setIsDeleting] = React.useState(false);
 
   // Estados para prueba de SMS
@@ -84,17 +95,20 @@ export function VariablesPanel({ initialData }: VariablesPanelProps) {
       return;
     }
     setIsTestLoading(true);
-    const result = await sendSmsAction({
-      to: testPhone,
-      mensaje:
-        "¡Prueba de Twilio exitosa! El Sistema Escolar Pro está listo para enviar alertas SMS. 🚀",
-    });
-    if (result.success) {
-      toast.success("SMS enviado. Verifique su teléfono.");
-    } else {
-      toast.error(result.error || "Error en la prueba.");
+    try {
+      const result = await sendSmsAction({
+        to: testPhone,
+        mensaje:
+          "¡Prueba de alerta SMS exitosa! El Sistema Escolar Pro está listo para notificaciones. 🚀",
+      });
+      if (result.success) {
+        toast.success("SMS enviado correctamente");
+      } else {
+        toast.error(result.error || "Error al realizar la prueba de SMS");
+      }
+    } finally {
+      setIsTestLoading(false);
     }
-    setIsTestLoading(false);
   };
 
   // Estados para prueba de Email
@@ -107,21 +121,24 @@ export function VariablesPanel({ initialData }: VariablesPanelProps) {
       return;
     }
     setIsEmailLoading(true);
-    const result = await sendEmailAction({
-      to: testEmail,
-      subject: "Prueba de Configuración - Sistema Escolar Pro",
-      mensaje:
-        "¡Prueba de Resend exitosa! Tu sistema está configurado para enviar notificaciones por correo.",
-      nombre: "Administrador",
-      accionLabel: "Ir al Dashboard",
-      accionUrl: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-    });
-    if (result.success) {
-      toast.success("Email enviado. Verifique su bandeja.");
-    } else {
-      toast.error("Error al enviar el email.");
+    try {
+      const result = await sendEmailAction({
+        to: testEmail,
+        subject: "Prueba de Notificación — Sistema Escolar Pro",
+        mensaje:
+          "¡Prueba de envío por correo exitosa! Tu plataforma está correctamente integrada con el servicio de despacho.",
+        nombre: "Administrador",
+        accionLabel: "Ir al Sistema",
+        accionUrl: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+      });
+      if (result.success) {
+        toast.success("Email enviado. Verifique su bandeja de entrada");
+      } else {
+        toast.error("Error al enviar el correo de prueba");
+      }
+    } finally {
+      setIsEmailLoading(false);
     }
-    setIsEmailLoading(false);
   };
 
   const handleVariableSaved = (variable: VariableSistema) => {
@@ -154,18 +171,19 @@ export function VariablesPanel({ initialData }: VariablesPanelProps) {
   };
 
   const handleDeleteClick = (id: string) => {
-    setVariableToDeleteId(id);
+    variableToDeleteIdRef.current = id;
     setIsDeleteModalOpen(true);
   };
 
   const onConfirmDelete = async () => {
-    if (!variableToDeleteId) return;
+    const idToDelete = variableToDeleteIdRef.current;
+    if (!idToDelete) return;
 
     setIsDeleting(true);
-    const result = await deleteVariableAction(variableToDeleteId);
+    const result = await deleteVariableAction(idToDelete);
 
     if (result.success) {
-      setVariables((prev) => prev.filter((v) => v.id !== variableToDeleteId));
+      setVariables((prev) => prev.filter((v) => v.id !== idToDelete));
       toast.success("Variable eliminada correctamente");
     } else {
       toast.error(result.error || "Error al eliminar la variable");
@@ -173,145 +191,150 @@ export function VariablesPanel({ initialData }: VariablesPanelProps) {
 
     setIsDeleting(false);
     setIsDeleteModalOpen(false);
-    setVariableToDeleteId(null);
+    variableToDeleteIdRef.current = null;
   };
 
   return (
     <div className="space-y-6">
-      <Alert className="lg:col-span-3 w-full bg-blue-50/50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-900 flex flex-col">
-        <AlertTitle className="text-blue-800 dark:text-blue-300 flex items-center gap-2">
-          <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-          Guía de Integraciones Externas
-        </AlertTitle>
-        <AlertDescription className="text-blue-700/80 dark:text-blue-400/80 mt-4">
-          <div className="flex flex-wrap gap-4 items-stretch">
-            {/* Cloudinary */}
-            <div className="flex flex-col h-full flex-1 min-w-[200px] bg-blue-100/30 dark:bg-blue-900/10 rounded-xl border border-blue-200/50 dark:border-blue-800/50 p-3">
-              <span className="font-bold text-blue-900 dark:text-blue-200 flex items-center gap-2 mb-1 text-sm">
-                <Cloudy className="h-4 w-4" /> Cloudinary
-              </span>
-              <p className="text-[10px] mb-3 opacity-70 leading-tight">
-                Almacenamiento multimedia:
-              </p>
-              <ul className="mt-auto space-y-1 font-mono text-[10px]">
-                <CopyableCode code="CLOUDINARY_CLOUD_NAME" />
-                <CopyableCode code="CLOUDINARY_API_KEY" />
-                <CopyableCode code="CLOUDINARY_API_SECRET" />
-              </ul>
+      {/* Guía de Integraciones Externas */}
+      <Card className="p-5 rounded-2xl bg-card/80 border-border/40 shadow-xl space-y-4">
+        <div className="flex items-center justify-between border-b border-border/30 pb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+              <IconInfoCircle className="size-5" />
             </div>
-
-            {/* Resend */}
-            <div className="flex flex-col h-full flex-1 min-w-[150px] bg-blue-100/30 dark:bg-blue-900/10 rounded-xl border border-blue-200/50 dark:border-blue-800/50 p-3">
-              <span className="font-bold text-blue-900 dark:text-blue-200 flex items-center gap-2 mb-1 text-sm">
-                <Mail className="h-4 w-4" /> Resend
-              </span>
-              <p className="text-[10px] mb-3 opacity-70 leading-tight">
-                Envío de correos automáticos:
-              </p>
-              <ul className="mt-auto space-y-1 font-mono text-[10px]">
-                <CopyableCode code="RESEND_API_KEY" />
-              </ul>
-            </div>
-
-            {/* Twilio */}
-            <div className="flex flex-col h-full flex-1 min-w-[250px] bg-blue-100/30 dark:bg-blue-900/10 rounded-xl border border-blue-200/50 dark:border-blue-800/50 p-3">
-              <span className="font-bold text-blue-900 dark:text-blue-200 flex items-center gap-2 mb-1 text-sm">
-                <Send className="h-4 w-4" /> Twilio (SMS)
-              </span>
-              <p className="text-[10px] mb-3 opacity-70 leading-tight">
-                Notificaciones de texto (SMS):
-              </p>
-              <ul className="mt-auto space-y-1 font-mono text-[10px]">
-                <CopyableCode code="TWILIO_ACCOUNT_SID" />
-                <CopyableCode code="TWILIO_AUTH_TOKEN" />
-                <CopyableCode code="TWILIO_PHONE_NUMBER">
-                  <span className="text-blue-600/70 dark:text-blue-400/50 font-sans italic">
-                    - (+51...)
-                  </span>
-                </CopyableCode>
-                <CopyableCode code="SMS_AUTO_ANUNCIOS">
-                  <span className="text-blue-600/70 dark:text-blue-400/50 font-sans italic">
-                    - (true/false) Envíos auto.
-                  </span>
-                </CopyableCode>
-              </ul>
-            </div>
-
-            {/* Google Gemini */}
-            <div className="flex flex-col h-full flex-1 min-w-[200px] bg-blue-100/30 dark:bg-blue-900/10 rounded-xl border border-blue-200/50 dark:border-blue-800/50 p-3">
-              <span className="font-bold text-blue-900 dark:text-blue-200 flex items-center gap-2 mb-1 text-sm">
-                🤖 Google Gemini
-              </span>
-              <p className="text-[10px] mb-3 opacity-70 leading-tight">
-                IA y análisis de datos:
-              </p>
-              <ul className="mt-auto space-y-1 font-mono text-[10px]">
-                <CopyableCode code="GOOGLE_GENERATIVE_AI_API_KEY" />
-                <CopyableCode code="GEMINI_MODEL" />
-              </ul>
+            <div>
+              <h3 className="text-sm font-bold text-foreground">Guía de Variables e Integraciones</h3>
+              <p className="text-xs text-muted-foreground">Claves de API y parámetros para conectar servicios externos al colegio.</p>
             </div>
           </div>
+        </div>
 
-          {/* Panel de Pruebas */}
-          <div className="mt-6 pt-4 border-t border-blue-200/50 dark:border-blue-800/50">
-            <span className="text-xs font-semibold text-blue-800 dark:text-blue-300 block mb-3">
-              🧪 Banco de Pruebas (Validación Rápida)
-            </span>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Test SMS */}
-              <div className="space-y-2">
-                <label className="text-[10px] font-medium text-blue-600 dark:text-blue-400 uppercase tracking-wider">
-                  Probar SMS
-                </label>
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Número (9XXXXXXXX)"
-                    value={testPhone}
-                    onChange={(e) => setTestPhone(e.target.value)}
-                    className="h-8 text-xs bg-white/50 dark:bg-black/20 border-blue-200 dark:border-blue-800"
-                    disabled={isTestLoading}
-                  />
-                  <Button
-                    size="sm"
-                    onClick={onTestSms}
-                    disabled={isTestLoading}
-                    className="h-8 px-3 text-xs bg-blue-600 hover:bg-blue-700 text-white flex gap-1 items-center"
-                  >
-                    {isTestLoading ? "..." : <Send className="h-3 w-3" />}
-                  </Button>
-                </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* Cloudinary */}
+          <div className="p-3.5 rounded-xl bg-background/50 border border-border/40 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-xs flex items-center gap-1.5 text-foreground">
+                <IconCloud className="size-4 text-sky-500" /> Cloudinary
+              </span>
+              <Badge variant="outline" className="text-[9px] font-bold bg-sky-500/10 text-sky-600 border-none">Imágenes</Badge>
+            </div>
+            <ul className="space-y-1">
+              <CopyableCode code="CLOUDINARY_CLOUD_NAME" />
+              <CopyableCode code="CLOUDINARY_API_KEY" />
+              <CopyableCode code="CLOUDINARY_API_SECRET" />
+            </ul>
+          </div>
+
+          {/* Resend */}
+          <div className="p-3.5 rounded-xl bg-background/50 border border-border/40 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-xs flex items-center gap-1.5 text-foreground">
+                <IconMail className="size-4 text-indigo-500" /> Resend
+              </span>
+              <Badge variant="outline" className="text-[9px] font-bold bg-indigo-500/10 text-indigo-600 border-none">Correo</Badge>
+            </div>
+            <ul className="space-y-1">
+              <CopyableCode code="RESEND_API_KEY" />
+            </ul>
+          </div>
+
+          {/* Twilio */}
+          <div className="p-3.5 rounded-xl bg-background/50 border border-border/40 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-xs flex items-center gap-1.5 text-foreground">
+                <IconSend className="size-4 text-emerald-500" /> Twilio SMS
+              </span>
+              <Badge variant="outline" className="text-[9px] font-bold bg-emerald-500/10 text-emerald-600 border-none">SMS</Badge>
+            </div>
+            <ul className="space-y-1">
+              <CopyableCode code="TWILIO_ACCOUNT_SID" />
+              <CopyableCode code="TWILIO_AUTH_TOKEN" />
+              <CopyableCode code="TWILIO_PHONE_NUMBER" />
+            </ul>
+          </div>
+
+          {/* Google Gemini */}
+          <div className="p-3.5 rounded-xl bg-background/50 border border-border/40 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-xs flex items-center gap-1.5 text-foreground">
+                <IconSparkles className="size-4 text-amber-500" /> Gemini AI
+              </span>
+              <Badge variant="outline" className="text-[9px] font-bold bg-amber-500/10 text-amber-600 border-none">IA</Badge>
+            </div>
+            <ul className="space-y-1">
+              <CopyableCode code="GOOGLE_GENERATIVE_AI_API_KEY" />
+              <CopyableCode code="GEMINI_MODEL" />
+            </ul>
+          </div>
+        </div>
+
+        {/* Banco de Pruebas Integrado */}
+        <div className="pt-3 border-t border-border/30 space-y-3">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-foreground">
+            <IconFlask className="size-4 text-indigo-500" />
+            <span>Banco de Pruebas de Despacho Directo</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {/* Test SMS */}
+            <div className="p-3 rounded-xl bg-background/40 border border-border/30 space-y-2">
+              <label htmlFor="test-sms-phone" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                Probar Despacho de SMS
+              </label>
+              <div className="flex gap-2">
+                <Input
+                  id="test-sms-phone"
+                  placeholder="Número de celular (ej. 987654321)"
+                  value={testPhone}
+                  onChange={(e) => setTestPhone(e.target.value)}
+                  className="h-9 text-xs bg-background border-border/40 rounded-xl"
+                  disabled={isTestLoading}
+                />
+                <Button
+                  size="sm"
+                  onClick={onTestSms}
+                  disabled={isTestLoading}
+                  className="rounded-xl px-4 h-9 font-semibold text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 shrink-0 gap-1.5 cursor-pointer"
+                >
+                  <IconSend className="size-3.5" />
+                  <span>{isTestLoading ? "..." : "Enviar SMS"}</span>
+                </Button>
               </div>
+            </div>
 
-              {/* Test Email */}
-              <div className="space-y-2">
-                <label className="text-[10px] font-medium text-blue-600 dark:text-blue-400 uppercase tracking-wider">
-                  Probar Email
-                </label>
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="correo@ejemplo.com"
-                    value={testEmail}
-                    onChange={(e) => setTestEmail(e.target.value)}
-                    className="h-8 text-xs bg-white/50 dark:bg-black/20 border-blue-200 dark:border-blue-800"
-                    disabled={isEmailLoading}
-                  />
-                  <Button
-                    size="sm"
-                    onClick={onTestEmail}
-                    disabled={isEmailLoading}
-                    className="h-8 px-3 text-xs bg-indigo-600 hover:bg-indigo-700 text-white flex gap-1 items-center"
-                  >
-                    {isEmailLoading ? "..." : <Mail className="h-3 w-3" />}
-                  </Button>
-                </div>
+            {/* Test Email */}
+            <div className="p-3 rounded-xl bg-background/40 border border-border/30 space-y-2">
+              <label htmlFor="test-email-addr" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                Probar Despacho de Correo
+              </label>
+              <div className="flex gap-2">
+                <Input
+                  id="test-email-addr"
+                  placeholder="correo@ejemplo.com"
+                  value={testEmail}
+                  onChange={(e) => setTestEmail(e.target.value)}
+                  className="h-9 text-xs bg-background border-border/40 rounded-xl"
+                  disabled={isEmailLoading}
+                />
+                <Button
+                  size="sm"
+                  onClick={onTestEmail}
+                  disabled={isEmailLoading}
+                  className="rounded-xl px-4 h-9 font-semibold text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 shrink-0 gap-1.5 cursor-pointer"
+                >
+                  <IconMail className="size-3.5" />
+                  <span>{isEmailLoading ? "..." : "Enviar Email"}</span>
+                </Button>
               </div>
             </div>
           </div>
-        </AlertDescription>
-      </Alert>
+        </div>
+      </Card>
+
       <ComprobanteFormatConfig currentValue={formatoComprobante} />
 
       <VariableForm onVariableSaved={handleVariableSaved} />
+      
       <VariableList
         variables={variables}
         onUpdateVariable={handleUpdateVariable}
@@ -324,7 +347,7 @@ export function VariablesPanel({ initialData }: VariablesPanelProps) {
         onConfirm={onConfirmDelete}
         loading={isDeleting}
         title="Eliminar Variable"
-        description="¿Estás seguro de que deseas eliminar esta variable? Esta acción no se puede deshacer."
+        description="¿Estás seguro de que deseas eliminar esta variable? Esta acción afectará a las configuraciones que la requieran."
         variant="danger"
       />
     </div>

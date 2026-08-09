@@ -62,18 +62,13 @@ export const PARENTESCO_OPTIONS = [
   { label: "Otro", value: "OTRO" },
 ] as const;
 
-const currentYear = new Date().getFullYear();
-export const ANIO_LECTIVO_OPTIONS = [
-  { label: `Año ${currentYear}`, value: String(currentYear) },
-  { label: `Año ${currentYear + 1}`, value: String(currentYear + 1) },
-];
-
-export const PAYMENT_STATUS_OPTIONS = [
-  { label: "Pendiente", value: "PENDING" },
-  { label: "Pagado", value: "PAID" },
-  { label: "Pagado Parcial", value: "PARTIALLY_PAID" },
-  { label: "Vencido", value: "EXPIRED" },
-] as const;
+export function getAnioLectivoOptions() {
+  const currentYear = new Date().getFullYear();
+  return [
+    { label: `Año ${currentYear}`, value: String(currentYear) },
+    { label: `Año ${currentYear + 1}`, value: String(currentYear + 1) },
+  ];
+}
 
 export const MESES_OPTIONS = [
   { id: 0, nombre: "Enero" },
@@ -90,8 +85,6 @@ export const MESES_OPTIONS = [
   { id: 11, nombre: "Diciembre" },
 ] as const;
 
-export const GENERO_OPTIONS = SEXO_OPTIONS; // Alias para compatibilidad
-
 // ── Academic Levels ──────────────────────────────────────────────────────────
 export const NIVEL_KEYS = {
   INICIAL: "INICIAL",
@@ -106,7 +99,7 @@ export const NIVEL_ICON_MAP: Record<string, React.ElementType> = {
   DEFAULT: IconBook,
 };
 
-export const NIVEL_COLOR_MAP: Record<string, string> = {
+const NIVEL_COLOR_MAP: Record<string, string> = {
   [NIVEL_KEYS.INICIAL]: "#F59E0B", // Amber
   [NIVEL_KEYS.PRIMARIA]: "#3B82F6", // Blue
   [NIVEL_KEYS.SECUNDARIA]: "#10B981", // Emerald

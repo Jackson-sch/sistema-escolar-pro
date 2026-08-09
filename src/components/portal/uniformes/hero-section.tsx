@@ -1,15 +1,19 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 
 export default function HeroSection() {
   return (
     <>
-      <div className="lg:col-span-2 relative h-[400px] rounded-[3rem] overflow-hidden group">
-        <img
+      <div className="group relative h-[400px] overflow-hidden rounded-2xl border border-border/50 shadow-sm lg:col-span-2">
+        <Image
           src="https://lh3.googleusercontent.com/aida-public/AB6AXuD05GD9SQDwx0Gz8icLHRbwNbo2kbKgaeClXAJ29QUTrOPr29DDQJNmDNEuySGp5l02NVhg2sZfXkvqDw0K0X_uRYc-QaqmIxzTDFf8Kvs5mCjniV_N1l1VvtiT6W5ODh2u3rgzNUvmHzTe52ACjqNuP4GDcRjGuQaW4BFOA1aQW2ABxszBD7njxq64rGuJdsrd1JjYCLVkZSe8oHrzWcmQDM6ojAQs0-hoRjC-I_23RVZPMT3r0xg14LHRYWwq7ynuBj6pgMLJYsI"
-          className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+          fill
+          sizes="(max-width: 1024px) 100vw, 50vw"
+          className="object-cover transition-transform duration-1000 group-hover:scale-105"
           alt="Heritage Formal Wear"
+          priority
         />
         <div className="absolute inset-0 bg-linear-to-t from-slate-900 via-slate-900/20 to-transparent" />
         <div className="absolute bottom-10 left-10 right-10 space-y-4">
@@ -30,10 +34,12 @@ export default function HeroSection() {
         </div>
       </div>
 
-      <div className="relative h-[400px] rounded-[3rem] overflow-hidden group">
-        <img
+      <div className="group relative h-[400px] overflow-hidden rounded-2xl border border-border/50 shadow-sm">
+        <Image
           src="https://lh3.googleusercontent.com/aida-public/AB6AXuDP9SVkh2sFAn6lSnnZIgUrYT9fs1vc-FW9KknwTlI0NA7UOMhEzdoOiMmMKZA7GWgnaGa9VIiuLPXgNofluNqQrgkp0-UQOrVWDI9IcEWFpAPrf7pM360BIon9fD0s9C__PGzPsftHoLxC0yuQM83Km6_PGjDkGoVzJV8DbaL4gdfk6r13ivDJ4VWhojls2HuvYdFFcF22OgQmsph0Dt2MkDoZBljQvdGzkyMjUId1L1fMggaO61DLwL6yeGLe7EjLA9A3eNiDuwI"
-          className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+          fill
+          sizes="(max-width: 1024px) 100vw, 50vw"
+          className="object-cover transition-transform duration-1000 group-hover:scale-105"
           alt="Elite Athletics"
         />
         <div className="absolute inset-0 bg-linear-to-t from-slate-900/80 to-transparent" />

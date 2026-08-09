@@ -2,7 +2,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { Banknote, CreditCard, LucideIcon, Smartphone } from "lucide-react";
 import { ComparisonBadge } from "@/components/common/comparison-badge";
-import { GlowBlob } from "./glow-blob";
 
 interface StatCardProps {
   title: string;
@@ -36,14 +35,13 @@ export default function StatCard({
   return (
     <Card
       className={cn(
-        "luxury-panel shadow-none overflow-hidden relative group",
+        "bg-card/80 border border-border/50 rounded-2xl shadow-sm overflow-hidden relative group",
         className,
       )}
     >
-      <GlowBlob color={glowColor} gradient="conic" />
 
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
+        <CardTitle className="text-xxs font-bold text-muted-foreground uppercase tracking-[0.2em]">
           {title}
         </CardTitle>
         {iconBgColor ? (

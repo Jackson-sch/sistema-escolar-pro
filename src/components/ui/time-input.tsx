@@ -20,10 +20,13 @@ export function TimeInput({
   ...props
 }: TimeInputProps) {
   const [internalValue, setInternalValue] = React.useState(value);
+  const [prevValue, setPrevValue] = React.useState(value);
 
-  React.useEffect(() => {
+  // Ajustar estado durante el render cuando el prop cambia (evita efecto espejo)
+  if (prevValue !== value) {
+    setPrevValue(value);
     setInternalValue(value);
-  }, [value]);
+  }
 
   const formatTime = (input: string) => {
     // Remove everything except numbers

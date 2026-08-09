@@ -2,7 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTransition } from "react";
+import { useTransition, useRef } from "react";
 import {
   IconLoader2,
   IconHash,
@@ -111,10 +111,16 @@ export function AreaForm({
     });
   };
 
+  const onSubmitRef = useRef(onSubmit);
+
   useEffect(() => {
-    setOnSubmit(() => form.handleSubmit(onSubmit)());
+    onSubmitRef.current = onSubmit;
+  });
+
+  useEffect(() => {
+    setOnSubmit(() => form.handleSubmit(onSubmitRef.current)());
     return () => setOnSubmit(undefined);
-  }, [form, onSubmit, setOnSubmit]);
+  }, [form, setOnSubmit]);
 
   return (
     <Form {...form}>
@@ -235,7 +241,7 @@ export function AreaForm({
                           type="button"
                           onClick={() => field.onChange(c)}
                           className={cn(
-                            "size-6 rounded-full border transition-all focus:outline-none focus:ring-2 focus:ring-offset-2",
+                            "size-6 rounded-full border transition-[outline-color,box-shadow] focus:outline-none focus:ring-2 focus:ring-offset-2",
                             field.value === c
                               ? "ring-2 ring-offset-2 ring-slate-900 scale-110 shadow-sm"
                               : "border-transparent opacity-60 hover:opacity-100",
@@ -247,7 +253,7 @@ export function AreaForm({
                     </div>
                     {/* Selector personalizado nativo */}
                     <div className="relative group">
-                      <div className="absolute inset-0 rounded-full ring-1 ring-inset ring-black/10 pointer-events-none group-hover:ring-black/20 transition-all" />
+                      <div className="absolute inset-0 rounded-full ring-1 ring-inset ring-black/10 pointer-events-none group-hover:ring-black/20 transition-shadow" />
                       <Input
                         type="color"
                         {...field}

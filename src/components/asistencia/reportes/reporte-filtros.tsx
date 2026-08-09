@@ -87,7 +87,7 @@ export function ReporteFiltros({
   onConsultar,
 }: ReporteFiltrosProps) {
   return (
-    <div className="space-y-4 lg:space-y-6 animate-in slide-in-from-top-2 duration-500">
+    <div className="space-y-4 lg:space-y-6 animate-in slide-in-from-top-2 animation-duration-">
       <AnimatedTabs
         layoutId="report-type-tabs"
         tabs={[
@@ -113,9 +113,9 @@ export function ReporteFiltros({
         {/* Foco Temporal — solo visible en reporte institucional */}
         {reportType === "institucional" && setRPeriod && (
           <div className="space-y-1.5 -mb-1">
-            <label className="text-[10px] font-black uppercase tracking-widest ml-1">
+            <span className="text-[10px] font-black uppercase tracking-widest ml-1">
               Foco
-            </label>
+            </span>
             <AnimatedTabs
               layoutId="temporal-focus-tabs"
               size="sm"
@@ -134,15 +134,15 @@ export function ReporteFiltros({
         {/* Periodo */}
         {(rPeriod !== "today" || reportType !== "institucional") && (
           <div className="space-y-1.5 w-[100px]">
-            <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-1">
+            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-1">
               Periodo
-            </label>
+            </span>
             <Select
               onValueChange={(v) => setAnio(Number(v))}
               value={anio.toString()}
               disabled={isLoadingSecciones}
             >
-              <SelectTrigger className="h-9 bg-card border-border/40 hover:bg-muted/50 w-full rounded-xl text-xs font-bold transition-all">
+              <SelectTrigger className="h-9 bg-card border-border/40 hover:bg-muted/50 w-full rounded-xl text-xs font-bold transition-colors">
                 <SelectValue placeholder="Año" />
               </SelectTrigger>
               <SelectContent className="rounded-xl">
@@ -159,15 +159,15 @@ export function ReporteFiltros({
         {/* Mes */}
         {((reportType === "mensual" || reportType === "justificaciones") || (reportType === "institucional" && rPeriod === "month")) && (
           <div className="space-y-1.5 w-[120px]">
-            <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-1">
+            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-1">
               Mes
-            </label>
+            </span>
             <Select
               onValueChange={(v) => setMes(Number(v))}
               value={mes.toString()}
               disabled={isLoadingSecciones}
             >
-              <SelectTrigger className="h-9 bg-card border-border/40 hover:bg-muted/50 w-full rounded-xl text-xs font-bold transition-all">
+              <SelectTrigger className="h-9 bg-card border-border/40 hover:bg-muted/50 w-full rounded-xl text-xs font-bold transition-colors">
                 <SelectValue placeholder="Mes" />
               </SelectTrigger>
               <SelectContent className="rounded-xl">
@@ -223,7 +223,7 @@ export function ReporteFiltros({
             )}
             {secciones.map((s: any) => (
               <SelectItem key={s.id} value={s.id} className="text-xs">
-                Sección "{s.seccion}" {s.turno ? `· ${s.turno}` : ""}
+                Sección &quot;{s.seccion}&quot; {s.turno ? `· ${s.turno}` : ""}
               </SelectItem>
             ))}
           </StepSelect>
@@ -239,9 +239,9 @@ export function ReporteFiltros({
               )}>
                 4
               </span>
-              <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
+              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
                 Estudiante
-              </label>
+              </span>
             </div>
             <ComboboxReusable
               items={alumnos.map((a: any) => ({
@@ -268,9 +268,9 @@ export function ReporteFiltros({
 
         {/* Botón Consultar */}
         <div className="space-y-1.5">
-          <label className="text-[10px] font-black uppercase tracking-widest text-transparent ml-1 select-none">
+          <span className="text-[10px] font-black uppercase tracking-widest text-transparent ml-1 select-none">
             &nbsp;
-          </label>
+          </span>
           <Button
             onClick={onConsultar}
             disabled={
@@ -282,7 +282,7 @@ export function ReporteFiltros({
               (reportType === "individual" && !studentId) ||
               isPending
             }
-            className="h-9 px-5 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-[11px] uppercase tracking-widest shadow-lg shadow-primary/25 transition-all active:scale-95 rounded-xl gap-2"
+            className="h-9 px-5 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-[11px] uppercase tracking-widest shadow-lg shadow-primary/25 transition-[background-color,transform] active:scale-95 rounded-xl gap-2"
           >
             {isPending ? (
               <IconLoader2 className="animate-spin size-4" />
@@ -331,19 +331,19 @@ function StepSelect({
         >
           {step}
         </span>
-        <label
+        <span
           className={cn(
             "text-[10px] font-black uppercase tracking-widest transition-colors",
             active ? "text-primary/80" : "text-muted-foreground/50",
           )}
         >
           {label}
-        </label>
+        </span>
       </div>
       <Select onValueChange={onValueChange} value={value || ""} disabled={disabled}>
         <SelectTrigger
           className={cn(
-            "h-9 w-full rounded-xl border-border/40 text-xs font-bold transition-all",
+            "h-9 w-full rounded-xl border-border/40 text-xs font-bold transition-[color,background-color,border-color,box-shadow,opacity]",
             active
               ? "border-primary/30 bg-primary/5 text-foreground shadow-sm"
               : "bg-background/40 text-muted-foreground hover:bg-background/60",

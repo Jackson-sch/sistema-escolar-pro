@@ -17,8 +17,9 @@ export default function LogsSection({
   logs: any[];
   lastScan: any;
 }) {
+  const hoy = new Date().toLocaleDateString("es-PE");
   return (
-    <Card className="h-full overflow-hidden border border-border/40 shadow-2xl bg-card/40 backdrop-blur-3xl text-foreground dark:text-white flex flex-col">
+    <Card className="h-full overflow-hidden border border-border/40 shadow-lg bg-card/80 text-foreground dark:text-white flex flex-col">
       <CardHeader className="pb-3 border-b border-border/10">
         <div className="flex items-center justify-between">
           <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
@@ -29,7 +30,7 @@ export default function LogsSection({
             variant="secondary"
             className="rounded-full font-mono text-[9px] dark:bg-muted/30 dark:text-muted-foreground border-border/20"
           >
-            {new Date().toLocaleDateString("es-PE")}
+            {hoy}
           </Badge>
         </div>
       </CardHeader>
@@ -37,7 +38,7 @@ export default function LogsSection({
       <CardContent className="p-0 flex flex-col flex-1 overflow-hidden">
         {/* Highlight Section (lastScan) */}
         {lastScan && (
-          <div className="p-4 bg-primary/5 border-b border-primary/10 animate-in slide-in-from-top duration-500 backdrop-blur-sm">
+          <div className="p-4 bg-primary/5 border-b border-primary/10 animate-in slide-in-from-top animation-duration-">
             <div className="flex items-center gap-4">
               <div className="relative shrink-0">
                 <Avatar className="size-16 border-2 border-primary/20 shadow-xl">

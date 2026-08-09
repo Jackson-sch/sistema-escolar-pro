@@ -8,9 +8,10 @@ interface useFormShortcutsProps {
 }
 
 /**
- * Hook para manejar atajos de teclado en formularios.
- * Soporta Ctrl+S para guardar y Enter para enviar.
- * Utiliza una Ref interna para evitar reinicializar el listener con cada render.
+ * Hook para manejar atajos de teclado globales en formularios.
+ * Soporta:
+ * - Ctrl+S / Cmd+S para enviar/guardar el formulario activo.
+ * - Enter para avanzar dinámicamente al siguiente campo editable.
  */
 export function useFormShortcuts({
   onSubmit,
@@ -18,32 +19,47 @@ export function useFormShortcuts({
 }: useFormShortcutsProps) {
   const onSubmitRef = useRef(onSubmit);
 
-  // Actualizar la ref en cada render para tener siempre la última lógica del form
   useEffect(() => {
     onSubmitRef.current = onSubmit;
   }, [onSubmit]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      // Evitar que funcione si el formulario está cargando
       if (isLoading) return;
 
-      // Ctrl + S (o Cmd + S en Mac)
-      if ((event.ctrlKey || event.metaKey) && event.key === "s") {
+      // Ctrl + S (o Cmd + S en Mac) -> Enviar formulario
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
         event.preventDefault();
         onSubmitRef.current?.();
+        return;
       }
 
-      // Enter (opcional, ya que el navegador lo maneja por defecto en botones type="submit")
+      // Enter -> Avanzar automáticamente al siguiente campo del formulario sin hacer submit directo
       if (event.key === "Enter" && !event.shiftKey) {
         const target = event.target as HTMLElement;
-        if (target.tagName === "TEXTAREA") return;
-        // El comportamiento nativo del botón submit suele ser suficiente,
-        // pero podrías llamar a onSubmitRef.current() si fuera necesario.
+        if (target && (target.tagName === "INPUT" || target.tagName === "SELECT")) {
+          const form = target.closest("form");
+          if (form) {
+            const inputs = Array.from(
+              form.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>(
+                "input:not([disabled]):not([type='hidden']), select:not([disabled]), button[type='submit']:not([disabled])"
+              )
+            );
+            const index = inputs.indexOf(target as any);
+            if (index > -1 && index < inputs.length - 1) {
+              const next = inputs[index + 1];
+              if (next && next.tagName !== "BUTTON") {
+                event.preventDefault();
+                next.focus();
+                if ("select" in next) (next as any).select();
+              }
+            }
+          }
+        }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isLoading]); // Solo reinicia si cambia el estado de carga
+  }, [isLoading]);
 }

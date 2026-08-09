@@ -2,6 +2,14 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
+import Image from "next/image";
+import {
+  IconMapPin,
+  IconBadgeFilled,
+  IconStarFilled,
+  IconSchool,
+  IconLibrary,
+} from "@tabler/icons-react";
 
 interface SedeMapProps {
   sedes: any[];
@@ -43,7 +51,6 @@ export function SedeMap({ sedes, activeSedeId, onSedeClick }: SedeMapProps) {
       if (cancelled || !mapContainer.current) return;
 
       // Import CSS
-      // @ts-ignore - CSS import has no type declarations
       import("maplibre-gl/dist/maplibre-gl.css");
 
       maplibreRef.current = maplibregl.default || maplibregl;
@@ -88,7 +95,12 @@ export function SedeMap({ sedes, activeSedeId, onSedeClick }: SedeMapProps) {
           setIsMapReady(true);
         }
       });
-    });
+    })
+      .catch((error) => {
+        if (!cancelled) {
+          console.error("Error al inicializar el mapa:", error);
+        }
+      });
 
     return () => {
       cancelled = true;
@@ -149,15 +161,25 @@ export function SedeMap({ sedes, activeSedeId, onSedeClick }: SedeMapProps) {
       inner.className =
         "cursor-pointer transition-transform duration-300 hover:scale-110 active:scale-95";
 
-      const iconHtml = sede.esPrincipal
-        ? `<div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white border-2 border-white shadow-lg" style="box-shadow: 0 0 15px rgba(37, 99, 235, 0.6)">
-             <span class="material-symbols-outlined text-sm">school</span>
-           </div>`
-        : `<div class="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white border-2 border-white shadow-md">
-             <span class="material-symbols-outlined text-xs">local_library</span>
-           </div>`;
-
-      inner.innerHTML = iconHtml;
+      // Build the marker icon with DOM APIs (avoids innerHTML sinks)
+      const icon = document.createElement("div");
+      if (sede.esPrincipal) {
+        icon.className =
+          "w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white border-2 border-white shadow-lg";
+        icon.style.boxShadow = "0 0 15px rgba(37, 99, 235, 0.6)";
+      } else {
+        icon.className =
+          "w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white border-2 border-white shadow-md";
+      }
+      const iconRoot = createRoot(icon);
+      iconRoot.render(
+        sede.esPrincipal ? (
+          <IconSchool className="text-sm" />
+        ) : (
+          <IconLibrary className="text-xs" />
+        ),
+      );
+      inner.appendChild(icon);
       el.appendChild(inner);
 
       // Popup Content
@@ -173,9 +195,12 @@ export function SedeMap({ sedes, activeSedeId, onSedeClick }: SedeMapProps) {
         <div className="flex flex-col gap-0 overflow-hidden">
           {sede.logo ? (
             <div className="relative w-full h-24 overflow-hidden rounded-t-xl mb-3">
-              <img
+              <Image
                 src={sede.logo}
-                className="w-full h-full object-cover"
+                fill
+                sizes="200px"
+                unoptimized
+                className="object-cover"
                 alt={sede.nombre}
               />
               <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
@@ -195,9 +220,7 @@ export function SedeMap({ sedes, activeSedeId, onSedeClick }: SedeMapProps) {
 
           <div className="px-3 pb-3 space-y-2.5">
             <div className="flex items-start gap-2">
-              <span className="material-symbols-outlined text-[14px] text-blue-600 shrink-0 mt-0.5">
-                location_on
-              </span>
+              <IconMapPin className="text-[14px] text-blue-600 shrink-0 mt-0.5" />
               <p className="text-[10px] text-gray-500 leading-snug">
                 {sede.direccion || "Sin dirección física"}
               </p>
@@ -218,17 +241,13 @@ export function SedeMap({ sedes, activeSedeId, onSedeClick }: SedeMapProps) {
 
             <div className="flex justify-between items-center pt-2 border-t border-gray-200">
               <div className="flex items-center gap-1.5 text-gray-400">
-                <span className="material-symbols-outlined text-[12px]">
-                  verified
-                </span>
+                <IconBadgeFilled className="text-[12px]" />
                 <span className="text-[9px] font-bold uppercase tracking-wider">
                   Sede {sede.esPrincipal ? "Principal" : "Secundaria"}
                 </span>
               </div>
               {sede.esPrincipal && (
-                <span className="material-symbols-outlined text-amber-500 text-sm">
-                  stars
-                </span>
+                <IconStarFilled className="text-amber-500 text-sm" />
               )}
             </div>
           </div>
@@ -294,12 +313,15 @@ export function SedeMap({ sedes, activeSedeId, onSedeClick }: SedeMapProps) {
           map.off("moveend", onMoveEnd);
         };
         map.on("moveend", onMoveEnd);
+
+        // Cleanup the temporary subscription when the effect re-runs/unmounts
+        return () => map.off("moveend", onMoveEnd);
       }
     }
-  }, [activeSedeId, isMapReady]);
+  }, [activeSedeId, isMapReady, sedes]);
 
   return (
-    <div className="w-full h-full relative group rounded-3xl overflow-hidden bg-muted/10 shadow-2xl border border-border/20">
+    <div className="w-full h-full relative group rounded-3xl overflow-hidden bg-muted/10 shadow-lg border border-border/20">
       <div
         ref={mapContainer}
         className="w-full h-full"

@@ -4,7 +4,14 @@ import { getParentDashboardDataAction } from "@/actions/portal";
 import { StudentSelector } from "@/components/portal/layout/student-selector";
 import { DashboardContent } from "@/components/portal/dashboard/dashboard-content";
 import { Card } from "@/components/ui/card";
-import { IconUser } from "@tabler/icons-react";
+import { IconUser, IconSchool } from "@tabler/icons-react";
+import { Badge } from "@/components/ui/badge";
+import { Suspense } from "react";
+
+export const metadata = {
+  title: "Portal de Familia | Sistema Escolar Pro",
+  description: "Resumen académico, estado financiero y seguimiento del estudiante.",
+};
 
 interface SearchParams {
   hijoId?: string;
@@ -26,7 +33,6 @@ export default async function PortalDashboardPage({
     estudianteId: hijoId,
   });
 
-  // Type assertion or check to fix inferred '{}' issue
   const data = result.success as {
     hijos: any[];
     currentStudent: any;
@@ -35,9 +41,9 @@ export default async function PortalDashboardPage({
 
   if (result.error || !result.success) {
     return (
-      <div className="flex flex-1 items-center justify-center p-4">
-        <p className="text-destructive font-bold">
-          {result.error || "Error al cargar los datos"}
+      <div className="flex flex-1 items-center justify-center p-8">
+        <p className="text-destructive font-bold text-sm">
+          {result.error || "Error al cargar los datos del portal"}
         </p>
       </div>
     );
@@ -47,22 +53,27 @@ export default async function PortalDashboardPage({
 
   if (hijos.length === 0) {
     return (
-      <div className="flex flex-1 flex-col gap-8 p-4 sm:p-10 pt-0">
-        <div className="space-y-1 mt-4 md:mt-0">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+      <div className="min-h-screen flex flex-col gap-6 p-4 md:p-8 pt-6 @container/main">
+        <div className="space-y-2 px-2">
+          <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-4 py-1 rounded-full text-xxs font-semibold uppercase tracking-widest flex items-center gap-2 w-fit">
+            <IconSchool size={14} />
+            Portal de Familia
+          </Badge>
+          <h1 className="text-3xl md:text-5xl font-bold tracking-tight leading-none">
             Bienvenido al Portal
           </h1>
-          <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed">
-            Resumen general de la actividad escolar y accesos rápidos.
+          <p className="text-muted-foreground text-sm md:text-base max-w-2xl font-normal leading-relaxed">
+            Resumen general de la actividad escolar, calificaciones y pagos.
           </p>
         </div>
-        <Card className="border-dashed p-12 text-center bg-muted/20">
-          <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-muted">
-            <IconUser className="size-8 text-muted-foreground" />
+
+        <Card className="rounded-2xl border border-dashed border-border/50 bg-card/80 p-12 text-center shadow-sm">
+          <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-xl bg-muted">
+            <IconUser className="size-6 text-muted-foreground" />
           </div>
-          <p className="text-lg font-bold">No tienes hijos registrados</p>
-          <p className="text-sm text-muted-foreground mt-2">
-            Contacta a la administración para vincular a tus hijos al sistema.
+          <h3 className="text-lg font-bold text-foreground">No tienes estudiantes asociados</h3>
+          <p className="text-xs text-muted-foreground mt-2 max-w-md mx-auto">
+            Por favor, contacta a la oficina de administración de la institución para vincular a tus hijos al sistema.
           </p>
         </Card>
       </div>
@@ -70,30 +81,46 @@ export default async function PortalDashboardPage({
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-8 p-4 md:p-10 pt-0 @container/main animate-in fade-in duration-700 min-h-screen max-w-[1600px] mx-auto w-full">
-      {/* Sección de Encabezado */}
-      <div className="space-y-1 mt-4 md:mt-0">
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-          Bienvenido al Portal
-        </h1>
-        <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed">
-          Resumen general de la actividad escolar y accesos rápidos.
-        </p>
-      </div>
+    <div className="min-h-screen flex flex-col gap-6 p-4 md:p-8 pt-6 @container/main">
+      {/* ── HEADER ── */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
+        <div className="space-y-2">
+          <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-4 py-1 rounded-full text-xxs font-semibold uppercase tracking-widest flex items-center gap-2 w-fit">
+            <IconSchool size={14} />
+            Portal de Familia
+          </Badge>
+          <h1 className="text-3xl md:text-5xl font-bold tracking-tight leading-none">
+            Bienvenido al Portal
+          </h1>
+          <p className="text-muted-foreground text-sm md:text-base max-w-2xl font-normal leading-relaxed">
+            Resumen en tiempo real del progreso académico, control de asistencia y servicios del estudiante.
+          </p>
+        </div>
 
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 py-2 border-b border-white/5">
-        <div className="flex flex-col gap-4">
-          <StudentSelector students={hijos} />
+        <div className="flex flex-col gap-1.5 shrink-0">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            Estudiante Seleccionado
+          </span>
+          <Suspense fallback={<div className="h-10 rounded-xl bg-muted/40 animate-pulse" />}>
+            <StudentSelector students={hijos} />
+          </Suspense>
         </div>
       </div>
 
-      {/* Dashboard Específico del Estudiante */}
-      <main className="space-y-8">
-        <div className="flex items-center gap-3">
-          <div className="h-8 w-1.5 bg-primary rounded-full" />
-          <h2 className="text-2xl font-bold tracking-tight capitalize">
-            Panel de {currentStudent.name}
-          </h2>
+      {/* ── PANEL DEL ESTUDIANTE ── */}
+      <main className="space-y-4 px-1">
+        <div className="flex items-center gap-3 py-1">
+          <div className="flex size-9 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary shrink-0">
+            <IconUser className="size-5" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold tracking-tight capitalize text-foreground">
+              Panel de {currentStudent.name}
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              {currentStudent.grado || "Información Académica"}
+            </p>
+          </div>
         </div>
 
         <DashboardContent data={{ currentStudent, stats }} />

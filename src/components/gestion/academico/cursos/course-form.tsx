@@ -2,7 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTransition } from "react";
+import { useTransition, useRef } from "react";
 import {
   IconBook,
   IconSettings,
@@ -103,10 +103,16 @@ export function CourseForm({
     return () => setIsDirty(false);
   }, [isDirty, setIsDirty]);
 
+  const onSubmitRef = useRef(onSubmit);
+
   useEffect(() => {
-    setOnSubmit(() => form.handleSubmit(onSubmit)());
+    onSubmitRef.current = onSubmit;
+  });
+
+  useEffect(() => {
+    setOnSubmit(() => form.handleSubmit(onSubmitRef.current)());
     return () => setOnSubmit(undefined);
-  }, [form, onSubmit, setOnSubmit]);
+  }, [form, setOnSubmit]);
 
   return (
     <Form {...form}>
@@ -258,7 +264,7 @@ export function CourseForm({
                       return (
                         <div
                           key={n.id}
-                          className={`flex items-center space-x-2 p-2 rounded-lg transition-all ${
+                          className={`flex items-center space-x-2 p-2 rounded-lg transition-[background-color,border-color] ${
                             isDisabled
                               ? "opacity-40 grayscale"
                               : "hover:bg-white/5 border border-transparent hover:border-white/5 cursor-pointer"
@@ -283,7 +289,7 @@ export function CourseForm({
                             htmlFor={`nivel-${n.id}`}
                             className="text-xs text-muted-foreground font-medium cursor-pointer disabled:cursor-not-allowed"
                           >
-                            {n.nivel.nombre} - {n.grado.nombre} "{n.seccion}"
+                            {n.nivel.nombre} - {n.grado.nombre} &quot;{n.seccion}&quot;
                           </label>
                         </div>
                       );

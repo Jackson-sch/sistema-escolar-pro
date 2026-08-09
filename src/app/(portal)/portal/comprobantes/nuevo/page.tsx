@@ -6,8 +6,6 @@ import {
 } from "@/actions/portal";
 import { ComprobanteForm } from "@/components/portal/finance/comprobante-form";
 import { formatCurrency } from "@/lib/formats";
-import { Badge } from "@/components/ui/badge";
-import { IconUpload, IconCloudUpload } from "@tabler/icons-react";
 
 export default async function NuevoComprobantePage({
   searchParams,
@@ -42,7 +40,9 @@ export default async function NuevoComprobantePage({
   }
 
   // Obtener todas las deudas de los hijos para el selector
-  const deudasRes = await getAllPendingDeudasAction({ padreId: session.user.id });
+  const deudasRes = await getAllPendingDeudasAction({
+    padreId: session.user.id,
+  });
   const relaciones = deudasRes.success || [];
 
   const opcionesDeuda = relaciones.flatMap((r: any) =>
@@ -56,18 +56,18 @@ export default async function NuevoComprobantePage({
   );
 
   return (
-    <div className="flex flex-1 flex-col gap-8 p-4 sm:p-10 pt-0 animate-in fade-in duration-500">
+    <div className="@container/main mx-auto flex min-h-full w-full max-w-[1600px] flex-1 flex-col gap-6 px-4 pb-6 pt-0 animate-in fade-in animation-duration- sm:px-6">
       {/* Sección de Encabezado */}
-      <div className="space-y-1 mt-4 md:mt-0">
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-          Mis Comprobantes
+      <div className="space-y-1 pt-2">
+        <h1 className="text-xl font-bold tracking-tight sm:text-2xl">
+          Registrar comprobante
         </h1>
-        <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed">
-          Historial de pagos realizados y descarga de facturas/recibos.
+        <p className="text-xs font-medium leading-relaxed text-muted-foreground sm:text-sm">
+          Adjunta el comprobante de tu transferencia para su validación.
         </p>
       </div>
 
-      <div className="max-w-2xl mx-auto w-full">
+      <div className="max-w-2xl w-full">
         <ComprobanteForm
           opcionesDeuda={opcionesDeuda}
           cronogramaPrecargado={cronogramaPrecargado}

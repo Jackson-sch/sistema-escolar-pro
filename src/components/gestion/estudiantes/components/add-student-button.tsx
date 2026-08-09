@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { StudentForm } from "@/components/gestion/estudiantes/management/student-form";
@@ -38,20 +37,18 @@ export function AddStudentButton({
 
   return (
     <>
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button onClick={() => setOpen(true)} className="rounded-full">
-              <IconPlus className="mr-2 size-4" />
-              <span className="hidden sm:inline">Nuevo Estudiante</span>
-              <IconUserPlus className="sm:hidden size-4" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="bottom" className="text-[11px] font-medium">
-            Registrar Nuevo Alumno
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button onClick={() => setOpen(true)} className="rounded-full">
+            <IconPlus className="mr-2 size-4" />
+            <span className="hidden sm:inline">Nuevo Estudiante</span>
+            <IconUserPlus className="sm:hidden size-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom" className="text-[11px] font-medium">
+          Registrar Nuevo Alumno
+        </TooltipContent>
+      </Tooltip>
 
       <FormDrawer
         title="Registro de Estudiante"

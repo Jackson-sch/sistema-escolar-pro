@@ -108,7 +108,7 @@ export function ProspectoRowActions({ row, table }: ProspectoRowActionsProps) {
       </FormModal>
 
       <Sheet open={showFlow} onOpenChange={setShowFlow}>
-        <SheetContent className="sm:max-w-lg bg-background/95 backdrop-blur-xl border-l border-border/40 px-4">
+        <SheetContent className="sm:max-w-lg bg-background border-l border-border/50 px-4">
           <SheetHeader>
             <SheetTitle className="text-xl font-bold uppercase tracking-tight">
               Expediente de Admisión

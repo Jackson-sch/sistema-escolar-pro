@@ -36,12 +36,75 @@ export async function getGlobalStatsAction() {
       prisma.user.count({ where: { role: "administrativo" } }),
     ]);
 
+    // 1. Crecimiento mensual de instituciones
+    const instDates = await prisma.institucionEducativa.findMany({
+      select: { createdAt: true },
+      orderBy: { createdAt: "asc" },
+    });
+
+    const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+    const monthlyData: Record<string, number> = {};
+    
+    // Inicializar los últimos 6 meses
+    const now = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const label = `${months[d.getMonth()]} ${d.getFullYear().toString().substring(2)}`;
+      monthlyData[label] = 0;
+    }
+
+    instDates.forEach(inst => {
+      const date = new Date(inst.createdAt);
+      const label = `${months[date.getMonth()]} ${date.getFullYear().toString().substring(2)}`;
+      if (label in monthlyData) {
+        monthlyData[label]++;
+      }
+    });
+
+    // Crecimiento acumulado
+    let cumulative = 0;
+    const growthChartData = Object.entries(monthlyData).map(([name, count]) => {
+      cumulative += count;
+      return { name, colegios: cumulative };
+    });
+
+    // 2. Distribución por nivel académico de estudiantes
+    const studentsWithLevel = await prisma.user.findMany({
+      where: { role: "estudiante" },
+      select: {
+        nivelAcademico: {
+          select: {
+            nivel: {
+              select: { nombre: true }
+            }
+          }
+        }
+      }
+    });
+
+    const levelCounts: Record<string, number> = { INICIAL: 0, PRIMARIA: 0, SECUNDARIA: 0 };
+    studentsWithLevel.forEach(s => {
+      const lvl = s.nivelAcademico?.nivel?.nombre;
+      if (lvl && lvl in levelCounts) {
+        levelCounts[lvl]++;
+      } else if (lvl) {
+        levelCounts[lvl] = (levelCounts[lvl] || 0) + 1;
+      }
+    });
+
+    const levelChartData = Object.entries(levelCounts).map(([name, value]) => ({
+      name: name.charAt(0) + name.slice(1).toLowerCase(),
+      value,
+    }));
+
     return {
       success: {
         instituciones,
         estudiantes,
         profesores,
         admins,
+        growthChartData,
+        levelChartData,
       },
     };
   } catch (error) {

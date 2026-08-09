@@ -12,7 +12,21 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Carpetas de respaldo y herramientas locales (gitignored)
+    ".trash/**",
+    ".agent/**",
+    ".antigravity/**",
   ]),
+  {
+    // This project is Spanish-only. No internationalization needed.
+    rules: {
+      "react/jsx-no-literals": "off",
+      // El código usa `any` deliberadamente para datos serializados de Prisma.
+      // Se mantiene como warning (no error) para no bloquear CI.
+      "@typescript-eslint/no-explicit-any": "warn",
+    },
+  },
 ]);
 
 export default eslintConfig;
+

@@ -20,6 +20,7 @@ export const getEstadisticasCobranzaAction = createSafeAction(
       totalMoraAcumulada,
       pendientesVerificacion,
       recaudacionMensualRes,
+      proyeccionMensualRes,
     ] = await Promise.all([
       prisma.cronogramaPago.aggregate({
         where: {
@@ -67,19 +68,17 @@ export const getEstadisticasCobranzaAction = createSafeAction(
         },
         _sum: { monto: true },
       }),
-    ]);
-
-    // Proyección mensual (todo lo procesado para este mes en el cronograma)
-    const proyeccionMensualRes = await prisma.cronogramaPago.aggregate({
-      where: {
-        fechaVencimiento: {
-          gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-          lte: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0),
+      prisma.cronogramaPago.aggregate({
+        where: {
+          fechaVencimiento: {
+            gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+            lte: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0),
+          },
+          estudiante: studentFilter,
         },
-        estudiante: studentFilter,
-      },
-      _sum: { monto: true },
-    });
+        _sum: { monto: true },
+      }),
+    ]);
 
     const totalMora = totalMoraAcumulada._sum.moraAcumulada || 0;
     const totalDeuda = totalStats._sum.monto || 0;

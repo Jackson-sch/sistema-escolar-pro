@@ -6,9 +6,11 @@ import { getSystemVariable } from "./settings";
  * Las credenciales se obtienen dinámicamente desde la base de datos (VariableSistema).
  */
 export async function getTwilioClient() {
-  const accountSid = await getSystemVariable("TWILIO_ACCOUNT_SID");
-  const authToken = await getSystemVariable("TWILIO_AUTH_TOKEN");
-  const twilioPhoneNumber = await getSystemVariable("TWILIO_PHONE_NUMBER");
+  const [accountSid, authToken, twilioPhoneNumber] = await Promise.all([
+    getSystemVariable("TWILIO_ACCOUNT_SID"),
+    getSystemVariable("TWILIO_AUTH_TOKEN"),
+    getSystemVariable("TWILIO_PHONE_NUMBER"),
+  ]);
 
   if (!accountSid || !authToken || !twilioPhoneNumber) {
     console.error("❌ Credenciales de Twilio incompletas en la base de datos.");

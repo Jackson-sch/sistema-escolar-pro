@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useQueryState, parseAsString, parseAsInteger } from "nuqs";
-import { ColumnDef } from "@tanstack/react-table";
+import { ColumnDef, type Table } from "@tanstack/react-table";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,27 +14,35 @@ import {
 } from "@/components/ui/select";
 import { IconCalendarEvent, IconFilter } from "@tabler/icons-react";
 
+interface EnrollmentTableMeta {
+  nivelesAcademicos?: unknown[];
+  institucion?: { cicloEscolarActual?: number | null } | null;
+}
+
 interface EnrollmentTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  meta?: any;
+  meta?: EnrollmentTableMeta;
 }
 
-interface EnrollmentFiltersProps {
-  table: any;
+interface EnrollmentFiltersProps<TData> {
+  table: Table<TData>;
   currentYear: number;
   anioFilter: number;
   estadoFilter: string;
-  meta: any;
+  meta: EnrollmentTableMeta & {
+    setAnioFilter: (value: number) => void;
+    setEstadoFilter: (value: string) => void;
+  };
 }
 
-function EnrollmentFilters({
+function EnrollmentFilters<TData>({
   table,
   currentYear,
   anioFilter,
   estadoFilter,
   meta,
-}: EnrollmentFiltersProps) {
+}: EnrollmentFiltersProps<TData>) {
   useEffect(() => {
     table.getColumn("anioAcademico")?.setFilterValue(anioFilter);
   }, [anioFilter, table]);
@@ -55,7 +63,7 @@ function EnrollmentFilters({
         <Button
           variant="ghost"
           onClick={() => meta.setAnioFilter(currentYear)}
-          className={`h-8 text-xs font-black rounded-full px-4 transition-all duration-200 ${
+          className={`h-8 text-xs font-black rounded-full px-4 transition-colors duration-200 ${
             anioFilter === currentYear
               ? "bg-indigo-600 text-white shadow-md hover:bg-indigo-500 hover:text-white"
               : "text-muted-foreground hover:bg-slate-200/50 dark:hover:bg-zinc-800"
@@ -66,7 +74,7 @@ function EnrollmentFilters({
         <Button
           variant="ghost"
           onClick={() => meta.setAnioFilter(currentYear + 1)}
-          className={`h-8 text-xs font-black rounded-full px-4 transition-all duration-200 ${
+          className={`h-8 text-xs font-black rounded-full px-4 transition-colors duration-200 ${
             anioFilter === currentYear + 1
               ? "bg-indigo-600 text-white shadow-md hover:bg-indigo-500 hover:text-white"
               : "text-muted-foreground hover:bg-slate-200/50 dark:hover:bg-zinc-800"
@@ -157,7 +165,7 @@ export function EnrollmentTable<TData, TValue>({
       onPageSizeChange={setLimit}
       showColumnVisibility={false}
     >
-      {(table: any) => (
+      {(table) => (
         <EnrollmentFilters
           table={table}
           currentYear={currentYear}

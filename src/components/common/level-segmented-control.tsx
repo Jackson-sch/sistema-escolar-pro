@@ -36,12 +36,12 @@ export function LevelSegmentedControl({
           )}>
             1
           </span>
-          <label className={cn(
+          <span className={cn(
             "text-[10px] font-bold uppercase transition-colors",
             value ? "text-primary/80" : "text-muted-foreground/60"
           )}>
             {label}
-          </label>
+          </span>
         </div>
       )}
       <div className="flex h-9 p-0.5 bg-muted/30 rounded-lg gap-0.5 border border-border/40">
@@ -57,7 +57,7 @@ export function LevelSegmentedControl({
               type="button"
               onClick={() => onChange(id)}
               className={cn(
-                "flex-1 flex items-center justify-center gap-1.5 px-2 rounded-md cursor-pointer transition-all duration-200 text-[11px] font-bold tracking-wide uppercase",
+                "flex-1 flex items-center justify-center gap-1.5 px-2 rounded-md cursor-pointer transition-[color,background-color,box-shadow] duration-200 text-[11px] font-bold tracking-wide uppercase",
                 isActive
                   ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
                   : "text-muted-foreground hover:bg-white/5 hover:text-foreground",

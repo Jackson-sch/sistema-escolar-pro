@@ -27,20 +27,3 @@ export function serialize<T>(data: T): T {
 
   return data;
 }
-
-/**
- * Helper para formatear nombres de usuarios de forma consistente
- */
-export function formatFullName(user: { name?: string | null; apellidoPaterno?: string | null; apellidoMaterno?: string | null }) {
-  if (!user) return "";
-  const parts = [
-    user.apellidoPaterno,
-    user.apellidoMaterno,
-    user.name ? `, ${user.name}` : ""
-  ].filter(Boolean);
-  
-  // Si no hay apellidos, solo devolver el nombre
-  if (parts.length === 1 && user.name) return user.name;
-  
-  return parts.join(" ").trim();
-}

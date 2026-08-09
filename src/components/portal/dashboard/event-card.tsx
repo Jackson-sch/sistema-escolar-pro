@@ -1,9 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  IconMapPin,
-  IconClock,
-} from "@tabler/icons-react";
+import { IconMapPin, IconClock } from "@tabler/icons-react";
 import { formatDate } from "@/lib/formats";
 
 interface EventCardProps {
@@ -24,7 +21,7 @@ export function EventCard({ evento, variant = "full" }: EventCardProps) {
 
   if (variant === "compact") {
     return (
-      <div className="group flex items-center gap-5 p-3 rounded-2xl transition-all duration-300 hover:bg-white/5 cursor-pointer">
+      <div className="group flex items-center gap-5 p-3 rounded-2xl transition-colors duration-300 hover:bg-white/5 cursor-pointer">
         <div className="relative shrink-0 flex flex-col items-center justify-center size-14 rounded-xl bg-muted/20 border border-border/10 group-hover:border-primary/40 transition-colors">
           <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/60 group-hover:text-primary transition-colors">
             {formatDate(date, "MMM")}
@@ -59,7 +56,7 @@ export function EventCard({ evento, variant = "full" }: EventCardProps) {
   }
 
   return (
-    <Card className="group relative overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 border-border/40 bg-card/40 backdrop-blur-md">
+    <Card className="group relative overflow-hidden transition-shadow duration-500 hover:shadow-lg hover:shadow-primary/10 border-border/40 bg-card/80">
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
       <CardContent className="p-6 relative z-10">
@@ -67,7 +64,7 @@ export function EventCard({ evento, variant = "full" }: EventCardProps) {
           {/* Enhanced Date Block */}
           <div className="relative shrink-0">
             <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="relative flex flex-col items-center justify-center size-20 rounded-2xl bg-gradient-to-br from-background/50 to-muted/20 border border-border/40 shadow-sm group-hover:border-primary/50 transition-all duration-500">
+            <div className="relative flex flex-col items-center justify-center size-20 rounded-2xl bg-gradient-to-br from-background/50 to-muted/20 border border-border/40 shadow-sm group-hover:border-primary/50 transition-[border-color] duration-500">
               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/70 group-hover:text-primary transition-colors">
                 {formatDate(date, "MMM")}
               </span>

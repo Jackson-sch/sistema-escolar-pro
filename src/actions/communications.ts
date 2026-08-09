@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { createSafeAction } from "@/lib/safe-action";
 import { z } from "zod";
 import { serialize } from "@/lib/dto";
+import { revalidatePath } from "next/cache";
 
 /**
  * Obtiene los logs de notificaciones filtrados por la institución actual
@@ -65,7 +66,7 @@ export const getNotificationLogsAction = createSafeAction(
       return { error: "No se pudieron obtener los logs de comunicaciones" };
     }
   },
-  { roles: ["admin", "coordinador"] }
+  { roles: ["administrativo", "super_admin", "director", "admin", "coordinador"] }
 );
 
 /**
@@ -84,7 +85,7 @@ export const getAnunciosAction = createSafeAction(
         },
         include: {
           autor: {
-            select: { name: true, image: true }
+            select: { name: true, image: true, role: true, apellidoPaterno: true }
           },
           grados: true,
           niveles: true,
@@ -179,6 +180,9 @@ export const upsertAnuncioAction = createSafeAction(
         });
       }
 
+      revalidatePath("/comunicaciones");
+      revalidatePath("/portal/comunicaciones");
+
       return { success: id ? "Anuncio actualizado" : "Anuncio publicado", data: serialize(anuncio) };
     } catch (error) {
       console.error("Error upserting anuncio:", error);
@@ -188,7 +192,7 @@ export const upsertAnuncioAction = createSafeAction(
 );
 
 /**
- * Crea o actualiza un evento
+ * Crea o actualiza un evento (y publica anuncio automático)
  */
 export const upsertEventoAction = createSafeAction(
   z.object({
@@ -222,12 +226,121 @@ export const upsertEventoAction = createSafeAction(
             organizadorId
           }
         });
+
+        // Al crear un evento nuevo, generar automáticamente un Anuncio para la lista de Anuncios
+        const fechaFormateada = data.fechaInicio.toLocaleDateString("es-PE", {
+          day: "2-digit",
+          month: "long",
+          year: "numeric",
+        });
+
+        await prisma.anuncio.create({
+          data: {
+            titulo: `Evento: ${data.titulo}`,
+            contenido: data.descripcion || `Se ha programado el evento "${data.titulo}" para el ${fechaFormateada}${data.ubicacion ? ` en ${data.ubicacion}` : ''}.`,
+            resumen: `Fecha: ${fechaFormateada} | Hora: ${data.horaInicio || '08:00'} | Lugar: ${data.ubicacion || 'Por definir'}`,
+            dirigidoA: "TODOS",
+            autorId: organizadorId,
+            importante: false,
+          }
+        });
       }
 
-      return { success: id ? "Evento actualizado" : "Evento programado", data: serialize(evento) };
+      revalidatePath("/comunicaciones");
+      revalidatePath("/portal/comunicaciones");
+
+      return { success: id ? "Evento actualizado" : "Evento programado y publicado en Anuncios", data: serialize(evento) };
     } catch (error) {
       console.error("Error upserting evento:", error);
       return { error: "No se pudo procesar el evento" };
     }
   }
 );
+
+/**
+ * Elimina un anuncio por su ID
+ */
+export const deleteAnuncioAction = createSafeAction(
+  z.object({
+    id: z.string(),
+  }),
+  async ({ id }) => {
+    try {
+      await prisma.anuncio.delete({
+        where: { id },
+      });
+
+      revalidatePath("/comunicaciones");
+      revalidatePath("/portal/comunicaciones");
+
+      return { success: "Anuncio eliminado correctamente" };
+    } catch (error) {
+      console.error("Error deleting anuncio:", error);
+      return { error: "No se pudo eliminar el anuncio" };
+    }
+  }
+);
+
+/**
+ * Elimina un evento por su ID
+ */
+export const deleteEventoAction = createSafeAction(
+  z.object({
+    id: z.string(),
+  }),
+  async ({ id }) => {
+    try {
+      await prisma.evento.delete({
+        where: { id },
+      });
+
+      revalidatePath("/comunicaciones");
+      revalidatePath("/portal/comunicaciones");
+
+      return { success: "Evento eliminado correctamente" };
+    } catch (error) {
+      console.error("Error deleting evento:", error);
+      return { error: "No se pudo eliminar el evento" };
+    }
+  }
+);
+
+/**
+ * Obtiene el detalle de un anuncio por ID
+ */
+export const getAnuncioByIdAction = createSafeAction(
+  z.object({
+    id: z.string(),
+  }),
+  async ({ id }) => {
+    try {
+      const anuncio = await prisma.anuncio.findUnique({
+        where: { id },
+        include: {
+          autor: {
+            select: {
+              name: true,
+              image: true,
+              role: true,
+              apellidoPaterno: true,
+              apellidoMaterno: true,
+            },
+          },
+          grados: true,
+          niveles: true,
+        },
+      });
+
+      if (!anuncio) {
+        return { error: "Comunicado no encontrado" };
+      }
+
+      return { success: serialize(anuncio) };
+    } catch (error) {
+      console.error("Error fetching anuncio by ID:", error);
+      return { error: "No se pudo obtener el detalle del comunicado" };
+    }
+  }
+);
+
+

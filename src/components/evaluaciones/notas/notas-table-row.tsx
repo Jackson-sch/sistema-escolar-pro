@@ -34,6 +34,8 @@ interface NotasTableRowProps {
   isStreaming: boolean;
   streamingContent: string | null;
   isActiveForAI: boolean;
+  onKeyDown: (e: React.KeyboardEvent<any>, index: number) => void;
+  isModified?: boolean;
 }
 
 export function NotasTableRow({
@@ -46,6 +48,8 @@ export function NotasTableRow({
   isStreaming,
   streamingContent,
   isActiveForAI,
+  onKeyDown,
+  isModified = false,
 }: NotasTableRowProps) {
   const getNotaStatus = (data?: NotaData) => {
     if (!data) return "pendiente";
@@ -62,7 +66,13 @@ export function NotasTableRow({
     `${estudiante.name?.[0] || ""}${estudiante.apellidoPaterno?.[0] || ""}`.toUpperCase();
 
   return (
-    <TableRow className="group hover:bg-muted transition-colors border-b border-border/10 last:border-0">
+    <TableRow
+      className={cn(
+        "group hover:bg-muted/70 transition-colors border-b border-border/10 last:border-0 duration-200",
+        isModified &&
+          "bg-amber-500/[0.02] dark:bg-amber-500/[0.01] hover:bg-amber-500/[0.04] border-l-2 border-l-amber-500/80 shadow-[inset_1px_0_0_rgba(245,158,11,0.1)]"
+      )}
+    >
       <TableCell className="text-center font-mono text-[10px] text-muted-foreground/40 hidden md:table-cell">
         {String(index + 1).padStart(2, "0")}
       </TableCell>
@@ -78,8 +88,13 @@ export function NotasTableRow({
               {estudiante.apellidoPaterno} {estudiante.apellidoMaterno},{" "}
               {estudiante.name}
             </span>
-            <span className="text-[10px] font-mono text-muted-foreground/70 uppercase">
+            <span className="text-[10px] font-mono text-muted-foreground/70 uppercase flex items-center gap-1.5">
               {estudiante.codigoEstudiante || "SIN CÓDIGO"}
+              {isModified && (
+                <span className="text-[8px] font-black text-amber-600 dark:text-amber-400 bg-amber-500/10 dark:bg-amber-500/5 border border-amber-500/20 px-1 py-0.5 rounded-md uppercase tracking-widest animate-pulse">
+                  Modificado
+                </span>
+              )}
             </span>
           </div>
         </div>
@@ -90,6 +105,8 @@ export function NotasTableRow({
           valor={notaData?.valor}
           valorLiteral={notaData?.valorLiteral}
           onChange={(v, type) => onNotaChange(estudiante.id, v, type)}
+          inputIndex={index}
+          onKeyDown={(e) => onKeyDown(e, index)}
         />
       </TableCell>
       <TableCell className="text-right hidden sm:table-cell">

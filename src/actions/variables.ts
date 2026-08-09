@@ -2,6 +2,7 @@
 import { serialize } from "@/lib/dto";
 
 import prisma from "@/lib/prisma"
+import { auth } from "@/auth";
 import { revalidatePath } from "next/cache"
 
 const REVALIDATE_PATH = "/configuracion"
@@ -11,6 +12,17 @@ const REVALIDATE_PATH = "/configuracion"
  */
 export async function getVariablesAction() {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return { error: "No autorizado" };
+    }
+
+    const rawRole = (session.user.role || "").toString().toLowerCase();
+    const isAdmin = ["super_admin", "admin", "administrador", "director"].includes(rawRole);
+    if (!isAdmin) {
+      return { error: "Acceso denegado" };
+    }
+
     const variables = await prisma.variableSistema.findMany({
       orderBy: [
         { seccion: "asc" },
@@ -36,6 +48,11 @@ export async function upsertVariableAction(data: {
   activo?: boolean;
 }) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     const variable = await prisma.variableSistema.upsert({
       where: { clave: data.clave },
       update: {
@@ -68,6 +85,11 @@ export async function upsertVariableAction(data: {
  */
 export async function deleteVariableAction(id: string) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     await prisma.variableSistema.delete({
       where: { id }
     })
@@ -85,6 +107,20 @@ export async function deleteVariableAction(id: string) {
  */
 export async function getVariableByKeyAction(clave: string) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return { error: "No autorizado" };
+    }
+
+    // Lista de claves públicas que el cliente puede requerir (ej. formato comprobante)
+    const PUBLIC_KEYS = ["FORMATO_COMPROBANTE", "FORMATO_COMPROBANTE_DEFAULT"];
+    const rawRole = (session.user.role || "").toString().toLowerCase();
+    const isAdmin = ["super_admin", "admin", "administrador", "director"].includes(rawRole);
+
+    if (!isAdmin && !PUBLIC_KEYS.includes(clave.toUpperCase())) {
+      return { error: "Acceso denegado a variable restringida" };
+    }
+
     const variable = await prisma.variableSistema.findUnique({
       where: { clave }
     })

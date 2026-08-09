@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { EnrollmentForm } from "@/components/gestion/matriculas/management/enrollment-form";
@@ -25,22 +24,20 @@ export function AddEnrollmentButton({
 
   return (
     <>
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              onClick={() => setOpen(true)}
-              className="rounded-full"
-            >
-              <IconFilePlus className="sm:mr-2 h-5 w-5" />
-              <span className="hidden sm:inline">Nueva Matrícula</span>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Nueva Matrícula</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            onClick={() => setOpen(true)}
+            className="rounded-full"
+          >
+            <IconFilePlus className="sm:mr-2 h-5 w-5" />
+            <span className="hidden sm:inline">Nueva Matrícula</span>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Nueva Matrícula</p>
+        </TooltipContent>
+      </Tooltip>
 
       <FormDrawer
         title={`Inscripción Académica ${year}`}

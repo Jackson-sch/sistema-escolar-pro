@@ -15,6 +15,7 @@ interface GradeTimelineItemProps {
   onEditSection: (seccion: any) => void;
   onDeleteSection: (id: string) => void;
   onAssignTutor: (seccion: any) => void;
+  onSelectSection?: (seccion: any) => void;
   onEditGrade: () => void;
   onDeleteGrade: () => void;
   isLast?: boolean;
@@ -27,6 +28,7 @@ export function GradeTimelineItem({
   onEditSection, 
   onDeleteSection,
   onAssignTutor,
+  onSelectSection,
   onEditGrade,
   onDeleteGrade,
   isLast = false 
@@ -40,7 +42,7 @@ export function GradeTimelineItem({
 
       {/* Timeline dot */}
       <div className="absolute left-0 top-0 size-10 rounded-full border-2 border-primary/20 bg-background flex items-center justify-center shadow-sm group-hover/timeline:border-primary/50 transition-colors duration-300">
-        <div className="size-3 rounded-full bg-primary/40 group-hover/timeline:scale-125 group-hover/timeline:bg-primary transition-all duration-500" />
+        <div className="size-3 rounded-full bg-primary/40 group-hover/timeline:scale-125 group-hover/timeline:bg-primary transition-[background-color,transform] duration-500" />
       </div>
 
       {/* Grade Header */}
@@ -87,6 +89,7 @@ export function GradeTimelineItem({
           <SectionItemCard
             key={seccion.id}
             seccion={seccion}
+            onSelectSection={() => onSelectSection?.(seccion)}
             onEdit={() => onEditSection(seccion)}
             onDelete={() => onDeleteSection(seccion.id)}
             onAssignTutor={() => onAssignTutor(seccion)}
@@ -96,9 +99,9 @@ export function GradeTimelineItem({
         {/* Add Section Card */}
         <button
           onClick={onAddSection}
-          className="h-full min-h-[160px] border-2 border-dashed border-border/40 rounded-2xl flex flex-col items-center justify-center gap-3 text-muted-foreground hover:text-primary hover:border-primary/40 hover:bg-primary/5 transition-all duration-300 group/add"
+          className="h-full min-h-[160px] border-2 border-dashed border-border/40 rounded-2xl flex flex-col items-center justify-center gap-3 text-muted-foreground hover:text-primary hover:border-primary/40 hover:bg-primary/5 transition-[color,background-color,border-color] duration-300 group/add"
         >
-          <div className="size-12 rounded-full bg-muted/40 flex items-center justify-center group-hover/add:bg-primary/10 group-hover/add:scale-110 transition-all duration-300">
+          <div className="size-12 rounded-full bg-muted/40 flex items-center justify-center group-hover/add:bg-primary/10 group-hover/add:scale-110 transition-[background-color,transform] duration-300">
             <IconPlus className="size-6 transition-transform group-hover/add:rotate-90 duration-500" />
           </div>
           <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Añadir Sección</span>

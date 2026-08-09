@@ -1,7 +1,9 @@
 "use server";
 import { serialize } from "@/lib/dto";
 import prisma from "@/lib/prisma";
+import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
+import { getActiveSedeId } from "@/actions/active-sede";
 
 export async function getVentasUniformesAction(filters: {
   estudianteId?: string;
@@ -9,10 +11,13 @@ export async function getVentasUniformesAction(filters: {
   estado?: string;
 }) {
   try {
+    const activeSedeId = await getActiveSedeId();
+    const targetSedeId = filters.sedeId || activeSedeId;
+
     const ventas = await prisma.ventaUniforme.findMany({
       where: {
         ...(filters.estudianteId ? { estudianteId: filters.estudianteId } : {}),
-        ...(filters.sedeId ? { sedeId: filters.sedeId } : {}),
+        ...(targetSedeId ? { sedeId: targetSedeId } : {}),
         ...(filters.estado ? { estado: filters.estado as any } : {}),
       },
       include: {
@@ -48,6 +53,11 @@ export async function crearReservaUniformeAction(data: {
   }[];
 }) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     const total = data.detalles.reduce(
       (acc, d) => acc + d.cantidad * d.precioUnitario,
       0,
@@ -88,6 +98,11 @@ export async function aprobarVentaUniformeAction(
   adminId: string,
 ) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     const result = await prisma.$transaction(async (tx: any) => {
       const venta = await tx.ventaUniforme.findUnique({
         where: { id: ventaId },
@@ -172,6 +187,11 @@ export async function aprobarVentaUniformeAction(
 
 export async function confirmarEntregaUniformeAction(ventaId: string) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     const result = await prisma.$transaction(async (tx: any) => {
       const venta = await tx.ventaUniforme.findUnique({
         where: { id: ventaId },
@@ -254,6 +274,11 @@ export async function actualizarEstadoVentaUniformeAction(
     | "CANCELADO",
 ) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     const venta = await prisma.ventaUniforme.update({
       where: { id: ventaId },
       data: {

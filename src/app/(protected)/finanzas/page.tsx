@@ -87,6 +87,7 @@ async function FinanzasContent() {
             <CronogramaTable
               data={cronograma as any}
               conceptos={conceptos}
+              niveles={niveles}
               institucion={instituciones[0]}
               formatoComprobante={formatoComprobante}
             />

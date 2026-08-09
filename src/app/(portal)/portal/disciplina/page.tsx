@@ -5,7 +5,14 @@ import { getParentStudentsAction } from "@/actions/portal";
 import { DisciplineList } from "@/components/portal/discipline/discipline-list";
 import { NotasFilter } from "@/components/portal/academic/notas-filter";
 import { Card } from "@/components/ui/card";
-import { IconUser, IconInfoCircle } from "@tabler/icons-react";
+import { IconUser, IconInfoCircle, IconShieldCheck } from "@tabler/icons-react";
+import { Badge } from "@/components/ui/badge";
+import { Suspense } from "react";
+
+export const metadata = {
+  title: "Registro Conductual | Portal de Familia",
+  description: "Seguimiento de méritos, deméritos y observaciones psicopedagógicas.",
+};
 
 interface DisciplinaPageProps {
   searchParams: Promise<{ hijoId?: string }>;
@@ -21,73 +28,87 @@ export default async function PortalDisciplinaPage({
     redirect("/login");
   }
 
-  // 1. Obtener hijos del padre
   const hijosRes = await getParentStudentsAction({ padreId: session.user.id });
   const hijos = hijosRes.success || [];
 
   if (hijos.length === 0) {
     return (
-      <div className="flex flex-1 flex-col gap-8 p-4 sm:p-10 pt-0">
-        <div className="space-y-1 mt-4 md:mt-0">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+      <div className="min-h-screen flex flex-col gap-6 p-4 md:p-8 pt-6 @container/main">
+        <div className="space-y-2 px-2">
+          <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-4 py-1 rounded-full text-xxs font-semibold uppercase tracking-widest flex items-center gap-2 w-fit">
+            <IconShieldCheck size={14} />
+            Convivencia Escolar
+          </Badge>
+          <h1 className="text-3xl md:text-5xl font-bold tracking-tight leading-none">
             Registro de Disciplina
           </h1>
-          <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed">
-            Seguimiento de conducta y méritos estudiantiles.
+          <p className="text-muted-foreground text-sm md:text-base max-w-2xl font-normal leading-relaxed">
+            Seguimiento de conducta, reconocimientos y deméritos estudiantiles.
           </p>
         </div>
-        <Card className="border-dashed p-12 text-center rounded-3xl">
-          <IconUser className="mx-auto size-12 text-muted-foreground mb-4" />
-          <p className="text-lg font-bold">No tienes hijos vinculados</p>
+        <Card className="rounded-2xl border-dashed border-border/50 bg-card/80 p-12 text-center shadow-sm">
+          <IconUser className="mx-auto size-14 text-muted-foreground/40 mb-4" />
+          <h3 className="text-xl font-bold tracking-tight text-foreground">No tienes estudiantes asociados</h3>
         </Card>
       </div>
     );
   }
 
-  // 2. Determinar hijo seleccionado
   const selectedHijoId = hijoId || hijos[0].id;
 
-  // 3. Obtener registros disciplinarios visibles
   const disciplineRes = await getStudentDisciplineRecordsForParentAction({
     studentId: selectedHijoId,
   });
   const records = disciplineRes.success || [];
 
   return (
-    <div className="flex flex-1 flex-col gap-8 p-4 sm:p-10 pt-0 animate-in fade-in duration-700">
-      {/* Sección de Encabezado */}
-      <div className="space-y-1 mt-4 md:mt-0">
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-          Registro de Disciplina
-        </h1>
-        <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed">
-          Seguimiento de conducta y méritos estudiantiles.
-        </p>
+    <div className="min-h-screen flex flex-col gap-6 p-4 md:p-8 pt-6 @container/main">
+      {/* ── HEADER ── */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
+        <div className="space-y-2">
+          <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-4 py-1 rounded-full text-xxs font-semibold uppercase tracking-widest flex items-center gap-2 w-fit">
+            <IconShieldCheck size={14} />
+            Convivencia Escolar
+          </Badge>
+          <h1 className="text-3xl md:text-5xl font-bold tracking-tight leading-none">
+            Registro de Disciplina
+          </h1>
+          <p className="text-muted-foreground text-sm md:text-base max-w-2xl font-normal leading-relaxed">
+            Seguimiento de conducta, reconocimientos meritorios e incidencias evaluadas por tutoría.
+          </p>
+        </div>
       </div>
 
       {/* Selector de Hijo */}
-      <NotasFilter
-        hijos={hijos}
-        periodos={[]}
-        currentHijoId={selectedHijoId}
-        currentPeriodoId=""
-        showPeriodo={false}
-      />
+      <div className="px-1">
+        <Suspense fallback={<div className="h-9 rounded-full bg-muted/40 animate-pulse" />}>
+          <NotasFilter
+            hijos={hijos}
+            periodos={[]}
+            currentHijoId={selectedHijoId}
+            currentPeriodoId=""
+            showPeriodo={false}
+          />
+        </Suspense>
+      </div>
 
-      <DisciplineList records={records} />
+      {/* Lista de Registros */}
+      <div className="px-1">
+        <DisciplineList records={records} />
+      </div>
 
-      <div className="bg-muted/30 border border-border/50 p-6 rounded-3xl flex items-start gap-4">
-        <div className="size-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 shrink-0">
-          <IconInfoCircle className="size-6" />
-        </div>
-        <div>
-          <h4 className="font-bold">Política de Visibilidad</h4>
-          <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
-            Solo se muestran los registros autorizados por la dirección o el
-            departamento psicopedagógico. Si desea más información o agendar una
-            cita con el especialista, por favor utilice el módulo de
-            comunicaciones.
-          </p>
+      {/* Nota sobre Política de Visibilidad */}
+      <div className="px-1">
+        <div className="flex items-start gap-4 rounded-2xl border border-border/40 bg-card/80 p-5 shadow-sm">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+            <IconInfoCircle className="size-5" />
+          </div>
+          <div>
+            <h4 className="font-bold text-sm text-foreground">Política de Transparencia y Convivencia</h4>
+            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+              Únicamente se visualizan los registros oficializados por la dirección de convivencia o tutoría. Para agendar una entrevista pedagógica con el equipo psicopedagógico, comunícate mediante la sección de avisos.
+            </p>
+          </div>
         </div>
       </div>
     </div>

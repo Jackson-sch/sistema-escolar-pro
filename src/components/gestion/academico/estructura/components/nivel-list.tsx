@@ -77,7 +77,7 @@ export function NivelList({
                 <button
                   onClick={() => onSelectNivel(nivel.id)}
                   className={cn(
-                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border text-left transition-all duration-200",
+                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border text-left transition-[color,background-color,border-color] duration-200",
                     isActive
                       ? "bg-primary/10 border-primary/25 text-primary"
                       : "bg-card border-border/50 text-foreground hover:border-border hover:bg-muted/40"

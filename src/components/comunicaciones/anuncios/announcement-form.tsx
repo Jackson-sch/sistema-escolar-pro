@@ -3,6 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useRouter } from "next/navigation";
 import {
   Form,
   FormControl,
@@ -30,11 +31,12 @@ import {
   getNivelesAction,
 } from "@/actions/academic-structure";
 import { toast } from "sonner";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useFormModal } from "@/components/modals/form-modal-context";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { FormKeyboardHelpBar } from "@/components/common/form-keyboard-help-bar";
+import { IconDeviceFloppy, IconLoader2 } from "@tabler/icons-react";
 
 const announcementSchema = z.object({
   titulo: z.string().min(4, "El título debe tener al menos 4 caracteres"),
@@ -67,18 +69,25 @@ export function AnnouncementForm({
   const [loading, setLoading] = useState(false);
   const [grados, setGrados] = useState<any[]>([]);
   const [niveles, setNiveles] = useState<any[]>([]);
+  const router = useRouter();
   const { setIsDirty, setOnSubmit } = useFormModal();
 
   useEffect(() => {
+    let ignore = false;
     const fetchData = async () => {
+      if (ignore) return;
       const [{ data: gradosRes }, { data: nivelesRes }] = await Promise.all([
         getGradosAction(undefined, isProfessor ? profesorId : undefined),
         getNivelesAction(),
       ]);
+      if (ignore) return;
       if (gradosRes) setGrados(gradosRes);
       if (nivelesRes) setNiveles(nivelesRes);
     };
     fetchData();
+    return () => {
+      ignore = true;
+    };
   }, [isProfessor, profesorId]);
 
   const form = useForm<z.infer<typeof announcementSchema>>({
@@ -110,6 +119,7 @@ export function AnnouncementForm({
       if (res.success) {
         toast.success(res.success);
         setIsDirty(false);
+        router.refresh();
         onSuccess();
       } else {
         toast.error(res.error);
@@ -119,10 +129,16 @@ export function AnnouncementForm({
     }
   };
 
+  const onSubmitRef = useRef(onSubmit);
+
   useEffect(() => {
-    setOnSubmit(() => form.handleSubmit(onSubmit)());
+    onSubmitRef.current = onSubmit;
+  });
+
+  useEffect(() => {
+    setOnSubmit(() => form.handleSubmit(onSubmitRef.current)());
     return () => setOnSubmit(undefined);
-  }, [form, onSubmit, setOnSubmit]);
+  }, [form, setOnSubmit]);
 
   const { isDirty } = form.formState;
 
@@ -133,22 +149,22 @@ export function AnnouncementForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-1 py-1">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-3.5">
             <FormField
               control={form.control}
               name="titulo"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs font-bold text-muted-foreground/70">
+                  <FormLabel className="text-xs font-medium text-foreground/80">
                     Título del Anuncio
                   </FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Ej: Inicio de vacaciones trimestrales"
                       {...field}
-                      className="rounded-full border-border/40 bg-background/50"
+                      className="bg-background border-border/40 rounded-xl text-xs h-9"
                     />
                   </FormControl>
                   <FormMessage />
@@ -161,19 +177,16 @@ export function AnnouncementForm({
               name="resumen"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs font-bold text-muted-foreground/70">
+                  <FormLabel className="text-xs font-medium text-foreground/80">
                     Resumen corto
                   </FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Una breve descripción para la tarjeta"
+                      placeholder="Breve vista previa para la tarjeta"
                       {...field}
-                      className="rounded-full border-border/40 bg-background/50"
+                      className="bg-background border-border/40 rounded-xl text-xs h-9"
                     />
                   </FormControl>
-                  <FormDescription className="text-[10px]">
-                    Aparecerá en la vista previa de la tarjeta.
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -184,7 +197,7 @@ export function AnnouncementForm({
               name="dirigidoA"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs font-bold text-muted-foreground/70">
+                  <FormLabel className="text-xs font-medium text-foreground/80">
                     Dirigido A
                   </FormLabel>
                   <Select
@@ -192,19 +205,19 @@ export function AnnouncementForm({
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger className="rounded-full w-full border-border/40 bg-background/50">
+                      <SelectTrigger className="bg-background border-border/40 rounded-xl text-xs h-9 font-medium w-full">
                         <SelectValue placeholder="Seleccione destinatario" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent className="border-border/40 bg-background/95 backdrop-blur-xl">
-                      <SelectItem value="TODOS">Toda la comunidad</SelectItem>
-                      <SelectItem value="ESTUDIANTES">
+                    <SelectContent className="rounded-xl border-border/40">
+                      <SelectItem value="TODOS" className="text-xs font-medium">Toda la comunidad</SelectItem>
+                      <SelectItem value="ESTUDIANTES" className="text-xs font-medium">
                         Solo Estudiantes
                       </SelectItem>
-                      <SelectItem value="PROFESORES">
+                      <SelectItem value="PROFESORES" className="text-xs font-medium">
                         Solo Profesores
                       </SelectItem>
-                      <SelectItem value="PADRES">Solo Padres</SelectItem>
+                      <SelectItem value="PADRES" className="text-xs font-medium">Solo Padres</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -219,16 +232,11 @@ export function AnnouncementForm({
                 name="grados"
                 render={() => (
                   <FormItem>
-                    <div className="mb-2">
-                      <FormLabel className="text-xs font-bold text-muted-foreground/70">
-                        Seleccionar Grados
-                      </FormLabel>
-                      <FormDescription className="text-[10px]">
-                        Seleccione los grados a los que desea enviar el anuncio.
-                      </FormDescription>
-                    </div>
-                    <ScrollArea className="h-[100px] rounded-lg border border-muted bg-background/60">
-                      <div className="grid grid-cols-2 gap-2 p-2">
+                    <FormLabel className="text-xs font-medium text-foreground/80">
+                      Seleccionar Grados Específicos
+                    </FormLabel>
+                    <ScrollArea className="h-[100px] rounded-xl border border-border/40 bg-background/60 p-2">
+                      <div className="grid grid-cols-2 gap-2">
                         {grados.map((grado) => (
                           <FormField
                             key={grado.id}
@@ -238,7 +246,7 @@ export function AnnouncementForm({
                               return (
                                 <FormItem
                                   key={grado.id}
-                                  className="flex flex-row items-center space-x-3 space-y-0"
+                                  className="flex flex-row items-center space-x-2 space-y-0"
                                 >
                                   <FormControl>
                                     <Checkbox
@@ -258,14 +266,11 @@ export function AnnouncementForm({
                                           );
                                         }
                                       }}
-                                      className="rounded-md border-border/40 bg-background/50"
+                                      className="rounded-md border-border/40"
                                     />
                                   </FormControl>
-                                  <FormLabel className="text-[11px] font-medium leading-none cursor-pointer">
+                                  <FormLabel className="text-xs font-normal cursor-pointer">
                                     {grado.nombre}
-                                    <span className="ml-1 text-[9px] text-muted-foreground">
-                                      {grado.nivel?.nombre.substring(0, 3)}
-                                    </span>
                                   </FormLabel>
                                 </FormItem>
                               );
@@ -281,15 +286,15 @@ export function AnnouncementForm({
             )}
           </div>
 
-          <div className="flex flex-col items-center justify-center space-y-2">
-            <FormLabel className="text-xs font-bold text-muted-foreground/70 self-start">
-              Imagen del Anuncio (Opcional)
+          <div className="flex flex-col space-y-2">
+            <FormLabel className="text-xs font-medium text-foreground/80">
+              Imagen Ilustrativa (Opcional)
             </FormLabel>
             <FormField
               control={form.control}
               name="imagen"
               render={({ field }) => (
-                <FormItem className="w-full h-full flex items-center justify-center">
+                <FormItem className="w-full flex-1 flex items-center justify-center">
                   <FormControl>
                     <ImageUpload
                       value={field.value}
@@ -310,14 +315,14 @@ export function AnnouncementForm({
           name="contenido"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-xs font-bold text-muted-foreground/70">
+              <FormLabel className="text-xs font-medium text-foreground/80">
                 Contenido Completo
               </FormLabel>
               <FormControl>
                 <Textarea
                   placeholder="Escriba aquí el mensaje detallado..."
                   {...field}
-                  className="min-h-[70px] rounded-2xl border-border/40 bg-background/50"
+                  className="min-h-[80px] bg-background border-border/40 rounded-xl text-xs p-3 resize-none"
                 />
               </FormControl>
               <FormMessage />
@@ -325,20 +330,19 @@ export function AnnouncementForm({
           )}
         />
 
-        <div className="grid grid-cols-3 gap-4 p-2 rounded-2xl bg-muted/5 border border-border/40">
+        <div className="flex flex-wrap items-center justify-around gap-4 p-3 rounded-xl bg-background/50 border border-border/40">
           <FormField
             control={form.control}
             name="importante"
             render={({ field }) => (
-              <FormItem className="flex flex-col items-center justify-center gap-2 space-y-0">
-                <FormLabel className="text-[10px] font-bold uppercase tracking-tighter">
+              <FormItem className="flex items-center gap-2 space-y-0 cursor-pointer">
+                <FormLabel className="text-xs font-medium cursor-pointer">
                   Importante
                 </FormLabel>
                 <FormControl>
                   <Switch
                     checked={field.value}
                     onCheckedChange={field.onChange}
-                    className="scale-75"
                   />
                 </FormControl>
               </FormItem>
@@ -348,15 +352,14 @@ export function AnnouncementForm({
             control={form.control}
             name="urgente"
             render={({ field }) => (
-              <FormItem className="flex flex-col items-center justify-center gap-2 space-y-0">
-                <FormLabel className="text-[10px] font-bold uppercase tracking-tighter">
+              <FormItem className="flex items-center gap-2 space-y-0 cursor-pointer">
+                <FormLabel className="text-xs font-medium cursor-pointer text-rose-600 dark:text-rose-400">
                   Urgente
                 </FormLabel>
                 <FormControl>
                   <Switch
                     checked={field.value}
                     onCheckedChange={field.onChange}
-                    className="scale-75"
                   />
                 </FormControl>
               </FormItem>
@@ -366,15 +369,14 @@ export function AnnouncementForm({
             control={form.control}
             name="fijado"
             render={({ field }) => (
-              <FormItem className="flex flex-col items-center justify-center gap-2 space-y-0">
-                <FormLabel className="text-[10px] font-bold uppercase tracking-tighter">
-                  Fijar
+              <FormItem className="flex items-center gap-2 space-y-0 cursor-pointer">
+                <FormLabel className="text-xs font-medium cursor-pointer">
+                  Fijar Arriba
                 </FormLabel>
                 <FormControl>
                   <Switch
                     checked={field.value}
                     onCheckedChange={field.onChange}
-                    className="scale-75"
                   />
                 </FormControl>
               </FormItem>
@@ -382,27 +384,36 @@ export function AnnouncementForm({
           />
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-white/5">
+        {/* Guía de Atajos de Teclado */}
+        <FormKeyboardHelpBar />
+
+        {/* Acciones */}
+        <div className="flex items-center justify-end gap-3 pt-3 border-t border-border/30">
           <Button
             type="button"
             variant="outline"
             onClick={onSuccess}
-            className="w-full sm:w-auto rounded-full border-border/40 hover:bg-accent/50 hover:scale-105"
+            className="rounded-xl px-5 h-10 font-semibold text-xs border-border/40"
             disabled={loading}
           >
             Cancelar
           </Button>
           <Button
             type="submit"
-            variant="default"
-            className="w-full sm:w-auto rounded-full px-8 hover:scale-105"
             disabled={loading}
+            className="rounded-xl px-6 h-10 font-semibold text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 gap-2 min-w-[180px]"
           >
-            {loading
-              ? "Procesando..."
-              : id
-                ? "Actualizar Anuncio"
-                : "Publicar Anuncio Ahora"}
+            {loading ? (
+              <>
+                <IconLoader2 className="size-4 animate-spin" />
+                <span>Procesando...</span>
+              </>
+            ) : (
+              <>
+                <IconDeviceFloppy className="size-4" />
+                <span>{id ? "Actualizar Anuncio" : "Publicar Anuncio Ahora"}</span>
+              </>
+            )}
           </Button>
         </div>
       </form>

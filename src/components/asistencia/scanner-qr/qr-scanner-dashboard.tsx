@@ -40,11 +40,6 @@ export function QRScannerDashboard() {
   const lastScanTimeRef = useRef<Record<string, number>>({});
   const { speak } = useSpeechFeedback();
 
-  const loadRecentLogs = async () => {
-    const res = await getRecentAttendanceLogsAction();
-    if (res.data) setLogs(res.data);
-  };
-
   const handleScan = useCallback(async (decodedText: string) => {
     const now = Date.now();
     if (now - (lastScanTimeRef.current[decodedText] || 0) < 10000) return;
@@ -82,8 +77,17 @@ export function QRScannerDashboard() {
   const { isScanning, isChangingCamera, facingMode, startScanner, stopScanner } = useQRScanner(handleScan);
 
   useEffect(() => {
-    loadRecentLogs();
+    let ignore = false;
+    getRecentAttendanceLogsAction()
+      .then((res) => {
+        if (ignore) return;
+        if (res.data) setLogs(res.data);
+      })
+      .catch(() => {
+        /* sin logs recientes */
+      });
     return () => {
+      ignore = true;
       stopScanner().catch(console.error);
     };
   }, [stopScanner]);
@@ -91,8 +95,8 @@ export function QRScannerDashboard() {
   const toggleCamera = () => startScanner(facingMode === "user" ? "environment" : "user");
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-2 sm:p-4 lg:h-[650px]">
-      <Card className="lg:col-span-7 p-0 h-full overflow-hidden border border-border/40 shadow-2xl bg-card/40 backdrop-blur-3xl text-foreground dark:text-white flex flex-col">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-2 sm:p-4 lg:h-[800px]">
+      <Card className="lg:col-span-7 p-0 h-full overflow-hidden border border-border/40 shadow-lg bg-card/80 text-foreground dark:text-white flex flex-col">
         <CardHeader className="pb-3 pt-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -119,42 +123,42 @@ export function QRScannerDashboard() {
         <CardContent className="p-0 flex flex-col items-center justify-center flex-1 relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-transparent via-primary/20 to-transparent" />
           {isScanning ? (
-            <div className="w-full max-w-md space-y-8 animate-in fade-in zoom-in-95 duration-500">
+            <div className="w-full max-w-md space-y-8 animate-in fade-in zoom-in-95 animation-duration-">
               <div className="relative group">
                 <div className="absolute -inset-4 border border-primary/10 rounded-[2.5rem] pointer-events-none" />
-                <div id="qr-reader" className="w-full border-2 border-primary/30 rounded-[2rem] overflow-hidden shadow-[0_0_50px_-12px_rgba(var(--primary),0.3)] bg-black/95 relative z-10 min-h-[300px]" />
+                <div id="qr-reader" className="w-full border-2 border-primary/30 rounded-2xl overflow-hidden shadow-[0_0_50px_-12px_rgba(var(--primary),0.3)] bg-black/95 relative z-10 min-h-[300px]" />
                 {isChangingCamera && (
-                  <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/60 rounded-[2rem] backdrop-blur-sm">
+                  <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/60 rounded-2xl backdrop-blur-sm">
                     <IconRefresh className="size-12 text-primary animate-spin mb-2" />
                     <p className="text-xs font-black uppercase tracking-widest text-primary">Sincronizando Sensor...</p>
                   </div>
                 )}
               </div>
               <div className="flex justify-center pt-4">
-                <Button variant="destructive" onClick={stopScanner} className="rounded-full px-12 h-14 font-black shadow-2xl hover:scale-105 transition-all">
+                <Button variant="destructive" onClick={stopScanner} className="rounded-full px-12 h-14 font-black shadow-lg hover:scale-105 transition-transform">
                   <IconX className="size-5 mr-2" /> DETENER ESCANEO
                 </Button>
               </div>
             </div>
           ) : (
-            <div className="text-center space-y-8 py-4 animate-in fade-in slide-in-from-bottom-8 duration-700">
+            <div className="text-center space-y-8 py-4 animate-in fade-in slide-in-from-bottom-8 animation-duration-">
               <div className="relative flex justify-center">
                 <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-150 animate-pulse" />
-                <div className="relative size-32 bg-card/40 backdrop-blur-2xl rounded-[3rem] flex items-center justify-center border border-border shadow-2xl overflow-hidden group">
+                <div className="relative size-32 bg-card/80 rounded-2xl flex items-center justify-center border border-border shadow-lg overflow-hidden group">
                   <IconCamera className="size-16 text-primary" />
                 </div>
               </div>
               <div className="space-y-4">
-                <h3 className="text-2xl font-black text-foreground dark:text-white uppercase tracking-widest">Listo para Escanear</h3>
+                <h3 className="text-2xl font-bold text-foreground dark:text-white uppercase tracking-widest">Listo para Escanear</h3>
               </div>
-              <Button onClick={() => startScanner()} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-16 h-16 font-black text-xl tracking-widest uppercase shadow-lg">
+              <Button onClick={() => startScanner()} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-16 h-16 font-bold text-xl tracking-widest uppercase shadow-lg">
                 PROCESAR ENTRADA
               </Button>
             </div>
           )}
         </CardContent>
       </Card>
-      <div className="lg:col-span-5 h-full animate-in fade-in duration-1000">
+      <div className="lg:col-span-5 h-full animate-in fade-in animation-duration-">
         <LogsSection logs={logs} lastScan={lastScan} />
       </div>
       <style jsx global>{`

@@ -7,6 +7,7 @@ import {
   IconChevronDown,
   IconCheck,
   IconCopy,
+  IconStar,
 } from "@tabler/icons-react";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
@@ -17,21 +18,21 @@ interface BankInfoSidebarProps {
 
 export function BankInfoSidebar({ bancos }: BankInfoSidebarProps) {
   return (
-    <div className="space-y-4 md:space-y-6">
-      <div className="px-2 space-y-1">
-        <h3 className="text-lg md:text-xl font-black tracking-tight">
-          Información Bancaria
+    <div className="space-y-4">
+      <div className="space-y-1">
+        <h3 className="text-base font-bold tracking-tight text-foreground">
+          Cuentas Oficiales de Recaudación
         </h3>
-        <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-          Detalles para depósito directo
+        <p className="text-xs text-muted-foreground">
+          Canales bancarios y billeteras para depósitos.
         </p>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         {bancos.length === 0 ? (
-          <p className="text-xs text-muted-foreground px-2 italic">
-            No hay información bancaria disponible.
-          </p>
+          <div className="p-4 rounded-2xl border border-dashed border-border/40 bg-card/80 text-center text-xs text-muted-foreground italic">
+            No hay información bancaria configurada.
+          </div>
         ) : (
           bancos.map((banco) => (
             <BankCardCollapsible
@@ -73,135 +74,147 @@ function BankCardCollapsible({
   isMain?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [copy, setCopy] = useState(false);
+  const [copyAccount, setCopyAccount] = useState(false);
   const [copyCci, setCopyCci] = useState(false);
+
+  const isWallet =
+    type.toLowerCase().includes("billetera") ||
+    type.toLowerCase().includes("digital");
 
   return (
     <div
-      className={`relative overflow-hidden rounded-[1.25rem] transition-all duration-300 liquid-glass ${
+      className={`rounded-2xl border transition-[border-color] bg-card/80 overflow-hidden ${
         isMain
-          ? "border border-primary/50 shadow-2xl shadow-primary/20"
-          : "border border-white/10 dark:border-white/5 shadow-xl"
+          ? "border-amber-500/40 ring-1 ring-amber-500/20 shadow-xs"
+          : "border-border/40 hover:border-indigo-500/30"
       }`}
     >
-      {isMain && (
-        <div className="absolute top-0 -left-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl animate-blob" />
-      )}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between p-5 text-left transition-colors hover:bg-white/5"
+        className="flex w-full items-center justify-between p-3.5 text-left transition-colors hover:bg-muted/30 cursor-pointer"
       >
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 min-w-0">
           <div
-            className={`p-3 rounded-2xl ${
-              isMain
-                ? "bg-primary text-white"
-                : "bg-muted/10 text-muted-foreground"
+            className={`size-10 rounded-xl flex items-center justify-center shrink-0 border ${
+              isWallet
+                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                : "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20"
             }`}
           >
-            {type.toLowerCase().includes("billetera") ||
-            type.toLowerCase().includes("digital") ? (
-              <IconDeviceMobile size={18} strokeWidth={2.5} />
+            {isWallet ? (
+              <IconDeviceMobile className="size-5" />
             ) : (
-              <IconBuildingBank size={18} strokeWidth={2.5} />
+              <IconBuildingBank className="size-5" />
             )}
           </div>
           <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="font-black dark:text-white leading-none truncate">
+            <div className="flex items-center gap-1.5">
+              <span className="font-bold text-xs text-foreground truncate">
                 {bank}
               </span>
               {isMain && (
-                <Badge className="bg-primary text-white border-none text-[8px] font-black uppercase px-2 py-0 shrink-0">
+                <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 text-[9px] px-1 py-0 rounded-md font-bold flex items-center gap-0.5 shrink-0">
+                  <IconStar className="size-3 fill-amber-500 text-amber-500" />
                   Principal
                 </Badge>
               )}
             </div>
-            <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground/60 mt-1 truncate">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate mt-0.5">
               {type}
             </p>
           </div>
         </div>
         <IconChevronDown
-          size={20}
-          className={`text-muted-foreground shrink-0 transition-transform duration-300 ${
+          className={`size-4 text-muted-foreground shrink-0 transition-transform duration-300 ${
             isOpen ? "rotate-180" : ""
           }`}
         />
       </button>
 
       <div
-        className={`overflow-hidden transition-all duration-300 ${
+        className={`overflow-hidden transition-[opacity,max-height] duration-300 ${
           isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
         }`}
       >
-        <div className="p-5 pt-0 space-y-4">
-          <div className="h-px bg-white/5" />
-          <div className="grid grid-cols-1 gap-4">
+        <div className="p-4 pt-0 space-y-3 border-t border-border/20">
+          <div className="pt-3 grid grid-cols-1 gap-3">
             <div>
-              <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">
-                Número
-              </p>
-              <p className="text-sm font-mono font-bold dark:text-white tracking-tight break-all">
-                {account}
+              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest block mb-1">
+                {isWallet ? "Número de Celular" : "Número de Cuenta"}
+              </span>
+              <div className="flex items-center justify-between p-2 rounded-xl bg-background/50 border border-border/40">
+                <span className="text-xs font-mono font-bold text-foreground truncate">
+                  {account}
+                </span>
                 <button
+                  type="button"
                   onClick={() => {
                     navigator.clipboard.writeText(account);
-                    setCopy(true);
-                    setTimeout(() => setCopy(false), 2000);
+                    setCopyAccount(true);
+                    setTimeout(() => setCopyAccount(false), 2000);
                   }}
-                  className="ml-2 text-muted-foreground dark:hover:text-white transition-colors"
+                  className="p-1 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                  title="Copiar número"
                 >
-                  {copy ? (
-                    <IconCheck size={16} className="text-green-500" />
+                  {copyAccount ? (
+                    <IconCheck className="size-4 text-emerald-500" />
                   ) : (
-                    <IconCopy size={16} />
+                    <IconCopy className="size-4" />
                   )}
                 </button>
-              </p>
+              </div>
             </div>
+
             {cci && (
               <div>
-                <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">
-                  CCI
-                </p>
-                <p className="text-sm font-mono font-bold dark:text-white tracking-tight break-all">
-                  {cci}
+                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest block mb-1">
+                  Código Interbancario (CCI)
+                </span>
+                <div className="flex items-center justify-between p-2 rounded-xl bg-background/50 border border-border/40">
+                  <span className="text-xs font-mono font-bold text-foreground truncate">
+                    {cci}
+                  </span>
                   <button
+                    type="button"
                     onClick={() => {
                       navigator.clipboard.writeText(cci);
                       setCopyCci(true);
                       setTimeout(() => setCopyCci(false), 2000);
                     }}
-                    className="ml-2 text-muted-foreground dark:hover:text-white transition-colors"
+                    className="p-1 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                    title="Copiar CCI"
                   >
                     {copyCci ? (
-                      <IconCheck size={16} className="text-green-500" />
+                      <IconCheck className="size-4 text-emerald-500" />
                     ) : (
-                      <IconCopy size={16} />
+                      <IconCopy className="size-4" />
                     )}
                   </button>
-                </p>
+                </div>
               </div>
             )}
+
             <div>
-              <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">
+              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest block mb-0.5">
                 Titular
-              </p>
-              <p className="text-sm font-bold dark:text-white/80">{titular}</p>
+              </span>
+              <p className="text-xs font-semibold text-foreground">{titular}</p>
             </div>
+
             {qrCode && (
-              <div>
-                <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">
-                  QR
-                </p>
-                <Image
-                  src={qrCode}
-                  alt="QR"
-                  width={100}
-                  height={100}
-                  className="rounded-lg"
-                />
+              <div className="pt-1">
+                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest block mb-1">
+                  Código QR de Pago
+                </span>
+                <div className="p-2 rounded-xl bg-background/50 border border-border/40 w-fit">
+                  <Image
+                    src={qrCode}
+                    alt={`QR ${bank}`}
+                    width={120}
+                    height={120}
+                    className="rounded-lg object-contain"
+                  />
+                </div>
               </div>
             )}
           </div>

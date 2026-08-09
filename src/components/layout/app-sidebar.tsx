@@ -35,6 +35,8 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
+import Image from "next/image";
+import { BrandIcon } from "@/components/common/brand-logo";
 
 // Menú para administradores/docentes
 const adminNavItems = [
@@ -96,7 +98,8 @@ const adminNavItems = [
     url: "/comunicaciones",
     icon: IconMessage2,
     items: [
-      { title: "Enviar Mensaje", url: "/comunicaciones" },
+      { title: "Centro de Anuncios", url: "/comunicaciones" },
+      { title: "Bandeja de Envíos", url: "/gestion/comunicaciones" },
       { title: "Logs de Auditoría", url: "/gestion/comunicaciones/logs" },
     ],
   },
@@ -109,6 +112,11 @@ const adminNavItems = [
     title: "Configuración",
     url: "/configuracion/institucion",
     icon: IconSettings,
+    items: [
+      { title: "Institución & Variables", url: "/configuracion/institucion" },
+      { title: "Bitácora de Auditoría", url: "/configuracion/auditoria" },
+      { title: "Estado & Diagnóstico", url: "/configuracion/estado" },
+    ],
   },
 ];
 
@@ -216,7 +224,7 @@ export function AppSidebar({
   const homeUrl = isPadre ? "/portal" : "/dashboard";
   const portalTitle = isPadre
     ? "Portal Padres"
-    : institucionName || "EduPeru Pro";
+    : institucionName || "EduNova Pro";
 
   // Actualizar el badge en Verificar Pagos si hay pendientes y filtrar por rol
   let navItems = isPadre ? padreNavItems : adminNavItems;
@@ -255,27 +263,34 @@ export function AppSidebar({
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href={homeUrl}>
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground overflow-hidden">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-indigo-950/40 text-primary overflow-hidden border border-indigo-500/20">
                   {!isPadre && institucionLogo ? (
-                    <img
+                    <Image
                       src={institucionLogo}
                       alt={portalTitle}
+                      width={32}
+                      height={32}
                       className="size-full object-cover"
                     />
                   ) : (
-                    <IconSchool className="size-4" />
+                    <BrandIcon size={22} />
                   )}
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold text-primary">
+                  <span className="truncate font-bold tracking-tight text-foreground flex items-center gap-1.5">
                     {portalTitle}
+                    {!institucionName && !isPadre && (
+                      <span className="px-1 py-0.2 text-[9px] font-extrabold uppercase text-indigo-600 bg-indigo-50 dark:bg-indigo-950/80 border border-indigo-200 dark:border-indigo-800 rounded">
+                        PRO
+                      </span>
+                    )}
                   </span>
-                  <span className="truncate text-xs text-muted-foreground">
+                  <span className="truncate text-[11px] text-muted-foreground">
                     {isPadre
-                      ? "Área de Padres"
+                      ? "Área de Familias"
                       : institucionName
                         ? "Sistema Escolar"
-                        : "EduPeru Pro"}
+                        : "Plataforma Educativa"}
                   </span>
                 </div>
               </Link>

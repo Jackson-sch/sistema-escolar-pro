@@ -29,7 +29,7 @@ export function ReporteJustificaciones({ justificaciones, isPending }: ReporteJu
       <div className="min-h-[400px] flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-dashed border-border/40 bg-muted/10">
         <div className="relative mb-6">
           <div className="absolute inset-0 bg-sky-500/20 blur-3xl rounded-full" />
-          <div className="relative bg-card p-6 rounded-2xl border border-border shadow-2xl">
+          <div className="relative bg-card p-6 rounded-2xl border border-border shadow-lg">
             <IconFileCheck className="w-14 h-14 text-sky-500/60" />
           </div>
         </div>
@@ -42,8 +42,8 @@ export function ReporteJustificaciones({ justificaciones, isPending }: ReporteJu
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="rounded-2xl border border-border/40 bg-card/30 backdrop-blur-sm overflow-hidden shadow-sm">
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 animation-duration-">
+      <div className="rounded-2xl border border-border/40 bg-card/80 overflow-hidden shadow-sm">
         <div className="px-6 py-5 border-b border-border/40 flex items-center justify-between bg-muted/20">
           <div className="space-y-1">
             <h3 className="text-base font-bold tracking-tight">Historial de Justificaciones</h3>

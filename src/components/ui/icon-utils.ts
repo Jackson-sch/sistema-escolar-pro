@@ -1,0 +1,63 @@
+import {
+  IconGlobe,
+  IconLanguage,
+  IconAbc,
+  IconBook,
+  IconScript,
+  IconMath,
+  IconCalculator,
+  IconGeometry,
+  IconFlask,
+  IconAtom,
+  IconMicroscope,
+  IconPlant,
+  IconUsers,
+  IconTarget,
+  IconBriefcase,
+  IconBuildingMonument,
+  IconPalette,
+  IconArtboard,
+  IconMusic,
+  IconCamera,
+  IconActivity,
+  IconBallBasketball,
+  IconDeviceLaptop,
+  IconTools,
+  IconChartBar,
+  IconVocabulary,
+} from "@tabler/icons-react";
+
+export const AVAILABLE_ICONS = [
+  { name: "IconGlobe", icon: IconGlobe, label: "Mundo / Geografía / Comunicación" },
+  { name: "IconLanguage", icon: IconLanguage, label: "Idiomas / Inglés" },
+  { name: "IconAbc", icon: IconAbc, label: "Lenguaje / Abecedario" },
+  { name: "IconVocabulary", icon: IconVocabulary, label: "Vocabulario / Letras" },
+  { name: "IconBook", icon: IconBook, label: "Libro / Lectura" },
+  { name: "IconScript", icon: IconScript, label: "Escritura / Documentos" },
+  { name: "IconMath", icon: IconMath, label: "Matemáticas / Aritmética" },
+  { name: "IconCalculator", icon: IconCalculator, label: "Cálculo / Números" },
+  { name: "IconGeometry", icon: IconGeometry, label: "Geometría / Formas" },
+  { name: "IconFlask", icon: IconFlask, label: "Química / Experimentos" },
+  { name: "IconAtom", icon: IconAtom, label: "Física / Átomo" },
+  { name: "IconMicroscope", icon: IconMicroscope, label: "Biología / Microscopio" },
+  { name: "IconPlant", icon: IconPlant, label: "Naturaleza / Botánica" },
+  { name: "IconUsers", icon: IconUsers, label: "Personal Social / Ciudadanía" },
+  { name: "IconTarget", icon: IconTarget, label: "Objetivos / Estrategia" },
+  { name: "IconBriefcase", icon: IconBriefcase, label: "Negocios / Emprendimiento" },
+  { name: "IconBuildingMonument", icon: IconBuildingMonument, label: "Historia / Sociales" },
+  { name: "IconPalette", icon: IconPalette, label: "Arte / Pintura" },
+  { name: "IconArtboard", icon: IconArtboard, label: "Diseño / Creatividad" },
+  { name: "IconMusic", icon: IconMusic, label: "Música / Notas" },
+  { name: "IconCamera", icon: IconCamera, label: "Fotografía / Visuales" },
+  { name: "IconActivity", icon: IconActivity, label: "Salud / Educación Física" },
+  { name: "IconBallBasketball", icon: IconBallBasketball, label: "Deportes / Juegos" },
+  { name: "IconDeviceLaptop", icon: IconDeviceLaptop, label: "Computación / Informática" },
+  { name: "IconTools", icon: IconTools, label: "Educación para el Trabajo" },
+  { name: "IconChartBar", icon: IconChartBar, label: "Estadística / Finanzas" },
+];
+
+export function getIconComponent(iconName: string | null | undefined) {
+  if (!iconName) return IconTarget;
+  const found = AVAILABLE_ICONS.find(i => i.name === iconName);
+  return found ? found.icon : IconTarget;
+}

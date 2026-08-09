@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -59,11 +61,11 @@ function FavoriteButton({
       aria-label={isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
       className={cn(
         "absolute top-4 right-4 z-10 h-9 w-9 rounded-2xl flex items-center justify-center",
-        "shadow-lg transition-all duration-200 active:scale-90",
+        "shadow-lg transition-transform duration-200 active:scale-90",
         "opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0",
         isFavorite
           ? "bg-red-500 text-white shadow-red-500/30"
-          : "bg-white/90 dark:bg-slate-900/90 text-slate-400 hover:text-red-400 backdrop-blur-sm",
+          : "bg-white/90 dark:bg-slate-900/90 text-slate-400 hover:text-red-400",
       )}
     >
       <Heart
@@ -95,7 +97,7 @@ function SizeButton({
       aria-pressed={isSelected}
       className={cn(
         "relative h-10 min-w-[40px] px-2 flex items-center justify-center rounded-xl text-xs font-black",
-        "transition-all duration-150 border",
+        "transition-[color,background-color,border-color,box-shadow,transform] duration-150 border",
         isSelected
           ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent shadow-md scale-105"
           : outOfStock
@@ -126,7 +128,8 @@ function QuantityControl({
       <button
         onClick={() => onChange(Math.max(1, value - 1))}
         disabled={value <= 1}
-        className="h-7 w-7 rounded-lg flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-white/10 disabled:opacity-30 transition-all active:scale-90"
+        aria-label="Disminuir cantidad"
+        className="h-7 w-7 rounded-lg flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-white/10 disabled:opacity-30 transition-[background-color,opacity,transform] active:scale-90"
       >
         <Minus className="h-3 w-3" />
       </button>
@@ -136,7 +139,8 @@ function QuantityControl({
       <button
         onClick={() => onChange(Math.min(max, value + 1))}
         disabled={value >= max}
-        className="h-7 w-7 rounded-lg flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-white/10 disabled:opacity-30 transition-all active:scale-90"
+        aria-label="Aumentar cantidad"
+        className="h-7 w-7 rounded-lg flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-white/10 disabled:opacity-30 transition-[background-color,opacity,transform] active:scale-90"
       >
         <Plus className="h-3 w-3" />
       </button>
@@ -170,11 +174,13 @@ export default function PortalUniformCard({
     sedeVariantes.length > 0 ? sedeVariantes : uniform.variantes;
   const isOutsideSede = sedeVariantes.length === 0;
 
-  // Reset selection when sede changes
-  useEffect(() => {
+  // Reset selection when sede changes (ajuste durante render)
+  const [prevSedeId, setPrevSedeId] = useState(sedeId);
+  if (prevSedeId !== sedeId) {
+    setPrevSedeId(sedeId);
     setSelectedVarianteId(null);
     setCantidad(1);
-  }, [sedeId]);
+  }
 
   // Current selected variant — auto-select first with stock
   const currentVariante = useMemo(() => {
@@ -215,14 +221,17 @@ export default function PortalUniformCard({
   }, [isLiking, isFavorite, currentUserId, uniform.id]);
 
   return (
-    <div className="group flex flex-col h-full rounded-[2rem] overflow-hidden bg-white dark:bg-slate-900/60 ring-1 ring-slate-100 dark:ring-white/6 shadow-lg shadow-slate-100 dark:shadow-none hover:shadow-2xl hover:shadow-slate-200/60 dark:hover:shadow-black/30 hover:-translate-y-1.5 transition-all duration-500">
+    <div className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border/50 bg-card/80 shadow-sm transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-md">
       {/* ── Image Region ─────────────────────────────────── */}
       <div className="relative aspect-[4/5] bg-slate-100 dark:bg-slate-800 overflow-hidden">
         {uniform.imagen ? (
-          <img
+          <Image
             src={uniform.imagen}
             alt={uniform.nombre}
-            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.07]"
+            fill
+            sizes="(max-width: 640px) 50vw, 25vw"
+            unoptimized
+            className="object-cover transition-transform duration-700 group-hover:scale-[1.07]"
           />
         ) : (
           <div className="h-full w-full flex items-center justify-center">
@@ -234,7 +243,7 @@ export default function PortalUniformCard({
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
         {/* Category label */}
-        <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-white/40 dark:border-white/10">
+        <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-white/80 dark:bg-slate-900/80 border border-white/40 dark:border-white/10">
           <span className="text-[10px] font-black text-slate-700 dark:text-slate-300 uppercase tracking-wider">
             {uniform.categoria?.nombre ?? "General"}
           </span>
@@ -249,7 +258,7 @@ export default function PortalUniformCard({
 
         {/* Outside-sede warning */}
         {isOutsideSede && (
-          <div className="absolute bottom-4 inset-x-4 flex items-center gap-2 bg-amber-500/90 backdrop-blur-sm text-white text-[10px] font-bold px-3 py-2 rounded-xl">
+          <div className="absolute bottom-4 inset-x-4 flex items-center gap-2 bg-amber-500/90 text-white text-[10px] font-bold px-3 py-2 rounded-xl">
             <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
             No disponible en tu sede actual
           </div>
@@ -257,8 +266,8 @@ export default function PortalUniformCard({
 
         {/* Quick sizes peek — slides up on hover */}
         {!isOutsideSede && (
-          <div className="absolute inset-x-4 bottom-4 translate-y-3 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-400">
-            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-xl px-3 py-2.5 border border-white/40 dark:border-white/10">
+          <div className="absolute inset-x-4 bottom-4 translate-y-3 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-[opacity,transform] duration-400">
+            <div className="bg-white/80 dark:bg-slate-900/80 rounded-xl px-3 py-2.5 border border-white/40 dark:border-white/10">
               <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">
                 Tallas
               </p>
@@ -359,7 +368,7 @@ export default function PortalUniformCard({
               "dark:bg-white dark:hover:bg-slate-100 dark:text-slate-900",
               "disabled:opacity-30 disabled:cursor-not-allowed",
               "shadow-md shadow-slate-900/10 dark:shadow-white/5",
-              "group/btn transition-all duration-150 active:scale-[0.98]",
+              "group/btn transition-transform duration-150 active:scale-[0.98]",
             )}
           >
             <ShoppingCart className="h-4 w-4 mr-2 group-hover/btn:rotate-6 transition-transform duration-150" />

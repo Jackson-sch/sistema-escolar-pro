@@ -7,9 +7,17 @@ import {
   IconLoader2,
   IconCalendarEvent,
 } from "@tabler/icons-react";
+import dynamic from "next/dynamic";
 import { toast } from "sonner";
-import { PDFDownloadLink } from "@react-pdf/renderer";
-import { BoletaNotasPDF } from "@/components/gestion/documentos/boleta-notas-pdf";
+
+const PDFDownloadLink = dynamic(
+  () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
+  { ssr: false }
+);
+const BoletaNotasPDF = dynamic<any>(
+  () => import("@/components/gestion/documentos/boleta-notas-pdf").then((mod) => mod.BoletaNotasPDF),
+  { ssr: false }
+);
 import { getQualitativeReportDataAction } from "@/actions/reports";
 import { getPeriodosByAnioAction } from "@/actions/academic-structure";
 import { registerDocumentAction } from "@/actions/documents";
@@ -50,15 +58,21 @@ export function ReportActions({
 
   // Cargar periodos al abrir
   useEffect(() => {
+    let ignore = false;
     if (isOpen) {
       const loadPeriodos = async () => {
+        if (ignore) return;
         const res = await getPeriodosByAnioAction(anioAcademico);
+        if (ignore) return;
         if (res.data) {
           setPeriodos(res.data);
         }
       };
       loadPeriodos();
     }
+    return () => {
+      ignore = true;
+    };
   }, [isOpen, anioAcademico]);
 
   const handlePrepareReport = async () => {
@@ -129,9 +143,9 @@ export function ReportActions({
 
         <div className="space-y-6 py-4">
           <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+            <span className="text-xs font-black uppercase tracking-widest text-muted-foreground">
               Periodo Académico
-            </label>
+            </span>
             <Select value={selectedPeriodo} onValueChange={setSelectedPeriodo}>
               <SelectTrigger className="rounded-full h-11 w-full">
                 <SelectValue placeholder="Seleccionar periodo..." />

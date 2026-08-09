@@ -47,13 +47,31 @@ export function DisciplineTab({ studentId }: DisciplineTabProps) {
 
   const loadHistory = async () => {
     setLoading(true);
-    const res = await getStudentPsychHistoryAction({ studentId });
-    if (res.success) setHistory(res.success);
-    setLoading(false);
+    try {
+      const res = await getStudentPsychHistoryAction({ studentId });
+      if (res.success) setHistory(res.success);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    loadHistory();
+    let ignore = false;
+    setLoading(true);
+    getStudentPsychHistoryAction({ studentId })
+      .then((res) => {
+        if (ignore) return;
+        if (res.success) setHistory(res.success);
+      })
+      .catch(() => {
+        /* sin historial */
+      })
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+    return () => {
+      ignore = true;
+    };
   }, [studentId]);
 
   const onDelete = async () => {
@@ -108,13 +126,13 @@ export function DisciplineTab({ studentId }: DisciplineTabProps) {
             >
               {/* Timeline Indicator */}
               <div className="relative flex items-center justify-center shrink-0 w-10">
-                <div className="size-10 rounded-xl bg-background border border-border/40 flex items-center justify-center text-muted-foreground group-hover:border-emerald-500/40 group-hover:bg-emerald-500/5 transition-all shadow-xl shadow-black/5">
+                <div className="size-10 rounded-xl bg-background border border-border/40 flex items-center justify-center text-muted-foreground group-hover:border-emerald-500/40 group-hover:bg-emerald-500/5 transition-[background-color,border-color] shadow-xl shadow-black/5">
                   <IconAlertCircle className="size-5" />
                 </div>
               </div>
 
               {/* Card */}
-              <div className="flex-1 bg-background/40 backdrop-blur-sm border border-border/40 rounded-2xl p-5 hover:border-emerald-500/20 transition-all group-hover:shadow-2xl group-hover:shadow-emerald-500/5">
+              <div className="flex-1 bg-card/80 border border-border/40 rounded-2xl p-5 hover:border-emerald-500/20 transition-[border-color,box-shadow] group-hover:shadow-lg group-hover:shadow-emerald-500/5">
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center gap-3">
                     <Badge
@@ -165,7 +183,7 @@ export function DisciplineTab({ studentId }: DisciplineTabProps) {
                   <h4 className="font-black text-sm uppercase tracking-tight text-foreground/90">
                     {item.motivo}
                   </h4>
-                  <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3 group-hover:line-clamp-none transition-all duration-500">
+                  <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3 group-hover:line-clamp-none transition-none">
                     {item.descripcion}
                   </p>
 
@@ -175,7 +193,7 @@ export function DisciplineTab({ studentId }: DisciplineTabProps) {
                         <IconStethoscope className="size-3" /> Recomendaciones
                       </p>
                       <p className="text-[11px] text-emerald-500/90 font-medium leading-normal italic">
-                        "{item.recomendaciones}"
+                        &quot;{item.recomendaciones}&quot;
                       </p>
                     </div>
                   )}

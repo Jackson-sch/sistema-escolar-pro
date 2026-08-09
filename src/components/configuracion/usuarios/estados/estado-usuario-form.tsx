@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { upsertUserStateAction } from "@/actions/user-states";
 import { IconLoader2 } from "@tabler/icons-react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useFormModal } from "@/components/modals/form-modal-context";
 
 const formSchema = z.object({
@@ -77,10 +77,16 @@ export function EstadoUsuarioForm({
     }
   }
 
+  const onSubmitRef = useRef(onSubmit);
+
   useEffect(() => {
-    setOnSubmit(() => form.handleSubmit(onSubmit)());
+    onSubmitRef.current = onSubmit;
+  });
+
+  useEffect(() => {
+    setOnSubmit(() => form.handleSubmit(onSubmitRef.current)());
     return () => setOnSubmit(undefined);
-  }, [form, onSubmit, setOnSubmit]);
+  }, [form, setOnSubmit]);
 
   const { isDirty } = form.formState;
 
@@ -217,7 +223,7 @@ export function EstadoUsuarioForm({
                 <div className="space-y-1 leading-none">
                   <FormLabel>Es Activo</FormLabel>
                   <FormDescription>
-                    El estado se considera operativamente "activo".
+                    El estado se considera operativamente &ldquo;activo&rdquo;.
                   </FormDescription>
                 </div>
               </FormItem>

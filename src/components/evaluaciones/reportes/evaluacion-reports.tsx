@@ -1,7 +1,17 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { ChartConfig } from "@/components/ui/chart";
-import { EvaluacionStats, ActividadCursoChart, TiposEvaluacionChart } from "./";
+import { EvaluacionStats } from "./evaluacion-stats";
+
+const ActividadCursoChart = dynamic(
+  () => import("./actividad-curso-chart").then((mod) => mod.ActividadCursoChart),
+  { ssr: false }
+);
+const TiposEvaluacionChart = dynamic(
+  () => import("./tipos-evaluacion-chart").then((mod) => mod.TiposEvaluacionChart),
+  { ssr: false }
+);
 
 interface EvaluacionReportsProps {
   evaluaciones: any[];
@@ -67,7 +77,7 @@ export function EvaluacionReports({ evaluaciones }: EvaluacionReportsProps) {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in animation-duration-">
       {/* Stats Cards */}
       <EvaluacionStats
         totalEvaluaciones={totalEvaluaciones}

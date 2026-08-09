@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useQueryState, parseAsString, parseAsInteger } from "nuqs";
-import { ColumnDef } from "@tanstack/react-table";
+import { ColumnDef, type Table } from "@tanstack/react-table";
 import { DataTable } from "@/components/ui/data-table";
 import {
   Select,
@@ -11,28 +11,45 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { IconFilter, IconSchool } from "@tabler/icons-react";
+import { Badge } from "@/components/ui/badge";
+import {
+  IconFilter,
+  IconSchool,
+  IconX,
+  IconFilterSearch,
+} from "@tabler/icons-react";
+import { cn } from "@/lib/utils";
+
+interface StudentTableMeta {
+  instituciones?: unknown[];
+  estados?: Array<{ id: string; nombre: string }>;
+  nivelesAcademicos?: Array<{ nivel: { nombre: string } }>;
+  institucion?: unknown;
+}
 
 interface StudentTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   totalCount?: number;
-  meta?: any;
+  meta?: StudentTableMeta;
 }
 
-interface StudentFiltersProps {
-  table: any;
+interface StudentFiltersProps<TData> {
+  table: Table<TData>;
   estadoFilter: string;
   nivelFilter: string;
-  meta: any;
+  meta: StudentTableMeta & {
+    setEstadoFilter: (value: string) => void;
+    setNivelFilter: (value: string) => void;
+  };
 }
 
-function StudentFilters({
+function StudentFilters<TData>({
   table,
   estadoFilter,
   nivelFilter,
   meta,
-}: StudentFiltersProps) {
+}: StudentFiltersProps<TData>) {
   useEffect(() => {
     table
       .getColumn("estado")
@@ -46,20 +63,32 @@ function StudentFilters({
   }, [nivelFilter, table]);
 
   return (
-    <div className="flex items-center gap-2.5 flex-wrap w-full sm:w-auto">
-      {/* Estado Select */}
+    <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
       <Select value={estadoFilter} onValueChange={meta.setEstadoFilter}>
-        <SelectTrigger className="w-full sm:w-auto min-w-[160px] h-10 bg-background border-slate-200 dark:border-zinc-800 rounded-full text-xs font-bold hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors pl-3.5 gap-2">
+        <SelectTrigger
+          className={cn(
+            "w-full sm:w-auto min-w-[160px] h-9 bg-background/40 border-border/40 rounded-full text-xs font-bold hover:bg-background/60 transition-colors pl-3.5 gap-2",
+            estadoFilter !== "ALL" &&
+              "border-primary/30 bg-primary/5 text-primary",
+          )}
+        >
           <div className="flex items-center gap-2">
-            <IconFilter className="size-3.5 text-muted-foreground/60 shrink-0" />
+            <IconFilter
+              className={cn(
+                "size-3.5 shrink-0 transition-colors",
+                estadoFilter !== "ALL"
+                  ? "text-primary/60"
+                  : "text-muted-foreground/60",
+              )}
+            />
             <SelectValue placeholder="Estado" />
           </div>
         </SelectTrigger>
-        <SelectContent className="border-slate-200 dark:border-zinc-800 rounded-2xl bg-background/95 backdrop-blur-xl p-1 shadow-2xl">
+        <SelectContent className="border-border/40 rounded-2xl bg-background/95 p-1 shadow-lg">
           <SelectItem value="ALL" className="font-bold text-xs">
             Todos los Estados
           </SelectItem>
-          {meta?.estados?.map((e: any) => (
+          {meta?.estados?.map((e) => (
             <SelectItem
               key={e.id}
               value={e.nombre}
@@ -71,21 +100,33 @@ function StudentFilters({
         </SelectContent>
       </Select>
 
-      {/* Nivel Select */}
       <Select value={nivelFilter} onValueChange={meta.setNivelFilter}>
-        <SelectTrigger className="w-full sm:w-auto min-w-[200px] h-10 bg-background border-slate-200 dark:border-zinc-800 rounded-full text-xs font-bold hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors pl-3.5 gap-2">
+        <SelectTrigger
+          className={cn(
+            "w-full sm:w-auto min-w-[200px] h-9 bg-background/40 border-border/40 rounded-full text-xs font-bold hover:bg-background/60 transition-colors pl-3.5 gap-2",
+            nivelFilter !== "ALL" &&
+              "border-primary/30 bg-primary/5 text-primary",
+          )}
+        >
           <div className="flex items-center gap-2">
-            <IconSchool className="size-3.5 text-muted-foreground/60 shrink-0" />
+            <IconSchool
+              className={cn(
+                "size-3.5 shrink-0 transition-colors",
+                nivelFilter !== "ALL"
+                  ? "text-primary/60"
+                  : "text-muted-foreground/60",
+              )}
+            />
             <SelectValue placeholder="Nivel" />
           </div>
         </SelectTrigger>
-        <SelectContent className="border-slate-200 dark:border-zinc-800 rounded-2xl bg-background/95 backdrop-blur-xl p-1 shadow-2xl">
+        <SelectContent className="border-border/40 rounded-2xl bg-background/95 p-1 shadow-lg">
           <SelectItem value="ALL" className="font-bold text-xs">
             Todos los Niveles
           </SelectItem>
           {Array.from(
-            new Set(meta?.nivelesAcademicos?.map((n: any) => n.nivel.nombre)),
-          ).map((nombre: any) => (
+            new Set(meta?.nivelesAcademicos?.map((n) => n.nivel.nombre)),
+          ).map((nombre) => (
             <SelectItem
               key={nombre}
               value={nombre}
@@ -105,7 +146,6 @@ export function StudentTable<TData, TValue>({
   data,
   meta,
 }: StudentTableProps<TData, TValue>) {
-  // Estados con nuqs (persistidos en URL)
   const [searchQuery, setSearchQuery] = useQueryState(
     "q",
     parseAsString.withDefault(""),
@@ -119,7 +159,6 @@ export function StudentTable<TData, TValue>({
     parseAsString.withDefault("ALL"),
   );
 
-  // Pagination states with nuqs
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
   const [limit, setLimit] = useQueryState(
     "limit",
@@ -136,34 +175,53 @@ export function StudentTable<TData, TValue>({
     setPage(1);
   };
 
+  const activeFilterCount = [
+    searchQuery !== "",
+    estadoFilter !== "ALL",
+    nivelFilter !== "ALL",
+  ].filter(Boolean).length;
+
   return (
     <DataTable
       columns={columns}
       data={data}
       searchKey="estudiante"
-      searchPlaceholder="Buscar por DNI o nombre..."
+      searchPlaceholder="Buscar por DNI, nombre o código..."
       searchValue={searchQuery}
       onSearchChange={(value) => {
         setSearchQuery(value);
-        setPage(1); // Reset to first page on search
+        setPage(1);
       }}
       onClearFilters={clearFilters}
       hasActiveFilters={hasActiveFilters}
       meta={meta}
-      // Controlled pagination
-      pageIndex={page - 1} // 0-indexed for table
+      pageIndex={page - 1}
       pageSize={limit}
-      onPageIndexChange={(index) => setPage(index + 1)} // 1-indexed for URL
+      onPageIndexChange={(index) => setPage(index + 1)}
       onPageSizeChange={setLimit}
       showColumnVisibility={false}
+      emptyStateTitle="No se encontraron estudiantes"
+      emptyStateDescription="No pudimos encontrar estudiantes que coincidan con tu búsqueda o filtros aplicados. Intenta con otros criterios."
     >
-      {(table: any) => (
-        <StudentFilters
-          table={table}
-          estadoFilter={estadoFilter}
-          nivelFilter={nivelFilter}
-          meta={{ ...meta, setEstadoFilter, setNivelFilter }}
-        />
+      {(table) => (
+        <div className="flex items-center gap-3 w-full">
+          <StudentFilters
+            table={table}
+            estadoFilter={estadoFilter}
+            nivelFilter={nivelFilter}
+            meta={{ ...meta, setEstadoFilter, setNivelFilter }}
+          />
+
+          {activeFilterCount > 0 && (
+            <Badge
+              variant="secondary"
+              className="h-6 px-2 rounded-full text-[10px] font-bold gap-1 shrink-0 bg-primary/5 text-primary border border-primary/15"
+            >
+              <IconFilterSearch className="size-3" />
+              {activeFilterCount}
+            </Badge>
+          )}
+        </div>
       )}
     </DataTable>
   );

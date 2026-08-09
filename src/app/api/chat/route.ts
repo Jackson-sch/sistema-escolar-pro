@@ -1,8 +1,26 @@
 import { streamText, convertToModelMessages } from "ai";
 import { getGeminiModel } from "@/lib/gemini";
+import { auth } from "@/auth";
 
 export async function POST(req: Request) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return new Response(JSON.stringify({ error: "No autorizado" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const rawRole = (session.user.role || "").toString().toLowerCase();
+    const allowedRoles = ["super_admin", "admin", "administrador", "director", "coordinador", "profesor", "docente"];
+    if (!allowedRoles.includes(rawRole)) {
+      return new Response(JSON.stringify({ error: "Permisos insuficientes para usar el chat AI" }), {
+        status: 403,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
     const { messages, context } = await req.json();
 
     if (!messages || !Array.isArray(messages)) {

@@ -21,7 +21,7 @@ export function AddAnnouncementButton({
     <>
       <Button
         onClick={() => setOpen(true)}
-        className="rounded-full transition-all active:scale-95"
+        className="rounded-full transition-transform active:scale-95"
       >
         <IconSpeakerphone className="mr-2 h-4 w-4" /> Crear Anuncio
       </Button>

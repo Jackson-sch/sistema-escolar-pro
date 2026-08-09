@@ -1,11 +1,11 @@
 "use client";
 
-import { useTransition, useEffect, useState } from "react";
+import { useTransition, useEffect, useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { IconCalendar, IconLoader2 } from "@tabler/icons-react";
+import { IconCalendar, IconLoader2, IconDeviceFloppy, IconBookmark } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -36,6 +36,7 @@ import {
   getCapacidadesByCursoAction,
 } from "@/actions/evaluations";
 import { useFormModal } from "@/components/modals/form-modal-context";
+import { FormKeyboardHelpBar } from "@/components/common/form-keyboard-help-bar";
 
 interface EvaluacionFormProps {
   initialData?: any;
@@ -77,17 +78,25 @@ export function EvaluacionForm({
   const selectedCursoId = form.watch("cursoId");
 
   useEffect(() => {
+    let ignore = false;
     if (selectedCursoId) {
-      loadCapacidades(selectedCursoId);
+      setLoadingCapacidades(true);
+      getCapacidadesByCursoAction({ cursoId: selectedCursoId })
+        .then((res) => {
+          if (ignore) return;
+          if (res.success) setCapacidades(res.success);
+        })
+        .catch(() => {
+          /* sin capacidades */
+        })
+        .finally(() => {
+          if (!ignore) setLoadingCapacidades(false);
+        });
     }
+    return () => {
+      ignore = true;
+    };
   }, [selectedCursoId]);
-
-  const loadCapacidades = async (cursoId: string) => {
-    setLoadingCapacidades(true);
-    const res = await getCapacidadesByCursoAction({ cursoId });
-    if (res.success) setCapacidades(res.success);
-    setLoadingCapacidades(false);
-  };
 
   const onSubmit = (values: any) => {
     startTransition(async () => {
@@ -101,10 +110,16 @@ export function EvaluacionForm({
     });
   };
 
+  const onSubmitRef = useRef(onSubmit);
+
   useEffect(() => {
-    setOnSubmit(() => form.handleSubmit(onSubmit)());
+    onSubmitRef.current = onSubmit;
+  });
+
+  useEffect(() => {
+    setOnSubmit(() => form.handleSubmit(onSubmitRef.current)());
     return () => setOnSubmit(undefined);
-  }, [form, onSubmit, setOnSubmit]);
+  }, [form, setOnSubmit]);
 
   const { isDirty } = form.formState;
 
@@ -115,34 +130,34 @@ export function EvaluacionForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-3">
-          <FormField
-            control={form.control}
-            name="nombre"
-            render={({ field }) => (
-              <FormItem className="sm:col-span-2 space-y-1.5">
-                <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">
-                  Nombre de la Evaluación
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Ej: Examen Parcial - Unidad 2"
-                    {...field}
-                    className="rounded-full px-4 placeholder:text-sm"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-1 py-1">
+        <FormField
+          control={form.control}
+          name="nombre"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Nombre de la Evaluación
+              </FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Ej. Examen Parcial - Unidad 2"
+                  {...field}
+                  className="bg-background border-border/40 rounded-xl text-xs h-9"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <FormField
             control={form.control}
             name="cursoId"
             render={({ field }) => (
-              <FormItem className="col-span-1 space-y-1.5">
-                <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">
+              <FormItem>
+                <FormLabel className="text-xs font-medium text-foreground/80">
                   Curso
                 </FormLabel>
                 <Select
@@ -150,15 +165,14 @@ export function EvaluacionForm({
                   defaultValue={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger className="w-full h-11 bg-muted/5 border-border/40 rounded-full px-5">
+                    <SelectTrigger className="w-full bg-background border-border/40 rounded-xl text-xs h-9 font-medium">
                       <SelectValue placeholder="Seleccionar curso" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
+                  <SelectContent className="rounded-xl border-border/40">
                     {cursos.map((curso: any) => (
-                      <SelectItem key={curso.id} value={curso.id}>
-                        {curso.nombre} -{" "}
-                        {curso.nivelAcademico?.grado?.nombre || ""}
+                      <SelectItem key={curso.id} value={curso.id} className="text-xs font-medium">
+                        {curso.nombre} - {curso.nivelAcademico?.grado?.nombre || ""}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -172,11 +186,11 @@ export function EvaluacionForm({
             control={form.control}
             name="capacidadId"
             render={({ field }) => (
-              <FormItem className="col-span-1 space-y-1.5">
-                <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider ml-1 flex items-center gap-2">
-                  Capacidad Vinculada{" "}
+              <FormItem>
+                <FormLabel className="text-xs font-medium text-foreground/80 flex items-center gap-1.5">
+                  Capacidad Vinculada
                   {loadingCapacidades && (
-                    <IconLoader2 className="animate-spin size-3" />
+                    <IconLoader2 className="animate-spin size-3 text-indigo-500" />
                   )}
                 </FormLabel>
                 <Select
@@ -185,33 +199,33 @@ export function EvaluacionForm({
                   value={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger className="w-full h-11 bg-muted/5 border-border/40 rounded-full px-5">
+                    <SelectTrigger className="w-full bg-background border-border/40 rounded-xl text-xs h-9 font-medium">
                       <SelectValue
                         placeholder={
                           loadingCapacidades
                             ? "Cargando..."
-                            : "Sleccionar capacidad"
+                            : "Seleccionar capacidad"
                         }
                       />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
+                  <SelectContent className="rounded-xl border-border/40">
                     {capacidades.length > 0 ? (
                       capacidades.map((cap) => (
                         <SelectItem
                           key={cap.id}
                           value={cap.id}
-                          className="text-xs"
+                          className="text-xs font-medium"
                         >
-                          <span className="font-bold text-violet-500 mr-2 truncate">
+                          <span className="font-bold text-indigo-600 dark:text-indigo-400 mr-1">
                             [{cap.competenciaNombre}]
                           </span>
                           {cap.nombre}
                         </SelectItem>
                       ))
                     ) : (
-                      <SelectItem value="none" disabled>
-                        No hay capacidades para este curso
+                      <SelectItem value="none" disabled className="text-xs">
+                        Sin capacidades para este curso
                       </SelectItem>
                     )}
                   </SelectContent>
@@ -225,8 +239,8 @@ export function EvaluacionForm({
             control={form.control}
             name="tipoEvaluacionId"
             render={({ field }) => (
-              <FormItem className="col-span-1 space-y-1.5">
-                <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">
+              <FormItem>
+                <FormLabel className="text-xs font-medium text-foreground/80">
                   Tipo de Evaluación
                 </FormLabel>
                 <Select
@@ -234,13 +248,13 @@ export function EvaluacionForm({
                   defaultValue={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger className="w-full h-11 bg-muted/5 border-border/40 rounded-full px-5">
+                    <SelectTrigger className="w-full bg-background border-border/40 rounded-xl text-xs h-9 font-medium">
                       <SelectValue placeholder="Seleccionar tipo" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
+                  <SelectContent className="rounded-xl border-border/40">
                     {tipos.map((tipo) => (
-                      <SelectItem key={tipo.id} value={tipo.id}>
+                      <SelectItem key={tipo.id} value={tipo.id} className="text-xs font-medium">
                         {tipo.nombre}
                       </SelectItem>
                     ))}
@@ -255,8 +269,8 @@ export function EvaluacionForm({
             control={form.control}
             name="periodoId"
             render={({ field }) => (
-              <FormItem className="col-span-1 space-y-1.5">
-                <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">
+              <FormItem>
+                <FormLabel className="text-xs font-medium text-foreground/80">
                   Periodo Académico
                 </FormLabel>
                 <Select
@@ -264,13 +278,13 @@ export function EvaluacionForm({
                   defaultValue={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger className="w-full h-11 bg-muted/5 border-border/40 rounded-full px-5">
+                    <SelectTrigger className="w-full bg-background border-border/40 rounded-xl text-xs h-9 font-medium">
                       <SelectValue placeholder="Seleccionar periodo" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
+                  <SelectContent className="rounded-xl border-border/40">
                     {periodos.map((periodo: any) => (
-                      <SelectItem key={periodo.id} value={periodo.id}>
+                      <SelectItem key={periodo.id} value={periodo.id} className="text-xs font-medium">
                         {periodo.nombre}
                       </SelectItem>
                     ))}
@@ -285,8 +299,8 @@ export function EvaluacionForm({
             control={form.control}
             name="fecha"
             render={({ field }) => (
-              <FormItem className="flex flex-col col-span-1 space-y-1.5">
-                <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider ml-1 mt-1.5">
+              <FormItem className="flex flex-col">
+                <FormLabel className="text-xs font-medium text-foreground/80">
                   Fecha de Evaluación
                 </FormLabel>
                 <Popover>
@@ -295,25 +309,26 @@ export function EvaluacionForm({
                       <Button
                         variant="outline"
                         className={cn(
-                          "w-full pl-3 text-left font-normal bg-muted/5 border-border/40 hover:bg-muted/10 rounded-full",
+                          "w-full pl-3 text-left font-medium bg-background border-border/40 rounded-xl text-xs h-9 justify-between",
                           !field.value && "text-muted-foreground",
                         )}
                       >
-                        <IconCalendar className="mr-2 h-4 w-4 opacity-70" />
                         {field.value ? (
                           format(field.value, "PPP", { locale: es })
                         ) : (
                           <span>Seleccionar fecha</span>
                         )}
+                        <IconCalendar className="size-4 opacity-50 ml-1" />
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent className="w-auto p-0 rounded-2xl border-border/40" align="start">
                     <Calendar
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
                       initialFocus
+                      locale={es}
                     />
                   </PopoverContent>
                 </Popover>
@@ -322,13 +337,13 @@ export function EvaluacionForm({
             )}
           />
 
-          <div className="grid grid-cols-2 gap-3 col-span-1 sm:col-span-1 pt-1.5">
+          <div className="grid grid-cols-2 gap-2">
             <FormField
               control={form.control}
               name="peso"
               render={({ field }) => (
-                <FormItem className="space-y-1.5">
-                  <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">
+                <FormItem>
+                  <FormLabel className="text-xs font-medium text-foreground/80">
                     Peso (%)
                   </FormLabel>
                   <FormControl>
@@ -338,7 +353,7 @@ export function EvaluacionForm({
                       max={100}
                       {...field}
                       onChange={(e) => field.onChange(parseInt(e.target.value))}
-                      className="bg-muted/5 border-border/40 rounded-full px-5 text-center sm:text-left"
+                      className="bg-background border-border/40 rounded-xl text-xs h-9 font-mono"
                     />
                   </FormControl>
                   <FormMessage />
@@ -350,9 +365,9 @@ export function EvaluacionForm({
               control={form.control}
               name="notaMinima"
               render={({ field }) => (
-                <FormItem className="space-y-1.5">
-                  <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">
-                    Mínima
+                <FormItem>
+                  <FormLabel className="text-xs font-medium text-foreground/80">
+                    Nota Mínima
                   </FormLabel>
                   <FormControl>
                     <Input
@@ -364,7 +379,7 @@ export function EvaluacionForm({
                       onChange={(e) =>
                         field.onChange(parseFloat(e.target.value))
                       }
-                      className="bg-muted/5 border-border/40 rounded-full px-5 text-center sm:text-left"
+                      className="bg-background border-border/40 rounded-xl text-xs h-9 font-mono"
                     />
                   </FormControl>
                   <FormMessage />
@@ -374,27 +389,35 @@ export function EvaluacionForm({
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-white/5 mt-4">
+        {/* Guía de Atajos de Teclado */}
+        <FormKeyboardHelpBar />
+
+        {/* Acciones */}
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-border/30">
           <Button
             type="button"
             variant="outline"
             onClick={onSuccess}
-            className="w-full sm:w-auto rounded-full border-border/40 hover:bg-accent/50 hover:scale-105"
+            className="rounded-xl px-5 h-10 font-semibold text-xs border-border/40"
             disabled={isPending}
           >
             Cancelar
           </Button>
           <Button
             type="submit"
-            className="w-full sm:w-auto shadow-lg shadow-primary/20 rounded-full px-8 hover:scale-105"
             disabled={isPending}
+            className="rounded-xl px-6 h-10 font-semibold text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 gap-2 min-w-[180px]"
           >
             {isPending ? (
-              <IconLoader2 className="animate-spin" />
-            ) : initialData ? (
-              "Guardar Cambios"
+              <>
+                <IconLoader2 className="size-4 animate-spin" />
+                <span>Procesando...</span>
+              </>
             ) : (
-              "Crear Evaluación"
+              <>
+                <IconDeviceFloppy className="size-4" />
+                <span>{initialData ? "Guardar Cambios" : "Crear Evaluación"}</span>
+              </>
             )}
           </Button>
         </div>

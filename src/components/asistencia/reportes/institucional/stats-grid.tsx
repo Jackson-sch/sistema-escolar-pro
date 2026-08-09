@@ -92,7 +92,7 @@ function StatCard({
 
   return (
     <div className={cn(
-      "relative overflow-hidden rounded-3xl border p-6 transition-all duration-300 backdrop-blur-sm",
+      "relative overflow-hidden rounded-2xl border p-6 transition-[background-color,border-color,box-shadow] duration-300",
       colorClasses,
       status === 'warning' && "border-red-500/40 ring-1 ring-red-500/20"
     )}>

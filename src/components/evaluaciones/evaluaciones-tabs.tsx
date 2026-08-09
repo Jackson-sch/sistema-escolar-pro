@@ -40,11 +40,11 @@ export function EvaluacionesTabs({ children }: EvaluacionesTabsProps) {
         className="mb-6 ml-2"
       />
 
-      <TabsContent value="evaluaciones" className="space-y-4">
+      <TabsContent value="evaluaciones" className="space-y-4 px-2">
         {children.evaluaciones}
       </TabsContent>
 
-      <TabsContent value="reportes" className="space-y-4">
+      <TabsContent value="reportes" className="space-y-4 px-2">
         {children.reportes}
       </TabsContent>
     </Tabs>

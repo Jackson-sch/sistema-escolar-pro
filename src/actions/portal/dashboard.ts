@@ -46,6 +46,7 @@ export const getParentDashboardDataAction = createSafeAction(
             currentStudent: null as any,
             stats: {
               attendancePercentage: 0,
+              asistenciaHoy: null as any,
               chartData: [] as any[],
               payments: { overdue: [] as any[], upcoming: [] as any[], totalDeuda: 0 },
               fichas: [] as any[],
@@ -65,8 +66,10 @@ export const getParentDashboardDataAction = createSafeAction(
 
       // 3. Fetch data concurrente para el estudiante actual
       const today = new Date();
+      const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999);
 
-      const [cronograma, notas, fichas, anuncios, asistenciaStats] = await Promise.all([
+      const [cronograma, notas, fichas, anuncios, asistenciaStats, asistenciaHoy] = await Promise.all([
         // Pagos
         prisma.cronogramaPago.findMany({
           where: { estudianteId: currentStudentId, pagado: false },
@@ -129,6 +132,21 @@ export const getParentDashboardDataAction = createSafeAction(
           },
           _count: { _all: true },
         }),
+        // Asistencia de hoy
+        prisma.asistencia.findFirst({
+          where: {
+            estudianteId: currentStudentId,
+            fecha: { gte: startOfDay, lte: endOfDay },
+          },
+          select: {
+            presente: true,
+            tardanza: true,
+            horaLlegada: true,
+            justificada: true,
+            justificacion: true,
+            createdAt: true,
+          },
+        }),
       ]);
 
       const presentCount =
@@ -181,6 +199,7 @@ export const getParentDashboardDataAction = createSafeAction(
           currentStudent: serialize(currentStudent),
           stats: {
             attendancePercentage,
+            asistenciaHoy: serialize(asistenciaHoy),
             chartData,
             payments,
             fichas: serialize(fichas),

@@ -2,9 +2,8 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { IconAlertTriangle, IconCreditCard } from "@tabler/icons-react";
+import { IconCreditCard } from "@tabler/icons-react";
 import { formatCurrency, formatDate } from "@/lib/formats";
-import { ShineBorder } from "@/components/ui/shine-border";
 
 interface FinancialStatusProps {
   payments: {
@@ -22,7 +21,7 @@ export function FinancialStatus({ payments }: FinancialStatusProps) {
   const upcomingAmount = payments.upcoming[0]?.monto || 0;
 
   return (
-    <Card className="overflow-hidden shadow-2xl h-full flex flex-col @container liquid-glass border-white/10 relative">
+    <Card className="@container flex h-full flex-col overflow-hidden rounded-2xl border-border/50 bg-card/80 shadow-sm">
       <CardContent className="p-6 flex flex-col gap-6 h-full">
         <h3 className="font-bold text-sm uppercase tracking-wider">
           Estado Financiero
@@ -30,12 +29,8 @@ export function FinancialStatus({ payments }: FinancialStatusProps) {
 
         <div className="grid grid-cols-1 @xs:grid-cols-2 gap-4">
           {/* Overdue Section */}
-          <div className="relative bg-destructive/5 rounded-2xl p-4 flex flex-col justify-center min-w-0 overflow-hidden">
-            <ShineBorder
-              borderWidth={1}
-              shineColor={["#ff000055", "#ff0000"]}
-            />
-            <div className="relative z-10 flex flex-col items-start w-full">
+          <div className="flex min-w-0 flex-col justify-center rounded-xl border border-destructive/20 bg-destructive/5 p-4">
+            <div className="flex w-full flex-col items-start">
               <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-1">
                 Total Vencido
               </p>
@@ -43,16 +38,11 @@ export function FinancialStatus({ payments }: FinancialStatusProps) {
                 {formatCurrency(overdueAmount)}
               </p>
             </div>
-            <IconAlertTriangle className="absolute -right-2 -bottom-2 size-12 text-red-500/10 -rotate-12" />
           </div>
 
           {/* Upcoming Section */}
-          <div className="relative bg-success/5 rounded-2xl p-4 flex flex-col justify-center min-w-0 overflow-hidden">
-            <ShineBorder
-              borderWidth={1}
-              shineColor={["#064e3b55", "#064e3b"]}
-            />
-            <div className="relative z-10 flex flex-col items-start w-full">
+          <div className="flex min-w-0 flex-col justify-center rounded-xl border border-success/20 bg-success/5 p-4">
+            <div className="flex w-full flex-col items-start">
               <p className="text-[10px] font-bold text-success uppercase tracking-widest mb-1">
                 Próximo a Vencer
               </p>
@@ -94,7 +84,7 @@ export function FinancialStatus({ payments }: FinancialStatusProps) {
             {payments.upcoming.map((p) => (
               <div
                 key={p.id}
-                className="flex items-center justify-between p-3 rounded-xl bg-muted dark:bg-white/5 border border-white/5"
+                className="flex items-center justify-between rounded-xl border border-border/40 bg-muted/30 p-3"
               >
                 <div className="min-w-0">
                   <p className="text-xs font-bold truncate">
@@ -119,9 +109,9 @@ export function FinancialStatus({ payments }: FinancialStatusProps) {
           </div>
         </div>
 
-        <Button className="w-full bg-primary hover:bg-primary/80 text-white font-black text-lg py-7 rounded-full shrink-0">
-          <IconCreditCard className="size-6" />
-          PAGAR AHORA
+        <Button className="h-10 w-full shrink-0 rounded-xl font-semibold">
+          <IconCreditCard className="size-4" />
+          Pagar ahora
         </Button>
       </CardContent>
     </Card>

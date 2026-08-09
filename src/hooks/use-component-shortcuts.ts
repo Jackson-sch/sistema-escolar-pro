@@ -31,25 +31,21 @@ export function useComponentShortcuts({
     if (disabled) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      // Ignorar si el usuario está escribiendo en un input o textarea
       const target = event.target as HTMLElement;
-      if (
+      const isInputFocused =
         target.tagName === "INPUT" ||
         target.tagName === "TEXTAREA" ||
-        target.isContentEditable
-      ) {
-        return;
-      }
+        target.isContentEditable;
 
-      // Shift + N (Nuevo)
-      if (event.shiftKey && event.key.toLowerCase() === "n") {
+      // Shift + N (Nuevo) - solo si no está en un input
+      if (!isInputFocused && event.shiftKey && event.key.toLowerCase() === "n") {
         if (onNewRef.current) {
           event.preventDefault();
           onNewRef.current();
         }
       }
 
-      // Ctrl + K (Buscar / Paleta)
+      // Ctrl + K (Buscar / Paleta) - Funciona SIEMPRE globalmente
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
         if (onSearchRef.current) {
           event.preventDefault();

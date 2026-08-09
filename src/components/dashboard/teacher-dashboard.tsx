@@ -13,6 +13,7 @@ import {
   IconExternalLink,
   IconGraphFilled,
   IconSparkles,
+  type Icon,
 } from "@tabler/icons-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,13 +27,64 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+interface AreaCurricular {
+  id: string;
+  nombre: string;
+}
+
+interface Grado {
+  id: string;
+  nombre: string;
+}
+
+interface NivelAcademico {
+  id: string;
+  grado: Grado;
+  nivel: { id: string; nombre: string };
+  seccion: string;
+  aulaAsignada?: string | null;
+}
+
+interface CursoDocente {
+  id: string;
+  areaCurricular: AreaCurricular;
+  nivelAcademico: NivelAcademico;
+  _count?: { estudiantes: number };
+}
+
+interface EvaluacionDocente {
+  id: string;
+  fecha: string | Date;
+  curso: {
+    areaCurricular: AreaCurricular;
+    nivelAcademico: { grado: Grado; seccion: string };
+  };
+  tipoEvaluacion: { nombre: string };
+}
+
+interface AlertaAsistencia {
+  id: string;
+  fecha: string | Date;
+  estudiante: { name?: string | null; apellidoPaterno?: string | null };
+}
+
+interface HorarioDocente {
+  id: string;
+  horaInicio: string;
+  horaFin: string;
+  curso: {
+    areaCurricular: AreaCurricular;
+    nivelAcademico: { grado: Grado; seccion: string; aulaAsignada?: string | null };
+  };
+}
+
 interface TeacherDashboardProps {
   data: {
-    cursos: any[];
-    upcomingEvaluations: any[];
-    criticalAttendance: any[];
-    evaluationsToGrade: any[];
-    todaySchedule: any[];
+    cursos: CursoDocente[];
+    upcomingEvaluations: EvaluacionDocente[];
+    criticalAttendance: AlertaAsistencia[];
+    evaluationsToGrade: EvaluacionDocente[];
+    todaySchedule: HorarioDocente[];
   };
 }
 
@@ -50,13 +102,20 @@ export function TeacherDashboard({ data }: TeacherDashboardProps) {
     0
   );
 
+  const fechaHoy = new Date().toLocaleDateString("es-PE", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    timeZone: "America/Lima",
+  });
+
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 pb-12">
+    <div className="space-y-8 animate-in fade-in animation-duration- pb-12">
       {/* Welcome Banner - Premium Look */}
-      <div className="relative overflow-hidden rounded-[2rem] bg-linear-to-br from-indigo-600 via-primary to-purple-700 p-8 md:p-10 text-white shadow-2xl shadow-primary/30 border border-white/10">
+      <div className="relative overflow-hidden rounded-2xl bg-linear-to-br from-indigo-600 via-primary to-purple-700 p-8 md:p-10 text-white shadow-lg shadow-primary/30 border border-white/10">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-3">
-            <Badge className="bg-white/20 hover:bg-white/30 border-white/20 text-white backdrop-blur-md px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest flex items-center gap-2 w-fit shadow-sm">
+            <Badge className="bg-white/20 hover:bg-white/30 border-white/20 text-white px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest flex items-center gap-2 w-fit shadow-sm">
               <IconSparkles size={14} />
               Portal Docente Pro
             </Badge>
@@ -68,7 +127,7 @@ export function TeacherDashboard({ data }: TeacherDashboardProps) {
             </p>
           </div>
           <div className="flex gap-4 shrink-0">
-            <Button size="lg" className="rounded-2xl bg-white text-primary hover:bg-white/90 font-black shadow-xl shadow-white/10 transition-all hover:scale-105 hover:-translate-y-1 h-14 px-6 text-base" asChild>
+            <Button size="lg" className="rounded-2xl bg-white text-primary hover:bg-white/90 font-black shadow-xl shadow-white/10 transition-[background-color,transform] hover:scale-105 hover:-translate-y-1 h-14 px-6 text-base" asChild>
               <Link href="/evaluaciones/nueva">
                 <IconCalendarStats className="mr-2 size-6" />
                 Nueva Evaluación
@@ -80,7 +139,7 @@ export function TeacherDashboard({ data }: TeacherDashboardProps) {
         {/* Background Decorative Elements */}
         <div className="absolute top-0 right-0 -translate-y-1/3 translate-x-1/3 size-[500px] rounded-full bg-white/20 blur-[80px] animate-blob" />
         <div className="absolute bottom-0 left-0 translate-y-1/3 -translate-x-1/3 size-[400px] rounded-full bg-purple-400/30 blur-[60px] animate-blob" style={{ animationDelay: "2s" }} />
-        <IconLayoutDashboard className="absolute -bottom-10 -right-10 size-80 text-white/5 md:text-white/10 rotate-12 drop-shadow-2xl mix-blend-overlay" />
+        <IconLayoutDashboard className="absolute -bottom-10 -right-10 size-80 text-white/5 md:text-white/10 rotate-12 drop-shadow-lg mix-blend-overlay" />
       </div>
 
       {/* KPI Cards - Elite Design */}
@@ -129,12 +188,12 @@ export function TeacherDashboard({ data }: TeacherDashboardProps) {
                 Horario de Hoy
               </h3>
               <Badge variant="outline" className="font-mono text-sm px-4 py-1.5 rounded-full border-primary/20 bg-primary/5 text-primary">
-                {new Date().toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" })}
+                {fechaHoy}
               </Badge>
             </div>
             <div className="grid gap-4">
               {todaySchedule.length === 0 ? (
-                <div className="liquid-glass rounded-3xl p-10 text-center border-dashed">
+                <div className="rounded-2xl p-10 text-center border border-dashed border-border/50 bg-card/80 shadow-sm">
                   <div className="size-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-5 text-primary">
                     <IconClock size={40} opacity={0.5} />
                   </div>
@@ -142,7 +201,7 @@ export function TeacherDashboard({ data }: TeacherDashboardProps) {
                   <p className="text-muted-foreground mt-2">No tienes clases programadas para hoy.</p>
                 </div>
               ) : (
-                todaySchedule.map((item: any) => (
+                todaySchedule.map((item) => (
                   <ScheduleItem key={item.id} item={item} />
                 ))
               )}
@@ -150,7 +209,7 @@ export function TeacherDashboard({ data }: TeacherDashboardProps) {
           </section>
 
           {/* Upcoming Evaluations */}
-          <div className="liquid-glass rounded-3xl overflow-hidden flex flex-col border border-border/50">
+          <div className="rounded-2xl overflow-hidden flex flex-col border border-border/50 bg-card/80 shadow-sm">
             <div className="p-6 md:p-8 flex items-center justify-between border-b border-border/50 bg-background/40">
               <div>
                 <h3 className="text-2xl font-black tracking-tight flex items-center gap-3">
@@ -164,7 +223,7 @@ export function TeacherDashboard({ data }: TeacherDashboardProps) {
                 <Link href="/evaluaciones">Gestionar todo</Link>
               </Button>
             </div>
-            <div className="p-0 flex-1 bg-background/20 backdrop-blur-md">
+            <div className="p-0 flex-1 bg-background/20">
               {upcomingEvaluations.length === 0 ? (
                 <div className="p-16 text-center">
                   <div className="size-24 rounded-full bg-muted flex items-center justify-center mx-auto mb-6 text-muted-foreground ring-8 ring-background/50">
@@ -175,7 +234,7 @@ export function TeacherDashboard({ data }: TeacherDashboardProps) {
                 </div>
               ) : (
                 <div className="divide-y divide-border/30">
-                  {upcomingEvaluations.map((evaluacion: any) => (
+                  {upcomingEvaluations.map((evaluacion) => (
                     <EvaluationItem key={evaluacion.id} evaluacion={evaluacion} />
                   ))}
                 </div>
@@ -192,7 +251,7 @@ export function TeacherDashboard({ data }: TeacherDashboardProps) {
               Mis Cursos
             </h3>
             <div className="grid gap-5 sm:grid-cols-2">
-              {cursos.map((curso: any) => (
+              {cursos.map((curso) => (
                 <CourseCard key={curso.id} curso={curso} />
               ))}
             </div>
@@ -202,7 +261,7 @@ export function TeacherDashboard({ data }: TeacherDashboardProps) {
         {/* Sidebar */}
         <div className="lg:col-span-4 space-y-6">
           {/* Attendance Alerts - High Priority */}
-          <div className="liquid-glass rounded-3xl overflow-hidden border border-border/50 relative shadow-lg">
+          <div className="rounded-2xl overflow-hidden border border-border/50 bg-card/80 shadow-sm relative">
             <div className="absolute -top-10 -right-10 size-40 bg-red-500/10 rounded-full blur-3xl animate-blob" />
             
             <div className="p-6 relative z-10">
@@ -223,7 +282,7 @@ export function TeacherDashboard({ data }: TeacherDashboardProps) {
                     <p className="text-sm text-muted-foreground font-medium">Asistencia perfecta</p>
                   </div>
                 ) : (
-                  criticalAttendance.map((alert: any) => (
+                  criticalAttendance.map((alert) => (
                     <AlertItem key={alert.id} alert={alert} />
                   ))
                 )}
@@ -235,7 +294,7 @@ export function TeacherDashboard({ data }: TeacherDashboardProps) {
           </div>
 
           {/* Pending Grades - Task Style */}
-          <div className="liquid-glass rounded-3xl overflow-hidden border border-border/50 relative shadow-lg">
+          <div className="rounded-2xl overflow-hidden border border-border/50 bg-card/80 shadow-sm relative">
             <div className="absolute -bottom-10 -left-10 size-40 bg-emerald-500/10 rounded-full blur-3xl animate-blob" style={{ animationDelay: "1s" }} />
 
             <div className="p-6 relative z-10">
@@ -256,7 +315,7 @@ export function TeacherDashboard({ data }: TeacherDashboardProps) {
                     <p className="text-sm text-muted-foreground font-medium">¡Todo al día! Excelente.</p>
                   </div>
                 ) : (
-                  evaluationsToGrade.map((evalu: any) => (
+                  evaluationsToGrade.map((evalu) => (
                     <PendingGradeItem key={evalu.id} evalu={evalu} />
                   ))
                 )}
@@ -265,17 +324,17 @@ export function TeacherDashboard({ data }: TeacherDashboardProps) {
           </div>
 
           {/* Tips / Productivity Card */}
-          <div className="liquid-glass rounded-3xl overflow-hidden relative bg-linear-to-br from-primary to-indigo-700 text-primary-foreground border-none shadow-xl shadow-primary/20">
+          <div className="rounded-2xl overflow-hidden relative bg-linear-to-br from-primary to-indigo-700 text-primary-foreground shadow-lg shadow-primary/20">
              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 animate-blob" />
             <div className="p-8 relative z-10">
               <div className="flex items-center gap-4 mb-6">
-                <div className="size-14 rounded-2xl bg-white/20 flex items-center justify-center backdrop-blur-md shadow-inner shadow-white/20">
+                <div className="size-14 rounded-2xl bg-white/20 flex items-center justify-center shadow-inner shadow-white/20">
                   <IconGraphFilled size={32} className="text-white" />
                 </div>
                 <h4 className="text-xl font-black tracking-tight drop-shadow-sm">Consejo de hoy</h4>
               </div>
               <p className="text-base text-white/90 leading-relaxed italic font-medium">
-                "La educación no es la respuesta a la pregunta. La educación es el medio para encontrar la respuesta a todas las preguntas."
+                &ldquo;La educación no es la respuesta a la pregunta. La educación es el medio para encontrar la respuesta a todas las preguntas.&rdquo;
               </p>
             </div>
           </div>
@@ -296,7 +355,7 @@ function KPIItem({
   title: string;
   value: string;
   label: string;
-  icon: any;
+  icon: Icon;
   color: "blue" | "amber" | "red" | "emerald" | "indigo";
   trend?: string;
 }) {
@@ -317,9 +376,9 @@ function KPIItem({
   };
 
   return (
-    <div className="liquid-glass rounded-3xl p-6 group transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 hover:shadow-2xl flex flex-col relative overflow-hidden border border-border/50">
+    <div className="rounded-2xl p-6 group border border-border/50 bg-card/80 shadow-sm transition-[background-color,box-shadow,transform] duration-300 hover:bg-card hover:shadow-md hover:-translate-y-0.5 flex flex-col relative overflow-hidden">
       {/* Background Glow */}
-      <div className={cn("absolute -right-6 -top-6 size-32 rounded-full blur-3xl opacity-50 transition-all duration-500 group-hover:opacity-100 group-hover:scale-150", glowMap[color])} />
+      <div className={cn("absolute -right-6 -top-6 size-32 rounded-full blur-3xl opacity-50 transition-[opacity,transform] duration-500 group-hover:opacity-100 group-hover:scale-150", glowMap[color])} />
       
       <div className="relative z-10 flex flex-col h-full">
         <div className="flex items-center justify-between mb-6">
@@ -346,9 +405,9 @@ function KPIItem({
   );
 }
 
-function ScheduleItem({ item }: { item: any }) {
+function ScheduleItem({ item }: { item: HorarioDocente }) {
   return (
-    <div className="group relative flex items-center gap-5 p-5 rounded-3xl bg-background/60 border border-border/50 hover:border-primary/40 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:bg-background/90 backdrop-blur-sm">
+    <div className="group relative flex items-center gap-5 p-5 rounded-2xl bg-muted/50 border border-border/30 hover:border-primary/40 transition-[background-color,border-color,box-shadow] duration-300 hover:shadow-md hover:shadow-primary/5 hover:bg-muted/80">
       <div className="flex flex-col items-center justify-center min-w-[80px] py-2 border-r border-border/50">
         <span className="text-base font-black text-primary drop-shadow-sm">{item.horaInicio}</span>
         <span className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mt-1 bg-muted px-2 py-0.5 rounded-full">{item.horaFin}</span>
@@ -366,18 +425,18 @@ function ScheduleItem({ item }: { item: any }) {
           </span>
         </div>
       </div>
-      <Button variant="ghost" size="icon" className="rounded-full size-12 opacity-0 group-hover:opacity-100 transition-all duration-300 bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground -mr-2 shadow-sm">
+      <Button variant="ghost" size="icon" className="rounded-full size-12 opacity-0 group-hover:opacity-100 transition-[color,background-color,opacity] duration-300 bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground -mr-2 shadow-sm">
         <IconExternalLink size={20} />
       </Button>
     </div>
   );
 }
 
-function EvaluationItem({ evaluacion }: { evaluacion: any }) {
+function EvaluationItem({ evaluacion }: { evaluacion: EvaluacionDocente }) {
   return (
     <div className="flex items-center justify-between p-6 hover:bg-muted/40 transition-colors group">
       <div className="flex items-center gap-6">
-        <div className="size-14 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-600 shadow-inner group-hover:scale-110 group-hover:bg-amber-500/20 transition-all duration-300">
+        <div className="size-14 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-600 shadow-inner group-hover:scale-110 group-hover:bg-amber-500/20 transition-[background-color,transform] duration-300">
           <IconCalendarStats size={28} strokeWidth={2} />
         </div>
         <div className="space-y-1">
@@ -405,13 +464,13 @@ function EvaluationItem({ evaluacion }: { evaluacion: any }) {
   );
 }
 
-function CourseCard({ curso }: { curso: any }) {
+function CourseCard({ curso }: { curso: CursoDocente }) {
   return (
-    <div className="liquid-glass rounded-3xl p-6 group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-primary/40 relative overflow-hidden flex flex-col h-full border border-border/50">
+    <div className="rounded-2xl p-6 group border border-border/50 bg-card/80 shadow-sm transition-[background-color,border-color,box-shadow,transform] duration-300 hover:bg-card hover:shadow-md hover:-translate-y-0.5 hover:border-primary/40 relative overflow-hidden flex flex-col h-full">
        <div className="absolute top-0 right-0 w-40 h-40 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/15 transition-colors duration-500" />
        
       <div className="flex justify-between items-start mb-6 relative z-10">
-        <div className="size-16 rounded-2xl bg-background/80 shadow-sm border flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300 group-hover:rotate-6 group-hover:scale-110">
+        <div className="size-16 rounded-2xl bg-background/80 shadow-sm border flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-[color,background-color,transform] duration-300 group-hover:rotate-6 group-hover:scale-110">
           <IconBook size={32} strokeWidth={1.5} />
         </div>
         <DropdownMenu>
@@ -420,7 +479,7 @@ function CourseCard({ curso }: { curso: any }) {
               <IconDotsVertical size={20} />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2 shadow-xl border-border/50 backdrop-blur-md bg-background/90">
+          <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2 shadow-lg border border-border/50 bg-background">
             <DropdownMenuItem className="rounded-xl cursor-pointer font-medium py-2">Ver Estudiantes</DropdownMenuItem>
             <DropdownMenuItem className="rounded-xl cursor-pointer font-medium py-2 text-primary focus:bg-primary/10 focus:text-primary">Subir Notas</DropdownMenuItem>
             <DropdownMenuItem className="rounded-xl cursor-pointer font-medium py-2">Tomar Asistencia</DropdownMenuItem>
@@ -436,7 +495,7 @@ function CourseCard({ curso }: { curso: any }) {
           {curso.areaCurricular.nombre}
         </h4>
         <p className="text-sm text-muted-foreground font-medium">
-          {curso.nivelAcademico.grado.nombre} - Sección "{curso.nivelAcademico.seccion}"
+          {curso.nivelAcademico.grado.nombre} - Sección &quot;{curso.nivelAcademico.seccion}&quot;
         </p>
       </div>
 
@@ -447,7 +506,7 @@ function CourseCard({ curso }: { curso: any }) {
           </div>
           <span className="text-sm font-black text-foreground drop-shadow-sm">{curso._count?.estudiantes || 0} alumnos</span>
         </div>
-        <Button variant="ghost" size="sm" className="h-10 px-4 rounded-xl text-sm font-bold bg-background/50 border hover:bg-primary hover:border-primary hover:text-primary-foreground shadow-sm transition-all duration-300">
+        <Button variant="ghost" size="sm" className="h-10 px-4 rounded-xl text-sm font-bold bg-background/50 border hover:bg-primary hover:border-primary hover:text-primary-foreground shadow-sm transition-[color,background-color,border-color] duration-300">
           Detalles <IconChevronRight size={16} className="ml-1" />
         </Button>
       </div>
@@ -455,9 +514,9 @@ function CourseCard({ curso }: { curso: any }) {
   );
 }
 
-function AlertItem({ alert }: { alert: any }) {
+function AlertItem({ alert }: { alert: AlertaAsistencia }) {
   return (
-    <div className="group flex items-center gap-4 p-4 rounded-2xl bg-background/80 border border-border/50 shadow-sm hover:shadow-md transition-all duration-300 hover:border-border relative overflow-hidden backdrop-blur-sm">
+    <div className="group flex items-center gap-4 p-4 rounded-2xl bg-muted/50 border border-border/30 shadow-sm hover:shadow-md transition-[border-color,box-shadow] duration-300 hover:border-border relative overflow-hidden">
       <div className="absolute inset-0 bg-red-500/0 group-hover:bg-red-500/5 transition-colors duration-300" />
       <div className="size-12 rounded-xl bg-red-100 dark:bg-red-900/50 flex items-center justify-center text-red-600 shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-inner">
         <IconUsers size={24} />
@@ -477,9 +536,9 @@ function AlertItem({ alert }: { alert: any }) {
   );
 }
 
-function PendingGradeItem({ evalu }: { evalu: any }) {
+function PendingGradeItem({ evalu }: { evalu: EvaluacionDocente }) {
   return (
-    <div className="group flex items-center justify-between p-4 rounded-2xl bg-background/80 border border-border/50 shadow-sm hover:shadow-md transition-all duration-300 hover:border-border cursor-pointer relative overflow-hidden backdrop-blur-sm">
+    <div className="group flex items-center justify-between p-4 rounded-2xl bg-muted/50 border border-border/30 shadow-sm hover:shadow-md transition-[border-color,box-shadow] duration-300 hover:border-border cursor-pointer relative overflow-hidden">
       <div className="absolute inset-0 bg-emerald-500/0 group-hover:bg-emerald-500/5 transition-colors duration-300" />
       <div className="min-w-0 relative z-10">
         <p className="text-sm font-black truncate leading-tight uppercase tracking-tight group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">

@@ -114,7 +114,7 @@ export function UniformBasicModal({
                   <Input
                     placeholder="Ej. Camisa Blanca Manga Larga"
                     {...field}
-                    className="bg-muted/10 border-border/40 focus:bg-muted/20 transition-all h-11 rounded-full"
+                    className="bg-muted/10 border-border/40 focus:bg-muted/20 transition-colors h-11 rounded-full"
                   />
                 </FormControl>
                 <FormMessage />

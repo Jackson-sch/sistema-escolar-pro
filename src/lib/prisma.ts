@@ -1,5 +1,4 @@
-// Prisma client initialization
-import { PrismaClient } from "../../prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 
@@ -13,8 +12,17 @@ declare global {
   var prisma: undefined | ReturnType<typeof prismaClientSingleton>;
 }
 
-const prisma = globalThis.prisma ?? prismaClientSingleton();
+const getPrismaClient = () => {
+  if (globalThis.prisma && (globalThis.prisma as any).auditLog) {
+    return globalThis.prisma;
+  }
+  const client = prismaClientSingleton();
+  if (process.env.NODE_ENV !== "production") {
+    globalThis.prisma = client;
+  }
+  return client;
+};
+
+const prisma = getPrismaClient();
 
 export default prisma;
-
-if (process.env.NODE_ENV !== "production") globalThis.prisma = prisma;

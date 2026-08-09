@@ -4,10 +4,12 @@ import { getPortalUniformesDataAction } from "@/actions/uniformes";
 import { UniformCatalogue } from "@/components/portal/uniformes/uniform-catalogue";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { IconShirt } from "@tabler/icons-react";
 
 export const metadata = {
-  title: "Uniformes | Portal de Padres",
-  description: "Reserva de uniformes escolares para tus hijos.",
+  title: "Uniformes y Prendas | Portal de Familia",
+  description: "Reserva de prendas reglamentarias, consulta de catálogo por sede y estado de pedidos.",
 };
 
 export default async function PortalUniformesPage() {
@@ -22,7 +24,7 @@ export default async function PortalUniformesPage() {
   if (res.error || !res.data) {
     return (
       <div className="flex flex-1 items-center justify-center p-12">
-        <div className="bg-red-50 text-red-600 p-6 rounded-2xl border border-red-100 max-w-md text-center">
+        <div className="max-w-md rounded-2xl border border-destructive/20 bg-card/80 p-6 text-center text-destructive shadow-sm">
           <p className="font-bold text-lg mb-2">Error de Carga</p>
           <p className="text-sm">
             {res.error || "No se pudo obtener la información de uniformes."}
@@ -35,26 +37,35 @@ export default async function PortalUniformesPage() {
   const { uniforms, categorias, sedes, hijos, ventas } = res.data;
 
   return (
-    <div className="flex flex-1 flex-col gap-8 p-4 sm:p-10 pt-0 @container/main animate-in fade-in duration-700 min-h-screen max-w-[1600px] mx-auto w-full">
-      {/* Sección de Encabezado */}
-      <div className="space-y-1 mt-4 md:mt-0">
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-          Guía de Uniformes
-        </h1>
-        <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed">
-          Información sobre los uniformes y prendas reglamentarias.
-        </p>
+    <div className="min-h-screen flex flex-col gap-6 p-4 md:p-8 pt-6 @container/main">
+      {/* ── HEADER ── */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
+        <div className="space-y-2">
+          <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-4 py-1 rounded-full text-xxs font-semibold uppercase tracking-widest flex items-center gap-2 w-fit">
+            <IconShirt size={14} />
+            Tienda Escolar
+          </Badge>
+          <h1 className="text-3xl md:text-5xl font-bold tracking-tight leading-none">
+            Catálogo de Uniformes
+          </h1>
+          <p className="text-muted-foreground text-sm md:text-base max-w-2xl font-normal leading-relaxed">
+            Consulta las prendas oficiales del colegio, precios por talla y realiza solicitudes de reserva.
+          </p>
+        </div>
       </div>
-      <Suspense fallback={<PortalUniformsSkeleton />}>
-        <UniformCatalogue
-          uniforms={uniforms}
-          categorias={categorias}
-          sedes={sedes}
-          hijos={hijos}
-          ventas={ventas}
-          currentPadreId={session.user.id}
-        />
-      </Suspense>
+
+      <div className="px-1">
+        <Suspense fallback={<PortalUniformsSkeleton />}>
+          <UniformCatalogue
+            uniforms={uniforms}
+            categorias={categorias}
+            sedes={sedes}
+            hijos={hijos}
+            ventas={ventas}
+            currentPadreId={session.user.id}
+          />
+        </Suspense>
+      </div>
     </div>
   );
 }
@@ -62,7 +73,7 @@ export default async function PortalUniformesPage() {
 function PortalUniformsSkeleton() {
   return (
     <div className="space-y-8">
-      <Skeleton className="h-32 w-full rounded-3xl" />
+      <Skeleton className="h-32 w-full rounded-2xl" />
       <div className="flex justify-center">
         <Skeleton className="h-14 w-full max-w-md rounded-2xl" />
       </div>
@@ -76,7 +87,7 @@ function PortalUniformsSkeleton() {
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-          <Skeleton key={i} className="aspect-3/4 w-full rounded-3xl" />
+          <Skeleton key={i} className="aspect-3/4 w-full rounded-2xl" />
         ))}
       </div>
     </div>

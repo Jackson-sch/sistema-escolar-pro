@@ -9,7 +9,9 @@ import {
   IconMapPin,
   IconBulb,
   IconPlus,
-  IconDotsVertical,
+  IconClock,
+  IconBuildingBank,
+  IconBookmark,
 } from "@tabler/icons-react";
 import {
   format,
@@ -31,6 +33,7 @@ import { ViewEventDialog } from "./view-event-dialog";
 import { getPeruvianHolidays } from "@/lib/holidays";
 import { FormModal } from "@/components/modals/form-modal";
 import { EventForm } from "./event-form";
+import { Badge } from "@/components/ui/badge";
 
 interface EventCalendarProps {
   initialEventos: any[];
@@ -59,6 +62,7 @@ export function EventCalendar({ initialEventos }: EventCalendarProps) {
 
   const getDayHolidays = (day: Date) =>
     holidays.filter((h) => isSameDay(h.date, day));
+
   const getDayEvents = (day: Date) => {
     const dayStr = format(day, "yyyy-MM-dd");
     return initialEventos.filter((e) => {
@@ -79,15 +83,15 @@ export function EventCalendar({ initialEventos }: EventCalendarProps) {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-in fade-in animation-duration-">
       {/* Calendario Principal (8/12) */}
       <div className="lg:col-span-8 space-y-4">
-        <div className="flex items-center justify-between mb-2 px-2">
-          <div className="flex items-center gap-4">
-            <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20">
-              <IconCalendarEvent className="size-6 text-primary" />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1">
+          <div className="flex items-center gap-3">
+            <div className="size-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-500 shrink-0">
+              <IconCalendarEvent className="size-5" />
             </div>
-            <h2 className="text-2xl font-bold capitalize tracking-tighter text-foreground font-display">
+            <h2 className="text-xl font-bold capitalize text-foreground tracking-tight">
               {format(currentMonth, "MMMM yyyy", { locale: es })}
             </h2>
           </div>
@@ -96,16 +100,16 @@ export function EventCalendar({ initialEventos }: EventCalendarProps) {
               variant="outline"
               size="sm"
               onClick={handleToday}
-              className="h-9 px-4 rounded-full border-border/40 bg-muted/20 font-bold text-[10px] uppercase tracking-widest hover:bg-muted/40 transition-all"
+              className="h-8 px-3 rounded-xl border-border/40 font-semibold text-xs bg-background/80 hover:bg-muted"
             >
               Hoy
             </Button>
-            <div className="flex p-1 rounded-full bg-muted/20 border border-border/40">
+            <div className="flex p-1 rounded-xl bg-background/80 border border-border/40">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={handlePrevMonth}
-                className="size-7 rounded-full hover:bg-background shadow-none"
+                className="size-6 rounded-lg hover:bg-muted"
               >
                 <IconChevronLeft className="size-4" />
               </Button>
@@ -113,7 +117,7 @@ export function EventCalendar({ initialEventos }: EventCalendarProps) {
                 variant="ghost"
                 size="icon"
                 onClick={handleNextMonth}
-                className="size-7 rounded-full hover:bg-background shadow-none"
+                className="size-6 rounded-lg hover:bg-muted"
               >
                 <IconChevronRight className="size-4" />
               </Button>
@@ -121,19 +125,19 @@ export function EventCalendar({ initialEventos }: EventCalendarProps) {
           </div>
         </div>
 
-        <Card className="border-border/40 bg-card p-0 backdrop-blur-xl shadow-2xl overflow-hidden rounded-3xl">
+        <Card className="border-border/40 bg-card/80 shadow-xl overflow-hidden rounded-2xl">
           <CardContent className="p-0">
-            <div className="grid grid-cols-7 border-b border-border/40 bg-muted/20">
+            <div className="grid grid-cols-7 border-b border-border/30 bg-muted/20">
               {["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"].map((d) => (
                 <div
                   key={d}
-                  className="py-4 text-center text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60"
+                  className="py-2.5 text-center text-[10px] font-bold uppercase tracking-wider text-muted-foreground"
                 >
                   {d}
                 </div>
               ))}
             </div>
-            <div className="grid grid-cols-7 gap-px bg-border/50">
+            <div className="grid grid-cols-7 gap-px bg-border/40">
               {calendarDays.map((day) => {
                 const dayEvents = getDayEvents(day);
                 const dayHolidays = getDayHolidays(day);
@@ -145,60 +149,79 @@ export function EventCalendar({ initialEventos }: EventCalendarProps) {
                 return (
                   <div
                     key={day.toString()}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Seleccionar día ${day.toLocaleDateString("es-PE", { day: "numeric", month: "long", year: "numeric", timeZone: "America/Lima" })}`}
                     onClick={() => setSelectedDay(day)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setSelectedDay(day);
+                      }
+                    }}
                     className={cn(
-                      "min-h-[100px] p-3 bg-card/40 transition-all cursor-pointer hover:bg-primary/5 group relative flex flex-col items-end",
-                      !isCurrentMonth && "bg-muted/5 opacity-30",
+                      "min-h-[95px] p-2 bg-background/60 transition-colors cursor-pointer hover:bg-indigo-500/5 group relative flex flex-col justify-between",
+                      !isCurrentMonth && "bg-muted/10 opacity-30",
                       isSelected &&
-                        "bg-primary/5 ring-inset ring-2 ring-primary/40 shadow-[inset_0_0_20px_rgba(var(--primary),0.05)]",
-                      hasHoliday && "bg-holiday/5",
+                        "ring-2 ring-indigo-500/50 bg-indigo-500/10 shadow-xs z-10",
+                      hasHoliday && "bg-rose-500/5",
                     )}
                   >
-                    <span
-                      className={cn(
-                        "text-xs font-black w-7 h-7 flex items-center justify-center rounded-lg transition-all tabular-nums",
-                        isDayToday &&
-                          "bg-primary text-primary-foreground shadow-lg shadow-primary/30",
-                        isSelected &&
-                          !isDayToday &&
-                          "text-primary bg-primary/10",
-                        !isSelected &&
-                          !isDayToday &&
-                          isCurrentMonth &&
-                          "text-foreground",
-                        hasHoliday && !isDayToday && "text-holiday",
-                      )}
-                    >
-                      {format(day, "d")}
-                    </span>
+                    <div className="flex justify-between items-start w-full">
+                      <span
+                        className={cn(
+                          "text-xs font-bold size-6 flex items-center justify-center rounded-lg transition-[color,background-color,box-shadow] tabular-nums",
+                          isDayToday &&
+                            "bg-indigo-600 text-white shadow-md shadow-indigo-500/20",
+                          isSelected &&
+                            !isDayToday &&
+                            "text-indigo-600 bg-indigo-500/20",
+                          !isSelected &&
+                            !isDayToday &&
+                            isCurrentMonth &&
+                            "text-foreground",
+                          hasHoliday && !isDayToday && "text-rose-600 dark:text-rose-400 font-bold",
+                        )}
+                      >
+                        {format(day, "d")}
+                      </span>
 
-                    <div className="mt-auto w-full space-y-1.5 pb-1">
-                      {/* Holidays indicators */}
-                      {dayHolidays.map((h, i) => (
+                      {hasHoliday && (
+                        <span className="size-2 rounded-full bg-rose-500 animate-pulse" title="Feriado" />
+                      )}
+                    </div>
+
+                    <div className="mt-1 space-y-1 w-full overflow-hidden">
+                      {/* Feriados */}
+                      {dayHolidays.map((h) => (
                         <div
-                          key={i}
-                          className="h-1 w-full bg-holiday/40 rounded-full"
-                        />
+                          key={h.name}
+                          className="text-[9px] font-semibold text-rose-600 dark:text-rose-400 bg-rose-500/10 px-1 py-0.5 rounded truncate"
+                          title={h.name}
+                        >
+                          {h.name}
+                        </div>
                       ))}
 
-                      {/* Events Dots */}
-                      <div className="flex flex-wrap gap-1 justify-end">
-                        {dayEvents.map((e, i) => {
-                          const color =
-                            e.tipo === "ACADEMICO"
-                              ? "bg-academic"
-                              : "bg-institutional";
-                          return (
-                            <div
-                              key={i}
-                              className={cn(
-                                "size-1.5 rounded-full shadow-sm",
-                                color,
-                              )}
-                            />
-                          );
-                        })}
-                      </div>
+                      {/* Títulos de eventos en píldoras */}
+                      {dayEvents.slice(0, 2).map((e) => (
+                        <div
+                          key={e.id ?? e.titulo}
+                          className={cn(
+                            "text-[9px] font-semibold px-1 py-0.5 rounded truncate text-white",
+                            e.tipo === "ACADEMICO" ? "bg-indigo-600" : "bg-emerald-600"
+                          )}
+                          title={e.titulo}
+                        >
+                          {e.titulo}
+                        </div>
+                      ))}
+
+                      {dayEvents.length > 2 && (
+                        <div className="text-[9px] font-bold text-muted-foreground text-right pr-1">
+                          +{dayEvents.length - 2} más
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -207,27 +230,27 @@ export function EventCalendar({ initialEventos }: EventCalendarProps) {
           </CardContent>
         </Card>
 
-        {/* Legend */}
-        <div className="flex items-center gap-6 px-4 py-3 rounded-2xl bg-muted/10 border border-border/40 mt-6">
-          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mr-2">
-            Categorías:
+        {/* Leyenda */}
+        <div className="flex items-center gap-4 px-3.5 py-2.5 rounded-xl bg-background/50 border border-border/40">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            Leyenda:
           </span>
-          <div className="flex items-center gap-2">
-            <div className="size-2 rounded-full bg-academic" />
-            <span className="text-[10px] font-bold uppercase text-muted-foreground/80">
+          <div className="flex items-center gap-1.5">
+            <div className="size-2.5 rounded-full bg-indigo-600" />
+            <span className="text-[11px] font-medium text-foreground">
               Académico
             </span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="size-2 rounded-full bg-institutional" />
-            <span className="text-[10px] font-bold uppercase text-muted-foreground/80">
+          <div className="flex items-center gap-1.5">
+            <div className="size-2.5 rounded-full bg-emerald-600" />
+            <span className="text-[11px] font-medium text-foreground">
               Institucional
             </span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="size-2 rounded-full bg-holiday" />
-            <span className="text-[10px] font-bold uppercase text-muted-foreground/80">
-              Feriado / Festivo
+          <div className="flex items-center gap-1.5">
+            <div className="size-2.5 rounded-full bg-rose-500" />
+            <span className="text-[11px] font-medium text-foreground">
+              Feriado Nacional
             </span>
           </div>
         </div>
@@ -235,32 +258,31 @@ export function EventCalendar({ initialEventos }: EventCalendarProps) {
 
       {/* Agenda Lateral (4/12) */}
       <div className="lg:col-span-4 h-full">
-        <Card className="border-border/40 p-0 bg-card/40 backdrop-blur-xl shadow-2xl h-full flex flex-col rounded-3xl overflow-hidden border-2">
-          <CardHeader className="bg-muted/10 p-6 border-b border-border/40">
-            <div className="space-y-1">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/70">
-                Agenda del día
+        <Card className="border-border/40 bg-card/80 shadow-xl h-full flex flex-col rounded-2xl overflow-hidden">
+          <CardHeader className="bg-muted/10 p-4 border-b border-border/30">
+            <div className="space-y-0.5">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+                Agenda del Día
               </p>
-              <h3 className="text-xl font-bold font-display text-foreground leading-none">
+              <h3 className="text-base font-bold text-foreground capitalize">
                 {format(selectedDay, "EEEE, d 'de' MMMM", { locale: es })}
               </h3>
             </div>
           </CardHeader>
 
-          <CardContent className="flex-1 p-6 space-y-6 overflow-y-auto">
-            {/* Holidays Section */}
+          <CardContent className="flex-1 p-4 space-y-4 overflow-y-auto min-h-[300px]">
+            {/* Feriados */}
             {selectedDayHolidays.length > 0 && (
-              <div className="space-y-3">
-                {selectedDayHolidays.map((holiday, i) => (
+              <div className="space-y-2">
+                {selectedDayHolidays.map((holiday) => (
                   <div
-                    key={i}
-                    className="p-4 rounded-2xl bg-holiday/10 border border-holiday/20 relative overflow-hidden group transition-all hover:bg-holiday/15"
+                    key={holiday.name}
+                    className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-700 dark:text-rose-300"
                   >
-                    <div className="absolute left-0 top-0 w-1 h-full bg-holiday" />
-                    <p className="text-[9px] font-black text-holiday uppercase tracking-widest mb-1">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">
                       Feriado Nacional
                     </p>
-                    <h4 className="text-sm font-bold text-foreground">
+                    <h4 className="text-xs font-bold text-foreground mt-0.5">
                       {holiday.name}
                     </h4>
                   </div>
@@ -268,76 +290,77 @@ export function EventCalendar({ initialEventos }: EventCalendarProps) {
               </div>
             )}
 
-            {/* Events Section */}
+            {/* Eventos */}
             {selectedDayEvents.length === 0 &&
             selectedDayHolidays.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 text-center opacity-40 group">
-                <div className="size-20 rounded-full bg-muted flex items-center justify-center mb-6 transition-transform group-hover:scale-110">
-                  <IconBulb className="size-10" />
+              <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground/60 space-y-2">
+                <div className="size-12 rounded-2xl bg-muted/20 flex items-center justify-center">
+                  <IconBulb className="size-6 text-muted-foreground" />
                 </div>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] mb-2">
-                  Sin Actividades
+                <p className="text-xs font-semibold text-foreground">
+                  Sin eventos agendados
                 </p>
-                <p className="text-xs italic text-muted-foreground">
-                  "La organización es la clave del éxito académico."
+                <p className="text-[11px] text-muted-foreground max-w-[200px]">
+                  No hay actividades registradas para este día.
                 </p>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsCreateModalOpen(true)}
-                  className="mt-10 rounded-full border-dashed border-border/60 hover:border-primary/50 text-[10px] uppercase font-bold tracking-widest gap-2"
-                >
-                  <IconPlus className="size-3" /> Crear primer evento
-                </Button>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-2.5">
                 {selectedDayEvents.map((evento) => (
                   <div
                     key={evento.id}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Ver evento ${evento.titulo}`}
                     onClick={() => setEventToView(evento)}
-                    className="group relative flex gap-4 p-4 rounded-2xl border border-transparent hover:border-border/40 hover:bg-muted/10 transition-all cursor-pointer"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setEventToView(evento);
+                      }
+                    }}
+                    className="p-3 rounded-xl border border-border/40 hover:border-indigo-500/40 bg-background/50 hover:bg-background transition-[background-color,border-color] cursor-pointer space-y-1.5"
                   >
-                    <div className="flex flex-col items-center py-1">
-                      <div
+                    <div className="flex items-center justify-between gap-2">
+                      <Badge
                         className={cn(
-                          "size-2 rounded-full",
+                          "text-[9px] font-bold uppercase px-2 py-0.5 rounded-md",
                           evento.tipo === "ACADEMICO"
-                            ? "bg-academic ring-4 ring-academic/10"
-                            : "bg-institutional ring-4 ring-institutional/10",
+                            ? "bg-indigo-600 text-white"
+                            : "bg-emerald-600 text-white"
                         )}
-                      />
-                      <div className="w-px flex-1 bg-border/40 mt-2" />
+                      >
+                        {evento.tipo || "EVENTO"}
+                      </Badge>
+                      <span className="text-[10px] font-mono font-medium text-muted-foreground flex items-center gap-1">
+                        <IconClock className="size-3" />
+                        {evento.horaInicio} - {evento.horaFin}
+                      </span>
                     </div>
 
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2 mb-1">
-                        <span className="text-[10px] font-black text-muted-foreground/60 tracking-wider">
-                          {evento.horaInicio} - {evento.horaFin}
-                        </span>
-                        <IconDotsVertical className="size-4 opacity-0 group-hover:opacity-40 transition-opacity" />
-                      </div>
-                      <h4 className="text-sm font-bold text-foreground mb-1 leading-tight line-clamp-2 transition-colors group-hover:text-primary">
-                        {evento.titulo}
-                      </h4>
-                      <p className="text-[10px] text-muted-foreground flex items-center gap-1.5 font-medium">
-                        <IconMapPin className="size-3 text-primary/60" />
-                        {evento.ubicacion || "Virtual / Por definir"}
+                    <h4 className="text-xs font-bold text-foreground line-clamp-2">
+                      {evento.titulo}
+                    </h4>
+
+                    {evento.ubicacion && (
+                      <p className="text-[10px] text-muted-foreground flex items-center gap-1 font-medium truncate">
+                        <IconMapPin className="size-3 text-indigo-500" />
+                        {evento.ubicacion}
                       </p>
-                    </div>
+                    )}
                   </div>
                 ))}
               </div>
             )}
           </CardContent>
 
-          <div className="p-6 bg-muted/10 border-t border-border/40">
+          <div className="p-4 bg-muted/10 border-t border-border/30">
             <Button
               onClick={() => setIsCreateModalOpen(true)}
-              className="w-full rounded-full h-11 font-bold text-xs uppercase tracking-[0.15em] shadow-lg shadow-primary/20 transition-all active:scale-95"
+              className="w-full rounded-xl h-10 font-semibold text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 gap-2 cursor-pointer"
             >
-              <IconPlus className="mr-2 size-4" /> Crear Nuevo Evento
+              <IconPlus className="size-4" />
+              <span>Programar Nuevo Evento</span>
             </Button>
           </div>
         </Card>

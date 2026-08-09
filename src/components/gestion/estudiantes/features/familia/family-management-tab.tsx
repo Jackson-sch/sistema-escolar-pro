@@ -115,8 +115,8 @@ export function FamilyManagementTab({
             <div
               key={rel.id}
               className={cn(
-                "group relative flex flex-col gap-4 rounded-2xl border p-5 transition-all duration-300",
-                "bg-background/40 backdrop-blur-sm border-border/40 hover:border-cyan-500/20 hover:shadow-xl hover:shadow-cyan-500/5",
+                "group relative flex flex-col gap-4 rounded-2xl border p-5 transition-[background-color,border-color,box-shadow,backdrop-filter] duration-300",
+                "bg-card/80 border-border/40 hover:border-cyan-500/20 hover:shadow-lg hover:shadow-cyan-500/5",
                 rel.contactoPrimario &&
                   "border-emerald-500/20 bg-emerald-500/5 shadow-none",
               )}

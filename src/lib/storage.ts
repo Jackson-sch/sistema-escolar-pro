@@ -7,9 +7,11 @@ import { join } from "path";
  * Configura Cloudinary dinámicamente usando variables de sistema de la base de datos.
  */
 async function configureCloudinary() {
-  const cloudName = await getSystemVariable("CLOUDINARY_CLOUD_NAME");
-  const apiKey = await getSystemVariable("CLOUDINARY_API_KEY");
-  const apiSecret = await getSystemVariable("CLOUDINARY_API_SECRET");
+  const [cloudName, apiKey, apiSecret] = await Promise.all([
+    getSystemVariable("CLOUDINARY_CLOUD_NAME"),
+    getSystemVariable("CLOUDINARY_API_KEY"),
+    getSystemVariable("CLOUDINARY_API_SECRET"),
+  ]);
 
   if (cloudName && apiKey && apiSecret) {
     cloudinary.config({
@@ -96,12 +98,20 @@ export async function deleteFile(
       const result = await cloudinary.uploader.destroy(publicId);
       return result.result === "ok";
     } else if (url.startsWith("/uploads/")) {
-      // Eliminar Localmente
-      const filename = url.replace("/uploads/", "");
-      const filePath = join(process.cwd(), "public", "uploads", filename);
+      // Eliminar Localmente con prevención de Path Traversal
+      const uploadDir = join(process.cwd(), "public", "uploads");
+      const filename = url.replace(/^\/uploads\//, "");
+      const targetPath = join(uploadDir, filename);
 
-      console.log("[Storage] Eliminando archivo local:", filePath);
-      await unlink(filePath);
+      // Verificar que la ruta resuelta esté estrictamente dentro de public/uploads
+      const resolvedPath = join(process.cwd(), "public", "uploads", filename);
+      if (!resolvedPath.startsWith(uploadDir)) {
+        console.warn("[Storage] Intento de Path Traversal bloqueado:", url);
+        return false;
+      }
+
+      console.log("[Storage] Eliminando archivo local seguro:", resolvedPath);
+      await unlink(resolvedPath);
       return true;
     }
   } catch (error) {

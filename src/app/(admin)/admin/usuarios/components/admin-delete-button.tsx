@@ -30,7 +30,7 @@ export function AdminDeleteButton({ userId, userName }: AdminDeleteButtonProps) 
     <button
       onClick={handleDelete}
       disabled={isPending}
-      className="p-2 text-zinc-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all disabled:opacity-50"
+      className="p-2 text-zinc-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-[color,background-color,opacity] disabled:opacity-50"
       title="Eliminar usuario"
     >
       <IconTrash className="size-4" />

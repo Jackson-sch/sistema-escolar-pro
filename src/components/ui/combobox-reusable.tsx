@@ -66,7 +66,7 @@ export function ComboboxReusable({
           aria-expanded={open}
           disabled={disabled || isLoading}
           className={cn(
-            "w-full justify-between h-9 px-3 rounded-xl border-border/40 bg-background/40 hover:bg-background/60 transition-all font-bold text-xs",
+            "w-full justify-between h-9 px-3 rounded-xl border-border/40 bg-background/40 hover:bg-background/60 transition-colors font-bold text-xs",
             selectedItem ? "text-foreground" : "text-muted-foreground",
             className
           )}
@@ -90,7 +90,7 @@ export function ComboboxReusable({
           )} />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[--radix-popover-trigger-width] p-0 rounded-2xl border-border/40 shadow-2xl bg-card/95 backdrop-blur-xl">
+      <PopoverContent className="w-[--radix-popover-trigger-width] p-0 rounded-2xl border-border/40 shadow-lg bg-card">
         <Command className="bg-transparent">
           <div className="flex items-center border-b border-border/40 px-3 py-2">
             <CommandInput 
@@ -113,7 +113,7 @@ export function ComboboxReusable({
                       setOpen(false);
                     }}
                     className={cn(
-                      "flex items-center gap-3 px-3 py-2 rounded-xl text-xs transition-all duration-200 cursor-pointer mb-0.5",
+                      "flex items-center gap-3 px-3 py-2 rounded-xl text-xs transition-colors duration-200 cursor-pointer mb-0.5",
                       value === item.id 
                         ? "bg-primary/10 text-primary font-bold" 
                         : "hover:bg-muted/50"
@@ -137,7 +137,7 @@ export function ComboboxReusable({
                     </div>
                     <IconCheck
                       className={cn(
-                        "ml-auto size-4 transition-all",
+                        "ml-auto size-4 transition-[opacity,transform,margin]",
                         value === item.id ? "opacity-100 scale-100" : "opacity-0 scale-50"
                       )}
                     />

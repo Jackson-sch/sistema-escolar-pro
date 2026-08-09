@@ -4,6 +4,7 @@ import { getTwilioClient } from "@/lib/twilio";
 import { getInstitucionAction } from "@/actions/institucion";
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 interface SendSmsParams {
   to: string | string[];
@@ -15,8 +16,23 @@ interface SendSmsParams {
  */
 export async function sendSmsAction({ to, mensaje }: SendSmsParams) {
   const session = await auth();
-  const institucionId = session?.user?.institucionId;
-  const userId = session?.user?.id;
+  if (!session?.user) {
+    return { error: "No autorizado. Inicie sesión." };
+  }
+
+  const rateLimit = checkRateLimit(`sms:${session.user.id}`, { maxRequests: 20, windowMs: 60 * 1000 });
+  if (!rateLimit.success) {
+    return { error: "Límite de envíos alcanzado. Por favor espere un momento." };
+  }
+
+  const rawRole = (session.user.role || "").toString().toLowerCase();
+  const allowedRoles = ["super_admin", "admin", "administrador", "director", "coordinador", "profesor", "docente", "administrativo"];
+  if (!allowedRoles.includes(rawRole)) {
+    return { error: "No tienes permisos para enviar mensajes SMS." };
+  }
+
+  const institucionId = session.user.institucionId;
+  const userId = session.user.id;
   const recipientStr = Array.isArray(to) ? to.join(", ") : to;
 
   try {
@@ -79,9 +95,9 @@ export async function sendSmsAction({ to, mensaje }: SendSmsParams) {
 
     return {
       success: true,
-      data: results
-        .filter((r) => r.status === "fulfilled")
-        .map((r: any) => r.value.sid),
+      data: results.flatMap((r: any) =>
+        r.status === "fulfilled" ? [r.value.sid] : [],
+      ),
       errorsCount: errores.length,
     };
   } catch (error: any) {

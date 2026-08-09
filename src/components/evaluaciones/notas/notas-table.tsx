@@ -16,7 +16,7 @@ interface NotasTableProps {
 
 export function NotasTable({ children, isEmpty }: NotasTableProps) {
   return (
-    <div className="rounded-2xl border border-border/40 bg-background backdrop-blur-sm shadow-2xl shadow-violet-500/5 overflow-hidden">
+    <div className="rounded-2xl border border-border/40 bg-background shadow-lg shadow-violet-500/5 overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/50 hover:bg-muted/50 border-b border-border/40">
@@ -41,7 +41,7 @@ export function NotasTable({ children, isEmpty }: NotasTableProps) {
           {isEmpty ? (
             <TableRow>
               <TableCell colSpan={5} className="h-80 text-center">
-                <div className="flex flex-col items-center justify-center text-muted-foreground animate-in fade-in zoom-in duration-500">
+                <div className="flex flex-col items-center justify-center text-muted-foreground animate-in fade-in zoom-in animation-duration-">
                   <div className="p-4 rounded-full bg-muted/20 mb-4">
                     <IconAlertCircle className="size-10 opacity-20" />
                   </div>

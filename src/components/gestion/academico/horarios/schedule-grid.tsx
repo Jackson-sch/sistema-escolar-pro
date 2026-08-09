@@ -39,7 +39,7 @@ export function ScheduleGrid({ horarios, onDelete, onDuplicate }: ScheduleGridPr
   };
 
   return (
-    <div className="overflow-x-auto rounded-2xl border border-primary/10 shadow-xl backdrop-blur-md">
+    <div className="overflow-x-auto rounded-2xl border border-primary/10 shadow-xl">
       <table className="w-full border-collapse">
         <thead>
           <tr className="bg-white/5 border-b border-primary/10 ">
@@ -147,7 +147,7 @@ function DraggableCard({ slot, onDelete, onDuplicate }: { slot: any, onDelete: (
             {...attributes}
             {...listeners}
             className={cn(
-                "p-3 rounded-lg border border-primary/10 shadow-md relative overflow-hidden group/card transition-all duration-300",
+                "p-3 rounded-lg border border-primary/10 shadow-md relative overflow-hidden group/card transition-[border-color,box-shadow,opacity,transform,padding] duration-300",
                 isDragging ? "opacity-30 scale-95" : "hover:scale-[1.02] hover:shadow-xl hover:ring-1 hover:ring-primary/20 cursor-grab active:cursor-grabbing"
             )}
             style={{
@@ -155,7 +155,7 @@ function DraggableCard({ slot, onDelete, onDuplicate }: { slot: any, onDelete: (
                 backgroundColor: `${areaColor}15`,
             }}
         >
-             <div className="absolute top-1 right-1 opacity-0 group-hover/card:opacity-100 transition-opacity z-10 flex items-center gap-0.5">
+             <div className="absolute top-1 right-1 opacity-0 group-hover/card:opacity-100 transition-opacity z-10 flex items-center gap-0.5 print:hidden no-print">
                 <Button
                     variant="ghost"
                     size="icon"

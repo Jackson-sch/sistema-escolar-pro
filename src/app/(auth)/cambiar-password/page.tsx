@@ -25,7 +25,7 @@ export default async function ChangePasswordPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4">
       <div className="w-full max-w-md">
-        <div className="bg-card border border-border rounded-3xl p-8 shadow-2xl">
+        <div className="bg-card border border-border rounded-3xl p-8 shadow-lg">
           <div className="text-center mb-6">
             <div className="size-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
               <span className="text-3xl">🔐</span>

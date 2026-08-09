@@ -47,3 +47,6 @@ next-env.d.ts
 .agent/
 .antigravity/
 .antigravitycli/
+
+# trash backup of removed files
+.trash/

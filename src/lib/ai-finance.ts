@@ -5,7 +5,7 @@ import { generateText } from "ai";
 /**
  * Analiza el historial de un estudiante y predice riesgo de morosidad
  */
-export async function analizarRiesgoMorosidad(estudianteId: string) {
+async function analizarRiesgoMorosidad(estudianteId: string) {
   const [estudiante, pagosPasados] = await Promise.all([
     prisma.user.findUnique({
       where: { id: estudianteId },

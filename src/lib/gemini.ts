@@ -21,11 +21,11 @@ export async function getGoogleClient() {
  * Obtiene el modelo de Gemini especificado en las variables o el default.
  */
 export async function getGeminiModel() {
-  const client = await getGoogleClient();
-  let modelName = await getSystemVariable(
-    "GEMINI_MODEL",
-    "gemini-2.5-flash",
-  );
+  const [client, rawModelName] = await Promise.all([
+    getGoogleClient(),
+    getSystemVariable("GEMINI_MODEL", "gemini-2.5-flash"),
+  ]);
+  let modelName = rawModelName;
 
   // Redirección de resiliencia si se configuró el preview descontinuado "gemini-3-flash-preview"
   if (modelName === "gemini-3-flash-preview") {

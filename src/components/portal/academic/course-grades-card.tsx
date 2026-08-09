@@ -61,17 +61,17 @@ export function CourseGradesCard({
   };
 
   return (
-    <Card className="group relative overflow-hidden rounded-[2.5rem] border border-border/40 bg-card/20 backdrop-blur-xl transition-all duration-500 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5">
-      <CardHeader className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-4 space-y-0 p-6 sm:p-8 pb-4">
+    <Card className="overflow-hidden rounded-2xl border border-border/50 bg-card/80 shadow-sm transition-colors hover:border-primary/30">
+      <CardHeader className="flex flex-col items-start justify-between gap-4 space-y-0 p-5 pb-4 xs:flex-row xs:items-center">
         <div className="flex items-center gap-4">
-          <div className="flex size-16 shrink-0 items-center justify-center rounded-[1.25rem] bg-primary/10 text-primary group-hover:scale-110 group-hover:bg-primary/20 transition-all duration-500">
-            <IconBook className="size-8" />
+          <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <IconBook className="size-5" />
           </div>
           <div className="min-w-0">
-            <h3 className="text-xl sm:text-2xl font-black tracking-tight leading-tight truncate">
+            <h3 className="truncate text-lg font-bold leading-tight">
               {curso.nombre}
             </h3>
-            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mt-1 truncate">
+            <p className="mt-1 truncate text-xs text-muted-foreground">
               {curso.areaCurricular.nombre}
             </p>
           </div>
@@ -83,7 +83,7 @@ export function CourseGradesCard({
           </span>
           <div
             className={cn(
-              "px-5 py-2 rounded-2xl border text-2xl sm:text-3xl font-black tabular-nums shadow-lg transition-all duration-500 group-hover:scale-105",
+              "rounded-xl border px-4 py-2 text-2xl font-bold tabular-nums",
               getBadgeColor(promedio),
             )}
           >
@@ -92,15 +92,15 @@ export function CourseGradesCard({
         </div>
       </CardHeader>
 
-      <CardContent className="px-8 pb-8 pt-2">
-        <div className="flex flex-wrap items-center gap-3 mb-6">
-          <div className="flex items-center gap-2 text-[11px] font-bold text-muted-foreground/80 bg-muted/40 px-4 py-2 rounded-xl border border-border/40">
+      <CardContent className="px-5 pb-5 pt-2">
+        <div className="mb-5 flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-2 rounded-lg border border-border/50 bg-muted/30 px-3 py-2 text-xs font-medium text-muted-foreground">
             <IconTrendingUp className="size-4 text-primary/60" />
             <span>{notas.length} Evaluaciones Registradas</span>
           </div>
 
           {curso.profesor && (
-            <div className="flex items-center gap-2 text-[11px] font-bold text-muted-foreground/80 bg-muted/40 px-4 py-2 rounded-xl border border-border/40">
+            <div className="flex items-center gap-2 rounded-lg border border-border/50 bg-muted/30 px-3 py-2 text-xs font-medium text-muted-foreground">
               <IconInfoCircle className="size-4 text-primary/60" />
               <span className="capitalize">
                 Cátedra: {curso.profesor.name} {curso.profesor.apellidoPaterno}
@@ -111,7 +111,7 @@ export function CourseGradesCard({
 
         <Button
           variant="outline"
-          className="w-full justify-between h-12 rounded-2xl bg-muted/20 border-border/40 hover:bg-muted/40 hover:border-primary/20 font-black text-xs uppercase tracking-widest transition-all duration-300"
+          className="h-10 w-full justify-between rounded-xl border-border/50 bg-transparent text-xs font-semibold"
           onClick={() => setExpanded(!expanded)}
         >
           {expanded ? "Cerrar Detalles" : "Desglosar Evaluaciones"}
@@ -123,14 +123,14 @@ export function CourseGradesCard({
         </Button>
 
         {expanded && (
-          <div className="mt-5 space-y-3 animate-in slide-in-from-top-4 duration-500 ease-out">
-            <div className="h-px bg-linear-to-r from-transparent via-border/40 to-transparent mb-5" />
+          <div className="mt-5 space-y-3">
+            <div className="mb-5 h-px bg-border/50" />
 
             {notas.map((nota: any) => (
               <div key={nota.id} className="space-y-2">
                 <div
                   className={cn(
-                    "flex items-center justify-between p-4 rounded-2xl border transition-all duration-300 hover:scale-[1.01]",
+                    "flex items-center justify-between rounded-xl border p-4",
                     getBgColor(nota.valor),
                   )}
                 >
@@ -141,11 +141,11 @@ export function CourseGradesCard({
                     <div className="flex items-center gap-2">
                       <Badge
                         variant="outline"
-                        className="text-[9px] font-black px-2 py-0.5 h-auto rounded-lg border-primary/20 bg-primary/5 text-primary/80 uppercase tracking-tighter"
+                        className="h-auto rounded-md border-primary/20 bg-primary/5 px-2 py-0.5 text-[10px] font-semibold text-primary"
                       >
                         {nota.evaluacion.tipoEvaluacion.nombre}
                       </Badge>
-                      <span className="text-[10px] text-muted-foreground/60 font-black uppercase tracking-widest">
+                      <span className="text-[10px] font-medium text-muted-foreground">
                         Impacto: {nota.evaluacion.peso}%
                       </span>
                     </div>
@@ -153,7 +153,7 @@ export function CourseGradesCard({
 
                   <span
                     className={cn(
-                      "text-xl font-black tabular-nums transition-transform group-hover:scale-110",
+                      "text-xl font-bold tabular-nums",
                       getNotaColor(nota.valor),
                     )}
                   >
@@ -163,7 +163,7 @@ export function CourseGradesCard({
 
                 {/* Comment Section if exists */}
                 {nota.comentario && (
-                  <div className="mx-4 p-3 rounded-xl bg-primary/5 border border-primary/10 text-[11px] text-foreground/70 italic flex gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="mx-2 flex gap-2 rounded-lg border border-primary/10 bg-primary/5 p-3 text-xs text-foreground/70">
                     <IconQuote size={14} className="shrink-0 text-primary/40" />
                     <p>{nota.comentario}</p>
                   </div>
@@ -173,9 +173,6 @@ export function CourseGradesCard({
           </div>
         )}
       </CardContent>
-
-      {/* Subtle Bottom Glow Overlay */}
-      <div className="absolute -bottom-10 -right-10 size-40 bg-primary/5 blur-3xl pointer-events-none rounded-full" />
     </Card>
   );
 }

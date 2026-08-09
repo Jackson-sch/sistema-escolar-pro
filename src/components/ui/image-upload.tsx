@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
 import Image from "next/image"
-import { useTranslation } from "@/lib/i18n"
 
 
 interface ImageUploadProps {
@@ -25,7 +24,6 @@ export function ImageUpload({
   disabled: externalDisabled,
   className,
 }: ImageUploadProps) {
-  const { t } = useTranslation()
   const [isUploading, setIsUploading] = React.useState(false)
   const fileInputRef = React.useRef<HTMLInputElement>(null)
 
@@ -42,17 +40,18 @@ export function ImageUpload({
         body: formData,
       })
 
+      if (!response.ok) throw new Error(`Error de subida (${response.status})`)
       const data = await response.json()
 
       if (response.ok && data.url) {
         onChange(data.url)
-        toast.success(t("imageUpload.success"))
+        toast.success("Imagen subida correctamente")
       } else {
-        throw new Error(data.error || t("imageUpload.error"))
+        throw new Error(data.error || "Error al subir la imagen")
       }
     } catch (error: any) {
       console.error("Upload error:", error)
-      toast.error(error.message || t("imageUpload.failed"))
+      toast.error(error.message || "No se pudo subir la imagen")
     } finally {
       setIsUploading(false)
     }
@@ -62,7 +61,7 @@ export function ImageUpload({
     const file = e.target.files?.[0]
     if (file) {
       if (!file.type.startsWith("image/")) {
-        toast.error(t("imageUpload.invalidType"))
+        toast.error("El archivo debe ser una imagen")
         return
       }
       uploadFile(file)
@@ -88,11 +87,22 @@ export function ImageUpload({
   return (
     <div className={cn("space-y-4 w-full flex flex-col items-center justify-center", className)}>
       <div
+        role="button"
+        tabIndex={disabled ? undefined : 0}
+        aria-disabled={disabled || undefined}
+        aria-label={value ? "Cambiar imagen" : "Subir imagen"}
         onClick={() => !disabled && fileInputRef.current?.click()}
+        onKeyDown={(e) => {
+          if (disabled) return;
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            fileInputRef.current?.click();
+          }
+        }}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
         className={cn(
-          "relative group cursor-pointer flex flex-col items-center justify-center gap-4 transition-all duration-300",
+          "relative group cursor-pointer flex flex-col items-center justify-center gap-4 transition-[background-color,border-color,box-shadow] duration-300 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
           "w-48 h-48 rounded-3xl overflow-hidden border-2 border-dashed",
           value
             ? "border-primary/50 bg-primary/5 shadow-inner"
@@ -110,9 +120,9 @@ export function ImageUpload({
         />
 
         {isUploading && (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-background/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-background/60 backdrop-blur-sm animate-in fade-in animation-duration-">
             <IconLoader2 className="size-10 text-primary animate-spin" />
-            <p className="text-xs font-bold uppercase tracking-widest mt-2 text-primary">{t("imageUpload.uploading")}</p>
+            <p className="text-xs font-bold uppercase tracking-widest mt-2 text-primary">Subiendo...</p>
           </div>
         )}
 
@@ -120,9 +130,10 @@ export function ImageUpload({
           <>
             <Image
               src={value}
-              alt={t("imageUpload.preview")}
+              alt="Vista previa"
               fill
               unoptimized
+              sizes="192px"
               className="object-cover transition-transform duration-500 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -137,7 +148,7 @@ export function ImageUpload({
               }}
               variant="destructive"
               size="icon"
-              className="absolute top-2 right-2 size-8 rounded-full shadow-lg scale-0 group-hover:scale-100 transition-transform hover:scale-110 active:scale-90"
+              className="absolute top-2 right-2 size-8 rounded-full shadow-lg opacity-0 group-hover:opacity-100 scale-95 group-hover:scale-100 transition-[opacity,transform] hover:scale-110 active:scale-90"
               disabled={isUploading}
             >
               <IconX className="size-4" />
@@ -149,13 +160,13 @@ export function ImageUpload({
               <div className="p-4 bg-muted/10 rounded-2xl group-hover:bg-primary/10 transition-colors">
                 <IconPhoto className="size-10" />
               </div>
-              <span className="text-xs font-bold uppercase tracking-widest">{t("imageUpload.uploadImage")}</span>
+              <span className="text-xs font-bold uppercase tracking-widest">Subir Imagen</span>
             </div>
           )
         )}
       </div>
       <p className="text-xs text-muted-foreground font-medium uppercase tracking-tighter">
-        {t("imageUpload.maxSize")}
+        PNG, JPG, WEBP (Máx. 4MB)
       </p>
     </div>
   )

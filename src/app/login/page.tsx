@@ -1,7 +1,9 @@
 import { LoginForm } from "@/components/auth/login-form";
-import { IconSchool, IconCheck } from "@tabler/icons-react";
+import { IconCheck } from "@tabler/icons-react";
 import SVGAnimado from "@/components/common/svg-animado";
 import { getInstitucionAction } from "@/actions/institucion";
+import { BrandLogo, BrandIcon } from "@/components/common/brand-logo";
+import Image from "next/image";
 
 export default async function LoginPage() {
   const { data } = await getInstitucionAction();
@@ -21,20 +23,24 @@ export default async function LoginPage() {
         </div>
 
         <div className="relative z-10 flex items-center gap-3 font-semibold text-xl">
-          <div className="flex h-10 w-10 items-center justify-center rounded-sm bg-primary/10 p-1 border border-primary/20 backdrop-blur-sm overflow-hidden">
-            {data?.logo ? (
-              <img
+          {data?.logo ? (
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 p-1 border border-primary/20 overflow-hidden">
+              <Image
                 src={data.logo}
                 alt={data.nombreInstitucion || "Logo"}
+                width={40}
+                height={40}
                 className="h-full w-full object-contain rounded-sm"
               />
-            ) : (
-              <IconSchool className="h-6 w-6 text-primary" />
-            )}
-          </div>
-          <span className="tracking-tight">
-            {data?.nombreInstitucion || "EduPeru Pro"}
-          </span>
+            </div>
+          ) : (
+            <BrandLogo iconSize={36} />
+          )}
+          {data?.nombreInstitucion && (
+            <span className="tracking-tight font-bold text-white">
+              {data.nombreInstitucion}
+            </span>
+          )}
         </div>
 
         <div className="relative z-10 space-y-8">
@@ -74,19 +80,21 @@ export default async function LoginPage() {
       <div className="flex items-center justify-center p-8 bg-zinc-50/50 dark:bg-zinc-950/50">
         <div className="w-full max-w-[420px] space-y-8">
           <div className="lg:hidden flex flex-col items-center gap-4 mb-8">
-            <div className="h-16 w-16 rounded-2xl bg-white dark:bg-zinc-900 flex items-center justify-center shadow-xl shadow-primary/5 border border-zinc-200 dark:border-zinc-800 overflow-hidden p-2">
+            <div className="rounded-2xl bg-white dark:bg-zinc-900 flex items-center justify-center shadow-xl shadow-indigo-500/10 border border-zinc-200 dark:border-zinc-800 p-3">
               {data?.logo ? (
-                <img
+                <Image
                   src={data.logo}
                   alt={data.nombreInstitucion || "Logo"}
-                  className="h-full w-full object-contain"
+                  width={40}
+                  height={40}
+                  className="h-10 w-10 object-contain"
                 />
               ) : (
-                <IconSchool className="h-10 w-10 text-primary" />
+                <BrandIcon size={40} />
               )}
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-center">
-              {data?.nombreInstitucion || "EduPeru Pro"}
+              {data?.nombreInstitucion || "EduNova Pro"}
             </h1>
           </div>
 

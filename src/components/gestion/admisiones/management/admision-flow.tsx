@@ -116,7 +116,7 @@ export function AdmisionFlow({ admision, onSuccess }: AdmisionFlowProps) {
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="relative group overflow-hidden bg-background/40 backdrop-blur-xl p-4 rounded-2xl border border-white/5 shadow-2xl transition-all duration-300 hover:border-violet-500/30">
+        <div className="relative group overflow-hidden bg-card/80 p-4 rounded-2xl border border-border/50 shadow-sm transition-[border-color] duration-300 hover:border-violet-500/30">
           <div className="absolute inset-0 bg-linear-to-br from-violet-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           <IconCalendarEvent className="size-5 mb-3 text-violet-500" />
           <span className="block text-[10px] font-bold text-muted-foreground tracking-widest mb-1">Entrevista</span>
@@ -125,7 +125,7 @@ export function AdmisionFlow({ admision, onSuccess }: AdmisionFlowProps) {
           </p>
         </div>
 
-        <div className="relative group overflow-hidden bg-background/40 backdrop-blur-xl p-4 rounded-2xl border border-white/5 shadow-2xl transition-all duration-300 hover:border-blue-500/30">
+        <div className="relative group overflow-hidden bg-card/80 p-4 rounded-2xl border border-border/50 shadow-sm transition-[border-color] duration-300 hover:border-blue-500/30">
           <div className="absolute inset-0 bg-linear-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           <IconClipboardCheck className="size-5 mb-3 text-blue-500" />
           <span className="block text-[10px] font-bold text-muted-foreground tracking-widest mb-1">Resultado</span>
@@ -133,8 +133,8 @@ export function AdmisionFlow({ admision, onSuccess }: AdmisionFlowProps) {
         </div>
 
         <div className={cn(
-          "relative group overflow-hidden bg-background/40 backdrop-blur-xl p-4 rounded-2xl border shadow-2xl transition-all duration-300 bg-linear-to-br",
-          statusVariants[admision.prospecto.estado] || "border-white/5"
+          "relative group overflow-hidden bg-card/80 p-4 rounded-2xl border border-border/50 shadow-sm transition-[border-color] duration-300 bg-linear-to-br",
+          statusVariants[admision.prospecto.estado] || "border-border/50"
         )}>
           <IconAlertCircle className="size-5 mb-3" />
           <span className="block text-[10px] font-bold opacity-70 tracking-widest mb-1">Estado Actual</span>
@@ -170,7 +170,7 @@ export function AdmisionFlow({ admision, onSuccess }: AdmisionFlowProps) {
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 border-border/40 bg-background/95 backdrop-blur-xl" align="start">
+                    <PopoverContent className="w-auto p-0 border-border/50 bg-popover shadow-md" align="start">
                       <Calendar
                         mode="single"
                         selected={field.value || undefined}
@@ -196,11 +196,11 @@ export function AdmisionFlow({ admision, onSuccess }: AdmisionFlowProps) {
                   <FormLabel className="text-[11px] font-bold tracking-widest text-muted-foreground/70 mb-2 ml-1">Actualizar Estado</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger className="w-full border-border/40 bg-background/50 rounded-xl transition-all focus:ring-violet-500/20">
+                      <SelectTrigger className="w-full border-border/40 bg-background/50 rounded-xl transition-shadow focus:ring-violet-500/20">
                         <SelectValue placeholder="Seleccionar estado" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent className="border-border/40 bg-background/95 backdrop-blur-xl">
+                    <SelectContent className="border-border/50 bg-popover shadow-md">
                       <SelectItem value="EVALUANDO" className="text-xs">En Evaluación</SelectItem>
                       <SelectItem value="ADMITIDO" className="text-emerald-500 font-bold text-xs tracking-tight">✓ Admitir Estudiante</SelectItem>
                       <SelectItem value="RECHAZADO" className="text-red-500 font-bold text-xs tracking-tight">✕ Rechazar Solicitud</SelectItem>
@@ -222,7 +222,7 @@ export function AdmisionFlow({ admision, onSuccess }: AdmisionFlowProps) {
                   <Input
                     placeholder="Ej: 18.5/20 - Sobresaliente"
                     {...field}
-                    className="h-11 border-border/40 bg-background/50 rounded-xl focus:ring-violet-500/20 transition-all font-medium"
+                    className="h-11 border-border/40 bg-background/50 rounded-xl focus:ring-violet-500/20 transition-shadow font-medium"
                   />
                 </FormControl>
                 <FormMessage />
@@ -240,7 +240,7 @@ export function AdmisionFlow({ admision, onSuccess }: AdmisionFlowProps) {
                   <Textarea
                     placeholder="Escriba aquí los detalles de la entrevista o justificación de la decisión..."
                     {...field}
-                    className="min-h-[120px] border-border/40 bg-background/50 rounded-xl focus:ring-violet-500/20 transition-all resize-none p-4"
+                    className="min-h-[120px] border-border/40 bg-background/50 rounded-xl focus:ring-violet-500/20 transition-shadow resize-none p-4"
                   />
                 </FormControl>
                 <FormMessage />
@@ -279,7 +279,7 @@ export function AdmisionFlow({ admision, onSuccess }: AdmisionFlowProps) {
           <Button
             onClick={handleGenerateStudent}
             disabled={isGenerating}
-            className="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold h-12 rounded-xl transition-all shadow-[0_0_20px_-5px_rgba(124,58,237,0.5)] hover:shadow-[0_0_30px_-5px_rgba(124,58,237,0.7)]"
+            className="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold h-12 rounded-xl transition-[background-color,box-shadow] shadow-[0_0_20px_-5px_rgba(124,58,237,0.5)] hover:shadow-[0_0_30px_-5px_rgba(124,58,237,0.7)]"
           >
             {isGenerating ? (
               <>

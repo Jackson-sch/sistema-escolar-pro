@@ -3,6 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useRouter } from "next/navigation";
 import {
   Form,
   FormControl,
@@ -23,7 +24,7 @@ import {
 } from "@/components/ui/select";
 import { upsertEventoAction } from "@/actions/communications";
 import { toast } from "sonner";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
@@ -32,10 +33,11 @@ import {
 } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { IconCalendar, IconClock } from "@tabler/icons-react";
+import { IconCalendar, IconClock, IconDeviceFloppy, IconLoader2 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { TimeInput } from "@/components/ui/time-input";
 import { useFormModal } from "@/components/modals/form-modal-context";
+import { FormKeyboardHelpBar } from "@/components/common/form-keyboard-help-bar";
 
 const eventSchema = z.object({
   titulo: z.string().min(5, "El título debe tener al menos 5 caracteres"),
@@ -58,6 +60,7 @@ interface EventFormProps {
 
 export function EventForm({ onSuccess, initialData, id }: EventFormProps) {
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
   const { setIsDirty, setOnSubmit } = useFormModal();
 
   const form = useForm<z.infer<typeof eventSchema>>({
@@ -90,6 +93,7 @@ export function EventForm({ onSuccess, initialData, id }: EventFormProps) {
       if (res.success) {
         toast.success(res.success);
         setIsDirty(false);
+        router.refresh();
         onSuccess();
       } else {
         toast.error(res.error);
@@ -99,10 +103,16 @@ export function EventForm({ onSuccess, initialData, id }: EventFormProps) {
     }
   };
 
+  const onSubmitRef = useRef(onSubmit);
+
   useEffect(() => {
-    setOnSubmit(() => form.handleSubmit(onSubmit)());
+    onSubmitRef.current = onSubmit;
+  });
+
+  useEffect(() => {
+    setOnSubmit(() => form.handleSubmit(onSubmitRef.current)());
     return () => setOnSubmit(undefined);
-  }, [form, onSubmit, setOnSubmit]);
+  }, [form, setOnSubmit]);
 
   const { isDirty } = form.formState;
 
@@ -113,18 +123,20 @@ export function EventForm({ onSuccess, initialData, id }: EventFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-1 py-1">
         <FormField
           control={form.control}
           name="titulo"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nombre del Evento</FormLabel>
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Nombre del Evento
+              </FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Ej: Ceremonia de Clausura"
+                  placeholder="Ej. Ceremonia de Clausura Académica"
                   {...field}
-                  className="rounded-full border-border/40 bg-background/50"
+                  className="bg-background border-border/40 rounded-xl text-xs h-9"
                 />
               </FormControl>
               <FormMessage />
@@ -137,12 +149,14 @@ export function EventForm({ onSuccess, initialData, id }: EventFormProps) {
           name="descripcion"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Descripción</FormLabel>
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Descripción o Agenda del Evento
+              </FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Detalles del evento..."
+                  placeholder="Detalles sobre el desarrollo de la actividad..."
                   {...field}
-                  className="min-h-[80px] border-border/40 bg-background/50 resize-none"
+                  className="min-h-[80px] bg-background border-border/40 rounded-xl text-xs p-3 resize-none"
                 />
               </FormControl>
               <FormMessage />
@@ -150,20 +164,22 @@ export function EventForm({ onSuccess, initialData, id }: EventFormProps) {
           )}
         />
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <FormField
             control={form.control}
             name="fechaInicio"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel>Fecha Inicio</FormLabel>
+                <FormLabel className="text-xs font-medium text-foreground/80">
+                  Fecha Inicio
+                </FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
-                        variant={"outline"}
+                        variant="outline"
                         className={cn(
-                          "w-full pl-3 text-left font-normal rounded-full border-border/40 bg-background/50 h-10 px-4",
+                          "w-full pl-3 text-left font-medium bg-background border-border/40 rounded-xl text-xs h-9 justify-between",
                           !field.value && "text-muted-foreground",
                         )}
                       >
@@ -172,12 +188,12 @@ export function EventForm({ onSuccess, initialData, id }: EventFormProps) {
                         ) : (
                           <span>Seleccionar fecha</span>
                         )}
-                        <IconCalendar className="ml-auto h-4 w-4 opacity-50" />
+                        <IconCalendar className="size-4 opacity-50 ml-1" />
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
                   <PopoverContent
-                    className="w-auto p-0 border-border/40 bg-background/95 backdrop-blur-xl"
+                    className="w-auto p-0 rounded-2xl border-border/40"
                     align="start"
                   >
                     <Calendar
@@ -194,19 +210,22 @@ export function EventForm({ onSuccess, initialData, id }: EventFormProps) {
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="fechaFin"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel>Fecha Fin</FormLabel>
+                <FormLabel className="text-xs font-medium text-foreground/80">
+                  Fecha Fin
+                </FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
-                        variant={"outline"}
+                        variant="outline"
                         className={cn(
-                          "w-full pl-3 text-left font-normal rounded-full border-border/40 bg-background/50 h-10 px-4",
+                          "w-full pl-3 text-left font-medium bg-background border-border/40 rounded-xl text-xs h-9 justify-between",
                           !field.value && "text-muted-foreground",
                         )}
                       >
@@ -215,12 +234,12 @@ export function EventForm({ onSuccess, initialData, id }: EventFormProps) {
                         ) : (
                           <span>Seleccionar fecha</span>
                         )}
-                        <IconCalendar className="ml-auto h-4 w-4 opacity-50" />
+                        <IconCalendar className="size-4 opacity-50 ml-1" />
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
                   <PopoverContent
-                    className="w-auto p-0 border-border/40 bg-background/95 backdrop-blur-xl"
+                    className="w-auto p-0 rounded-2xl border-border/40"
                     align="start"
                   >
                     <Calendar
@@ -243,13 +262,15 @@ export function EventForm({ onSuccess, initialData, id }: EventFormProps) {
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3.5">
           <FormField
             control={form.control}
             name="horaInicio"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Hora Inicio</FormLabel>
+                <FormLabel className="text-xs font-medium text-foreground/80">
+                  Hora Inicio
+                </FormLabel>
                 <FormControl>
                   <TimeInput value={field.value} onChange={field.onChange} />
                 </FormControl>
@@ -262,7 +283,9 @@ export function EventForm({ onSuccess, initialData, id }: EventFormProps) {
             name="horaFin"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Hora Fin</FormLabel>
+                <FormLabel className="text-xs font-medium text-foreground/80">
+                  Hora Fin
+                </FormLabel>
                 <FormControl>
                   <TimeInput value={field.value} onChange={field.onChange} />
                 </FormControl>
@@ -272,44 +295,49 @@ export function EventForm({ onSuccess, initialData, id }: EventFormProps) {
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <FormField
             control={form.control}
             name="tipo"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tipo</FormLabel>
+                <FormLabel className="text-xs font-medium text-foreground/80">
+                  Tipo de Evento
+                </FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger className="rounded-full w-full border-border/40 bg-background/50 h-10">
+                    <SelectTrigger className="bg-background border-border/40 rounded-xl text-xs h-9 font-medium w-full">
                       <SelectValue placeholder="Tipo" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent className="border-border/40 bg-background/95 backdrop-blur-xl">
-                    <SelectItem value="ACADEMICO">Académico</SelectItem>
-                    <SelectItem value="DEPORTIVO">Deportivo</SelectItem>
-                    <SelectItem value="CULTURAL">Cultural</SelectItem>
-                    <SelectItem value="REUNION">Reunión</SelectItem>
+                  <SelectContent className="rounded-xl border-border/40">
+                    <SelectItem value="ACADEMICO" className="text-xs font-medium">Académico</SelectItem>
+                    <SelectItem value="DEPORTIVO" className="text-xs font-medium">Deportivo</SelectItem>
+                    <SelectItem value="CULTURAL" className="text-xs font-medium">Cultural</SelectItem>
+                    <SelectItem value="REUNION" className="text-xs font-medium">Reunión de Padres</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="ubicacion"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Ubicación / Aula</FormLabel>
+                <FormLabel className="text-xs font-medium text-foreground/80">
+                  Ubicación / Aula
+                </FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Ej: Auditorio Principal"
+                    placeholder="Ej. Auditorio Principal"
                     {...field}
-                    className="rounded-full border-border/40 bg-background/50"
+                    className="bg-background border-border/40 rounded-xl text-xs h-9"
                   />
                 </FormControl>
                 <FormMessage />
@@ -318,27 +346,36 @@ export function EventForm({ onSuccess, initialData, id }: EventFormProps) {
           />
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-white/5">
+        {/* Guía de Atajos de Teclado */}
+        <FormKeyboardHelpBar />
+
+        {/* Botón de Enviar */}
+        <div className="flex items-center justify-end gap-3 pt-3 border-t border-border/30">
           <Button
             type="button"
             variant="outline"
             onClick={onSuccess}
-            className="w-full sm:w-auto rounded-full border-border/40 hover:bg-accent/50 hover:scale-105"
+            className="rounded-xl px-5 h-10 font-semibold text-xs border-border/40"
             disabled={loading}
           >
             Cancelar
           </Button>
           <Button
             type="submit"
-            variant="default"
-            className="w-full sm:w-auto rounded-full transition-all active:scale-[0.98] px-8 hover:scale-105"
             disabled={loading}
+            className="rounded-xl px-6 h-10 font-semibold text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 gap-2 min-w-[180px]"
           >
-            {loading
-              ? "Procesando..."
-              : id
-                ? "Actualizar Evento"
-                : "Programar Evento"}
+            {loading ? (
+              <>
+                <IconLoader2 className="size-4 animate-spin" />
+                <span>Procesando...</span>
+              </>
+            ) : (
+              <>
+                <IconDeviceFloppy className="size-4" />
+                <span>{id ? "Actualizar Evento" : "Programar y Publicar"}</span>
+              </>
+            )}
           </Button>
         </div>
       </form>

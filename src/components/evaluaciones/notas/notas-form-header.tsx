@@ -1,4 +1,4 @@
-import { IconDeviceFloppy, IconLoader2 } from "@tabler/icons-react";
+import { IconDeviceFloppy, IconLoader2, IconCircleCheck, IconAlertCircle } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -6,12 +6,14 @@ import { cn } from "@/lib/utils";
 interface NotasFormHeaderProps {
   escala: "VIGESIMAL" | "LITERAL" | "DESCRIPTIVA";
   isPending: boolean;
+  isDirty?: boolean;
   onGuardar: () => void;
 }
 
 export function NotasFormHeader({
   escala,
   isPending,
+  isDirty = false,
   onGuardar,
 }: NotasFormHeaderProps) {
   const isLiteral = escala === "LITERAL";
@@ -19,7 +21,7 @@ export function NotasFormHeader({
   return (
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-border/40 pb-6">
       <div className="space-y-1">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <h2 className="text-2xl font-black tracking-tight uppercase bg-clip-text text-transparent bg-linear-to-r from-foreground to-foreground/70">
             Registro Curricular
           </h2>
@@ -33,18 +35,36 @@ export function NotasFormHeader({
           >
             {escala}
           </Badge>
+
+          {/* Sync / Autosave Badge Status */}
+          {isPending ? (
+            <Badge className="bg-amber-500/10 text-amber-600 border border-amber-500/20 font-bold gap-1 text-[10px]">
+              <IconLoader2 className="animate-spin size-3" />
+              Guardando en servidor...
+            </Badge>
+          ) : isDirty ? (
+            <Badge className="bg-amber-500/10 text-amber-600 border border-amber-500/20 font-bold gap-1 text-[10px]">
+              <IconAlertCircle className="size-3" />
+              Borrador local guardado
+            </Badge>
+          ) : (
+            <Badge className="bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 font-bold gap-1 text-[10px]">
+              <IconCircleCheck className="size-3 text-emerald-500" />
+              Sincronizado
+            </Badge>
+          )}
         </div>
         <p className="text-[10px] text-muted-foreground font-bold tracking-widest uppercase">
           {isLiteral
-            ? "Escala de Logros (AD, A, B, C)"
-            : "Escala Vigesimal (0-20)"}
+            ? "Escala de Logros (AD, A, B, C) · Navega con Enter / Flechas"
+            : "Escala Vigesimal (0-20) · Navega con Enter / Flechas"}
         </p>
       </div>
       <div className="flex items-center gap-3 w-full md:w-auto">
         <Button
           onClick={onGuardar}
-          disabled={isPending}
-          className="w-full md:w-auto min-w-[160px] rounded-full"
+          disabled={isPending || !isDirty}
+          className="w-full md:w-auto min-w-[160px] rounded-full shadow-md transition-[width,height]"
         >
           {isPending ? (
             <IconLoader2 className="animate-spin size-4" />

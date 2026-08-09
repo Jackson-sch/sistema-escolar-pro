@@ -7,7 +7,18 @@ import {
   IconLayoutGrid,
   IconSchool,
   IconClock,
+  IconAward,
+  IconRosette,
 } from "@tabler/icons-react";
+
+const ACADEMICO_TABS = [
+  { label: "Estructura Académica", value: "/gestion/academico/estructura", icon: IconSchool },
+  { label: "Malla Curricular", value: "/gestion/academico/areas", icon: IconBooks },
+  { label: "Competencias CNEB", value: "/gestion/academico/competencias", icon: IconAward },
+  { label: "Carga Académica", value: "/gestion/academico/carga-horaria", icon: IconLayoutGrid },
+  { label: "Horarios", value: "/gestion/academico/horarios", icon: IconClock },
+  { label: "Promociones y Cierre", value: "/gestion/academico/promociones", icon: IconRosette },
+];
 
 export default function AcademicoLayout({
   children,
@@ -17,17 +28,10 @@ export default function AcademicoLayout({
   const pathname = usePathname();
   const router = useRouter();
 
-  const tabs = [
-    { label: "Estructura Académica", value: "/gestion/academico/estructura", icon: IconSchool },
-    { label: "Malla Curricular", value: "/gestion/academico/areas", icon: IconBooks },
-    { label: "Carga Académica", value: "/gestion/academico/carga-horaria", icon: IconLayoutGrid },
-    { label: "Horarios", value: "/gestion/academico/horarios", icon: IconClock },
-  ];
-
   const currentTab =
-    tabs.find((tab) => pathname.includes(tab.value))?.value || tabs[0].value;
+    ACADEMICO_TABS.find((tab) => pathname.includes(tab.value))?.value || ACADEMICO_TABS[0].value;
 
-  const tabsForAnimated = tabs.map(tab => ({
+  const tabsForAnimated = ACADEMICO_TABS.map(tab => ({
     id: tab.value,
     label: tab.label,
     icon: <tab.icon className="size-4" />

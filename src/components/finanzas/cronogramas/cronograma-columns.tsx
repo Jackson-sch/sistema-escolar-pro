@@ -131,7 +131,7 @@ function StatusBadge({ status }: { status: StatusKey }) {
   return (
     <Badge
       className={cn(
-        "inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-[9px] font-black tracking-widest transition-all hover:scale-105 shadow-sm",
+        "inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-[9px] font-black tracking-widest transition-transform hover:scale-105 shadow-sm",
         cfg.bg,
         cfg.text,
       )}
@@ -169,12 +169,13 @@ export const getCronogramaColumns = (meta: {
 
       return (
         <div className="flex items-center gap-4 group">
-          <div className="relative size-10 rounded-xl overflow-hidden ring-1 ring-border/40 bg-muted/40 shadow-xs transition-all group-hover:ring-primary/40 group-hover:shadow-md">
+          <div className="relative size-10 rounded-xl overflow-hidden ring-1 ring-border/40 bg-muted/40 shadow-xs transition-shadow group-hover:ring-primary/40 group-hover:shadow-md">
             {estudiante.image ? (
               <Image
                 src={estudiante.image}
                 alt={fullName}
                 fill
+                sizes="40px"
                 className="object-cover transition-transform group-hover:scale-110"
               />
             ) : (
@@ -337,7 +338,7 @@ export const getCronogramaColumns = (meta: {
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0 rounded-xl text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-all"
+              className="h-8 w-8 p-0 rounded-xl text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors"
               onClick={() => {
                 meta.setSelectedPago({
                   id: ultimoPago.id,
@@ -360,7 +361,7 @@ export const getCronogramaColumns = (meta: {
           <IAReminderButton cronograma={row.original} />
           <Button
             size="sm"
-            className="h-9 px-5 gap-2 text-[10px] font-black uppercase tracking-widest rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 transition-all active:scale-95"
+            className="h-9 px-5 gap-2 text-[10px] font-black uppercase tracking-widest rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 transition-[background-color,transform] active:scale-95"
             onClick={async () => {
               meta.setSelectedCronograma(row.original);
               meta.setMontoPago(

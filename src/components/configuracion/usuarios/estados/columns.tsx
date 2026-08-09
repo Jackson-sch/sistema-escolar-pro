@@ -13,7 +13,6 @@ import {
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
@@ -49,22 +48,20 @@ export const columns: ColumnDef<any>[] = [
     cell: ({ row }) => {
       const permite = row.getValue("permiteLogin") as boolean;
       return (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="flex justify-center w-full">
-                {permite ? (
-                  <IconLockOpen className="h-4 w-4 text-green-500" />
-                ) : (
-                  <IconLock className="h-4 w-4 text-destructive" />
-                )}
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>
-              {permite ? "Permite iniciar sesión" : "Acceso bloqueado"}
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex justify-center w-full">
+              {permite ? (
+                <IconLockOpen className="h-4 w-4 text-green-500" />
+              ) : (
+                <IconLock className="h-4 w-4 text-destructive" />
+              )}
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            {permite ? "Permite iniciar sesión" : "Acceso bloqueado"}
+          </TooltipContent>
+        </Tooltip>
       );
     },
   },
@@ -92,18 +89,16 @@ export const columns: ColumnDef<any>[] = [
       const sistemico = row.getValue("sistemico") as boolean;
       if (!sistemico) return null;
       return (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="flex justify-center w-full">
-                <IconSettings className="h-4 w-4 text-muted-foreground animate-pulse" />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>
-              Estado crítico del sistema (no eliminable)
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex justify-center w-full">
+              <IconSettings className="h-4 w-4 text-muted-foreground animate-pulse" />
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            Estado crítico del sistema (no eliminable)
+          </TooltipContent>
+        </Tooltip>
       );
     },
   },

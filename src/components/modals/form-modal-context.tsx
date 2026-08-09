@@ -33,10 +33,13 @@ export function FormModalProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const value = React.useMemo(
+    () => ({ isDirty, setIsDirty, setOnSubmit, triggerSubmit }),
+    [isDirty, setOnSubmit, triggerSubmit],
+  );
+
   return (
-    <FormModalContext.Provider
-      value={{ isDirty, setIsDirty, setOnSubmit, triggerSubmit }}
-    >
+    <FormModalContext.Provider value={value}>
       {children}
     </FormModalContext.Provider>
   );

@@ -2,6 +2,7 @@
 import { serialize } from "@/lib/dto";
 
 import prisma from "@/lib/prisma";
+import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { achievementSchema, AchievementValues } from "@/lib/validations/achievement";
 
@@ -10,6 +11,11 @@ import { achievementSchema, AchievementValues } from "@/lib/validations/achievem
  */
 export async function createAchievementAction(studentId: string, values: AchievementValues) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     const validatedFields = achievementSchema.safeParse(values);
 
     if (!validatedFields.success) {
@@ -53,6 +59,11 @@ export async function getStudentAchievementsAction(studentId: string) {
  */
 export async function deleteAchievementAction(id: string) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     await prisma.logro.delete({
       where: { id },
     });

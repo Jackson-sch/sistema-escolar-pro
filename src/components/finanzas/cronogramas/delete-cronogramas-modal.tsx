@@ -145,7 +145,7 @@ export function DeleteCronogramasModal({
                   </SelectContent>
                 </Select>
                 <FormDescription className="text-xs ml-1">
-                  Deja en "Toda la institución" para eliminar de todos los niveles.
+                  Deja en &ldquo;Toda la institución&rdquo; para eliminar de todos los niveles.
                 </FormDescription>
               </FormItem>
             )}

@@ -9,11 +9,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import { ShineBorder } from "@/components/ui/shine-border";
 import { FormModalProvider, useFormModal } from "@/components/modals/form-modal-context";
 import { toast } from "sonner";
 import { SafeCloseDialog } from "@/components/modals/safe-close-dialog";
 import { useFormShortcuts } from "@/hooks/use-form-shortcuts";
+import { LucideIcon } from "lucide-react";
 
 interface FormModalProps {
   title: string;
@@ -24,6 +24,7 @@ interface FormModalProps {
   children: React.ReactNode;
   className?: string;
   headerClassName?: string;
+  Icon?: LucideIcon;
 }
 
 /**
@@ -47,6 +48,7 @@ function FormModalInner({
   children,
   className,
   headerClassName,
+  Icon
 }: FormModalProps) {
   const { isDirty, setIsDirty, triggerSubmit } = useFormModal();
   const [showConfirm, setShowConfirm] = useState(false);
@@ -89,17 +91,17 @@ function FormModalInner({
           }
         }}
         className={cn(
-          "sm:max-w-2xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 border-none shadow-2xl bg-card",
+          "sm:max-w-2xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 border-none shadow-lg bg-card",
           className,
         )}
       >
-        <ShineBorder shineColor={["#A07CFE", "#FE8FB5", "#FFBE7B"]} />
         <DialogHeader className={cn("p-6 pb-4 border-b", headerClassName)}>
           <div className="flex items-center gap-3">
-           <DialogTitle className="text-xl font-bold tracking-tight">
+           <DialogTitle className="flex items-center gap-3 text-2xl font-bold text-foreground">
+            {Icon && <Icon className="size-7 mr-2 text-primary" />}
             {title}
           </DialogTitle> 
-            {titleSpan && <span className="hidden sm:inline-flex items-center text-[10px] font-mono bg-white/5 text-zinc-500 border border-white/[0.07] px-2 py-1 rounded-md shrink-0">{titleSpan}</span>}
+            {titleSpan && <span className="hidden sm:inline-flex items-center text-xxs font-mono bg-white/5 text-zinc-500 border border-white/[0.07] px-2 py-1 rounded-md shrink-0">{titleSpan}</span>}
           </div>
           
           {description && (

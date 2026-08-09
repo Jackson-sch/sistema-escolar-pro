@@ -21,6 +21,7 @@ import { CapacityGauge } from "@/components/dashboard/capacity-gauge";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
 import { FinancialHealthCard } from "@/components/dashboard/financial-health-card";
 import { AttendanceTodayMonitor } from "@/components/dashboard/attendance-today-monitor";
+import { AIProactiveAlerts } from "@/components/dashboard/ai-proactive-alerts";
 import {
   IconLayoutDashboard,
   IconUserPlus,
@@ -65,16 +66,15 @@ export default async function DashboardPage() {
   const institucion = institucionRes.data;
 
   return (
-    <div className="flex flex-1 flex-col gap-8 p-0 sm:p-6 pt-0">
-      {/* Header with Quick Actions */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-4 sm:px-2">
+    <div className="flex flex-1 flex-col gap-6 px-0 pb-6 sm:px-4 pt-0">
+      <div className="flex flex-col justify-between gap-4 px-4 sm:flex-row sm:items-center sm:px-2">
         <PageHeader
           icon={<IconLayoutDashboard className="size-5" />}
           title="Dashboard Institucional"
           description={`Panel de control · ${institucion?.nombreInstitucion ?? "Sistema Escolar Pro"} · Periodo ${institucion?.cicloEscolarActual ?? "2025"}`}
         />
 
-        <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide py-1 px-1 -m-1 lg:m-0">
+        <div className="grid grid-cols-3 gap-2 sm:flex sm:shrink-0">
           <QuickAction
             href="/gestion/estudiantes"
             label="Matrícula"
@@ -96,14 +96,21 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* KPI Cards (Liquid Glass) */}
-      <section>
+      <div className="px-4 sm:px-2">
+        <AIProactiveAlerts
+          totalOverdue={stats?.totalOverdue || 0}
+          lateTodayCount={stats?.attendanceToday?.late || 0}
+          absentTodayCount={stats?.attendanceToday?.absent || 0}
+          capacityPercentage={stats?.capacityStats?.percentage || 0}
+        />
+      </div>
+
+      <section className="px-4 sm:px-2">
         <SectionCards stats={stats} />
       </section>
 
-      {/* Primary Insights: Monitors & Capacity */}
-      <section className="grid gap-6 px-2 lg:grid-cols-12">
-        <div className="lg:col-span-4 translate-y-0 transition-all hover:-translate-y-1">
+      <section className="grid gap-4 px-4 lg:grid-cols-12 sm:px-2">
+        <div className="lg:col-span-4">
           <AttendanceTodayMonitor
             present={stats?.attendanceToday?.present || 0}
             absent={stats?.attendanceToday?.absent || 0}
@@ -111,14 +118,14 @@ export default async function DashboardPage() {
             total={stats?.attendanceToday?.total || 0}
           />
         </div>
-        <div className="lg:col-span-4 translate-y-0 transition-all hover:-translate-y-1">
+        <div className="lg:col-span-4">
           <FinancialHealthCard
             collected={stats?.totalRevenue || 0}
             overdue={stats?.totalOverdue || 0}
             pending={stats?.totalPending || 0}
           />
         </div>
-        <div className="lg:col-span-4 translate-y-0 transition-all hover:-translate-y-1">
+        <div className="lg:col-span-4">
           <CapacityGauge
             occupied={stats?.capacityStats?.occupied || 0}
             total={stats?.capacityStats?.total || 0}
@@ -127,16 +134,14 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      {/* Main Grid: Bento Style */}
-      <section className="grid gap-6 px-2 lg:grid-cols-12 min-h-[600px]">
-        {/* Left Column: Trend + Admissions */}
-        <div className="lg:col-span-8 flex flex-col gap-6">
-          <div className="transition-all hover:-translate-y-1 duration-300">
+      <section className="grid min-h-[600px] gap-4 px-4 lg:grid-cols-12 sm:px-2">
+        <div className="flex flex-col gap-4 lg:col-span-8">
+          <div>
             <ChartAreaInteractive data={stats?.chartData} />
           </div>
 
-          <Card className="liquid-glass border-none flex-1 p-0">
-            <CardHeader className="border-b border-white/5 py-3 flex flex-col md:flex-row items-center justify-between">
+          <Card className="flex flex-1 flex-col overflow-hidden rounded-2xl border-border/50 bg-card/80 p-0 shadow-sm">
+            <CardHeader className="flex flex-col justify-between gap-3 border-b border-border/50 py-4 sm:flex-row sm:items-center">
               <div>
                 <CardTitle className="text-lg font-bold tracking-tight">
                   Admisiones Recientes
@@ -149,7 +154,7 @@ export default async function DashboardPage() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-primary font-bold gap-1 group"
+                  className="gap-1 font-semibold text-primary group"
                   asChild
                 >
                   <Link href="/gestion/estudiantes">
@@ -163,7 +168,7 @@ export default async function DashboardPage() {
               </div>
             </CardHeader>
             <CardContent className="p-0">
-              <ScrollArea className="h-[430px]">
+              <ScrollArea className="h-[390px]">
                 <div className="p-4">
                   <AdmissionsTable students={admissions} />
                 </div>
@@ -172,8 +177,7 @@ export default async function DashboardPage() {
           </Card>
         </div>
 
-        {/* Right Column: Recent Activity (Spans whole height) */}
-        <div className="lg:col-span-4 h-full min-h-[500px]">
+        <div className="min-h-[500px] lg:col-span-4">
           <RecentActivity
             activities={(stats?.recentActivity || []) as any}
             className="h-full"
@@ -199,9 +203,9 @@ function QuickAction({
     <Button
       variant={variant}
       className={cn(
-        "rounded-2xl gap-2 font-bold px-5 py-6 h-auto transition-all hover:scale-105 active:scale-95",
+        "h-9 min-w-0 gap-1.5 rounded-xl px-3 text-xs font-semibold shadow-xs",
         variant === "outline" &&
-          "border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary",
+          "border-border/60 bg-card/80 text-foreground hover:bg-accent",
       )}
       asChild
     >
@@ -223,15 +227,15 @@ function PageHeader({
   description: string;
 }) {
   return (
-    <div className="flex items-start gap-3 px-4 sm:px-2">
-      <div className="mt-1 flex size-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary shadow-sm border border-primary/5">
+    <div className="flex items-start gap-3">
+      <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
         {icon}
       </div>
       <div>
-        <h1 className="text-xl font-bold tracking-tight sm:text-3xl drop-shadow-sm">
+        <h1 className="text-xl font-bold tracking-tight sm:text-2xl">
           {title}
         </h1>
-        <p className="text-xs text-muted-foreground font-medium sm:text-sm">
+        <p className="text-xxs font-medium text-muted-foreground sm:text-xs">
           {description}
         </p>
       </div>

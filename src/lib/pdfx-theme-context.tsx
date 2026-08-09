@@ -12,7 +12,7 @@ export interface PdfxThemeProviderProps {
   children: any;
 }
 
-export function PdfxThemeProvider({ children }: PdfxThemeProviderProps) {
+function PdfxThemeProvider({ children }: PdfxThemeProviderProps) {
   return children;
 }
 

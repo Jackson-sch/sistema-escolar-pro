@@ -22,10 +22,11 @@ export function exportToExcel(data: any[], fileName: string, sheetName: string =
   // esto debe llamarse desde un Client Component
   try {
     const link = document.createElement('a');
-    link.href = window.URL.createObjectURL(blob);
+    const url = window.URL.createObjectURL(blob);
+    link.href = url;
     link.download = fullFileName;
     link.click();
-    window.URL.revokeObjectURL(link.href);
+    setTimeout(() => window.URL.revokeObjectURL(url), 100);
   } catch (err) {
     console.error('Error al descargar el archivo Excel:', err);
   }

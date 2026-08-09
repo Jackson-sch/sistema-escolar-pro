@@ -1,34 +1,21 @@
 "use server"
 
 import prisma from "@/lib/prisma"
+import { auth } from "@/auth";
 import { revalidatePath } from "next/cache"
 
 const REVALIDATE_PATH = "/gestion/academico/competencias"
-
-/**
- * Obtener competencias por área curricular
- */
-export async function getCompetenciesByAreaAction(areaId: string) {
-  try {
-    const competencies = await prisma.competencia.findMany({
-      where: { areaCurricularId: areaId },
-      include: {
-        capacidades: true
-      },
-      orderBy: { createdAt: "asc" }
-    })
-    return { data: competencies }
-  } catch (error) {
-    console.error("Error fetching competencies:", error)
-    return { error: "No se pudieron cargar las competencias" }
-  }
-}
 
 /**
  * Crear o editar una competencia
  */
 export async function upsertCompetencyAction(values: any, id?: string) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     const { nombre, descripcion, areaCurricularId } = values
 
     if (id) {
@@ -56,6 +43,11 @@ export async function upsertCompetencyAction(values: any, id?: string) {
  */
 export async function deleteCompetencyAction(id: string) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     await prisma.competencia.delete({
       where: { id }
     })
@@ -73,6 +65,11 @@ export async function deleteCompetencyAction(id: string) {
  */
 export async function upsertCapacityAction(values: any, id?: string) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     const { nombre, descripcion, competenciaId } = values
 
     if (id) {
@@ -100,6 +97,11 @@ export async function upsertCapacityAction(values: any, id?: string) {
  */
 export async function deleteCapacityAction(id: string) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     await prisma.capacidad.delete({
       where: { id }
     })
@@ -132,28 +134,33 @@ export async function getCurricularAreasAction(nivelId?: string) {
 }
 
 /**
- * Obtener todas las competencias con sus capacidades de un nivel específico
+ * Obtener todas las competencias con sus capacidades de un nivel específico o globales
  */
-export async function getCompetenciesByNivelAction(nivelId: string) {
+export async function getCompetenciesByNivelAction(nivelId?: string) {
   try {
     const competencies = await prisma.competencia.findMany({
-      where: { 
-        areaCurricular: { 
-          nivelId 
-        } 
-      },
+      where: nivelId
+        ? {
+            areaCurricular: {
+              OR: [
+                { nivelId },
+                { nivelId: null },
+              ],
+            },
+          }
+        : undefined,
       include: {
         capacidades: true,
         areaCurricular: {
           select: {
             nombre: true,
             color: true,
-          }
-        }
+          },
+        },
       },
-      orderBy: { createdAt: "asc" }
+      orderBy: { createdAt: "asc" },
     });
-    
+
     return { data: competencies };
   } catch (error) {
     console.error("Error fetching competencies by nivel:", error);

@@ -6,18 +6,16 @@ import {
   IconBuildingBank,
   IconDeviceMobile,
   IconCheck,
-  IconStarFilled,
+  IconStar,
   IconSearch,
+  IconChevronRight,
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
+import { Input } from "@/components/ui/input";
 import { FormModalProvider } from "@/components/modals/form-modal-context";
 import { BankAccountForm } from "./bank-account-form";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 interface BankAccountListProps {
   initialData: any[];
@@ -40,7 +38,7 @@ function BankAccountListContent({ initialData }: BankAccountListProps) {
   const filteredCuentas = cuentas.filter(
     (c) =>
       c.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.titular.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      c.titular?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       c.numero.includes(searchTerm),
   );
 
@@ -74,7 +72,6 @@ function BankAccountListContent({ initialData }: BankAccountListProps) {
       );
     }
 
-    // Persist focus or reset? Let's keep the form open with the updated data
     setEditingCuenta(newCuenta);
   };
 
@@ -87,99 +84,91 @@ function BankAccountListContent({ initialData }: BankAccountListProps) {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 h-[calc(100vh-16rem)] min-h-[600px] overflow-hidden relative bg-card border border-border/50 rounded-2xl py-4 px-2">
+    <div className="flex flex-col lg:flex-row gap-6 h-auto lg:h-[calc(100vh-220px)] lg:min-h-[600px] overflow-hidden relative bg-card/80 border border-border/40 rounded-2xl p-4 shadow-xl">
       {/* Master: Sidebar List */}
       <div
         className={cn(
-          "w-full lg:w-[400px] flex flex-col gap-6 h-full overflow-hidden transition-all duration-300",
+          "w-full lg:w-[380px] flex flex-col gap-4 h-full overflow-hidden transition-[width,height] shrink-0",
           showForm && "hidden lg:flex",
         )}
       >
         <div className="flex items-center gap-2">
           {/* Search UI */}
-          <InputGroup className="w-full rounded-full bg-card/40 backdrop-blur-md border border-border shadow-sm transition-all focus-within:border-primary/40 focus-within:shadow-lg focus-within:shadow-primary/5">
-            <InputGroupInput
-              placeholder="Buscar por nombre, titular o número..."
+          <div className="relative flex-1">
+            <IconSearch className="absolute left-3 top-2.5 text-muted-foreground/60 size-4" />
+            <Input
+              placeholder="Buscar por banco, titular o número..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-transparent border-none font-medium placeholder:text-muted-foreground/50"
+              className="pl-9 bg-background border-border/40 rounded-xl text-xs h-9"
             />
-            <InputGroupAddon className="text-muted-foreground/40">
-              <IconSearch size={18} strokeWidth={2.5} />
-            </InputGroupAddon>
-            <InputGroupAddon
-              align="inline-end"
-              className="text-[9px] font-black uppercase tracking-widest text-primary/60 bg-primary/5 px-3 rounded-full mr-1"
-            >
-              {filteredCuentas.length}
-            </InputGroupAddon>
-          </InputGroup>
+          </div>
 
-          {/* Nueva Entidad Button (Top Position) */}
+          {/* Nueva Entidad Button */}
           <Button
             size="sm"
             onClick={handleCreateNew}
-            className="rounded-full gap-2 shadow-2xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all shrink-0"
+            className="rounded-xl px-3.5 h-9 font-semibold text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 shrink-0 gap-1.5 cursor-pointer"
           >
-            <IconPlus className="w-5 h-5" strokeWidth={2.5} />
-            Agregar
+            <IconPlus className="size-4" />
+            <span>Nueva Cuenta</span>
           </Button>
         </div>
 
-        <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-8">
+        <div className="flex-1 overflow-y-auto pr-1 space-y-5">
           {/* Bancos Section */}
           {bancos.length > 0 && (
-            <div className="space-y-3">
-              <h3 className="text-sm font-semibold capitalize text-muted-foreground px-4">
-                Bancos Registrados
-              </h3>
+            <div className="space-y-2">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground px-1">
+                Cuentas Bancarias ({bancos.length})
+              </span>
               <div className="space-y-2">
                 {bancos.map((cuenta) => (
                   <button
                     key={cuenta.id}
                     onClick={() => handleSelect(cuenta)}
-                    className={`w-full text-left p-4 rounded-full border transition-all duration-500 relative flex items-center justify-between group overflow-hidden ${
+                    className={cn(
+                      "w-full text-left p-3 rounded-xl border transition-[background-color,border-color,box-shadow] relative flex items-center justify-between group cursor-pointer bg-background/50",
                       editingCuenta?.id === cuenta.id
-                        ? "bg-primary/5 border-primary/30 shadow-[0_0_30px_-10px_rgba(var(--primary),0.2)] ring-1 ring-primary/30"
-                        : "bg-background/50 border-border hover:border-primary/20 hover:bg-white/5"
-                    }`}
-                  >
-                    {/* Glow effect for selected item */}
-                    {editingCuenta?.id === cuenta.id && (
-                      <div className="absolute inset-0 bg-primary/5 animate-pulse" />
+                        ? "border-indigo-500/60 bg-indigo-500/10 shadow-xs ring-1 ring-indigo-500/30"
+                        : "border-border/40 hover:border-indigo-500/30 hover:bg-background/80",
                     )}
-
-                    <div className="flex items-center gap-4 relative z-10">
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
                       <div
-                        className={`size-11 rounded-2xl flex items-center justify-center transition-all duration-500 shadow-xl ${
+                        className={cn(
+                          "size-10 rounded-xl flex items-center justify-center transition-colors shrink-0 border",
                           editingCuenta?.id === cuenta.id
-                            ? "bg-primary text-white scale-110 rotate-3"
-                            : "bg-primary/5 text-primary group-hover:bg-primary/10 group-hover:scale-105"
-                        }`}
+                            ? "bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border-indigo-500/30"
+                            : "bg-muted/30 border-border/30 text-muted-foreground group-hover:text-indigo-500",
+                        )}
                       >
-                        <IconBuildingBank size={24} strokeWidth={1.5} />
+                        <IconBuildingBank className="size-5" />
                       </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="font-black text-sm tracking-tight leading-none">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <p className="font-bold text-xs text-foreground truncate">
                             {cuenta.nombre}
                           </p>
                           {cuenta.esPrincipal && (
-                            <IconStarFilled
-                              size={10}
-                              className="text-amber-500"
-                            />
+                            <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 text-[9px] px-1 py-0 rounded-md font-bold flex items-center gap-0.5 shrink-0">
+                              <IconStar className="size-3 fill-amber-500 text-amber-500" />
+                              Principal
+                            </Badge>
                           )}
                         </div>
-                        <p className="font-mono text-[10px] font-bold text-muted-foreground mt-1 tracking-tighter">
+                        <p className="font-mono text-[11px] text-muted-foreground truncate mt-0.5">
                           {cuenta.numero}
                         </p>
                       </div>
                     </div>
-                    {editingCuenta?.id === cuenta.id && (
-                      <div className="size-6 bg-primary rounded-full flex items-center justify-center text-white scale-110 shadow-lg shadow-primary/20">
-                        <IconCheck size={14} strokeWidth={3} />
+
+                    {editingCuenta?.id === cuenta.id ? (
+                      <div className="size-5 bg-indigo-600 rounded-full flex items-center justify-center text-white shrink-0">
+                        <IconCheck className="size-3" strokeWidth={3} />
                       </div>
+                    ) : (
+                      <IconChevronRight className="size-4 text-muted-foreground/40 opacity-0 group-hover:opacity-100 transition-opacity" />
                     )}
                   </button>
                 ))}
@@ -189,57 +178,57 @@ function BankAccountListContent({ initialData }: BankAccountListProps) {
 
           {/* Billeteras Section */}
           {billeteras.length > 0 && (
-            <div className="space-y-3">
-              <h3 className="text-sm font-semibold capitalize text-muted-foreground px-4">
-                Billeteras Digitales
-              </h3>
+            <div className="space-y-2">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground px-1">
+                Billeteras Digitales ({billeteras.length})
+              </span>
               <div className="space-y-2">
                 {billeteras.map((cuenta) => (
                   <button
                     key={cuenta.id}
                     onClick={() => handleSelect(cuenta)}
-                    className={`w-full text-left p-4 rounded-full border transition-all duration-500 relative flex items-center justify-between group overflow-hidden ${
+                    className={cn(
+                      "w-full text-left p-3 rounded-xl border transition-[background-color,border-color,box-shadow] relative flex items-center justify-between group cursor-pointer bg-background/50",
                       editingCuenta?.id === cuenta.id
-                        ? "bg-emerald-500/5 border-emerald-500/30 shadow-[0_0_30px_-10px_rgba(16,185,129,0.2)] ring-1 ring-emerald-500/30"
-                        : "bg-background/50 border-border hover:border-emerald-500/20 hover:bg-white/5"
-                    }`}
-                  >
-                    {/* Glow effect for selected item */}
-                    {editingCuenta?.id === cuenta.id && (
-                      <div className="absolute inset-0 bg-emerald-500/5 animate-pulse" />
+                        ? "border-emerald-500/60 bg-emerald-500/10 shadow-xs ring-1 ring-emerald-500/30"
+                        : "border-border/40 hover:border-emerald-500/30 hover:bg-background/80",
                     )}
-
-                    <div className="flex items-center gap-4 relative z-10">
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
                       <div
-                        className={`size-11 rounded-2xl flex items-center justify-center transition-all duration-500 shadow-xl ${
+                        className={cn(
+                          "size-10 rounded-xl flex items-center justify-center transition-colors shrink-0 border",
                           editingCuenta?.id === cuenta.id
-                            ? "bg-emerald-500 text-white scale-110 -rotate-3"
-                            : "bg-emerald-500/5 text-emerald-600 group-hover:bg-emerald-500/10 group-hover:scale-105"
-                        }`}
+                            ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
+                            : "bg-muted/30 border-border/30 text-muted-foreground group-hover:text-emerald-500",
+                        )}
                       >
-                        <IconDeviceMobile size={24} strokeWidth={1.5} />
+                        <IconDeviceMobile className="size-5" />
                       </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="font-black text-sm tracking-tight leading-none">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <p className="font-bold text-xs text-foreground truncate">
                             {cuenta.nombre}
                           </p>
                           {cuenta.esPrincipal && (
-                            <IconStarFilled
-                              size={10}
-                              className="text-amber-500"
-                            />
+                            <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 text-[9px] px-1 py-0 rounded-md font-bold flex items-center gap-0.5 shrink-0">
+                              <IconStar className="size-3 fill-amber-500 text-amber-500" />
+                              Principal
+                            </Badge>
                           )}
                         </div>
-                        <p className="font-mono text-[10px] font-bold text-muted-foreground mt-1 tracking-tighter">
+                        <p className="font-mono text-[11px] text-muted-foreground truncate mt-0.5">
                           {cuenta.numero}
                         </p>
                       </div>
                     </div>
-                    {editingCuenta?.id === cuenta.id && (
-                      <div className="size-6 bg-emerald-500 rounded-full flex items-center justify-center text-white scale-110 shadow-lg shadow-emerald-500/20">
-                        <IconCheck size={14} strokeWidth={3} />
+
+                    {editingCuenta?.id === cuenta.id ? (
+                      <div className="size-5 bg-emerald-600 rounded-full flex items-center justify-center text-white shrink-0">
+                        <IconCheck className="size-3" strokeWidth={3} />
                       </div>
+                    ) : (
+                      <IconChevronRight className="size-4 text-muted-foreground/40 opacity-0 group-hover:opacity-100 transition-opacity" />
                     )}
                   </button>
                 ))}
@@ -248,15 +237,10 @@ function BankAccountListContent({ initialData }: BankAccountListProps) {
           )}
 
           {cuentas.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-12 px-6 text-center border-2 border-dashed border-border/40 rounded-[2.5rem] bg-muted/5 opacity-60">
-              <div className="size-16 bg-muted/20 rounded-[2rem] flex items-center justify-center text-muted-foreground/30 mb-4">
-                <IconBuildingBank size={32} />
-              </div>
-              <p className="text-sm font-black text-muted-foreground uppercase tracking-widest leading-relaxed">
-                No hay entidades
-                <br />
-                registradas
-              </p>
+            <div className="flex flex-col items-center justify-center py-16 px-4 text-center border border-dashed border-border/40 rounded-2xl bg-background/40 text-muted-foreground/60 space-y-2">
+              <IconBuildingBank className="size-10 text-muted-foreground/30" />
+              <p className="text-xs font-semibold text-foreground">No hay cuentas bancarias registradas</p>
+              <p className="text-[11px]">Agrega cuentas o billeteras para recibir cobros en línea.</p>
             </div>
           )}
         </div>
@@ -265,7 +249,7 @@ function BankAccountListContent({ initialData }: BankAccountListProps) {
       {/* Detail: Form Area */}
       <div
         className={cn(
-          "flex-1 min-w-0 h-full overflow-hidden border border-border/10 rounded-[2.5rem] bg-card/10 transition-all duration-300",
+          "flex-1 min-w-0 h-full overflow-hidden border border-border/40 rounded-2xl bg-background/40 shadow-inner transition-[width,height]",
           !showForm && "hidden lg:block",
         )}
       >
@@ -278,19 +262,15 @@ function BankAccountListContent({ initialData }: BankAccountListProps) {
             onDeleteSuccess={handleDeleteSuccess}
           />
         ) : (
-          <div className="h-full flex flex-col items-center justify-center bg-card/20 rounded-[3rem] border border-dashed border-border/40 p-12 text-center group">
-            <div className="relative mb-8">
-              <div className="absolute -inset-8 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors" />
-              <div className="relative size-32 bg-card border border-border/40 rounded-[3rem] flex items-center justify-center text-muted-foreground/20 shadow-2xl group-hover:text-primary/40 transition-all group-hover:scale-105 group-hover:-rotate-3">
-                <IconBuildingBank size={64} strokeWidth={1} />
-              </div>
+          <div className="h-full flex flex-col items-center justify-center p-8 text-center space-y-3">
+            <div className="size-16 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+              <IconBuildingBank className="size-8" />
             </div>
-            <h3 className="text-2xl font-black tracking-tight mb-3">
-              Gestión de Cuentas
+            <h3 className="text-base font-bold text-foreground">
+              Gestión de Cuentas y Recaudación
             </h3>
-            <p className="text-muted-foreground max-w-xs font-medium leading-relaxed">
-              Selecciona una cuenta de la lista para ver sus detalles o presiona
-              el botón para registrar una nueva.
+            <p className="text-xs text-muted-foreground max-w-sm leading-relaxed">
+              Selecciona una entidad de la lista para modificar sus datos o haz clic en <strong>&quot;Nueva Cuenta&quot;</strong> para habilitar canales de cobro.
             </p>
           </div>
         )}

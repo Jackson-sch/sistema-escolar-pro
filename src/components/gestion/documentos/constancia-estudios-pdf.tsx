@@ -43,7 +43,7 @@ export const ConstanciaEstudiosPDF = ({
     >
       <Stack direction="vertical" gap="lg" style={{ marginTop: 20 }}>
         <Text style={{ fontSize: 11, textAlign: 'justify', lineHeight: 1.8 }}>
-          EL QUE SUSCRIBE, DIRECTOR DE LA INSTITUCIÓN EDUCATIVA <Text style={{ fontWeight: 'bold' }}>"{institucion.nombreInstitucion.toUpperCase()}"</Text>, HACE CONSTAR QUE:
+          EL QUE SUSCRIBE, DIRECTOR DE LA INSTITUCIÓN EDUCATIVA <Text style={{ fontWeight: 'bold' }}>{"\u0022"}{institucion.nombreInstitucion.toUpperCase()}{"\u0022"}</Text>, HACE CONSTAR QUE:
         </Text>
 
         <Text style={{ fontSize: 11, textAlign: 'justify', lineHeight: 1.8 }}>
@@ -55,7 +55,7 @@ export const ConstanciaEstudiosPDF = ({
             {(student.nivelAcademico?.grado?.nombre || '-').toUpperCase()} DE {(student.nivelAcademico?.nivel?.nombre || '-').toUpperCase()}
           </Heading>
           <Heading level={5} align="center" noMargin color="mutedForeground">
-            SECCIÓN "{(student.nivelAcademico?.seccion || '-').toUpperCase()}"
+            SECCIÓN {"\u0022"}{(student.nivelAcademico?.seccion || '-').toUpperCase()}{"\u0022"}
           </Heading>
         </View>
 

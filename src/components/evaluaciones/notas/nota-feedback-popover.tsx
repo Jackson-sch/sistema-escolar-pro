@@ -34,7 +34,7 @@ export function NotaFeedbackPopover({
           variant="ghost"
           size="icon"
           className={cn(
-            "size-8 rounded-full transition-all",
+            "size-8 rounded-full transition-colors",
             comentario
               ? "text-violet-600 bg-violet-600/10 hover:bg-violet-600/20"
               : "text-muted-foreground hover:bg-muted/50",
@@ -44,7 +44,7 @@ export function NotaFeedbackPopover({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-80 p-4 rounded-2xl border-border/40 bg-background/95 backdrop-blur-xl shadow-2xl overflow-hidden"
+        className="w-80 p-4 rounded-2xl border-border/40 bg-background/95 shadow-lg overflow-hidden"
         align="end"
       >
         <div className="space-y-4">
@@ -57,7 +57,7 @@ export function NotaFeedbackPopover({
               size="sm"
               onClick={onGenerateAI}
               disabled={isStreaming}
-              className="h-7 px-2.5 text-[10px] font-black uppercase text-violet-600 border-violet-600/20 hover:bg-violet-600/10 hover:border-violet-600/30 transition-all gap-1.5 shadow-sm rounded-full"
+              className="h-7 px-2.5 text-[10px] font-black uppercase text-violet-600 border-violet-600/20 hover:bg-violet-600/10 hover:border-violet-600/30 transition-[background-color,border-color] gap-1.5 shadow-sm rounded-full"
             >
               {isStreaming ? (
                 <IconLoader2 className="size-3 animate-spin" />
@@ -71,7 +71,7 @@ export function NotaFeedbackPopover({
           <div className="relative">
             <Textarea
               placeholder="Escribe un comentario o usa la IA para generar uno..."
-              className="min-h-[120px] text-xs font-medium bg-muted/20 border-border/40 resize-none rounded-xl focus:border-violet-500/50 transition-all"
+              className="min-h-[120px] text-xs font-medium bg-muted/20 border-border/40 resize-none rounded-xl focus:border-violet-500/50 transition-[border-color]"
               value={streamingContent ?? (comentario || "")}
               onChange={(e) => onCommentChange(e.target.value)}
             />

@@ -1,4 +1,5 @@
 import { Card } from "@/components/ui/card";
+import { IconCalendarCheck } from "@tabler/icons-react";
 
 export default function AttendanceWidget({
   attendancePercentage,
@@ -6,48 +7,53 @@ export default function AttendanceWidget({
   attendancePercentage: number;
 }) {
   return (
-    <Card className="flex flex-col p-6 h-full min-h-[300px] liquid-glass relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-t from-emerald-500/5 to-transparent pointer-events-none" />
-      <div className="relative z-10 w-full h-full flex flex-col">
-      <h3 className="font-bold text-sm uppercase tracking-wider mb-6">
-        Asistencia
-      </h3>
-      <div className="flex-1 flex flex-col justify-center items-center py-6">
-        <div className="relative size-32 @[20rem]:size-40">
-          <svg className="size-full" viewBox="0 0 36 36">
-            <path
-              className="stroke-muted-foreground"
-              strokeDasharray="100, 100"
-              strokeWidth="3"
-              fill="none"
-              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-            />
-            <path
-              className="stroke-emerald-500 shadow-glow"
-              strokeDasharray={`${attendancePercentage}, 100`}
-              strokeWidth="3"
-              strokeLinecap="round"
-              fill="none"
-              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-            />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-3xl @[20rem]:text-4xl font-black">
-              {attendancePercentage.toFixed(0)}%
-            </span>
-            <span className="text-[10px] font-bold text-muted-foreground uppercase">
-              Presente
-            </span>
+    <Card className="flex h-full min-h-[300px] flex-col rounded-2xl border border-border/50 bg-card/80 p-5 shadow-sm">
+      <div className="flex h-full w-full flex-col">
+        <div className="flex items-center justify-between border-b border-border/20 pb-3 mb-4">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            Asistencia General
+          </span>
+          <div className="size-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/20">
+            <IconCalendarCheck className="size-4" />
           </div>
         </div>
-        <p className="mt-8 text-xs text-center text-muted-foreground font-medium italic px-4">
-          "
-          {attendancePercentage >= 95
-            ? "Excelente consistencia este periodo"
-            : "Asistencia regular"}
-          "
-        </p>
-      </div>
+
+        <div className="flex-1 flex flex-col justify-center items-center py-4">
+          <div className="relative size-32 @[20rem]:size-36">
+            <svg className="size-full" viewBox="0 0 36 36">
+              <path
+                className="stroke-muted/40"
+                strokeDasharray="100, 100"
+                strokeWidth="3"
+                fill="none"
+                d="M18 2.08 a 15.92 15.92 0 0 1 0 31.83 a 15.92 15.92 0 0 1 0 -31.83"
+              />
+              <path
+                className="stroke-emerald-500"
+                strokeDasharray={`${attendancePercentage}, 100`}
+                strokeWidth="3"
+                strokeLinecap="round"
+                fill="none"
+                d="M18 2.08 a 15.92 15.92 0 0 1 0 31.83 a 15.92 15.92 0 0 1 0 -31.83"
+              />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-3xl font-black font-mono text-foreground">
+                {attendancePercentage.toFixed(0)}%
+              </span>
+              <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider mt-0.5">
+                Presente
+              </span>
+            </div>
+          </div>
+          <p className="mt-6 text-xs text-center text-muted-foreground font-medium italic px-2">
+            &ldquo;
+            {attendancePercentage >= 95
+              ? "Excelente consistencia en el periodo"
+              : "Asistencia regular en aula"}
+            &rdquo;
+          </p>
+        </div>
       </div>
     </Card>
   );

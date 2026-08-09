@@ -27,29 +27,31 @@ export function AdminCreateForm() {
   return (
     <form id="admin-create-form" action={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Nombre Completo</label>
+        <label htmlFor="admin-name" className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Nombre Completo</label>
         <input 
+          id="admin-name"
           name="name"
           required
           placeholder="Ej: Juan Pérez"
-          className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500/50 transition-all placeholder:text-zinc-700" 
+          className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500/50 transition-[border-color,outline-color] placeholder:text-zinc-700" 
         />
       </div>
       <div className="space-y-2">
-        <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Correo Electrónico</label>
+        <label htmlFor="admin-email" className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Correo Electrónico</label>
         <input 
+          id="admin-email"
           name="email"
           type="email"
           required
           placeholder="director@colegio.edu.pe"
-          className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500/50 transition-all placeholder:text-zinc-700" 
+          className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500/50 transition-[border-color,outline-color] placeholder:text-zinc-700" 
         />
       </div>
       
       <button 
         type="submit"
         disabled={isPending}
-        className="w-full py-3 bg-zinc-100 text-zinc-950 rounded-xl text-sm font-bold hover:bg-white active:scale-95 transition-all disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-2"
+        className="w-full py-3 bg-zinc-100 text-zinc-950 rounded-xl text-sm font-bold hover:bg-white active:scale-95 transition-[background-color,opacity,transform] disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-2"
       >
         {isPending ? (
           "Procesando..."

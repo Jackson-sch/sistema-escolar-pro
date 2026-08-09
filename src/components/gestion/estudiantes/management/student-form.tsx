@@ -1,8 +1,8 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTransition, useState, useEffect } from "react";
+import { useTransition, useState, useEffect, useRef, useMemo } from "react";
 import {
   IconUser,
   IconId,
@@ -12,6 +12,8 @@ import {
   IconLoader2,
   IconUsers,
   IconDeviceFloppy,
+  IconPhone,
+  IconSparkles,
 } from "@tabler/icons-react";
 
 import { StudentSchema, StudentValues } from "@/lib/schemas/student";
@@ -45,15 +47,44 @@ import {
   getGuardianByDniAction,
 } from "@/actions/students";
 import { toast } from "sonner";
-import { Separator } from "@/components/ui/separator";
 import { formatDate } from "@/lib/formats";
-import CardGeneric from "@/components/common/card-generic";
 import { SEXO_OPTIONS, PARENTESCO_OPTIONS } from "@/lib/constants";
 import { useFormModal } from "@/components/modals/form-modal-context";
+import { FormKeyboardHelpBar } from "@/components/common/form-keyboard-help-bar";
+import { Badge } from "@/components/ui/badge";
+
+interface StudentInitialData {
+  name?: string;
+  apellidoPaterno?: string;
+  apellidoMaterno?: string;
+  dni?: string;
+  email?: string;
+  sexo?: string;
+  nacionalidad?: string;
+  direccion?: string;
+  departamento?: string;
+  provincia?: string;
+  distrito?: string;
+  ubigeo?: string;
+  codigoEstudiante?: string;
+  codigoSiagie?: string;
+  institucionId?: string;
+  estadoId?: string;
+  fechaNacimiento?: Date | string | null;
+  padresTutores?: Array<{
+    contactoPrimario?: boolean;
+    parentesco?: string;
+    padreTutor?: {
+      name?: string | null;
+      dni?: string | null;
+      telefono?: string | null;
+    } | null;
+  }>;
+}
 
 interface StudentFormProps {
   id?: string;
-  initialData?: any;
+  initialData?: StudentInitialData;
   onSuccess?: () => void;
   instituciones: { id: string; nombreInstitucion: string }[];
   estados: { id: string; nombre: string }[];
@@ -66,8 +97,13 @@ export function StudentForm({
   instituciones,
   estados,
 }: StudentFormProps) {
+  const today = useMemo(() => new Date(), []);
+  const minFechaNacimiento = useMemo(() => new Date("1900-01-01"), []);
+  const inicioCalendario = useMemo(() => new Date(1900, 0), []);
+
   const [isPending, startTransition] = useTransition();
   const { setIsDirty, setOnSubmit } = useFormModal();
+  const [guardianAutofilled, setGuardianAutofilled] = useState(false);
 
   const form = useForm<StudentValues>({
     resolver: zodResolver(StudentSchema),
@@ -94,18 +130,17 @@ export function StudentForm({
           fechaNacimiento: initialData.fechaNacimiento
             ? new Date(initialData.fechaNacimiento)
             : undefined,
-          // Extraer datos del apoderado principal si existen
           nombreApoderado:
-            initialData.padresTutores?.find((p: any) => p.contactoPrimario)
-              ?.padreTutor.name || "",
+            initialData.padresTutores?.find((p) => p.contactoPrimario)
+              ?.padreTutor?.name || "",
           dniApoderado:
-            initialData.padresTutores?.find((p: any) => p.contactoPrimario)
-              ?.padreTutor.dni || "",
+            initialData.padresTutores?.find((p) => p.contactoPrimario)
+              ?.padreTutor?.dni || "",
           telefonoApoderado:
-            initialData.padresTutores?.find((p: any) => p.contactoPrimario)
-              ?.padreTutor.telefono || "",
+            initialData.padresTutores?.find((p) => p.contactoPrimario)
+              ?.padreTutor?.telefono || "",
           parentescoApoderado:
-            initialData.padresTutores?.find((p: any) => p.contactoPrimario)
+            initialData.padresTutores?.find((p) => p.contactoPrimario)
               ?.parentesco || "PADRE",
         }
       : {
@@ -137,7 +172,7 @@ export function StudentForm({
   });
 
   const [calendarMonth, setCalendarMonth] = useState<Date>(
-    form.getValues("fechaNacimiento") || new Date(),
+    () => form.getValues("fechaNacimiento") || today,
   );
 
   const { isDirty } = form.formState;
@@ -148,7 +183,6 @@ export function StudentForm({
   }, [isDirty, setIsDirty]);
 
   const onSubmit = (values: StudentValues) => {
-    // Asegurar que la fecha sea un objeto Date válido antes de enviar
     const formattedValues = {
       ...values,
       fechaNacimiento: values.fechaNacimiento
@@ -173,19 +207,28 @@ export function StudentForm({
     });
   };
 
-  useEffect(() => {
-    setOnSubmit(() => form.handleSubmit(onSubmit)());
-    return () => setOnSubmit(undefined);
-  }, [form, onSubmit, setOnSubmit]);
+  const onSubmitRef = useRef(onSubmit);
 
-  // Observar cambios en el DNI del apoderado para auto-completar
+  useEffect(() => {
+    onSubmitRef.current = onSubmit;
+  });
+
+  useEffect(() => {
+    setOnSubmit(() => form.handleSubmit(onSubmitRef.current)());
+    return () => setOnSubmit(undefined);
+  }, [form, setOnSubmit]);
+
+  // Observar cambios en el DNI del apoderado para autocompletar
   const dniApoderado = form.watch("dniApoderado");
 
   useEffect(() => {
+    let ignore = false;
     if (dniApoderado && dniApoderado.length === 8) {
       const searchGuardian = async () => {
         try {
+          if (ignore) return;
           const res = await getGuardianByDniAction(dniApoderado);
+          if (ignore) return;
           if (res?.data) {
             const fullName = `${res.data.name || ""} ${res.data.apellidoPaterno || ""} ${res.data.apellidoMaterno || ""}`.trim();
             form.setValue("nombreApoderado", fullName, {
@@ -196,533 +239,652 @@ export function StudentForm({
               shouldValidate: true,
               shouldDirty: true,
             });
-            toast.success(
-              "Apoderado encontrado, datos cargados automáticamente.",
-            );
+            setGuardianAutofilled(true);
+            toast.success("Apoderado registrado encontrado. Datos cargados.");
+          } else {
+            if (!ignore) setGuardianAutofilled(false);
           }
         } catch (error) {
           console.error("Error searching guardian:", error);
+          if (!ignore) setGuardianAutofilled(false);
         }
       };
       searchGuardian();
-    } else if (!dniApoderado) {
-      // Limpiar campos si el DNI del apoderado se borra
-      form.setValue("nombreApoderado", "");
-      form.setValue("telefonoApoderado", "");
+    } else {
+      setGuardianAutofilled(false);
+      if (!dniApoderado) {
+        form.setValue("nombreApoderado", "");
+        form.setValue("telefonoApoderado", "");
+      }
     }
+    return () => {
+      ignore = true;
+    };
   }, [dniApoderado, form]);
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {/* SECCIÓN 1: DATOS PERSONALES */}
-        <CardGeneric
-          title="Información Personal"
-          description="Datos básicos de identificación del estudiante."
-          icon={<IconUser className="h-4 w-4" />}
-        >
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-            {/* Nombre (ancho 4) */}
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem className="md:col-span-4">
-                  <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
-                    Nombres
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="Juan Alberto"
-                      className="bg-muted/5 border-border/40 focus:ring-primary/20 transition-all rounded-full"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {/* Apellido Paterno (ancho 4) */}
-            <FormField
-              control={form.control}
-              name="apellidoPaterno"
-              render={({ field }) => (
-                <FormItem className="md:col-span-4">
-                  <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
-                    Apellido Paterno
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="Pérez"
-                      className="bg-muted/5 border-border/40 focus:ring-primary/20 transition-all rounded-full"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {/* Apellido Materno (ancho 4) */}
-            <FormField
-              control={form.control}
-              name="apellidoMaterno"
-              render={({ field }) => (
-                <FormItem className="md:col-span-4">
-                  <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
-                    Apellido Materno
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="García"
-                      className="bg-muted/5 border-border/40 focus:ring-primary/20 transition-all rounded-full"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 px-1 py-1">
+        <StudentPersonalSection
+          form={form}
+          estados={estados}
+          instituciones={instituciones}
+          calendarMonth={calendarMonth}
+          onCalendarMonthChange={setCalendarMonth}
+        />
 
-            <Separator className="md:col-span-12 my-1" />
+        <StudentAddressSection form={form} />
 
-            {/* DNI (ancho 6) */}
-            <FormField
-              control={form.control}
-              name="dni"
-              render={({ field }) => (
-                <FormItem className="md:col-span-4">
-                  <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
-                    DNI / Documento de Identidad
-                  </FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <IconId className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        {...field}
-                        placeholder="00000000"
-                        className="pl-10 bg-muted/5 border-border/40 focus:ring-primary/20 transition-all rounded-full"
-                        maxLength={8}
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <GuardianSection form={form} guardianAutofilled={guardianAutofilled} />
 
-            {/* Fecha Nacimiento (ancho 6) */}
-            <FormField
-              control={form.control}
-              name="fechaNacimiento"
-              render={({ field }) => (
-                <FormItem className="md:col-span-4">
-                  <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
-                    Fecha de Nacimiento
-                  </FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-full pl-3 text-left font-normal rounded-full border-border/40 hover:bg-muted/50 transition-all",
-                            !field.value && "text-muted-foreground",
-                          )}
-                        >
-                          {field.value ? (
-                            formatDate(field.value, "PPP")
-                          ) : (
-                            <span>DD / MM / AAAA</span>
-                          )}
-                          <IconCalendar className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={(date) => {
-                          field.onChange(date);
-                          if (date) setCalendarMonth(date);
-                        }}
-                        month={calendarMonth}
-                        onMonthChange={setCalendarMonth}
-                        disabled={(date) =>
-                          date > new Date() || date < new Date("1900-01-01")
-                        }
-                        startMonth={new Date(1900, 0)}
-                        endMonth={new Date()}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        {/* Guía de Atajos de Teclado */}
+        <FormKeyboardHelpBar />
 
-            <FormField
-              control={form.control}
-              name="sexo"
-              render={({ field }) => (
-                <FormItem className="md:col-span-4">
-                  <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
-                    Género / Sexo
-                  </FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="w-full rounded-full bg-muted/5 border-border/40 focus:ring-primary/20 transition-all">
-                        <SelectValue placeholder="Seleccionar" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {SEXO_OPTIONS.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="nacionalidad"
-              render={({ field }) => (
-                <FormItem className="md:col-span-3">
-                  <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
-                    Nacionalidad
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="PERUANA"
-                      className="bg-muted/5 border-border/40 focus:ring-primary/20 transition-all rounded-full"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Email (ancho 8) */}
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem className="md:col-span-6">
-                  <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
-                    Correo Electrónico (Opcional)
-                  </FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <IconMail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        {...field}
-                        type="email"
-                        placeholder="ejemplo@correo.com"
-                        className="pl-10 bg-muted/5 border-border/40 focus:ring-primary/20 transition-all rounded-full"
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Estado (ancho 6 si hay institucion, sino full) */}
-            <FormField
-              control={form.control}
-              name="estadoId"
-              render={({ field }) => (
-                <FormItem className="md:col-span-3">
-                  <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
-                    Estado de Alumno
-                  </FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="w-full rounded-full bg-muted/5 border-border/40 focus:ring-primary/20 transition-all">
-                        <SelectValue placeholder="Seleccionar estado" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {estados.map((e) => (
-                        <SelectItem key={e.id} value={e.id}>
-                          {e.nombre}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <Separator
-              className={cn(
-                "md:col-span-12 my-1",
-                instituciones.length === 1 && "hidden",
-              )}
-            />
-
-            {/* Institución and Estado */}
-            {instituciones.length > 1 && (
-              <FormField
-                control={form.control}
-                name="institucionId"
-                render={({ field }) => (
-                  <FormItem className="md:col-span-12">
-                    <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
-                      Institución
-                    </FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="w-full rounded-full bg-muted/5 border-border/40 focus:ring-primary/20 transition-all">
-                          <SelectValue placeholder="Seleccionar institución" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {instituciones.map((inst) => (
-                          <SelectItem key={inst.id} value={inst.id}>
-                            {inst.nombreInstitucion}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-          </div>
-        </CardGeneric>
-
-        {/* SECCIÓN 2: UBICACIÓN */}
-        <CardGeneric
-          title="Ubicación y Domicilio"
-          description="Información sobre la ubicación y domicilio del estudiante"
-          icon={<IconMapPin className="h-4 w-4" />}
-        >
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-            <FormField
-              control={form.control}
-              name="direccion"
-              render={({ field }) => (
-                <FormItem className="md:col-span-12">
-                  <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
-                    Dirección Exacta de Residencia
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="Av. Principal 123, Depto 404"
-                      className="bg-muted/5 border-border/40 focus:ring-primary/20 transition-all rounded-full"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="departamento"
-              render={({ field }) => (
-                <FormItem className="md:col-span-4">
-                  <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
-                    Departamento
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      className="uppercase bg-muted/5 border-border/40 focus:ring-primary/20 transition-all rounded-full"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="provincia"
-              render={({ field }) => (
-                <FormItem className="md:col-span-4">
-                  <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
-                    Provincia
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      className="uppercase bg-muted/5 border-border/40 focus:ring-primary/20 transition-all rounded-full"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="distrito"
-              render={({ field }) => (
-                <FormItem className="md:col-span-4">
-                  <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
-                    Distrito
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      className="uppercase bg-muted/5 border-border/40 focus:ring-primary/20 transition-all rounded-full"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </CardGeneric>
-
-        {/* SECCIÓN 4: APODERADO */}
-        <CardGeneric
-          title="Datos del Apoderado"
-          description="Información de contacto del padre, madre o tutor."
-          icon={<IconUsers className="h-4 w-4" />}
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="dniApoderado"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
-                    DNI del Apoderado
-                  </FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <IconId className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        {...field}
-                        placeholder="DNI"
-                        maxLength={8}
-                        className="pl-10 bg-muted/5 border-border/40 focus:ring-primary/20 transition-all rounded-full"
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="nombreApoderado"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
-                    Nombre Completo Apoderado
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="Nombre y apellidos"
-                      className="bg-muted/5 border-border/40 focus:ring-primary/20 transition-all rounded-full"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="telefonoApoderado"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
-                    Teléfono / WhatsApp
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="999 999 999"
-                      className="bg-muted/5 border-border/40 focus:ring-primary/20 transition-all rounded-full"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="parentescoApoderado"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-micro font-semibold text-muted-foreground uppercase tracking-wider ml-1">
-                    Parentesco con el Alumno
-                  </FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="w-full rounded-full bg-muted/5 border-border/40 focus:ring-primary/20 transition-all">
-                        <SelectValue placeholder="Seleccionar" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {PARENTESCO_OPTIONS.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </CardGeneric>
-
-        <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-6 border-t border-border/40">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onSuccess}
-            className="w-full sm:w-auto rounded-full border-border/40 hover:bg-accent/50 hover:scale-105"
-            disabled={isPending}
-            size="lg"
-          >
-            Cancelar
-          </Button>
-          <Button
-            disabled={isPending}
-            type="submit"
-            size="lg"
-            className="w-full sm:w-auto rounded-full px-8 hover:scale-105"
-          >
-            {isPending ? (
-              <>
-                <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />
-                Procesando...
-              </>
-            ) : (
-              <>
-                <IconDeviceFloppy className="mr-2 h-4 w-4" />
-                {id ? "Guardar Cambios" : "Registrar Estudiante"}
-              </>
-            )}
-          </Button>
-        </div>
+        {/* Acciones del Formulario */}
+        <StudentFormActions isPending={isPending} isEdit={Boolean(id)} onSuccess={onSuccess} />
       </form>
     </Form>
+  );
+}
+
+/* ── Subcomponentes ── */
+
+function SectionHeader({
+  icon: Icon,
+  title,
+  description,
+  colorClass,
+  action,
+}: {
+  icon: React.ElementType;
+  title: string;
+  description: string;
+  colorClass: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div
+      className={`flex items-center ${action ? "justify-between" : "gap-2.5"} pb-2.5 border-b border-border/30`}
+    >
+      <div className="flex items-center gap-2.5">
+        <div
+          className={`size-8 rounded-xl border flex items-center justify-center shrink-0 ${colorClass}`}
+        >
+          <Icon className="size-4" />
+        </div>
+        <div>
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground">
+            {title}
+          </h3>
+          <p className="text-[11px] text-muted-foreground">{description}</p>
+        </div>
+      </div>
+      {action}
+    </div>
+  );
+}
+
+function StudentPersonalSection({
+  form,
+  estados,
+  instituciones,
+  calendarMonth,
+  onCalendarMonthChange,
+}: {
+  form: UseFormReturn<StudentValues>;
+  estados: { id: string; nombre: string }[];
+  instituciones: { id: string; nombreInstitucion: string }[];
+  calendarMonth: Date;
+  onCalendarMonthChange: (month: Date) => void;
+}) {
+  const today = useMemo(() => new Date(), []);
+  const minFechaNacimiento = useMemo(() => new Date("1900-01-01"), []);
+  const inicioCalendario = useMemo(() => new Date(1900, 0), []);
+
+  return (
+    <div className="space-y-4">
+      <SectionHeader
+        icon={IconUser}
+        title="1. Información Personal del Estudiante"
+        description="Nombres, apellidos, documento de identidad y datos biográficos."
+        colorClass="bg-indigo-500/10 border-indigo-500/20 text-indigo-500"
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem className="md:col-span-4">
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Nombres
+              </FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  placeholder="Juan Alberto"
+                  className="bg-background border-border/40 rounded-xl text-xs h-9"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="apellidoPaterno"
+          render={({ field }) => (
+            <FormItem className="md:col-span-4">
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Apellido Paterno
+              </FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  placeholder="Pérez"
+                  className="bg-background border-border/40 rounded-xl text-xs h-9"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="apellidoMaterno"
+          render={({ field }) => (
+            <FormItem className="md:col-span-4">
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Apellido Materno
+              </FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  placeholder="García"
+                  className="bg-background border-border/40 rounded-xl text-xs h-9"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="dni"
+          render={({ field }) => (
+            <FormItem className="md:col-span-4">
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                DNI / Documento Identidad
+              </FormLabel>
+              <FormControl>
+                <div className="relative">
+                  <IconId className="absolute left-3 top-2.5 size-4 text-muted-foreground/60" />
+                  <Input
+                    {...field}
+                    placeholder="76543210"
+                    maxLength={8}
+                    className="pl-9 bg-background border-border/40 rounded-xl text-xs h-9 font-mono"
+                  />
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="fechaNacimiento"
+          render={({ field }) => (
+            <FormItem className="md:col-span-4">
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Fecha de Nacimiento
+              </FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full pl-3 text-left font-medium rounded-xl border-border/40 bg-background h-9 text-xs justify-between",
+                        !field.value && "text-muted-foreground",
+                      )}
+                    >
+                      {field.value ? (
+                        formatDate(field.value, "PPP")
+                      ) : (
+                        <span>DD / MM / AAAA</span>
+                      )}
+                      <IconCalendar className="size-4 opacity-50 ml-1" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 border-border/40 rounded-2xl" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value}
+                    onSelect={(date) => {
+                      field.onChange(date);
+                      if (date) onCalendarMonthChange(date);
+                    }}
+                    month={calendarMonth}
+                    onMonthChange={onCalendarMonthChange}
+                    disabled={(date) =>
+                      date > today || date < minFechaNacimiento
+                    }
+                    startMonth={inicioCalendario}
+                    endMonth={today}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="sexo"
+          render={({ field }) => (
+            <FormItem className="md:col-span-4">
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Sexo / Género
+              </FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+              >
+                <FormControl>
+                  <SelectTrigger className="w-full rounded-xl bg-background border-border/40 text-xs h-9 font-medium">
+                    <SelectValue placeholder="Seleccionar" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="rounded-xl border-border/40">
+                  {SEXO_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value} className="text-xs font-medium">
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="nacionalidad"
+          render={({ field }) => (
+            <FormItem className="md:col-span-3">
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Nacionalidad
+              </FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  placeholder="PERUANA"
+                  className="bg-background border-border/40 rounded-xl text-xs h-9 uppercase"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem className="md:col-span-6">
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Correo Electrónico (Opcional)
+              </FormLabel>
+              <FormControl>
+                <div className="relative">
+                  <IconMail className="absolute left-3 top-2.5 size-4 text-muted-foreground/60" />
+                  <Input
+                    {...field}
+                    type="email"
+                    placeholder="alumno@colegio.edu.pe"
+                    className="pl-9 bg-background border-border/40 rounded-xl text-xs h-9"
+                  />
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="estadoId"
+          render={({ field }) => (
+            <FormItem className="md:col-span-3">
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Estado de Alumno
+              </FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+              >
+                <FormControl>
+                  <SelectTrigger className="w-full rounded-xl bg-background border-border/40 text-xs h-9 font-medium">
+                    <SelectValue placeholder="Seleccionar" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="rounded-xl border-border/40">
+                  {estados.map((e) => (
+                    <SelectItem key={e.id} value={e.id} className="text-xs font-medium">
+                      {e.nombre}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {instituciones.length > 1 && (
+          <FormField
+            control={form.control}
+            name="institucionId"
+            render={({ field }) => (
+              <FormItem className="md:col-span-12">
+                <FormLabel className="text-xs font-medium text-foreground/80">
+                  Institución Educativa
+                </FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger className="w-full rounded-xl bg-background border-border/40 text-xs h-9 font-medium">
+                      <SelectValue placeholder="Seleccionar institución" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent className="rounded-xl border-border/40">
+                    {instituciones.map((inst) => (
+                      <SelectItem key={inst.id} value={inst.id} className="text-xs font-medium">
+                        {inst.nombreInstitucion}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function StudentAddressSection({
+  form,
+}: {
+  form: UseFormReturn<StudentValues>;
+}) {
+  return (
+    <div className="space-y-4 pt-2">
+      <SectionHeader
+        icon={IconMapPin}
+        title="2. Domicilio y Ubicación Geográfica"
+        description="Dirección de residencia, distrito, provincia y departamento."
+        colorClass="bg-blue-500/10 border-blue-500/20 text-blue-500"
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5">
+        <FormField
+          control={form.control}
+          name="direccion"
+          render={({ field }) => (
+            <FormItem className="md:col-span-12">
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Dirección Exacta de Residencia
+              </FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  placeholder="Av. Mansiche 123, Urb. San Andrés"
+                  className="bg-background border-border/40 rounded-xl text-xs h-9"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="departamento"
+          render={({ field }) => (
+            <FormItem className="md:col-span-4">
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Departamento
+              </FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  className="uppercase bg-background border-border/40 rounded-xl text-xs h-9 font-medium"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="provincia"
+          render={({ field }) => (
+            <FormItem className="md:col-span-4">
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Provincia
+              </FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  className="uppercase bg-background border-border/40 rounded-xl text-xs h-9 font-medium"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="distrito"
+          render={({ field }) => (
+            <FormItem className="md:col-span-4">
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Distrito
+              </FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  className="uppercase bg-background border-border/40 rounded-xl text-xs h-9 font-medium"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+    </div>
+  );
+}
+
+function GuardianSection({
+  form,
+  guardianAutofilled,
+}: {
+  form: UseFormReturn<StudentValues>;
+  guardianAutofilled: boolean;
+}) {
+  return (
+    <div className="space-y-4 pt-2">
+      <SectionHeader
+        icon={IconUsers}
+        title="3. Datos del Apoderado Principal"
+        description="Padre, madre o tutor legal responsable de la matrícula."
+        colorClass="bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
+        action={
+          guardianAutofilled ? (
+            <Badge className="bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 text-[10px] font-semibold gap-1 rounded-md px-2 py-0.5">
+              <IconSparkles className="size-3" />
+              Auto-completado por DNI
+            </Badge>
+          ) : undefined
+        }
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5">
+        <FormField
+          control={form.control}
+          name="dniApoderado"
+          render={({ field }) => (
+            <FormItem className="md:col-span-4">
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                DNI del Apoderado
+              </FormLabel>
+              <FormControl>
+                <div className="relative">
+                  <IconId className="absolute left-3 top-2.5 size-4 text-muted-foreground/60" />
+                  <Input
+                    {...field}
+                    placeholder="01234567"
+                    maxLength={8}
+                    className="pl-9 bg-background border-border/40 rounded-xl text-xs h-9 font-mono"
+                  />
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="nombreApoderado"
+          render={({ field }) => (
+            <FormItem className="md:col-span-5">
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Nombre Completo del Apoderado
+              </FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  placeholder="Nombres y apellidos completos"
+                  className="bg-background border-border/40 rounded-xl text-xs h-9"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="parentescoApoderado"
+          render={({ field }) => (
+            <FormItem className="md:col-span-3">
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Parentesco
+              </FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+              >
+                <FormControl>
+                  <SelectTrigger className="w-full rounded-xl bg-background border-border/40 text-xs h-9 font-medium">
+                    <SelectValue placeholder="Seleccionar" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="rounded-xl border-border/40">
+                  {PARENTESCO_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value} className="text-xs font-medium">
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="telefonoApoderado"
+          render={({ field }) => (
+            <FormItem className="md:col-span-6">
+              <FormLabel className="text-xs font-medium text-foreground/80">
+                Teléfono / Celular de Contacto
+              </FormLabel>
+              <FormControl>
+                <div className="relative">
+                  <IconPhone className="absolute left-3 top-2.5 size-4 text-muted-foreground/60" />
+                  <Input
+                    {...field}
+                    placeholder="987 654 321"
+                    className="pl-9 bg-background border-border/40 rounded-xl text-xs h-9 font-mono"
+                  />
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+    </div>
+  );
+}
+
+function StudentFormActions({
+  isPending,
+  isEdit,
+  onSuccess,
+}: {
+  isPending: boolean;
+  isEdit: boolean;
+  onSuccess?: () => void;
+}) {
+  return (
+    <div className="flex items-center justify-end gap-3 pt-4 border-t border-border/30">
+      <Button
+        type="button"
+        variant="outline"
+        onClick={onSuccess}
+        className="rounded-xl px-5 h-10 font-semibold text-xs border-border/40"
+        disabled={isPending}
+      >
+        Cancelar
+      </Button>
+      <Button
+        disabled={isPending}
+        type="submit"
+        className="rounded-xl px-6 h-10 font-semibold text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 gap-2 min-w-[180px]"
+      >
+        {isPending ? (
+          <>
+            <IconLoader2 className="size-4 animate-spin" />
+            <span>Procesando...</span>
+          </>
+        ) : (
+          <>
+            <IconDeviceFloppy className="size-4" />
+            <span>{isEdit ? "Guardar Cambios" : "Registrar Estudiante"}</span>
+          </>
+        )}
+      </Button>
+    </div>
   );
 }

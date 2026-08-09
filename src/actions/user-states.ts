@@ -2,6 +2,7 @@
 import { serialize } from "@/lib/dto";
 
 import prisma from "@/lib/prisma"
+import { auth } from "@/auth";
 import { revalidatePath } from "next/cache"
 
 const REVALIDATE_PATH = "/configuracion/usuarios/estados"
@@ -30,6 +31,11 @@ export async function getUserStatesAction(institucionId?: string) {
  */
 export async function upsertUserStateAction(values: any, id?: string) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     if (!values.codigo || values.codigo.trim() === "") {
       return { error: "El código es requerido" }
     }
@@ -75,6 +81,11 @@ export async function upsertUserStateAction(values: any, id?: string) {
  */
 export async function deleteUserStateAction(id: string) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado" };
+    }
+
     // Verificar si es sistémico
     const state = await prisma.estadoUsuario.findUnique({
       where: { id },

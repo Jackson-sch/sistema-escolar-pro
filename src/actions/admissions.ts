@@ -119,18 +119,22 @@ export const convertProspectoToAdmisionAction = createSafeAction(
     try {
       // Validar pertenencia
       const existing = await prisma.prospecto.findUnique({
-        where: { id: prospectoId, institucionId: session.user.institucionId || undefined }
+        where: { id: prospectoId, institucionId: session.user.institucionId || undefined },
+        include: { admision: true }
       });
 
-      if (!existing) return { error: "Prospecto no encontrado" };
+      if (!existing) return { error: "Prospecto no encontrado o sin permisos" };
 
       const result = await prisma.$transaction(async (tx) => {
-        // 1. Crear registro de admisión
-        const admision = await tx.admision.create({
-          data: {
-            prospectoId,
-          }
-        })
+        // 1. Crear o reutilizar registro de admisión existente
+        let admision = existing.admision;
+        if (!admision) {
+          admision = await tx.admision.create({
+            data: {
+              prospectoId,
+            }
+          })
+        }
 
         // 2. Actualizar estado del prospecto
         await tx.prospecto.update({
@@ -142,7 +146,7 @@ export const convertProspectoToAdmisionAction = createSafeAction(
       })
 
       revalidatePath(REVALIDATE_PATH)
-      return { success: "Proceso de admisión iniciado", data: serialize(result) }
+      return { success: "Prospecto ingresó al proceso de evaluación", data: serialize(result) }
     } catch (error) {
       console.error("Error converting to admision:", error)
       return { error: "No se pudo iniciar el proceso de admisión" }
@@ -322,3 +326,32 @@ export const convertProspectoToEstudianteAction = createSafeAction(
   },
   { roles: ["administrativo"] }
 );
+
+/**
+ * Actualiza el estado de un prospecto (diseñado para drag-and-drop del Kanban)
+ */
+export const updateProspectoStatusAction = createSafeAction(
+  z.object({ id: z.string(), estado: z.string() }),
+  async ({ id, estado }, session) => {
+    try {
+      const existing = await prisma.prospecto.findUnique({
+        where: { id, institucionId: session.user.institucionId || undefined }
+      });
+
+      if (!existing) return { error: "Prospecto no encontrado o sin permisos" };
+
+      const prospecto = await prisma.prospecto.update({
+        where: { id },
+        data: { estado: estado as any }
+      });
+
+      revalidatePath(REVALIDATE_PATH);
+      return { success: `Estado actualizado a ${estado}`, data: serialize(prospecto) };
+    } catch (error) {
+      console.error("Error updating prospecto status:", error);
+      return { error: "No se pudo actualizar el estado" };
+    }
+  },
+  { roles: ["administrativo"] }
+);
+

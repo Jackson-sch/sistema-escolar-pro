@@ -33,6 +33,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { FormModal } from "@/components/modals/form-modal";
+import { FormKeyboardHelpBar } from "@/components/common/form-keyboard-help-bar";
+import { IconDeviceFloppy } from "@tabler/icons-react";
 
 const variantSchema = z.object({
   id: z.string().optional(),
@@ -109,7 +111,7 @@ export function UniformVariantsModal({
       if (res.error) {
         toast.error(res.error);
       } else {
-        toast.success("Variantes actualizadas");
+        toast.success("Variantes y tallas actualizadas correctamente");
         onOpenChange(false);
       }
     });
@@ -118,71 +120,61 @@ export function UniformVariantsModal({
   return (
     <FormModal
       title={`Gestionar Tallas: ${uniform?.nombre || ""}`}
-      description="Configura los precios y stock disponible por cada sede."
+      description="Configura los precios por prenda y el stock disponible por cada sede."
       isOpen={isOpen}
       onOpenChange={onOpenChange}
-      className="sm:max-w-3xl bg-card/60 backdrop-blur-2xl"
+      className="sm:max-w-3xl"
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-              Lista de Variantes
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-1 py-1">
+          <div className="flex items-center justify-between border-b border-border/30 pb-2.5">
+            <span className="text-xs font-semibold text-foreground/80">
+              Combinaciones de Talla y Sede ({fields.length})
             </span>
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={() =>
-                append({ sedeId: "", talla: "", precio: 0, stock: 0 })
+                append({ sedeId: sedes[0]?.id || "", talla: "", precio: 0, stock: 0 })
               }
-              className="h-8 border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 rounded-lg text-xs font-bold hover:scale-105"
+              className="h-8 border-indigo-500/30 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/20 rounded-xl text-xs font-semibold gap-1.5 cursor-pointer"
             >
-              <Plus className="h-3.5 w-3.5 mr-1.5" />
-              Añadir Talla
+              <Plus className="h-3.5 w-3.5" />
+              <span>Añadir Talla</span>
             </Button>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
             {fields.map((field, index) => (
               <div
                 key={field.id}
-                className="p-4 bg-card/40 backdrop-blur-md rounded-2xl border border-border/40 space-y-4 relative group"
+                className="p-3 bg-background/50 rounded-xl border border-border/40 space-y-3 relative group"
               >
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => remove(index)}
-                  className="absolute top-2 right-2 h-7 w-7 text-muted-foreground/40 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100 hover:scale-105"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
-
-                <div className="grid grid-cols-12 gap-4">
+                <div className="grid grid-cols-12 gap-3 items-end">
                   <FormField
                     control={form.control}
                     name={`variantes.${index}.sedeId`}
                     render={({ field }) => (
-                      <FormItem className="col-span-12 lg:col-span-6">
-                        <FormLabel className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-widest flex items-center gap-1.5 ml-1">
-                          <Home className="h-3 w-3" /> Sede
+                      <FormItem className="col-span-12 sm:col-span-4">
+                        <FormLabel className="text-xs font-medium text-foreground/80 flex items-center gap-1">
+                          <Home className="h-3.5 w-3.5 text-indigo-500" /> Sede
                         </FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger className="bg-muted/10 border-border/40 h-9 w-full rounded-lg text-xs">
-                              <SelectValue placeholder="Sede" />
+                            <SelectTrigger className="bg-background border-border/40 h-9 w-full rounded-xl text-xs font-medium">
+                              <SelectValue placeholder="Seleccionar sede" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent>
+                          <SelectContent className="rounded-xl border-border/40">
                             {sedes.map((sede) => (
                               <SelectItem
                                 key={sede.id}
                                 value={sede.id}
-                                className="text-xs"
+                                className="text-xs font-medium"
                               >
                                 {sede.nombre}
                               </SelectItem>
@@ -198,15 +190,15 @@ export function UniformVariantsModal({
                     control={form.control}
                     name={`variantes.${index}.talla`}
                     render={({ field }) => (
-                      <FormItem className="col-span-12 lg:col-span-2">
-                        <FormLabel className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-widest flex items-center gap-1.5 ml-1">
-                          <Ruler className="h-3 w-3" /> Talla
+                      <FormItem className="col-span-6 sm:col-span-2">
+                        <FormLabel className="text-xs font-medium text-foreground/80 flex items-center gap-1">
+                          <Ruler className="h-3.5 w-3.5 text-amber-500" /> Talla
                         </FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="4, 6, S, M..."
+                            placeholder="Ej: 4, 6, S, M"
                             {...field}
-                            className="bg-muted/10 border-border/40 h-9 rounded-lg text-xs"
+                            className="bg-background border-border/40 h-9 rounded-xl text-xs"
                           />
                         </FormControl>
                         <FormMessage />
@@ -218,16 +210,16 @@ export function UniformVariantsModal({
                     control={form.control}
                     name={`variantes.${index}.precio`}
                     render={({ field }) => (
-                      <FormItem className="col-span-12 lg:col-span-2">
-                        <FormLabel className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-widest flex items-center gap-1.5 ml-1">
-                          <BadgeDollarSign className="h-3 w-3" /> Precio (S/)
+                      <FormItem className="col-span-6 sm:col-span-3">
+                        <FormLabel className="text-xs font-medium text-foreground/80 flex items-center gap-1">
+                          <BadgeDollarSign className="h-3.5 w-3.5 text-emerald-500" /> Precio (S/)
                         </FormLabel>
                         <FormControl>
                           <Input
                             type="number"
                             step="0.50"
                             {...field}
-                            className="bg-muted/10 border-border/40 h-9 rounded-lg text-xs"
+                            className="bg-background border-border/40 h-9 rounded-xl text-xs font-mono"
                           />
                         </FormControl>
                         <FormMessage />
@@ -239,44 +231,68 @@ export function UniformVariantsModal({
                     control={form.control}
                     name={`variantes.${index}.stock`}
                     render={({ field }) => (
-                      <FormItem className="col-span-12 lg:col-span-2">
-                        <FormLabel className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-widest flex items-center gap-1.5 ml-1">
-                          <Package className="h-3 w-3" /> Stock
+                      <FormItem className="col-span-9 sm:col-span-2">
+                        <FormLabel className="text-xs font-medium text-foreground/80 flex items-center gap-1">
+                          <Package className="h-3.5 w-3.5 text-sky-500" /> Stock
                         </FormLabel>
                         <FormControl>
                           <Input
                             type="number"
                             {...field}
-                            className="bg-muted/10 border-border/40 h-9 rounded-lg text-xs"
+                            className="bg-background border-border/40 h-9 rounded-xl text-xs font-mono"
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+
+                  <div className="col-span-3 sm:col-span-1 flex justify-end">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => remove(index)}
+                      className="h-9 w-9 rounded-xl text-rose-500 hover:bg-rose-500/10 cursor-pointer"
+                      title="Eliminar talla"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
 
-          <div className="flex gap-3 pt-4">
+          {/* Guía de Atajos de Teclado */}
+          <FormKeyboardHelpBar />
+
+          {/* Acciones */}
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-border/30">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="flex-1 rounded-xl h-11 font-bold hover:scale-105"
+              className="rounded-xl px-5 h-10 font-semibold text-xs border-border/40"
+              disabled={isPending}
             >
               Cancelar
             </Button>
             <Button
               type="submit"
               disabled={isPending}
-              className="flex-1 rounded-xl h-11 font-bold shadow-lg shadow-primary/20 hover:scale-105"
+              className="rounded-xl px-6 h-10 font-semibold text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 gap-2 min-w-[170px]"
             >
               {isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Guardando...</span>
+                </>
               ) : (
-                "Guardar Cambios"
+                <>
+                  <IconDeviceFloppy className="size-4" />
+                  <span>Guardar Tallas</span>
+                </>
               )}
             </Button>
           </div>

@@ -40,14 +40,15 @@ export function VerificacionDialogs({
         </div>
 
         <div className="space-y-4">
-          <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+          <label htmlFor="motivo-rechazo" className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
             Motivo del Rechazo
           </label>
           <Textarea
+            id="motivo-rechazo"
             value={motivoRechazo}
             onChange={(e) => setMotivoRechazo(e.target.value)}
             placeholder="Ej: El monto indicado no coincide con la imagen adjunta..."
-            className="min-h-[120px] rounded-2xl border-zinc-200 dark:border-zinc-800 focus:ring-destructive/20 transition-all resize-none shadow-sm"
+            className="min-h-[120px] rounded-2xl border-zinc-200 dark:border-zinc-800 focus:ring-destructive/20 transition-shadow resize-none shadow-sm"
           />
         </div>
 
@@ -63,7 +64,7 @@ export function VerificacionDialogs({
             variant="destructive"
             onClick={onConfirmReject}
             disabled={loading || !motivoRechazo.trim()}
-            className="flex-1 rounded-full active:scale-[0.98] transition-all"
+            className="flex-1 rounded-full active:scale-[0.98] transition-transform"
           >
             {loading ? (
               <>

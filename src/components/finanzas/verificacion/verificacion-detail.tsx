@@ -26,7 +26,7 @@ export function VerificacionDetail({
   onBack,
 }: VerificacionDetailProps) {
   return (
-    <div className="flex flex-col h-full bg-card animate-in fade-in slide-in-from-right-4 duration-500 overflow-y-auto custom-scrollbar p-4 sm:p-6">
+    <div className="flex flex-col h-full bg-card animate-in fade-in slide-in-from-right-4 animation-duration- overflow-y-auto custom-scrollbar p-4 sm:p-6">
       <div className="max-w-6xl mx-auto w-full">
         <VerificacionHeader comprobante={comprobante} onBack={onBack} />
 

@@ -10,16 +10,16 @@ export default function ReservationsWidget({
   setActiveTab: (tab: string) => void;
 }) {
   return (
-    <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-white/5 rounded-[3rem] p-8 space-y-6 shadow-xl shadow-slate-200/50 dark:shadow-none">
+    <div className="space-y-6 rounded-2xl border border-border/50 bg-card/80 p-6 shadow-sm">
       <div className="flex justify-between items-center">
-        <div className="flex items-center gap-2 text-slate-900 dark:text-white">
-          <Clock className="h-5 w-5 text-blue-500" />
-          <h3 className="text-lg font-black">Mis Reservas</h3>
+        <div className="flex items-center gap-2 text-foreground">
+          <Clock className="h-5 w-5 text-primary" />
+          <h3 className="text-lg font-bold">Mis Reservas</h3>
         </div>
         <Button
           variant="link"
           onClick={() => setActiveTab("mis-reservas")}
-          className="text-xs text-blue-600 dark:text-blue-400 capitalize tracking-widest p-0 h-auto"
+          className="h-auto p-0 text-xs font-semibold text-primary capitalize tracking-widest"
         >
           Ver Todas
         </Button>

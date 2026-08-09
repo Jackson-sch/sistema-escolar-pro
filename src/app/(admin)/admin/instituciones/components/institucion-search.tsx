@@ -9,7 +9,7 @@ export function InstitucionSearch() {
   const pathname = usePathname();
   const { replace } = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [value, setValue] = useState(searchParams.get("query") || "");
+  const [value, setValue] = useState(() => searchParams.get("query") || "");
 
   const handleSearch = (term: string) => {
     const params = new URLSearchParams(searchParams);
@@ -35,15 +35,17 @@ export function InstitucionSearch() {
           setValue(e.target.value);
           handleSearch(e.target.value);
         }}
-        className="pl-10 pr-10 py-2 bg-zinc-900 border border-white/5 rounded-xl text-sm focus:outline-none focus:border-indigo-500/50 transition-all w-64"
+        className="pl-10 pr-10 py-2 bg-zinc-900 border border-white/5 rounded-xl text-sm focus:outline-none focus:border-indigo-500/50 transition-[border-color,outline-color] w-64"
+        aria-label="Buscar institución"
       />
       {value && (
         <button 
+          aria-label="Limpiar búsqueda"
           onClick={() => {
             setValue("");
             handleSearch("");
           }}
-          className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 hover:bg-white/5 rounded-md transition-all"
+          className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 hover:bg-white/5 rounded-md transition-colors"
         >
           <IconX className="size-3 text-zinc-500" />
         </button>

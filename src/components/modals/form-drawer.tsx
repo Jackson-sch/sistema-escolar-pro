@@ -9,11 +9,10 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { cn } from "@/lib/utils";
-import { ShineBorder } from "@/components/ui/shine-border";
 import { FormModalProvider, useFormModal } from "@/components/modals/form-modal-context";
-import { toast } from "sonner";
 import { SafeCloseDialog } from "@/components/modals/safe-close-dialog";
 import { useFormShortcuts } from "@/hooks/use-form-shortcuts";
+import { LucideIcon } from "lucide-react";
 
 interface FormDrawerProps {
   title: string;
@@ -24,6 +23,7 @@ interface FormDrawerProps {
   children: React.ReactNode;
   className?: string;
   headerClassName?: string;
+  Icon?: LucideIcon;
 }
 
 export function FormDrawer(props: FormDrawerProps) {
@@ -43,6 +43,7 @@ function FormDrawerInner({
   children,
   className,
   headerClassName,
+  Icon
 }: FormDrawerProps) {
   const { isDirty, setIsDirty, triggerSubmit } = useFormModal();
   const [showConfirm, setShowConfirm] = useState(false);
@@ -71,14 +72,14 @@ function FormDrawerInner({
       <DrawerContent
         className={cn(
           "h-full max-h-full border-l border-border/50",
-          "data-[vaul-drawer-direction=right]:!w-full data-[vaul-drawer-direction=right]:sm:!max-w-2xl",
+          "data-[vaul-drawer-direction=right]:w-full! data-[vaul-drawer-direction=right]:sm:max-w-2xl!",
           className,
         )}
       >
-        <ShineBorder shineColor={["#A07CFE", "#FE8FB5", "#FFBE7B"]} />
         <DrawerHeader className={cn("p-6 pb-4 border-b shrink-0", headerClassName)}>
           <div className="flex items-center gap-3">
-            <DrawerTitle className="text-xl font-bold tracking-tight">
+            <DrawerTitle className="text-xl font-bold tracking-tight flex items-center gap-2">
+              {Icon && <Icon className="size-5" />}
               {title}
             </DrawerTitle>
             {titleSpan && (
