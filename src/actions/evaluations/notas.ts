@@ -77,7 +77,17 @@ export async function getEstudiantesCursoAction(cursoId: string) {
     const estudiantes = await prisma.user.findMany({
       where: {
         role: "estudiante",
-        nivelAcademicoId: curso.nivelAcademicoId,
+        OR: [
+          { nivelAcademicoId: curso.nivelAcademicoId },
+          {
+            matriculas: {
+              some: {
+                nivelAcademicoId: curso.nivelAcademicoId,
+                estado: "activo",
+              },
+            },
+          },
+        ],
       },
       select: {
         id: true,
@@ -110,13 +120,16 @@ export const registrarNotasMasivasAction = createSafeAction(
   async ({ evaluacionId, cursoId, notas }, session) => {
     try {
       if (session.user.role === "profesor") {
-          const asignacion = await prisma.curso.findFirst({
-            where: {
-              id: cursoId,
-              profesorId: session.user.id,
-            }
-          });
-          if (!asignacion) return { error: "No tiene permiso para este curso" };
+        const asignacion = await prisma.curso.findFirst({
+          where: {
+            id: cursoId,
+            OR: [
+              { profesorId: session.user.id },
+              { nivelAcademico: { tutorId: session.user.id } },
+            ],
+          },
+        });
+        if (!asignacion) return { error: "No tiene permiso para este curso" };
       }
 
       const operations = notas.map((nota) => {

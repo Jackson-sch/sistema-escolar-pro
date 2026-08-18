@@ -54,9 +54,21 @@ export async function getCoursesAction(filters?: {
       return { error: "No autorizado. Por favor inicie sesión." };
     }
 
+    const isProfessor = session.user.role === "profesor";
+    const targetProfesorId = isProfessor ? session.user.id : filters?.profesorId;
+
+    const teacherCondition = targetProfesorId
+      ? {
+          OR: [
+            { profesorId: targetProfesorId },
+            { nivelAcademico: { tutorId: targetProfesorId } },
+          ],
+        }
+      : {};
+
     const where: any = {
+      ...teacherCondition,
       anioAcademico: filters?.anioAcademico,
-      profesorId: filters?.profesorId || undefined,
       nivelId: filters?.nivelId || undefined,
       activo: true,
     };

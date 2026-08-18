@@ -49,19 +49,12 @@ export function GradoForm({
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialData 
-      ? {
-          nombre: initialData.nombre,
-          codigo: initialData.codigo,
-          orden: String(initialData.orden),
-          nivelId: initialData.nivelId,
-        }
-      : {
-          nombre: "",
-          codigo: "",
-          orden: "1",
-          nivelId: "",
-        },
+    defaultValues: {
+      nombre: initialData?.nombre ?? "",
+      codigo: initialData?.codigo ?? "",
+      orden: initialData?.orden != null ? String(initialData.orden) : "1",
+      nivelId: initialData?.nivelId ?? "",
+    },
   });
 
   const { isDirty } = form.formState;
@@ -100,7 +93,7 @@ export function GradoForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Nivel</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select onValueChange={field.onChange} value={field.value ?? ""}>
                 <FormControl>
                   <SelectTrigger className="w-full rounded-full">
                     <SelectValue placeholder="Seleccionar nivel" />
@@ -129,6 +122,7 @@ export function GradoForm({
                   <Input
                     placeholder="Ej: 3ero"
                     {...field}
+                    value={field.value ?? ""}
                     className="rounded-full"
                   />
                 </FormControl>
@@ -146,6 +140,7 @@ export function GradoForm({
                   <Input
                     placeholder="Ej: G3-SEC"
                     {...field}
+                    value={field.value ?? ""}
                     className="rounded-full"
                   />
                 </FormControl>
@@ -165,6 +160,7 @@ export function GradoForm({
                   type="number"
                   min={1}
                   {...field}
+                  value={field.value ?? ""}
                   className="rounded-full"
                 />
               </FormControl>

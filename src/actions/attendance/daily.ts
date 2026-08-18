@@ -36,12 +36,17 @@ export const getAsistenciaAction = createSafeAction(
       const alumnos = await prisma.user.findMany({
         where: {
           role: "estudiante",
-          nivelAcademicoId,
-          matriculas: {
-            some: {
-              estado: "activo",
+          OR: [
+            { nivelAcademicoId },
+            {
+              matriculas: {
+                some: {
+                  nivelAcademicoId,
+                  estado: "activo",
+                },
+              },
             },
-          },
+          ],
         },
         select: {
           id: true,
@@ -134,7 +139,7 @@ export const upsertAsistenciaAction = createSafeAction(
             data: {
               estudianteId: asist.estudianteId,
               cursoId: asist.cursoId,
-              fecha: asist.fecha,
+              fecha: startOfDay,
               presente: asist.presente,
               tardanza: asist.tardanza,
               justificada: asist.justificada,

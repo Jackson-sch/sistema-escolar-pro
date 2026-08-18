@@ -40,15 +40,10 @@ export function NivelForm({
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialData 
-      ? {
-          nombre: initialData.nombre,
-          institucionId: initialData.institucionId,
-        }
-      : {
-          nombre: "",
-          institucionId,
-        },
+    defaultValues: {
+      nombre: initialData?.nombre ?? "",
+      institucionId: initialData?.institucionId ?? institucionId ?? "",
+    },
   });
 
   const { isDirty } = form.formState;
@@ -88,6 +83,7 @@ export function NivelForm({
                 <Input
                   placeholder="Ej: SECUNDARIA"
                   {...field}
+                  value={field.value ?? ""}
                   className="rounded-full placeholder:text-xs"
                 />
               </FormControl>

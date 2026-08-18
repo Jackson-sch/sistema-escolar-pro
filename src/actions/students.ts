@@ -124,6 +124,9 @@ export async function getStudentsAction(params?: {
         where,
         include: {
           estado: true,
+          institucion: {
+            select: { nombreInstitucion: true },
+          },
           matriculas: {
             where: { anioAcademico: currentYear },
             include: {
@@ -176,7 +179,13 @@ export async function getUserStatusesAction() {
       where: { activo: true },
       orderBy: { orden: "asc" },
     });
-    return { data: serialize(statuses) };
+    const uniqueMap = new Map<string, typeof statuses[0]>();
+    for (const status of statuses) {
+      if (status.nombre && !uniqueMap.has(status.nombre)) {
+        uniqueMap.set(status.nombre, status);
+      }
+    }
+    return { data: serialize(Array.from(uniqueMap.values())) };
   } catch (error) {
     console.error("Error al cargar estados:", error);
     return { error: "Error al cargar estados" };

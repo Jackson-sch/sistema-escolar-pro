@@ -354,11 +354,15 @@ export const getTeacherDashboardAction = createSafeAction(
     const teacherId = session.user.id;
     const institucionId = session.user.institucionId;
 
-    // 1. Obtener cursos del profesor con conteo de estudiantes
+    // 1. Obtener cursos del profesor con conteo de estudiantes (incluye tutorías)
     const cursos = await prisma.curso.findMany({
       where: {
-        profesorId: teacherId,
+        OR: [
+          { profesorId: teacherId },
+          { nivelAcademico: { tutorId: teacherId } },
+        ],
         institucionId: institucionId || undefined,
+        activo: true,
       },
       include: {
         areaCurricular: true,
@@ -372,10 +376,85 @@ export const getTeacherDashboardAction = createSafeAction(
     });
 
     const cursoIds = cursos.map((c) => c.id);
+    const nivelAcademicoIds = Array.from(new Set(cursos.map((c) => c.nivelAcademicoId)));
+    const studentCountMap = new Map<string, number>();
+
+    if (nivelAcademicoIds.length > 0) {
+      // 1) Contar matrículas activas en cada nivelAcademicoId (sección)
+      const counts = await prisma.matricula.groupBy({
+        by: ["nivelAcademicoId"],
+        where: {
+          nivelAcademicoId: { in: nivelAcademicoIds },
+          estado: "activo",
+        },
+        _count: {
+          _all: true,
+        },
+      });
+
+      counts.forEach((c) => {
+        if (c.nivelAcademicoId) {
+          studentCountMap.set(c.nivelAcademicoId, c._count._all);
+        }
+      });
+
+      // 2) Fallback con User.nivelAcademicoId si el conteo fuera mayor
+      const userCounts = await prisma.user.groupBy({
+        by: ["nivelAcademicoId"],
+        where: {
+          nivelAcademicoId: { in: nivelAcademicoIds },
+          role: "estudiante",
+        },
+        _count: {
+          _all: true,
+        },
+      });
+
+      userCounts.forEach((c) => {
+        if (c.nivelAcademicoId) {
+          const current = studentCountMap.get(c.nivelAcademicoId) || 0;
+          if (c._count._all > current) {
+            studentCountMap.set(c.nivelAcademicoId, c._count._all);
+          }
+        }
+      });
+    }
+
+    // Contar total de estudiantes ÚNICOS que están matriculados en las secciones del docente
+    let totalUniqueStudents = 0;
+    if (nivelAcademicoIds.length > 0) {
+      const uniqueMatriculas = await prisma.matricula.groupBy({
+        by: ["estudianteId"],
+        where: {
+          nivelAcademicoId: { in: nivelAcademicoIds },
+          estado: "activo",
+        },
+      });
+      totalUniqueStudents = uniqueMatriculas.length;
+
+      if (totalUniqueStudents === 0) {
+        const uniqueUsers = await prisma.user.groupBy({
+          by: ["id"],
+          where: {
+            nivelAcademicoId: { in: nivelAcademicoIds },
+            role: "estudiante",
+          },
+        });
+        totalUniqueStudents = uniqueUsers.length;
+      }
+    }
+
+    const cursosConConteo = cursos.map((c) => ({
+      ...c,
+      _count: {
+        estudiantes: studentCountMap.get(c.nivelAcademicoId) || 0,
+      },
+    }));
 
     // 2. Próximas evaluaciones (próximos 7 días)
     const upcomingEvaluationsPromise = prisma.evaluacion.findMany({
       where: {
+        activa: true,
         cursoId: { in: cursoIds },
         fecha: {
           gte: new Date(),
@@ -419,6 +498,7 @@ export const getTeacherDashboardAction = createSafeAction(
     // 4. Progreso de calificación (evaluaciones sin notas registradas)
     const evaluationsToGradePromise = prisma.evaluacion.findMany({
       where: {
+        activa: true,
         cursoId: { in: cursoIds },
         fecha: { lte: new Date() },
         notas: { none: {} }, // No tiene notas registradas
@@ -438,8 +518,6 @@ export const getTeacherDashboardAction = createSafeAction(
 
     // 5. Horario de hoy
     const today = new Date().getDay(); // 0 (Sun) to 6 (Sat)
-    // Map JS getDay to database day (assuming 1=Mon, ..., 7=Sun or similar)
-    // Let's assume 1-7 where 1=Mon.
     const dbDay = today === 0 ? 7 : today;
 
     const todaySchedulePromise = prisma.horario.findMany({
@@ -468,7 +546,8 @@ export const getTeacherDashboardAction = createSafeAction(
 
     return {
       success: {
-        cursos,
+        cursos: serialize(cursosConConteo),
+        totalUniqueStudents,
         upcomingEvaluations: serialize(upcomingEvaluations),
         criticalAttendance: serialize(criticalAttendance),
         evaluationsToGrade: serialize(evaluationsToGrade),

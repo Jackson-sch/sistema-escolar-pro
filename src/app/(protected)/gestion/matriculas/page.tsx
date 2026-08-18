@@ -11,14 +11,9 @@ import { getInstitucionAction } from "@/actions/institucion";
 import { columns } from "@/components/gestion/matriculas/components/columns";
 import { EnrollmentTable } from "@/components/gestion/matriculas/management/enrollment-table";
 import { AddEnrollmentButton } from "@/components/gestion/matriculas/components/add-enrollment-button";
-import { Button } from "@/components/ui/button";
+import { DownloadEnrollmentsReportButton } from "@/components/gestion/matriculas/components/download-consolidado-button";
 import Stats from "@/components/gestion/matriculas/components/stats";
 import { Badge } from "@/components/ui/badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 import { Suspense } from "react";
 
@@ -59,18 +54,7 @@ export default async function MatriculasPage() {
         </div>
 
         <div className="flex flex-row gap-3 items-center shrink-0">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="outline" className="rounded-xl h-10 px-4 font-semibold text-xs border-border/40 gap-2 cursor-pointer">
-                <IconCloudDownload className="size-4 text-muted-foreground" />
-                <span className="hidden sm:inline">Reporte Consolidado</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="text-micro font-medium">
-              Descargar consolidado de matrículas en formato excel
-            </TooltipContent>
-          </Tooltip>
-
+          <DownloadEnrollmentsReportButton />
           <AddEnrollmentButton nivelesAcademicos={nivelesAcademicos as any} />
         </div>
       </div>

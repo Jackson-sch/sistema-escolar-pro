@@ -531,7 +531,7 @@ export function AsistenciaReportes({
     "type",
     parseAsString.withDefault("mensual"),
   ) as any;
-  const [rPeriod, setRPeriod] = useQueryState("rPeriod", parseAsStringLiteral(["today", "month", "year"]).withDefault("today"));
+  const [rPeriod, setRPeriod] = useQueryState("rPeriod", parseAsStringLiteral(["today", "month", "year"]).withDefault("month"));
   const [studentId, setStudentId] = useQueryState(
     "student",
     parseAsString.withDefault(""),
@@ -586,7 +586,7 @@ export function AsistenciaReportes({
   const [isLoadingAlumnos, setIsLoadingAlumnos] = useState(false);
   const [alumnos, setAlumnos] = useState<any[]>([]);
 
-  const isFirstRender = useRef(true);
+  const prevAnioRef = useRef(anio);
 
   // Cargar secciones cuando cambie el año
   useEffect(() => {
@@ -601,15 +601,14 @@ export function AsistenciaReportes({
       if (ignore) return;
       if (res.data) {
         setSecciones(res.data);
-        // Si no es el primer render (ej. cambio de año), limpiar estados secundarios
-        if (!isFirstRender.current) {
+        if (prevAnioRef.current !== anio) {
           setNivelId("");
           setGradoId("");
           setSeccionId("");
           setStudentId("");
           dispatchResults({ type: "RESET" });
+          prevAnioRef.current = anio;
         }
-        isFirstRender.current = false;
       }
       setIsLoadingSecciones(false);
     };
@@ -619,12 +618,26 @@ export function AsistenciaReportes({
     };
   }, [anio, profesorId, setNivelId, setGradoId, setSeccionId, setStudentId]);
 
-  // Selección por defecto del primer nivel disponible
+  // Selección por defecto del nivel, grado y sección del docente o primera opción
   useEffect(() => {
-    if (niveles.length > 0 && !nivelId) {
-      setNivelId(niveles[0].id);
+    if (secciones.length > 0 && !nivelId) {
+      const targetSeccion =
+        (profesorId
+          ? secciones.find((s: any) => s.tutor?.id === profesorId) ||
+            secciones.find((s: any) =>
+              s.cursos?.some(
+                (c: any) => c.profesorId === profesorId || c.profesor?.id === profesorId,
+              ),
+            )
+          : null) || secciones[0];
+
+      if (targetSeccion) {
+        if (targetSeccion.nivel?.id) setNivelId(targetSeccion.nivel.id);
+        if (targetSeccion.grado?.id) setGradoId(targetSeccion.grado.id);
+        if (targetSeccion.id) setSeccionId(targetSeccion.id);
+      }
     }
-  }, [niveles, nivelId, setNivelId]);
+  }, [secciones, nivelId, profesorId, setNivelId, setGradoId, setSeccionId]);
 
   // Cargar alumnos cuando cambie la sección (solo para reporte individual)
   useEffect(() => {

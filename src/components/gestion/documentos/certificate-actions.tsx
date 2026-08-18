@@ -90,11 +90,46 @@ export function CertificateActions({
     copy(verificationCode, "Código copiado al portapapeles");
   };
 
+  const handleDownloadPdf = async () => {
+    if (!data) return;
+    try {
+      const { pdf } = await import("@react-pdf/renderer");
+      const { ConstanciaEstudiosPDF } = await import(
+        "@/components/gestion/documentos/constancia-estudios-pdf"
+      );
+
+      const blob = await pdf(
+        <ConstanciaEstudiosPDF
+          student={data.student}
+          anioAcademico={data.anioAcademico}
+          institucion={data.institucion}
+          verificationCode={verificationCode}
+        />
+      ).toBlob();
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `Constancia-${studentName}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      toast.success("Constancia descargada exitosamente");
+    } catch (error) {
+      console.error("Error generando constancia:", error);
+      toast.error("Error al descargar el PDF");
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="rounded-full">
-          <IconFileCertificate className="size-4 mr-2 text-amber-500" />
+        <Button
+          variant="outline"
+          className="w-full rounded-full text-xs md:text-sm h-9 md:h-10 font-semibold border-border/60 hover:bg-accent hover:text-accent-foreground transition-all duration-200 shadow-sm"
+        >
+          <IconFileCertificate className="size-3.5 md:size-4 mr-1.5 md:mr-2 text-amber-500" />
           Constancia
         </Button>
       </DialogTrigger>
@@ -140,24 +175,13 @@ export function CertificateActions({
                 </span>
               </button>
 
-              <PDFDownloadLink
-                document={
-                  <ConstanciaEstudiosPDF
-                    student={data.student}
-                    anioAcademico={data.anioAcademico}
-                    institucion={data.institucion}
-                    verificationCode={verificationCode}
-                  />
-                }
-                fileName={`Constancia-${studentName}.pdf`}
+              <Button
+                onClick={handleDownloadPdf}
+                className="w-full rounded-full font-bold"
               >
-                {({ loading: pdfLoading }) => (
-                  <Button className="w-full rounded-full" disabled={pdfLoading}>
-                    <IconDownload className="mr-2 h-5 w-5" />
-                    {pdfLoading ? "Generando PDF..." : "Descargar Constancia"}
-                  </Button>
-                )}
-              </PDFDownloadLink>
+                <IconDownload className="mr-2 h-5 w-5" />
+                Descargar Constancia
+              </Button>
 
               <Button
                 variant="outline"

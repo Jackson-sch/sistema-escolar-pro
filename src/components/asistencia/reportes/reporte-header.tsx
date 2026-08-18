@@ -4,8 +4,10 @@ import {
   IconCalendarMonth,
   IconCircleFilled,
   IconDownload,
+  IconUsers,
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { MESES_OPTIONS } from "@/lib/constants";
 import * as XLSX from "xlsx-js-style";
 
@@ -15,6 +17,19 @@ interface ReporteHeaderProps {
   totalEstudiantes: number;
   data?: any[];
   daysInMonth?: number;
+}
+
+function parseDayFromDate(dateInput: string | Date): number {
+  if (!dateInput) return -1;
+  if (typeof dateInput === "string") {
+    const datePart = dateInput.split("T")[0];
+    const parts = datePart.split("-");
+    if (parts.length === 3) {
+      return parseInt(parts[2], 10);
+    }
+  }
+  const d = new Date(dateInput);
+  return d.getUTCDate();
 }
 
 export function ReporteHeader({
@@ -45,7 +60,7 @@ export function ReporteHeader({
 
       for (let day = 1; day <= daysInMonth; day++) {
         const asistencia = alumno.asistencias.find(
-          (a: any) => new Date(a.fecha).getDate() === day,
+          (a: any) => parseDayFromDate(a.fecha) === day,
         );
         let status = "-";
         if (asistencia) {
@@ -65,7 +80,6 @@ export function ReporteHeader({
       return row;
     });
 
-    // Definir el orden explícito de las columnas
     const header = [
       "ESTUDIANTE",
       ...Array.from({ length: daysInMonth }, (_, i) => (i + 1).toString()),
@@ -77,10 +91,9 @@ export function ReporteHeader({
 
     const ws = XLSX.utils.json_to_sheet(excelData, { header });
 
-    // ESTILOS
     const headerStyle = {
       font: { bold: true, color: { rgb: "FFFFFF" } },
-      fill: { fgColor: { rgb: "1E293B" } }, // Slate 800
+      fill: { fgColor: { rgb: "1E293B" } },
       alignment: { horizontal: "center", vertical: "center" },
       border: {
         top: { style: "thin" },
@@ -111,49 +124,44 @@ export function ReporteHeader({
       },
     };
 
-    // Aplicar estilos
     const range = XLSX.utils.decode_range(ws["!ref"]!);
     for (let R = range.s.r; R <= range.e.r; ++R) {
       for (let C = range.s.c; C <= range.e.c; ++C) {
         const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
         if (!ws[cellAddress]) continue;
 
-        // Estilo Header
         if (R === 0) {
           ws[cellAddress].s = headerStyle;
         } else {
-          // Estilo Datos
           if (C === 0) {
-            // Columna Estudiante
             ws[cellAddress].s = studentColStyle;
           } else {
-            // Columnas de Asistencia y Totales
             const value = ws[cellAddress].v;
             let customStyle = { ...cellStyle };
 
             if (value === "P") {
               customStyle = {
                 ...customStyle,
-                font: { color: { rgb: "059669" }, bold: true }, // Emerald 600
-                fill: { fgColor: { rgb: "ECFDF5" } }, // Emerald 50
+                font: { color: { rgb: "059669" }, bold: true },
+                fill: { fgColor: { rgb: "ECFDF5" } },
               } as any;
             } else if (value === "F") {
               customStyle = {
                 ...customStyle,
-                font: { color: { rgb: "DC2626" }, bold: true }, // Red 600
-                fill: { fgColor: { rgb: "FEF2F2" } }, // Red 50
+                font: { color: { rgb: "DC2626" }, bold: true },
+                fill: { fgColor: { rgb: "FEF2F2" } },
               } as any;
             } else if (value === "T") {
               customStyle = {
                 ...customStyle,
-                font: { color: { rgb: "D97706" }, bold: true }, // Amber 600
-                fill: { fgColor: { rgb: "FFFBEB" } }, // Amber 50
+                font: { color: { rgb: "D97706" }, bold: true },
+                fill: { fgColor: { rgb: "FFFBEB" } },
               } as any;
             } else if (value === "J") {
               customStyle = {
                 ...customStyle,
-                font: { color: { rgb: "0284C7" }, bold: true }, // Sky 600
-                fill: { fgColor: { rgb: "F0F9FF" } }, // Sky 50
+                font: { color: { rgb: "0284C7" }, bold: true },
+                fill: { fgColor: { rgb: "F0F9FF" } },
               } as any;
             }
 
@@ -166,14 +174,13 @@ export function ReporteHeader({
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Asistencia");
 
-    // Ajustar anchos de columna básicos
     const wscols = [
-      { wch: 40 }, // Estudiante
-      ...Array.from({ length: daysInMonth }, () => ({ wch: 4 })), // Días
+      { wch: 40 },
+      ...Array.from({ length: daysInMonth }, () => ({ wch: 4 })),
       { wch: 6 },
       { wch: 6 },
       { wch: 6 },
-      { wch: 6 }, // Totales
+      { wch: 6 },
     ];
     ws["!cols"] = wscols;
 
@@ -184,54 +191,54 @@ export function ReporteHeader({
   };
 
   return (
-    <div className="flex flex-col justify-between gap-6 px-6 py-5 bg-muted/5">
-      <div className="flex items-center gap-4">
-        <div className="bg-primary/10 p-2.5 rounded-xl border border-primary/20 shadow-sm shadow-primary/5">
-          <IconCalendarMonth className="h-5 w-5 text-primary" />
+    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-5 rounded-2xl border border-border/40 bg-card/80 backdrop-blur-md shadow-sm mb-4">
+      <div className="flex items-center gap-3.5">
+        <div className="size-11 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-500 flex items-center justify-center shrink-0 shadow-xs">
+          <IconCalendarMonth className="size-5" />
         </div>
         <div className="space-y-0.5">
-          <h3 className="text-lg font-bold tracking-tight leading-tight">
-            Consolidado {MESES_OPTIONS[mes].nombre}
-          </h3>
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-medium text-muted-foreground">
-              Periodo {anio}
-            </span>
-            <span className="w-1 h-1 rounded-full bg-border" />
-            <span className="text-[11px] font-semibold text-primary/90">
-              {totalEstudiantes} Alumnos
-            </span>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="text-base font-extrabold tracking-tight text-foreground uppercase">
+              Consolidado {MESES_OPTIONS[mes].nombre}
+            </h3>
+            <Badge variant="outline" className="text-[10px] font-bold border-indigo-500/30 text-indigo-600 dark:text-indigo-400 bg-indigo-500/5 rounded-full px-2 py-0">
+              Año Lectivo {anio}
+            </Badge>
           </div>
+          <p className="text-xs text-muted-foreground font-medium flex items-center gap-1.5">
+            <IconUsers size={13} className="text-indigo-500" />
+            <span className="font-bold text-foreground/80">{totalEstudiantes} Alumnos</span> registrados en la nómina activa
+          </p>
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-        {/* Leyenda Técnica */}
-        <div className="flex items-center gap-3 sm:gap-4 text-[10px] font-bold text-muted-foreground bg-background/40 h-10 border border-border/40 rounded-full px-2 shrink-0">
-          <div className="flex items-center gap-1.5">
-            <IconCircleFilled className="size-2 text-emerald-500" />{" "}
-            <span>Presente</span>
+      <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-between md:justify-end">
+        {/* Leyenda de Asistencia */}
+        <div className="flex items-center gap-3 text-[10px] font-bold text-muted-foreground/80 bg-muted/40 border border-border/40 rounded-xl px-3 py-1.5 shadow-xs">
+          <div className="flex items-center gap-1">
+            <IconCircleFilled className="size-2 text-emerald-500" />
+            <span>P: Pres.</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <IconCircleFilled className="size-2 text-red-500" />{" "}
-            <span>Falta</span>
+          <div className="flex items-center gap-1">
+            <IconCircleFilled className="size-2 text-rose-500" />
+            <span>F: Falta</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <IconCircleFilled className="size-2 text-amber-500" />{" "}
-            <span>Tarde</span>
+          <div className="flex items-center gap-1">
+            <IconCircleFilled className="size-2 text-amber-500" />
+            <span>T: Tarde</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <IconCircleFilled className="size-2 text-sky-500" />{" "}
-            <span>Justif.</span>
+          <div className="flex items-center gap-1">
+            <IconCircleFilled className="size-2 text-sky-500" />
+            <span>J: Just.</span>
           </div>
         </div>
 
         <Button
           onClick={handleExportXLSX}
           disabled={!data || data.length === 0}
-          className="text-xs px-6 rounded-full shadow-lg shadow-primary/20 transition-opacity disabled:opacity-50"
+          className="rounded-xl text-xs font-bold px-4 h-9.5 gap-2 bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-600/20 transition-all cursor-pointer"
         >
-          <IconDownload className="mr-2 h-3.5 w-3.5" />
+          <IconDownload className="size-4" />
           Exportar Excel
         </Button>
       </div>

@@ -46,6 +46,10 @@ interface Seccion {
   tutor?: Tutor | null;
   students?: unknown[];
   cursos?: SeccionCurso[];
+  _count?: {
+    matriculas?: number;
+    students?: number;
+  };
 }
 
 interface Grado {
@@ -119,7 +123,11 @@ export function SectionMasterDetail({
   };
 
   const tutor = seccion.tutor;
-  const estudiantesCount = seccion.students?.length || 0;
+  const estudiantesCount =
+    seccion._count?.matriculas ??
+    seccion._count?.students ??
+    seccion.students?.length ??
+    0;
   const capacidad = seccion.capacidad || 30;
   const vacantesDisponibles = Math.max(0, capacidad - estudiantesCount);
   const cursos = seccion.cursos || [];

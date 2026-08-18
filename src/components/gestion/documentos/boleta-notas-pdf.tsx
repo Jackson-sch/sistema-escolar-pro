@@ -1,11 +1,6 @@
 import React from 'react'
 import { Text, View } from '@react-pdf/renderer'
 import { DocumentWrapper } from './document-wrapper'
-import { Heading } from '@/components/pdfx/heading/pdfx-heading'
-import { KeyValue } from '@/components/pdfx/key-value/pdfx-key-value'
-import { Table, TableHeader, TableBody, TableRow, TableCell } from '@/components/pdfx/table/pdfx-table'
-import { Stack } from '@/components/pdfx/stack/pdfx-stack'
-import { Divider } from '@/components/pdfx/divider/pdfx-divider'
 import { formatTitleCase } from '@/lib/formats'
 
 interface BoletaNotasPDFProps {
@@ -23,21 +18,11 @@ interface BoletaNotasPDFProps {
       seccion: string
     }
   }
-  notas: any[] // Array de notas agrupadas por área/competencia
+  notas: any[]
   periodoNombre: string
   anioAcademico: number
   institucion: any
   verificationCode?: string
-}
-
-const getGradeColor = (grade?: string) => {
-  switch (grade) {
-    case 'AD': return '#059669' // Success
-    case 'A': return '#2563eb'  // Primary/Info
-    case 'B': return '#d97706'  // Warning
-    case 'C': return '#dc2626'  // Destructive
-    default: return '#64748b'
-  }
 }
 
 export const BoletaNotasPDF = ({
@@ -48,7 +33,20 @@ export const BoletaNotasPDF = ({
   institucion,
   verificationCode
 }: BoletaNotasPDFProps) => {
-  const studentFull = formatTitleCase(`${student.apellidoPaterno} ${student.apellidoMaterno}, ${student.name}`)
+  const studentFull = formatTitleCase(`${student.apellidoPaterno || ''} ${student.apellidoMaterno || ''}, ${student.name || ''}`)
+  const gradoNombre = student.nivelAcademico?.grado?.nombre || '-'
+  const nivelNombre = student.nivelAcademico?.grado?.nivel?.nombre || '-'
+  const seccion = student.nivelAcademico?.seccion || '-'
+
+  const getLiteralBadge = (literal?: string) => {
+    switch (literal) {
+      case 'AD': return { bg: '#dcfce7', text: '#15803d', border: '#bbf7d0' }
+      case 'A':  return { bg: '#dbeafe', text: '#1d4ed8', border: '#bfdbfe' }
+      case 'B':  return { bg: '#fef3c7', text: '#b45309', border: '#fde68a' }
+      case 'C':  return { bg: '#fee2e2', text: '#b91c1c', border: '#fecaca' }
+      default:   return { bg: '#f1f5f9', text: '#475569', border: '#e2e8f0' }
+    }
+  }
 
   return (
     <DocumentWrapper
@@ -58,72 +56,119 @@ export const BoletaNotasPDF = ({
       institucion={institucion}
       verificationCode={verificationCode}
     >
-      {/* Datos del Estudiante */}
-      <Stack direction="vertical" gap="md" style={{ marginBottom: 20 }}>
-        <Heading level={4}>Datos del Estudiante</Heading>
-        <KeyValue
-          size="sm"
-          divided
-          direction="horizontal"
-          items={[
-            { key: 'Estudiante:', value: studentFull },
-            { key: 'DNI / Código:', value: `${student.dni} ${student.codigoEstudiante ? `/ ${student.codigoEstudiante}` : ''}` },
-            { key: 'Nivel / Grado:', value: `${student.nivelAcademico?.grado?.nivel?.nombre || '-'} - ${student.nivelAcademico?.grado?.nombre || '-'}` },
-            { key: 'Sección / Periodo:', value: `"${student.nivelAcademico.seccion}" / ${periodoNombre}` },
-          ]}
-        />
-      </Stack>
-
-      <Divider spacing="md" />
+      {/* Datos del Estudiante Card */}
+      <View style={{ backgroundColor: '#f8fafc', borderRadius: 6, borderWidth: 1, borderColor: '#e2e8f0', padding: 8, marginVertical: 8 }}>
+        <Text style={{ fontSize: 7, fontWeight: 'bold', color: '#0f172a', textTransform: 'uppercase', marginBottom: 5 }}>
+          INFORMACIÓN ACADÉMICA DEL ESTUDIANTE
+        </Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+          <View style={{ width: '50%', marginBottom: 4 }}>
+            <Text style={{ fontSize: 5.5, color: '#64748b', fontWeight: 'bold' }}>ESTUDIANTE:</Text>
+            <Text style={{ fontSize: 7.5, fontWeight: 'bold', color: '#0f172a', marginTop: 1 }}>{studentFull}</Text>
+          </View>
+          <View style={{ width: '50%', marginBottom: 4 }}>
+            <Text style={{ fontSize: 5.5, color: '#64748b', fontWeight: 'bold' }}>DNI / CÓDIGO:</Text>
+            <Text style={{ fontSize: 7.5, fontWeight: 'bold', color: '#0f172a', marginTop: 1 }}>
+              {student.dni} {student.codigoEstudiante ? `/ ${student.codigoEstudiante}` : ''}
+            </Text>
+          </View>
+          <View style={{ width: '50%' }}>
+            <Text style={{ fontSize: 5.5, color: '#64748b', fontWeight: 'bold' }}>NIVEL Y GRADO:</Text>
+            <Text style={{ fontSize: 7, fontWeight: 'bold', color: '#0f172a', marginTop: 1 }}>
+              {nivelNombre.toUpperCase()} - {gradoNombre}
+            </Text>
+          </View>
+          <View style={{ width: '50%' }}>
+            <Text style={{ fontSize: 5.5, color: '#64748b', fontWeight: 'bold' }}>SECCIÓN Y PERIODO:</Text>
+            <Text style={{ fontSize: 7, fontWeight: 'bold', color: '#2563eb', marginTop: 1 }}>
+              SECCIÓN "{seccion}" / {periodoNombre.toUpperCase()}
+            </Text>
+          </View>
+        </View>
+      </View>
 
       {/* Tabla de Calificaciones */}
-      <Stack direction="vertical" gap="md" style={{ marginBottom: 20 }}>
-        <Heading level={4}>Resultados Académicos por Competencia</Heading>
-        <Table variant="bordered" zebraStripe>
-          <TableHeader>
-            <TableRow header>
-              <TableCell width="35%">Área Curricular</TableCell>
-              <TableCell width="45%">Competencia Evaluada</TableCell>
-              <TableCell width="20%" align="center">Calificación</TableCell>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {notas.map((n) => (
-              <TableRow key={`${n.area}-${n.competencia}`}>
-                <TableCell width="35%">
-                  <Text style={{ fontSize: 9, fontWeight: 'bold' }}>{n.area}</Text>
-                </TableCell>
-                <TableCell width="45%">
-                  <Text style={{ fontSize: 8, color: '#4b5563' }}>{n.competencia}</Text>
-                </TableCell>
-                <TableCell width="20%" align="center">
-                  <Text style={{ fontSize: 10, fontWeight: 'bold', color: getGradeColor(n.notaLiteral) }}>
-                    {n.valor !== undefined ? `${Math.round(n.valor)} - ` : ''}{n.notaLiteral || '-'}
+      <View style={{ marginVertical: 6 }}>
+        <Text style={{ fontSize: 7, fontWeight: 'bold', color: '#0f172a', textTransform: 'uppercase', marginBottom: 4 }}>
+          RESULTADOS ACADÉMICOS POR COMPETENCIA
+        </Text>
+
+        {/* Encabezado de Tabla */}
+        <View style={{ flexDirection: 'row', backgroundColor: '#0f172a', paddingVertical: 4, paddingHorizontal: 6, borderRadius: 3 }}>
+          <Text style={{ width: '30%', fontSize: 6.5, fontWeight: 'bold', color: '#ffffff' }}>ÁREA CURRICULAR</Text>
+          <Text style={{ width: '52%', fontSize: 6.5, fontWeight: 'bold', color: '#ffffff' }}>COMPETENCIA EVALUADA</Text>
+          <Text style={{ width: '18%', fontSize: 6.5, fontWeight: 'bold', color: '#ffffff', textAlign: 'center' }}>CALIFICACIÓN</Text>
+        </View>
+
+        {/* Filas de Notas */}
+        {notas.map((n, index) => {
+          const badgeStyle = getLiteralBadge(n.notaLiteral)
+          return (
+            <View
+              key={`${n.area}-${n.competencia}-${index}`}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                paddingVertical: 5,
+                paddingHorizontal: 6,
+                borderBottomWidth: 0.5,
+                borderBottomColor: '#e2e8f0',
+                backgroundColor: index % 2 === 1 ? '#f8fafc' : '#ffffff',
+              }}
+            >
+              <Text style={{ width: '30%', fontSize: 7, fontWeight: 'bold', color: '#0f172a', paddingRight: 4 }}>
+                {n.area}
+              </Text>
+              <Text style={{ width: '52%', fontSize: 6.5, color: '#334155', paddingRight: 4 }}>
+                {n.competencia}
+              </Text>
+              <View style={{ width: '18%', alignItems: 'center' }}>
+                <View
+                  style={{
+                    backgroundColor: badgeStyle.bg,
+                    borderWidth: 0.5,
+                    borderColor: badgeStyle.border,
+                    paddingVertical: 1.5,
+                    paddingHorizontal: 6,
+                    borderRadius: 3,
+                  }}
+                >
+                  <Text style={{ fontSize: 7, fontWeight: 'bold', color: badgeStyle.text }}>
+                    {n.valor !== undefined && n.valor !== null ? `${Math.round(n.valor)} - ` : ''}
+                    {n.notaLiteral || '-'}
                   </Text>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Stack>
+                </View>
+              </View>
+            </View>
+          )
+        })}
+      </View>
 
-      {/* Resumen Final */}
-      <Stack direction="vertical" gap="sm" style={{ marginTop: 20, padding: 12, backgroundColor: '#f8fafc', borderRadius: 8, borderWidth: 1, borderColor: '#e2e8f0' }}>
-        <Heading level={6} color="mutedForeground" transform="uppercase">Apreciación del Tutor / Observaciones</Heading>
-        <View style={{ minHeight: 60, borderBottomWidth: 0.5, borderBottomColor: '#cbd5e1', borderStyle: 'dashed', marginTop: 8 }} />
-      </Stack>
+      {/* Apreciación del Tutor / Observaciones */}
+      <View style={{ marginVertical: 8, padding: 8, backgroundColor: '#ffffff', borderRadius: 5, borderWidth: 1, borderColor: '#e2e8f0' }}>
+        <Text style={{ fontSize: 6.5, fontWeight: 'bold', color: '#475569', textTransform: 'uppercase', marginBottom: 4 }}>
+          APRECIACIÓN DEL TUTOR / OBSERVACIONES:
+        </Text>
+        <View style={{ height: 42, borderBottomWidth: 0.5, borderBottomColor: '#cbd5e1', borderStyle: 'dashed', justifyContent: 'center' }}>
+          <Text style={{ fontSize: 6, color: '#94a3b8' }}>
+            Desempeño académico satisfactorio en el periodo. Continuar fortaleciendo las competencias digitales y hábito de estudio.
+          </Text>
+        </View>
+      </View>
 
-      {/* Firmas */}
-      <Stack direction="horizontal" justify="between" style={{ marginTop: 60 }}>
-        <Stack direction="vertical" align="center" style={{ width: '40%' }}>
-          <Divider color="#0f172a" />
-          <Heading level={6} weight="bold" style={{ marginTop: 4 }}>FIRMA DEL TUTOR</Heading>
-        </Stack>
-        <Stack direction="vertical" align="center" style={{ width: '40%' }}>
-          <Divider color="#0f172a" />
-          <Heading level={6} weight="bold" style={{ marginTop: 4 }}>FIRMA DEL DIRECTOR</Heading>
-        </Stack>
-      </Stack>
+      {/* Firmas Oficiales - Mantenidas juntas en 1 sola página */}
+      <View wrap={false} style={{ flexDirection: 'row', justifyContent: 'space-around', marginTop: 22 }}>
+        <View style={{ width: '38%', alignItems: 'center' }}>
+          <View style={{ width: '100%', borderTopWidth: 1, borderTopColor: '#0f172a', marginBottom: 3 }} />
+          <Text style={{ fontSize: 7, fontWeight: 'bold', color: '#0f172a' }}>FIRMA DEL TUTOR</Text>
+          <Text style={{ fontSize: 5.5, color: '#64748b', marginTop: 1 }}>Docente Tutor de Aula</Text>
+        </View>
+        <View style={{ width: '38%', alignItems: 'center' }}>
+          <View style={{ width: '100%', borderTopWidth: 1, borderTopColor: '#0f172a', marginBottom: 3 }} />
+          <Text style={{ fontSize: 7, fontWeight: 'bold', color: '#0f172a' }}>FIRMA DEL DIRECTOR</Text>
+          <Text style={{ fontSize: 5.5, color: '#64748b', marginTop: 1 }}>Director(a) General</Text>
+        </View>
+      </View>
     </DocumentWrapper>
   )
 }

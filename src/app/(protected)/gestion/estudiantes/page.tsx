@@ -1,4 +1,4 @@
-import { IconCloudDownload, IconUsers } from "@tabler/icons-react";
+import { IconUsers } from "@tabler/icons-react";
 import {
   getStudentsAction,
   getInstitucionesAction,
@@ -11,14 +11,8 @@ import { columns } from "@/components/gestion/estudiantes/components/columns";
 import { StudentTable } from "@/components/gestion/estudiantes/management/student-table";
 import { AddStudentButton } from "@/components/gestion/estudiantes/components/add-student-button";
 import StudentStats from "@/components/gestion/estudiantes/components/stats";
-import { Button } from "@/components/ui/button";
 import { auth } from "@/auth";
 import { Badge } from "@/components/ui/badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 export const metadata = {
   title: "Gestión de Estudiantes | Sistema Escolar Pro",
@@ -71,23 +65,6 @@ export default async function EstudiantesPage() {
         </div>
 
         <div className="flex flex-row gap-3 items-center shrink-0">
-          {isAdmin && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="outline" className="rounded-xl h-10 px-4 font-semibold text-xs border-border/40 gap-2 cursor-pointer">
-                  <IconCloudDownload className="size-4 text-muted-foreground" />
-                  <span className="hidden sm:inline">Descargar Padrón</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent
-                side="bottom"
-                className="text-micro font-medium"
-              >
-                Exportar base de datos de alumnos en Excel/CSV
-              </TooltipContent>
-            </Tooltip>
-          )}
-
           <AddStudentButton
             instituciones={instituciones as any}
             estados={estados as any}
@@ -108,6 +85,7 @@ export default async function EstudiantesPage() {
           data={estudiantes as any}
           totalCount={totalCount}
           meta={{ instituciones, estados, nivelesAcademicos, institucion }}
+          showPadronExport={isAdmin}
         />
       </div>
     </div>

@@ -15,7 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/formats";
-import { EditEvaluacionButton } from "./edit-evaluacion-button";
+import { EvaluacionButton } from "./evaluacion-button";
 import { EvaluacionTableType } from "./evaluacion-table";
 
 interface GetEvaluacionColumnsProps {
@@ -170,7 +170,7 @@ export const getEvaluacionColumns = ({
           </Link>
         </Button>
 
-        <EditEvaluacionButton
+        <EvaluacionButton
           evaluacion={row.original}
           tipos={meta?.tipos || []}
           periodos={meta?.periodos || []}

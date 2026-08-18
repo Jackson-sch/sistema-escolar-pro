@@ -34,6 +34,12 @@ export async function getActiveSedeAction() {
       return { error: "No autorizado" };
     }
 
+    const userRole = (session.user.role || "").toString().toLowerCase();
+    const adminRoles = ["super_admin", "admin", "administrador", "director", "coordinador", "administrativo"];
+    if (!adminRoles.includes(userRole)) {
+      return { success: true, sedes: [], activeSedeId: null, activeSede: null };
+    }
+
     const institucionId = session.user.institucionId;
     if (!institucionId && session.user.role !== "super_admin") {
       return { error: "Institución no especificada" };

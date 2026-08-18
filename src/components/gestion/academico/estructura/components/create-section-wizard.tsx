@@ -35,6 +35,7 @@ interface CreateSectionWizardProps {
   institucionId: string;
   currentAnio: number;
   initialGradeId?: string;
+  selectedNivelId?: string;
 }
 
 interface WizardCourse {
@@ -82,6 +83,8 @@ function WizardStepIndicator({ step }: { step: 1 | 2 | 3 }) {
 
 interface StepDatosAulaProps {
   grados: any[];
+  niveles: any[];
+  selectedNivelId?: string;
   gradoId: string;
   onGradoChange: (id: string) => void;
   seccionNombre: string;
@@ -101,6 +104,8 @@ interface StepDatosAulaProps {
 
 function StepDatosAula({
   grados,
+  niveles,
+  selectedNivelId,
   gradoId,
   onGradoChange,
   seccionNombre,
@@ -117,21 +122,32 @@ function StepDatosAula({
   selectedTutor,
   onNext,
 }: StepDatosAulaProps) {
+  const filteredGrados = useMemo(() => {
+    if (!selectedNivelId) return grados;
+    const match = grados.filter((g) => g.nivelId === selectedNivelId);
+    return match.length > 0 ? match : grados;
+  }, [grados, selectedNivelId]);
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
           <Label className="text-xs font-bold">Grado Académico *</Label>
           <Select value={gradoId} onValueChange={onGradoChange}>
-            <SelectTrigger className="h-9 text-xs rounded-xl">
+            <SelectTrigger className="w-full h-9 text-xs rounded-xl">
               <SelectValue placeholder="Selecciona grado..." />
             </SelectTrigger>
             <SelectContent className="rounded-xl max-h-48 z-[80]">
-              {grados.map((g) => (
-                <SelectItem key={g.id} value={g.id} className="text-xs font-medium">
-                  {g.nombre}
-                </SelectItem>
-              ))}
+              {filteredGrados.map((g) => {
+                const nivelObj = niveles.find((n) => n.id === g.nivelId);
+                const showPrefix = !selectedNivelId || filteredGrados.length === grados.length;
+                const label = showPrefix && nivelObj?.nombre ? `${nivelObj.nombre} - ${g.nombre}` : g.nombre;
+                return (
+                  <SelectItem key={g.id} value={g.id} className="text-xs font-medium">
+                    {label}
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
         </div>
@@ -152,7 +168,7 @@ function StepDatosAula({
         <div className="space-y-1.5">
           <Label className="text-xs font-bold">Turno</Label>
           <Select value={turno} onValueChange={onTurnoChange}>
-            <SelectTrigger className="h-9 text-xs rounded-xl">
+            <SelectTrigger className="w-full h-9 text-xs rounded-xl">
               <SelectValue placeholder="Turno" />
             </SelectTrigger>
             <SelectContent className="rounded-xl z-[80]">
@@ -446,6 +462,7 @@ export function CreateSectionWizard({
   institucionId,
   currentAnio,
   initialGradeId,
+  selectedNivelId,
 }: CreateSectionWizardProps) {
   const router = useRouter();
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -458,6 +475,31 @@ export function CreateSectionWizard({
   const [capacidad, setCapacidad] = useState("30");
   const [aulaAsignada, setAulaAsignada] = useState("");
   const [tutorId, setTutorId] = useState<string | null>(null);
+
+  // Auto-detectar/seleccionar el grado adecuado al abrir el wizard
+  useEffect(() => {
+    if (open) {
+      setStep(1);
+      setSeccionNombre("A");
+      setTurno("MANANA");
+      setCapacidad("30");
+      setAulaAsignada("");
+      setTutorId(null);
+
+      if (initialGradeId) {
+        setGradoId(initialGradeId);
+      } else if (selectedNivelId) {
+        const nivelGrados = grados.filter((g) => g.nivelId === selectedNivelId);
+        if (nivelGrados.length > 0) {
+          setGradoId(nivelGrados[0].id);
+        } else if (grados.length > 0) {
+          setGradoId(grados[0].id);
+        }
+      } else if (grados.length > 0) {
+        setGradoId(grados[0].id);
+      }
+    }
+  }, [open, initialGradeId, selectedNivelId, grados]);
 
   // ── Paso 2: Cursos y Áreas ──
   const [loadingAreas, setLoadingAreas] = useState(false);
@@ -605,6 +647,8 @@ export function CreateSectionWizard({
       {step === 1 && (
         <StepDatosAula
           grados={grados}
+          niveles={niveles}
+          selectedNivelId={selectedNivelId}
           gradoId={gradoId}
           onGradoChange={setGradoId}
           seccionNombre={seccionNombre}

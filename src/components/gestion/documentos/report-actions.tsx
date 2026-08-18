@@ -121,12 +121,49 @@ export function ReportActions({
     }
   };
 
+  const handleDownloadPdf = async () => {
+    if (!reportData) return;
+    try {
+      const { pdf } = await import("@react-pdf/renderer");
+      const { BoletaNotasPDF } = await import(
+        "@/components/gestion/documentos/boleta-notas-pdf"
+      );
+
+      const blob = await pdf(
+        <BoletaNotasPDF
+          student={reportData.student}
+          notas={reportData.notas}
+          periodoNombre={reportData.periodoNombre}
+          anioAcademico={reportData.anioAcademico}
+          institucion={reportData.institucion}
+          verificationCode={verificationCode}
+        />
+      ).toBlob();
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `Boleta-${reportData.periodoNombre}-${reportData.student.dni}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      toast.success("Boleta de notas descargada exitosamente");
+    } catch (error) {
+      console.error("Error generando boleta de notas:", error);
+      toast.error("Error al descargar el PDF");
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="w-full rounded-full">
-          <IconClipboardList className="size-4 mr-2 text-emerald-500" /> Boleta
-          de Notas
+        <Button
+          variant="outline"
+          className="w-full rounded-full text-xs md:text-sm h-9 md:h-10 font-semibold border-border/60 hover:bg-accent hover:text-accent-foreground transition-all duration-200 shadow-sm"
+        >
+          <IconClipboardList className="size-3.5 md:size-4 mr-1.5 md:mr-2 text-emerald-500" />{" "}
+          Boleta de Notas
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[300px]">
@@ -175,29 +212,13 @@ export function ReportActions({
                 Procesar Calificaciones
               </Button>
             ) : (
-              <PDFDownloadLink
-                document={
-                  <BoletaNotasPDF
-                    student={reportData.student}
-                    notas={reportData.notas}
-                    periodoNombre={reportData.periodoNombre}
-                    anioAcademico={reportData.anioAcademico}
-                    institucion={reportData.institucion}
-                    verificationCode={verificationCode}
-                  />
-                }
-                fileName={`Boleta-${reportData.periodoNombre}-${reportData.student.dni}.pdf`}
+              <Button
+                onClick={handleDownloadPdf}
+                className="w-full font-bold rounded-full"
               >
-                {({ loading }) => (
-                  <Button
-                    className="w-full font-bold rounded-full"
-                    disabled={loading}
-                  >
-                    <IconDownload className="mr-2 h-4 w-4" />
-                    {loading ? "Generando PDF..." : "Descargar Boleta de Notas"}
-                  </Button>
-                )}
-              </PDFDownloadLink>
+                <IconDownload className="mr-2 h-4 w-4" />
+                Descargar Boleta de Notas
+              </Button>
             )}
 
             {reportData && (

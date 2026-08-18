@@ -1,84 +1,68 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import dynamic from "next/dynamic"
-import { IconFileText, IconLoader2 } from "@tabler/icons-react"
-import { getGradeReportDataAction } from "@/actions/reports"
-
-const PDFDownloadLink = dynamic(
-  () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
-  { ssr: false }
-)
-const GradeReportPDF = dynamic<any>(
-  () => import("./grade-report-pdf").then((mod) => mod.GradeReportPDF),
-  { ssr: false }
-)
-import { Button } from "@/components/ui/button"
-import { toast } from "sonner"
+import { useState } from "react";
+import { IconFileText, IconLoader2 } from "@tabler/icons-react";
+import { getGradeReportDataAction } from "@/actions/reports";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface GradeReportButtonProps {
-  studentId: string
-  studentName: string
-  anioAcademico?: number
+  studentId: string;
+  studentName: string;
+  anioAcademico?: number;
 }
 
-export function GradeReportButton({ studentId, studentName, anioAcademico = 2025 }: GradeReportButtonProps) {
-  const [data, setData] = useState<any>(null)
-  const [loading, setLoading] = useState(false)
+export function GradeReportButton({
+  studentId,
+  studentName,
+  anioAcademico = 2025,
+}: GradeReportButtonProps) {
+  const [loading, setLoading] = useState(false);
 
-  const handleFetchData = async () => {
-    if (data) return // Ya tenemos los datos
-
-    setLoading(true)
+  const handleDownload = async () => {
+    if (loading) return;
+    setLoading(true);
     try {
-      const res = await getGradeReportDataAction(studentId, anioAcademico)
-      if (res.data) {
-        setData(res.data)
-      } else {
-        toast.error(res.error || "No se pudieron obtener los datos de la libreta")
+      const res = await getGradeReportDataAction(studentId, anioAcademico);
+      if (!res.data) {
+        toast.error(res.error || "No se pudieron obtener los datos de la libreta");
+        return;
       }
-    } catch (error) {
-      toast.error("Error al procesar la libreta de notas")
-    } finally {
-      setLoading(false)
-    }
-  }
 
-  // Si ya tenemos los datos, mostramos el link de descarga directo
-  if (data) {
-    return (
-      <PDFDownloadLink
-        document={<GradeReportPDF data={data} />}
-        fileName={`Libreta-${studentName}-${anioAcademico}.pdf`}
-        className="w-full"
-      >
-        {({ loading: pdfLoading }) => (
-          <Button
-            variant="outline"
-            className="w-full font-semibold border-emerald-500/30 hover:bg-emerald-500/10 hover:text-emerald-500 transition-[color,background-color,transform] active:scale-95 text-emerald-600 rounded-full"
-            disabled={pdfLoading}
-          >
-            <IconFileText className="size-4 mr-2" />
-            {pdfLoading ? "Preparando PDF..." : "Descargar Libreta"}
-          </Button>
-        )}
-      </PDFDownloadLink>
-    )
-  }
+      const { pdf } = await import("@react-pdf/renderer");
+      const { GradeReportPDF } = await import("./grade-report-pdf");
+
+      const blob = await pdf(<GradeReportPDF data={res.data as any} />).toBlob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `Libreta-${studentName}-${anioAcademico}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      toast.success("Libreta descargada exitosamente");
+    } catch (error) {
+      console.error("Error al generar libreta:", error);
+      toast.error("Error al procesar la libreta de notas");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Button
       variant="outline"
-      className="w-full rounded-full"
-      onClick={handleFetchData}
+      className="w-full rounded-full text-xs md:text-sm h-9 md:h-10 font-semibold border-border/60 hover:bg-accent hover:text-accent-foreground transition-all duration-200 shadow-sm"
+      onClick={handleDownload}
       disabled={loading}
     >
       {loading ? (
-        <IconLoader2 className="size-4 mr-2 animate-spin" />
+        <IconLoader2 className="size-3.5 md:size-4 mr-1.5 md:mr-2 animate-spin" />
       ) : (
-        <IconFileText className="size-4 mr-2 text-emerald-500" />
+        <IconFileText className="size-3.5 md:size-4 mr-1.5 md:mr-2 text-emerald-500" />
       )}
       {loading ? "Generando..." : "Generar Libreta"}
     </Button>
-  )
+  );
 }

@@ -7,10 +7,6 @@ import {
   Image,
 } from '@react-pdf/renderer'
 import { getQRCodeUrl } from '@/lib/pdf-utils'
-import { Heading } from '@/components/pdfx/heading/pdfx-heading'
-import { PageHeader } from '@/components/pdfx/page-header/pdfx-page-header'
-import { PageFooter } from '@/components/pdfx/page-footer/pdfx-page-footer'
-import { Stack } from '@/components/pdfx/stack/pdfx-stack'
 
 interface InstitucionProps {
   nombreInstitucion: string
@@ -43,11 +39,10 @@ export const DocumentWrapper = ({
   children,
   origin: passedOrigin
 }: DocumentWrapperProps) => {
-  // En SSR window no está disponible. Priorizamos el origin pasado desde el servidor.
   const origin = passedOrigin || (typeof window !== 'undefined' 
     ? window.location.origin 
     : (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'))
-  const fechaGeneracion = new Date().toLocaleString('es-PE')
+  const fechaGeneracion = new Date().toLocaleDateString('es-PE')
   const verificationUrl = verificationCode
     ? `${origin}/verificar?codigo=${verificationCode}`
     : null
@@ -61,9 +56,8 @@ export const DocumentWrapper = ({
 
   const subHeader = subHeaderParts.length > 0 
     ? subHeaderParts.join(' | ') 
-    : institucion.direccion
+    : (institucion.direccion || 'S/D')
 
-  // Resolución del logo sin hooks para evitar errores en el servidor (SSR)
   let logoUrl: string | null = null
   const rawLogo = institucion.logo || (institucion as any).logoUrl
   
@@ -76,89 +70,88 @@ export const DocumentWrapper = ({
     }
   }
 
-  console.log('DocumentWrapper LOGO DEBUG:', {
-    rawLogo: institucion.logo,
-    origin,
-    finalUrl: logoUrl,
-    hasNombre: !!institucion.nombreInstitucion,
-    availableKeys: Object.keys(institucion)
-  })
-
   return (
     <Document title={title}>
-      <Page size="A4" style={{ padding: 35, fontFamily: 'Helvetica', color: '#1e293b' }}>
-        {/* Header Institucional */}
-        <PageHeader
-          title={institucion.nombreInstitucion}
-          subtitle={subHeader}
-          rightText={docTypeLabel}
-          rightSubText={docId}
-          variant={logoUrl ? "logo-left" : "simple"}
-          logo={logoUrl ? (
-            <Image 
-              src={logoUrl} 
-              style={{ width: 48, height: 48, objectFit: 'contain' }} 
-            />
-          ) : undefined}
-          marginBottom={12}
-        />
-        
-        {/* Dirección si hay subheader (para no saturar la primera línea) */}
-        {subHeaderParts.length > 0 && (
-          <Text style={{ fontSize: 7, color: '#64748b', marginTop: -8, marginBottom: 12, textAlign: 'left' }}>
-            {institucion.direccion}
-          </Text>
-        )}
+      <Page size="A4" style={{ padding: 28, fontFamily: 'Helvetica', color: '#0f172a', backgroundColor: '#ffffff' }}>
+        {/* Cabecera Principal Institucional */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderBottomWidth: 1.5, borderBottomColor: '#0f172a', paddingBottom: 8, marginBottom: 10 }}>
+          {/* Izquierda: Logo y Nombre */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, paddingRight: 10 }}>
+            {logoUrl ? (
+              <View style={{ width: 42, height: 42, borderRadius: 21, backgroundColor: '#ffffff', marginRight: 10, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                <Image src={logoUrl} style={{ width: 38, height: 38, objectFit: 'contain' }} />
+              </View>
+            ) : (
+              <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: '#0f172a', marginRight: 10, alignItems: 'center', justifyContent: 'center' }}>
+                <Text style={{ color: '#ffffff', fontSize: 16, fontWeight: 'bold' }}>
+                  {institucion.nombreInstitucion ? institucion.nombreInstitucion.charAt(0).toUpperCase() : 'I'}
+                </Text>
+              </View>
+            )}
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#0f172a', textTransform: 'uppercase', letterSpacing: 0.3 }}>
+                {institucion.nombreInstitucion}
+              </Text>
+              <Text style={{ fontSize: 6.5, color: '#475569', marginTop: 1 }}>
+                {subHeader}
+              </Text>
+              {institucion.direccion ? (
+                <Text style={{ fontSize: 6, color: '#64748b', marginTop: 0.5 }}>
+                  {institucion.direccion}
+                </Text>
+              ) : null}
+            </View>
+          </View>
 
-        {/* Título del Documento */}
-        <Stack direction="vertical" gap="none" style={{ marginVertical: 12 }}>
-          <Heading 
-            level={2} 
-            weight="bold" 
-            transform="uppercase" 
-            align="center" 
-            keepWithNext={false}
-            noMargin
-            style={{ borderBottomWidth: 1.5, borderBottomColor: '#0f172a', paddingBottom: 4 }}
-          >
+          {/* Derecha: Badge del Documento */}
+          <View style={{ alignItems: 'flex-end', minWidth: 100 }}>
+            <View style={{ backgroundColor: '#0f172a', paddingVertical: 3, paddingHorizontal: 8, borderRadius: 3 }}>
+              <Text style={{ fontSize: 7, fontWeight: 'bold', color: '#ffffff', textTransform: 'uppercase' }}>
+                {docTypeLabel}
+              </Text>
+            </View>
+            {docId ? (
+              <Text style={{ fontSize: 6.5, fontWeight: 'bold', color: '#475569', marginTop: 2 }}>
+                CÓD: {docId}
+              </Text>
+            ) : null}
+          </View>
+        </View>
+
+        {/* Título Principal Sin Cortar Texto */}
+        <View style={{ marginVertical: 6, alignItems: 'center' }}>
+          <Text style={{ fontSize: 13, fontWeight: 'bold', color: '#0f172a', textTransform: 'uppercase', letterSpacing: 0.5, textAlign: 'center' }}>
             {title}
-          </Heading>
-        </Stack>
+          </Text>
+          <View style={{ width: 60, height: 2, backgroundColor: '#0f172a', marginTop: 3, borderRadius: 1 }} />
+        </View>
 
-        {/* Contenido Dinámico */}
-        <View wrap={true}>
+        {/* Contenido Dinámico del Documento */}
+        <View style={{ flex: 1 }}>
           {children}
         </View>
 
-        {/* Footer con Verificación */}
-        <PageFooter
-          variant="simple"
-          fixed
-          pagePadding={30}
-          renderCustomContent={() => (
-            <Stack direction="horizontal" justify="between" align="center" style={{ width: '100%', borderTopWidth: 0.5, borderTopColor: '#e2e8f0', paddingTop: 10 }}>
-              <View style={{ flex: 1, marginRight: 20 }}>
-                <Text style={{ fontSize: 7, color: '#94a3b8' }}>
-                  Documento generado por Sistema de Gestión Escolar PRO | Fecha: {fechaGeneracion}
-                </Text>
-                <Text style={{ fontSize: 7, color: '#94a3b8', marginTop: 2 }}>
-                  La autenticidad de este documento puede ser verificada mediante el código de control.
-                </Text>
-                {verificationCode && (
-                  <Text style={{ fontSize: 7, fontWeight: 'bold', color: '#64748b', marginTop: 2 }}>
-                    CÓDIGO DE VERIFICACIÓN: {verificationCode}
-                  </Text>
-                )}
-              </View>
-              {verificationUrl && (
-                <Image
-                  src={getQRCodeUrl(verificationUrl)}
-                  style={{ width: 40, height: 40 }}
-                />
-              )}
-            </Stack>
-          )}
-        />
+        {/* Footer Oficial */}
+        <View style={{ borderTopWidth: 0.5, borderTopColor: '#cbd5e1', paddingTop: 6, marginTop: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <View style={{ flex: 1, paddingRight: 10 }}>
+            <Text style={{ fontSize: 6, color: '#64748b' }}>
+              Sistema de Gestión Escolar PRO | Emisión: {fechaGeneracion}
+            </Text>
+            <Text style={{ fontSize: 5.5, color: '#94a3b8', marginTop: 1 }}>
+              Documento digital con validez oficial. Para verificar autenticidad escanee el código QR o ingrese el código de control.
+            </Text>
+            {verificationCode ? (
+              <Text style={{ fontSize: 6.5, fontWeight: 'bold', color: '#0f172a', marginTop: 1.5 }}>
+                CÓDIGO DE VERIFICACIÓN: {verificationCode}
+              </Text>
+            ) : null}
+          </View>
+          {verificationUrl ? (
+            <View style={{ padding: 1, backgroundColor: '#ffffff', borderRadius: 2, borderWidth: 0.5, borderColor: '#cbd5e1' }}>
+              <Image src={getQRCodeUrl(verificationUrl)} style={{ width: 32, height: 32 }} />
+            </View>
+          ) : null}
+        </View>
       </Page>
     </Document>
   )

@@ -466,30 +466,56 @@ export async function assignTutorAction(seccionId: string, tutorId: string | nul
       return { error: "No autorizado" };
     }
 
+    // 1. Obtener la sección y el tutor previo antes de la actualización
+    const currentSection = await prisma.nivelAcademico.findUnique({
+      where: { id: seccionId },
+      select: { tutorId: true },
+    });
+
+    const oldTutorId = currentSection?.tutorId;
+
+    // 2. Actualizar el tutor en la sección
     await prisma.nivelAcademico.update({
       where: { id: seccionId },
       data: { tutorId: tutorId || null },
     });
 
-    // Auto-asignar el Tutor a los cursos del aula que no tengan docente aún
+    // 3. Sincronizar los cursos del aula
     if (tutorId) {
+      // Al cambiar o asignar nuevo tutor: actualizar los cursos que tenían al tutor anterior o estaban sin docente
       await prisma.curso.updateMany({
         where: {
           nivelAcademicoId: seccionId,
-          profesorId: null,
+          OR: [
+            { profesorId: null },
+            ...(oldTutorId ? [{ profesorId: oldTutorId }] : []),
+          ],
         },
         data: {
           profesorId: tutorId,
         },
       });
+    } else if (oldTutorId) {
+      // Al remover el tutor: desasignar los cursos que pertenecían a ese tutor anterior
+      await prisma.curso.updateMany({
+        where: {
+          nivelAcademicoId: seccionId,
+          profesorId: oldTutorId,
+        },
+        data: {
+          profesorId: null,
+        },
+      });
     }
 
-    revalidatePath(REVALIDATE_PATH);
+    revalidatePath("/gestion/academico/estructura");
     revalidatePath("/gestion/academico/carga-horaria");
+    revalidatePath("/dashboard");
+
     return {
       success: tutorId
-        ? "Tutor asignado correctamente y sincronizado con los cursos del aula"
-        : "Tutor removido",
+        ? "Tutor asignado y sincronizado con los cursos del aula"
+        : "Tutor removido y cursos del aula desasignados",
     };
   } catch (error) {
     console.error("Error assigning tutor:", error);
@@ -548,20 +574,26 @@ export async function getStudentsInSeccionAction(nivelAcademicoId: string) {
 
     const students = await prisma.user.findMany({
       where: {
-        nivelAcademicoId,
         role: "estudiante",
         institucionId: session.user.institucionId || undefined,
-        matriculas: {
-          some: {
-            estado: "activo",
+        OR: [
+          { nivelAcademicoId },
+          {
+            matriculas: {
+              some: {
+                nivelAcademicoId,
+                estado: "activo",
+              },
+            },
           },
-        },
+        ],
       },
       select: {
         id: true,
         name: true,
         apellidoPaterno: true,
         apellidoMaterno: true,
+        dni: true,
       },
       orderBy: {
         apellidoPaterno: "asc",

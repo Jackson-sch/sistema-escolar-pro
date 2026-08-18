@@ -52,6 +52,18 @@ export const getEvaluacionesAction = createSafeAction(
   }).optional(),
   async (filters, session) => {
     try {
+      const isProfessor = session.user.role === "profesor";
+      const targetProfesorId = isProfessor ? session.user.id : filters?.profesorId;
+
+      const profesorWhere = targetProfesorId
+        ? {
+            OR: [
+              { profesorId: targetProfesorId },
+              { nivelAcademico: { tutorId: targetProfesorId } },
+            ],
+          }
+        : {};
+
       const evaluaciones = await prisma.evaluacion.findMany({
         where: {
           cursoId: filters?.cursoId || undefined,
@@ -59,8 +71,10 @@ export const getEvaluacionesAction = createSafeAction(
           tipoEvaluacionId: filters?.tipoEvaluacionId || undefined,
           activa: true,
           curso: {
-            nivelAcademico: { institucionId: session.user.institucionId || undefined },
-            ...(filters?.profesorId ? { profesorId: filters.profesorId } : {}),
+            nivelAcademico: {
+              institucionId: session.user.institucionId || undefined,
+            },
+            ...profesorWhere,
           },
         },
         include: {
@@ -162,12 +176,11 @@ export const deleteEvaluacionAction = createSafeAction(
         };
       }
 
-      await prisma.evaluacion.update({
+      await prisma.evaluacion.delete({
         where: { id },
-        data: { activa: false },
       });
       revalidatePath(REVALIDATE_PATH);
-      return { success: "Evaluación eliminada" };
+      return { success: "Evaluación eliminada correctamente" };
     } catch (error) {
       console.error("Error deleting evaluacion:", error);
       return { error: "No se pudo eliminar la evaluación" };

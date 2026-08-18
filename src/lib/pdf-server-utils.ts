@@ -17,3 +17,19 @@ export function resolvePdfImage(url: string | null | undefined): string | null {
   }
   return null;
 }
+
+/**
+ * Collects a pdfkit stream into a real Buffer.
+ * In @react-pdf/renderer 4.x, `pdf().toBuffer()` returns the underlying pdfkit
+ * *stream* (`fileStream`), not bytes, so it must be drained before sending as a
+ * response body.
+ */
+export async function collectPdfBuffer(
+  fileStream: unknown,
+): Promise<Buffer> {
+  const chunks: Buffer[] = [];
+  for await (const chunk of fileStream as AsyncIterable<unknown>) {
+    chunks.push(Buffer.from(chunk as Uint8Array));
+  }
+  return Buffer.concat(chunks);
+}

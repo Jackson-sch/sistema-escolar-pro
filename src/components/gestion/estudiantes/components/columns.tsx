@@ -57,6 +57,9 @@ export type StudentTableType = {
   religion: string | null;
   numeroHermanos: number | null;
   institucionId: string;
+  institucion?: {
+    nombreInstitucion: string;
+  } | null;
   estadoId: string;
   image: string | null;
   telefono: string | null;

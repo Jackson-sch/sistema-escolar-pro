@@ -8,6 +8,7 @@ import { useChat } from "@ai-sdk/react";
 import { registrarNotasMasivasAction } from "@/actions/evaluations";
 import { IconSparkles, IconKeyboard } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
+import { exportEvaluacionToExcel } from "@/lib/excel-helper";
 
 // Componentes del Formulario
 import { NotasFormHeader } from "./notas-form-header";
@@ -248,14 +249,9 @@ function useNotasAiFeedback({
     setMessages([]);
 
     (sendMessage as any)({
-      text: `Genera un reporte de retroalimentación formal para el padre de familia sobre el desempeño de:
-        Alumno: ${est.name} ${est.apellidoPaterno}
-        Calificación obtenida en ${evaluacionNombre}: ${
-          notaData.valorLiteral ? notaData.valorLiteral : notaData.valor + "/20"
-        }
-        Materia: ${cursoNombre}.
-        
-        Recuerda mencionar la competencia evaluada [${evaluacionNombre}] y dar recomendaciones constructivas. Solo en español.`,
+      text: `Genera una observación extremadamente concisa (máximo 20 palabras) para la planilla sobre el estudiante ${est.name} ${est.apellidoPaterno} con nota ${
+        notaData.valorLiteral ? notaData.valorLiteral : notaData.valor + "/20"
+      } en ${evaluacionNombre} (${cursoNombre}). Sin introducciones ni saludos.`,
     });
   };
 
@@ -572,6 +568,27 @@ export function NotasForm({
     return () => window.removeEventListener("keydown", handleGlobalKeyDown);
   }, [isDirty, isPending]);
 
+  const handleExportExcel = useCallback(() => {
+    const dataForExport = estudiantes.map((e) => {
+      const notaObj = notas[e.id];
+      return {
+        codigoEstudiante: e.codigoEstudiante,
+        apellidoPaterno: e.apellidoPaterno,
+        apellidoMaterno: e.apellidoMaterno,
+        nombre: e.name,
+        nota: escala === "LITERAL" ? (notaObj?.valorLiteral || "-") : (notaObj?.valor ?? "-"),
+        comentario: notaObj?.comentario || "",
+      };
+    });
+
+    exportEvaluacionToExcel({
+      evaluacionNombre,
+      cursoNombre,
+      estudiantes: dataForExport,
+    });
+    toast.success("Planilla de calificaciones descargada en Excel");
+  }, [estudiantes, notas, escala, evaluacionNombre, cursoNombre]);
+
   // Calcular estadísticas dinámicas en tiempo real
   const stats = useNotasStats(estudiantes, notas, escala);
 
@@ -587,6 +604,7 @@ export function NotasForm({
         isPending={isPending}
         isDirty={isDirty}
         onGuardar={handleGuardar}
+        onExportExcel={handleExportExcel}
       />
 
       <NotasFormStats

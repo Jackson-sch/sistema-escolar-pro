@@ -75,8 +75,13 @@ export function StudentProfileHeader({
     if (!primaryGuardian?.telefono) return;
     const cleanPhone = primaryGuardian.telefono.replace(/\D/g, "");
     const fullPhone = cleanPhone.length === 9 ? `51${cleanPhone}` : cleanPhone;
+    const instName =
+      (initialStudent as any).institucion?.nombreInstitucion ||
+      initialStudent.nivelAcademico?.sede?.nombre ||
+      "";
+    const instText = instName ? ` ${instName}` : "";
     const msg = encodeURIComponent(
-      `Estimado(a) ${primaryGuardian.name || "Apoderado"}, le saludamos de la institución educativa con relación al alumno(a) ${fullName}.`
+      `Estimado(a) ${primaryGuardian.name || "Apoderado"}, le saludamos de la institución educativa${instText} con relación al alumno(a) ${fullName}.`
     );
     window.open(`https://wa.me/${fullPhone}?text=${msg}`, "_blank");
   };

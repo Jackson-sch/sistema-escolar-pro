@@ -11,8 +11,9 @@ import {
   IconLayoutDashboard,
   IconDotsVertical,
   IconExternalLink,
-  IconGraphFilled,
   IconSparkles,
+  IconUserCheck,
+  IconPencil,
   type Icon,
 } from "@tabler/icons-react";
 import { Badge } from "@/components/ui/badge";
@@ -74,13 +75,14 @@ interface HorarioDocente {
   horaFin: string;
   curso: {
     areaCurricular: AreaCurricular;
-    nivelAcademico: { grado: Grado; seccion: string; aulaAsignada?: string | null };
+    nivelAcademico: { id?: string; grado: Grado; seccion: string; aulaAsignada?: string | null };
   };
 }
 
 interface TeacherDashboardProps {
   data: {
     cursos: CursoDocente[];
+    totalUniqueStudents?: number;
     upcomingEvaluations: EvaluacionDocente[];
     criticalAttendance: AlertaAsistencia[];
     evaluationsToGrade: EvaluacionDocente[];
@@ -91,14 +93,15 @@ interface TeacherDashboardProps {
 export function TeacherDashboard({ data }: TeacherDashboardProps) {
   const {
     cursos,
+    totalUniqueStudents,
     upcomingEvaluations,
     criticalAttendance,
     evaluationsToGrade,
     todaySchedule,
   } = data;
 
-  const totalStudents = cursos.reduce(
-    (acc, curso) => acc + (curso._count?.estudiantes || 0),
+  const totalStudents = totalUniqueStudents ?? cursos.reduce(
+    (acc, curso) => Math.max(acc, curso._count?.estudiantes || 0),
     0
   );
 
@@ -110,95 +113,117 @@ export function TeacherDashboard({ data }: TeacherDashboardProps) {
   });
 
   return (
-    <div className="space-y-8 animate-in fade-in animation-duration- pb-12">
-      {/* Welcome Banner - Premium Look */}
-      <div className="relative overflow-hidden rounded-2xl bg-linear-to-br from-indigo-600 via-primary to-purple-700 p-8 md:p-10 text-white shadow-lg shadow-primary/30 border border-white/10">
+    <div className="space-y-6 animate-in fade-in animation-duration- pb-12">
+      {/* Banner de Bienvenida Ejecutivo Docente */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-950 via-indigo-900 to-slate-900 p-6 md:p-8 text-white shadow-xl border border-indigo-500/20">
+        {/* Glow Accent Circles */}
+        <div className="absolute top-0 right-0 -translate-y-1/3 translate-x-1/3 size-[400px] rounded-full bg-indigo-500/20 blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 translate-y-1/3 -translate-x-1/3 size-[300px] rounded-full bg-purple-500/20 blur-[90px] pointer-events-none" />
+
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-3">
-            <Badge className="bg-white/20 hover:bg-white/30 border-white/20 text-white px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest flex items-center gap-2 w-fit shadow-sm">
-              <IconSparkles size={14} />
-              Portal Docente Pro
-            </Badge>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tighter drop-shadow-sm">
-              ¡Panel de Control Académico!
-            </h2>
-            <p className="text-white/80 font-medium max-w-lg text-lg leading-relaxed">
-              Gestiona tus clases, califica evaluaciones y monitorea el progreso de tus alumnos desde un solo lugar.
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Badge className="bg-indigo-500/20 border-indigo-500/30 text-indigo-300 px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 backdrop-blur-md">
+                <IconSparkles size={12} />
+                Portal Pedagógico Docente
+              </Badge>
+              <Badge variant="outline" className="text-[10px] font-semibold border-white/20 text-white/80 capitalize">
+                {fechaHoy}
+              </Badge>
+            </div>
+            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white">
+              Panel de Gestión Académica
+            </h1>
+            <p className="text-xs md:text-sm text-indigo-200/80 max-w-xl leading-relaxed">
+              Monitoreo en tiempo real de tus clases asignadas, registro de asistencias y calificaciones de evaluaciones.
             </p>
           </div>
-          <div className="flex gap-4 shrink-0">
-            <Button size="lg" className="rounded-2xl bg-white text-primary hover:bg-white/90 font-black shadow-xl shadow-white/10 transition-[background-color,transform] hover:scale-105 hover:-translate-y-1 h-14 px-6 text-base" asChild>
+
+          <div className="flex items-center gap-2.5 shrink-0">
+            <Button
+              size="sm"
+              className="rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold shadow-md shadow-indigo-600/30 transition-all duration-200 text-xs h-9.5 px-4 gap-2 cursor-pointer"
+              asChild
+            >
               <Link href="/evaluaciones/nueva">
-                <IconCalendarStats className="mr-2 size-6" />
-                Nueva Evaluación
+                <IconCalendarStats size={15} />
+                <span>Nueva Evaluación</span>
+              </Link>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-xl border-white/20 bg-white/10 hover:bg-white/20 text-white font-semibold text-xs h-9.5 px-4 gap-2 backdrop-blur-md cursor-pointer"
+              asChild
+            >
+              <Link href="/asistencia">
+                <IconUserCheck size={15} />
+                <span>Asistencia</span>
               </Link>
             </Button>
           </div>
         </div>
-        
-        {/* Background Decorative Elements */}
-        <div className="absolute top-0 right-0 -translate-y-1/3 translate-x-1/3 size-[500px] rounded-full bg-white/20 blur-[80px] animate-blob" />
-        <div className="absolute bottom-0 left-0 translate-y-1/3 -translate-x-1/3 size-[400px] rounded-full bg-purple-400/30 blur-[60px] animate-blob" style={{ animationDelay: "2s" }} />
-        <IconLayoutDashboard className="absolute -bottom-10 -right-10 size-80 text-white/5 md:text-white/10 rotate-12 drop-shadow-lg mix-blend-overlay" />
       </div>
 
-      {/* KPI Cards - Elite Design */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+      {/* Tarjetas KPI Docentes */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KPIItem
-          title="Mis Alumnos"
+          title="Mis Estudiantes"
           value={totalStudents.toString()}
-          label="Estudiantes activos"
+          label="Total matriculados en tus aulas"
           icon={IconUsers}
-          color="blue"
-          trend="+2 esta semana"
+          badgeText="Activos"
+          color="indigo"
         />
         <KPIItem
           title="Cursos Asignados"
           value={cursos.length.toString()}
-          label="Materias impartidas"
+          label="Asignaturas a tu cargo"
           icon={IconBook}
-          color="indigo"
+          color="blue"
         />
         <KPIItem
-          title="Eval. Programadas"
-          value={upcomingEvaluations.length.toString()}
-          label="Próximos 7 días"
-          icon={IconCalendarStats}
-          color="amber"
+          title="Clases de Hoy"
+          value={todaySchedule.length.toString()}
+          label="Sesiones programadas hoy"
+          icon={IconClock}
+          color="purple"
         />
         <KPIItem
           title="Por Calificar"
           value={evaluationsToGrade.length.toString()}
-          label="Evaluaciones cerradas"
+          label="Evaluaciones pendientes"
           icon={IconClipboardCheck}
-          color="emerald"
+          badgeText={evaluationsToGrade.length > 0 ? "Pendiente" : "Al día"}
+          color={evaluationsToGrade.length > 0 ? "amber" : "emerald"}
         />
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-12">
-        {/* Main Content Area */}
-        <div className="lg:col-span-8 space-y-8">
-          {/* Today's Schedule - New Section */}
-          <section className="space-y-5">
-            <div className="flex items-center justify-between px-2">
-              <h3 className="text-2xl font-black tracking-tight flex items-center gap-3">
-                <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                  <IconClock className="size-6" />
+      <div className="grid gap-6 lg:grid-cols-12">
+        {/* Columna Principal (8Cols) */}
+        <div className="lg:col-span-8 space-y-6">
+          {/* Horario de Hoy */}
+          <section className="space-y-3">
+            <div className="flex items-center justify-between px-1">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
+                <div className="size-6 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-500">
+                  <IconClock size={14} />
                 </div>
-                Horario de Hoy
+                Jornada de Clases de Hoy
               </h3>
-              <Badge variant="outline" className="font-mono text-sm px-4 py-1.5 rounded-full border-primary/20 bg-primary/5 text-primary">
+              <Badge variant="outline" className="font-mono text-[10px] font-bold px-2.5 py-0.5 rounded-full border-border/50 text-muted-foreground capitalize">
                 {fechaHoy}
               </Badge>
             </div>
-            <div className="grid gap-4">
+
+            <div className="grid gap-3">
               {todaySchedule.length === 0 ? (
-                <div className="rounded-2xl p-10 text-center border border-dashed border-border/50 bg-card/80 shadow-sm">
-                  <div className="size-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-5 text-primary">
-                    <IconClock size={40} opacity={0.5} />
+                <div className="rounded-2xl p-8 text-center border border-dashed border-border/40 bg-card/80 shadow-xs space-y-2">
+                  <div className="size-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center mx-auto text-indigo-500">
+                    <IconClock size={24} opacity={0.6} />
                   </div>
-                  <h4 className="text-xl font-bold text-foreground">Día Libre</h4>
-                  <p className="text-muted-foreground mt-2">No tienes clases programadas para hoy.</p>
+                  <h4 className="text-sm font-bold text-foreground">Sin clases programadas hoy</h4>
+                  <p className="text-xs text-muted-foreground max-w-xs mx-auto">No tienes sesiones lectivas asignadas para la fecha actual.</p>
                 </div>
               ) : (
                 todaySchedule.map((item) => (
@@ -208,29 +233,54 @@ export function TeacherDashboard({ data }: TeacherDashboardProps) {
             </div>
           </section>
 
-          {/* Upcoming Evaluations */}
-          <div className="rounded-2xl overflow-hidden flex flex-col border border-border/50 bg-card/80 shadow-sm">
-            <div className="p-6 md:p-8 flex items-center justify-between border-b border-border/50 bg-background/40">
-              <div>
-                <h3 className="text-2xl font-black tracking-tight flex items-center gap-3">
-                  Próximas Evaluaciones
-                </h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Cronograma de actividades evaluativas
-                </p>
+          {/* Mis Cursos Asignados */}
+          <section className="space-y-3">
+            <div className="flex items-center justify-between px-1">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
+                <div className="size-6 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-500">
+                  <IconBook size={14} />
+                </div>
+                Mis Cursos y Aulas Asignadas
+              </h3>
+              <Badge variant="outline" className="text-[10px] font-bold rounded-full px-2.5 py-0.5 border-indigo-500/30 text-indigo-600 dark:text-indigo-400 bg-indigo-500/5">
+                {cursos.length} Asignaturas
+              </Badge>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              {cursos.map((curso) => (
+                <CourseCard key={curso.id} curso={curso} />
+              ))}
+            </div>
+          </section>
+
+          {/* Próximas Evaluaciones */}
+          <div className="rounded-2xl border border-border/40 bg-card/80 backdrop-blur-md overflow-hidden shadow-xs">
+            <div className="p-4 flex items-center justify-between border-b border-border/30">
+              <div className="flex items-center gap-2">
+                <div className="size-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500">
+                  <IconCalendarStats size={14} />
+                </div>
+                <div>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">
+                    Próximas Evaluaciones Programadas
+                  </h3>
+                  <p className="text-[10px] text-muted-foreground">
+                    Cronograma evaluativo de los próximos 7 días
+                  </p>
+                </div>
               </div>
-              <Button variant="outline" className="rounded-full shadow-sm hover:bg-primary hover:text-primary-foreground transition-colors" asChild>
-                <Link href="/evaluaciones">Gestionar todo</Link>
+              <Button variant="ghost" size="sm" className="h-8 text-xs font-semibold rounded-xl text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10 cursor-pointer" asChild>
+                <Link href="/evaluaciones">Ver todas</Link>
               </Button>
             </div>
-            <div className="p-0 flex-1 bg-background/20">
+
+            <div className="p-0">
               {upcomingEvaluations.length === 0 ? (
-                <div className="p-16 text-center">
-                  <div className="size-24 rounded-full bg-muted flex items-center justify-center mx-auto mb-6 text-muted-foreground ring-8 ring-background/50">
-                    <IconCalendarStats size={48} opacity={0.5} />
-                  </div>
-                  <h4 className="text-xl font-bold text-foreground">Agenda Despejada</h4>
-                  <p className="text-muted-foreground font-medium mt-2">No hay evaluaciones programadas para esta semana</p>
+                <div className="p-8 text-center space-y-1">
+                  <IconCalendarStats className="mx-auto size-8 text-muted-foreground/30 mb-2" />
+                  <p className="text-xs font-semibold text-foreground">Sin evaluaciones programadas</p>
+                  <p className="text-[11px] text-muted-foreground">No hay exámenes programados para esta semana.</p>
                 </div>
               ) : (
                 <div className="divide-y divide-border/30">
@@ -241,101 +291,72 @@ export function TeacherDashboard({ data }: TeacherDashboardProps) {
               )}
             </div>
           </div>
-
-          {/* Assigned Courses Grid */}
-          <div className="space-y-5">
-            <h3 className="text-2xl font-black tracking-tight px-2 flex items-center gap-3">
-              <div className="size-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500">
-                <IconBook className="size-6" />
-              </div>
-              Mis Cursos
-            </h3>
-            <div className="grid gap-5 sm:grid-cols-2">
-              {cursos.map((curso) => (
-                <CourseCard key={curso.id} curso={curso} />
-              ))}
-            </div>
-          </div>
         </div>
 
-        {/* Sidebar */}
-        <div className="lg:col-span-4 space-y-6">
-          {/* Attendance Alerts - High Priority */}
-          <div className="rounded-2xl overflow-hidden border border-border/50 bg-card/80 shadow-sm relative">
-            <div className="absolute -top-10 -right-10 size-40 bg-red-500/10 rounded-full blur-3xl animate-blob" />
-            
-            <div className="p-6 relative z-10">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="size-12 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-600 shadow-inner">
-                  <IconAlertTriangle size={24} strokeWidth={2} />
+        {/* Columna Lateral (4Cols) */}
+        <div className="lg:col-span-4 space-y-5">
+          {/* Alertas de Asistencia */}
+          <div className="rounded-2xl border border-border/40 bg-card/80 backdrop-blur-md p-4 space-y-3.5 shadow-xs">
+            <div className="flex items-center justify-between pb-3 border-b border-border/30">
+              <div className="flex items-center gap-2">
+                <div className="size-7 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500">
+                  <IconAlertTriangle size={14} />
                 </div>
                 <div>
-                  <h3 className="text-lg font-black uppercase tracking-wider text-red-600">Alertas</h3>
-                  <p className="text-xs text-red-600/70 font-medium">Faltas injustificadas (72h)</p>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">
+                    Inasistencias Recientes
+                  </h3>
+                  <p className="text-[10px] text-muted-foreground">Últimos 3 días lectivos</p>
                 </div>
               </div>
+            </div>
 
-              <div className="space-y-4">
-                {criticalAttendance.length === 0 ? (
-                  <div className="py-10 text-center bg-background/50 rounded-2xl border border-dashed border-border/50">
-                    <IconClipboardCheck className="mx-auto size-10 text-emerald-500 mb-3 opacity-50" />
-                    <p className="text-sm text-muted-foreground font-medium">Asistencia perfecta</p>
-                  </div>
-                ) : (
-                  criticalAttendance.map((alert) => (
-                    <AlertItem key={alert.id} alert={alert} />
-                  ))
-                )}
-                <Button variant="ghost" className="w-full text-xs font-bold text-red-600 hover:bg-red-500/10 hover:text-red-700 transition-colors rounded-xl h-10 mt-2" asChild>
-                  <Link href="/asistencia">Ver reporte detallado</Link>
-                </Button>
-              </div>
+            <div className="space-y-2">
+              {criticalAttendance.length === 0 ? (
+                <div className="py-6 text-center bg-muted/10 rounded-xl border border-dashed border-border/30 space-y-1">
+                  <IconUserCheck className="mx-auto size-7 text-emerald-500 opacity-60" />
+                  <p className="text-xs font-semibold text-foreground">Asistencia completa</p>
+                  <p className="text-[10px] text-muted-foreground">Sin inasistencias en tus secciones.</p>
+                </div>
+              ) : (
+                criticalAttendance.map((alert) => (
+                  <AlertItem key={alert.id} alert={alert} />
+                ))
+              )}
+              <Button variant="ghost" className="w-full text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10 rounded-xl h-9 mt-1 cursor-pointer" asChild>
+                <Link href="/asistencia">Ir a Control de Asistencia</Link>
+              </Button>
             </div>
           </div>
 
-          {/* Pending Grades - Task Style */}
-          <div className="rounded-2xl overflow-hidden border border-border/50 bg-card/80 shadow-sm relative">
-            <div className="absolute -bottom-10 -left-10 size-40 bg-emerald-500/10 rounded-full blur-3xl animate-blob" style={{ animationDelay: "1s" }} />
-
-            <div className="p-6 relative z-10">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="size-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 shadow-inner">
-                  <IconClipboardCheck size={24} strokeWidth={2} />
+          {/* Evaluaciones Pendientes por Calificar */}
+          <div className="rounded-2xl border border-border/40 bg-card/80 backdrop-blur-md p-4 space-y-3.5 shadow-xs">
+            <div className="flex items-center justify-between pb-3 border-b border-border/30">
+              <div className="flex items-center gap-2">
+                <div className="size-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500">
+                  <IconPencil size={14} />
                 </div>
                 <div>
-                  <h3 className="text-lg font-black uppercase tracking-wider text-emerald-600">Pendientes</h3>
-                  <p className="text-xs text-emerald-600/70 font-medium">Evaluaciones por calificar</p>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">
+                    Notas Pendientes
+                  </h3>
+                  <p className="text-[10px] text-muted-foreground">Evaluaciones a ingresar</p>
                 </div>
-              </div>
-
-              <div className="space-y-4">
-                {evaluationsToGrade.length === 0 ? (
-                  <div className="py-10 text-center bg-background/50 rounded-2xl border border-dashed border-border/50">
-                    <IconSparkles className="mx-auto size-10 text-emerald-500 mb-3 opacity-50" />
-                    <p className="text-sm text-muted-foreground font-medium">¡Todo al día! Excelente.</p>
-                  </div>
-                ) : (
-                  evaluationsToGrade.map((evalu) => (
-                    <PendingGradeItem key={evalu.id} evalu={evalu} />
-                  ))
-                )}
               </div>
             </div>
-          </div>
 
-          {/* Tips / Productivity Card */}
-          <div className="rounded-2xl overflow-hidden relative bg-linear-to-br from-primary to-indigo-700 text-primary-foreground shadow-lg shadow-primary/20">
-             <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 animate-blob" />
-            <div className="p-8 relative z-10">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="size-14 rounded-2xl bg-white/20 flex items-center justify-center shadow-inner shadow-white/20">
-                  <IconGraphFilled size={32} className="text-white" />
+            <div className="space-y-2">
+              {evaluationsToGrade.length === 0 ? (
+                <div className="py-6 text-center bg-muted/10 rounded-xl border border-dashed border-border/30 space-y-1">
+                  <IconSparkles className="mx-auto size-7 text-emerald-500 opacity-60" />
+                  <p className="text-xs font-semibold text-foreground">¡Todo al día!</p>
+                  <p className="text-[10px] text-muted-foreground">Todas las notas han sido registradas.</p>
                 </div>
-                <h4 className="text-xl font-black tracking-tight drop-shadow-sm">Consejo de hoy</h4>
-              </div>
-              <p className="text-base text-white/90 leading-relaxed italic font-medium">
-                &ldquo;La educación no es la respuesta a la pregunta. La educación es el medio para encontrar la respuesta a todas las preguntas.&rdquo;
-              </p>
+              ) : (
+                evaluationsToGrade.map((evalu) => (
+                  <PendingGradeItem key={evalu.id} evalu={evalu} />
+                ))
+              )}
             </div>
           </div>
         </div>
@@ -350,56 +371,44 @@ function KPIItem({
   label,
   icon: Icon,
   color,
-  trend,
+  badgeText,
 }: {
   title: string;
   value: string;
   label: string;
   icon: Icon;
-  color: "blue" | "amber" | "red" | "emerald" | "indigo";
-  trend?: string;
+  color: "blue" | "amber" | "emerald" | "indigo" | "purple";
+  badgeText?: string;
 }) {
   const colorMap = {
-    blue: "text-blue-600 bg-blue-500/10",
-    amber: "text-amber-600 bg-amber-500/10",
-    red: "text-red-600 bg-red-500/10",
-    emerald: "text-emerald-600 bg-emerald-500/10",
-    indigo: "text-indigo-600 bg-indigo-500/10",
-  };
-
-  const glowMap = {
-    blue: "bg-blue-500/20",
-    amber: "bg-amber-500/20",
-    red: "bg-red-500/20",
-    emerald: "bg-emerald-500/20",
-    indigo: "bg-indigo-500/20",
+    blue: "text-blue-500 bg-blue-500/10 border-blue-500/20",
+    amber: "text-amber-500 bg-amber-500/10 border-amber-500/20",
+    emerald: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20",
+    indigo: "text-indigo-500 bg-indigo-500/10 border-indigo-500/20",
+    purple: "text-purple-500 bg-purple-500/10 border-purple-500/20",
   };
 
   return (
-    <div className="rounded-2xl p-6 group border border-border/50 bg-card/80 shadow-sm transition-[background-color,box-shadow,transform] duration-300 hover:bg-card hover:shadow-md hover:-translate-y-0.5 flex flex-col relative overflow-hidden">
-      {/* Background Glow */}
-      <div className={cn("absolute -right-6 -top-6 size-32 rounded-full blur-3xl opacity-50 transition-[opacity,transform] duration-500 group-hover:opacity-100 group-hover:scale-150", glowMap[color])} />
-      
-      <div className="relative z-10 flex flex-col h-full">
-        <div className="flex items-center justify-between mb-6">
-          <div className={cn("size-14 rounded-2xl flex items-center justify-center shadow-inner", colorMap[color])}>
-            <Icon size={28} strokeWidth={2} />
-          </div>
-          <div className={cn("p-2 rounded-xl opacity-20 group-hover:scale-110 transition-transform duration-500", colorMap[color].split(" ")[0])}>
-             <Icon size={48} strokeWidth={1.5} />
-          </div>
+    <div className="rounded-2xl p-4 border border-border/40 bg-card/80 backdrop-blur-md shadow-xs flex flex-col justify-between relative overflow-hidden">
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+          {title}
+        </span>
+        <div className={cn("size-8 rounded-xl flex items-center justify-center border", colorMap[color])}>
+          <Icon size={16} />
         </div>
-        
-        <div className="space-y-2 mt-auto">
-          <p className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/80">
-            {title}
-          </p>
-          <div className="flex items-end gap-3">
-            <h3 className="text-4xl md:text-5xl font-black tracking-tighter text-foreground leading-none">{value}</h3>
-            {trend && <span className="text-[10px] font-black text-emerald-600 bg-emerald-500/10 px-2 py-1 rounded-md mb-1.5 shadow-sm">{trend}</span>}
-          </div>
-          <p className="text-xs font-medium text-muted-foreground mt-1">{label}</p>
+      </div>
+
+      <div className="mt-3 space-y-0.5">
+        <div className="flex items-baseline gap-2">
+          <h3 className="text-2xl font-extrabold tracking-tight text-foreground">{value}</h3>
+          {badgeText && (
+            <Badge variant="outline" className="text-[9px] font-bold px-1.5 py-0 rounded-full border-border/40 bg-muted/30">
+              {badgeText}
+            </Badge>
+          )}
         </div>
+        <p className="text-[10px] text-muted-foreground font-medium">{label}</p>
       </div>
     </div>
   );
@@ -407,107 +416,122 @@ function KPIItem({
 
 function ScheduleItem({ item }: { item: HorarioDocente }) {
   return (
-    <div className="group relative flex items-center gap-5 p-5 rounded-2xl bg-muted/50 border border-border/30 hover:border-primary/40 transition-[background-color,border-color,box-shadow] duration-300 hover:shadow-md hover:shadow-primary/5 hover:bg-muted/80">
-      <div className="flex flex-col items-center justify-center min-w-[80px] py-2 border-r border-border/50">
-        <span className="text-base font-black text-primary drop-shadow-sm">{item.horaInicio}</span>
-        <span className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mt-1 bg-muted px-2 py-0.5 rounded-full">{item.horaFin}</span>
-      </div>
-      <div className="flex-1 min-w-0 py-1">
-        <h4 className="font-black text-lg truncate uppercase tracking-tight group-hover:text-primary transition-colors">
-          {item.curso.areaCurricular.nombre}
-        </h4>
-        <div className="flex flex-wrap items-center gap-3 mt-2">
-          <Badge variant="secondary" className="text-xs font-bold rounded-full px-3 py-1 bg-muted shadow-sm">
-            {item.curso.nivelAcademico.grado.nombre} {item.curso.nivelAcademico.seccion}
-          </Badge>
-          <span className="text-xs text-muted-foreground font-medium flex items-center gap-1.5 bg-background/80 px-3 py-1 rounded-full border shadow-sm">
-            <IconUsers size={14} /> {item.curso.nivelAcademico.aulaAsignada || "Aula N/A"}
-          </span>
+    <div className="flex items-center justify-between p-3.5 rounded-2xl bg-card/80 border border-border/40 hover:border-indigo-500/30 transition-all duration-200 shadow-xs gap-3">
+      <div className="flex items-center gap-3.5 min-w-0">
+        <div className="flex flex-col items-center justify-center px-3 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 shrink-0">
+          <span className="text-xs font-bold font-mono">{item.horaInicio}</span>
+          <span className="text-[9px] text-muted-foreground font-semibold">a {item.horaFin}</span>
+        </div>
+
+        <div className="min-w-0 space-y-0.5">
+          <h4 className="font-bold text-xs text-foreground truncate uppercase">
+            {item.curso.areaCurricular.nombre}
+          </h4>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="text-[10px] font-semibold border-border/40 bg-muted/30 px-2 py-0">
+              {item.curso.nivelAcademico.grado.nombre} "{item.curso.nivelAcademico.seccion}"
+            </Badge>
+            <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+              <IconUsers size={11} /> {item.curso.nivelAcademico.aulaAsignada || "Aula asignada"}
+            </span>
+          </div>
         </div>
       </div>
-      <Button variant="ghost" size="icon" className="rounded-full size-12 opacity-0 group-hover:opacity-100 transition-[color,background-color,opacity] duration-300 bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground -mr-2 shadow-sm">
-        <IconExternalLink size={20} />
-      </Button>
+
+      <div className="flex items-center gap-1 shrink-0">
+        <Button variant="outline" size="sm" className="rounded-xl h-8 px-2.5 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 border-indigo-500/20 hover:bg-indigo-500/10 cursor-pointer gap-1" asChild>
+          <Link href={`/asistencia?seccion=${item.curso.nivelAcademico.id}`}>
+            <IconUserCheck size={13} />
+            <span className="hidden sm:inline">Asistencia</span>
+          </Link>
+        </Button>
+        <Button variant="ghost" size="icon" className="rounded-xl size-8 text-muted-foreground hover:text-indigo-600 hover:bg-indigo-500/10 cursor-pointer" asChild>
+          <Link href="/gestion/estudiantes">
+            <IconExternalLink size={15} />
+          </Link>
+        </Button>
+      </div>
     </div>
   );
 }
 
 function EvaluationItem({ evaluacion }: { evaluacion: EvaluacionDocente }) {
   return (
-    <div className="flex items-center justify-between p-6 hover:bg-muted/40 transition-colors group">
-      <div className="flex items-center gap-6">
-        <div className="size-14 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-600 shadow-inner group-hover:scale-110 group-hover:bg-amber-500/20 transition-[background-color,transform] duration-300">
-          <IconCalendarStats size={28} strokeWidth={2} />
+    <Link
+      href={`/evaluaciones/${evaluacion.id}/notas`}
+      className="flex items-center justify-between p-3.5 hover:bg-muted/20 transition-colors group cursor-pointer"
+    >
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="size-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 shrink-0">
+          <IconCalendarStats size={16} />
         </div>
-        <div className="space-y-1">
-          <p className="font-black text-base uppercase tracking-tight group-hover:text-primary transition-colors">
+        <div className="min-w-0 space-y-0.5">
+          <p className="font-bold text-xs text-foreground truncate uppercase group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
             {evaluacion.curso.areaCurricular.nombre}
           </p>
-          <div className="flex flex-wrap items-center gap-2 mt-1">
-            <Badge variant="outline" className="text-[10px] uppercase font-bold text-muted-foreground border-border/50 bg-background/50">
-               {evaluacion.curso.nivelAcademico.grado.nombre} {evaluacion.curso.nivelAcademico.seccion}
+          <div className="flex items-center gap-1.5">
+            <Badge variant="outline" className="text-[9px] font-semibold border-border/40 text-muted-foreground px-1.5 py-0">
+              {evaluacion.curso.nivelAcademico.grado.nombre} "{evaluacion.curso.nivelAcademico.seccion}"
             </Badge>
-            <span className="size-1.5 rounded-full bg-border" />
-            <span className="text-primary font-black text-[11px] uppercase tracking-wider">{evaluacion.tipoEvaluacion.nombre}</span>
+            <span className="text-indigo-600 dark:text-indigo-400 font-bold text-[10px]">
+              {evaluacion.tipoEvaluacion.nombre}
+            </span>
           </div>
         </div>
       </div>
-      <div className="text-right flex flex-col items-end gap-2">
-        <p className="text-sm font-black text-primary bg-primary/10 px-3 py-1.5 rounded-xl border border-primary/20 shadow-sm">
-          {formatDate(evaluacion.fecha)}
-        </p>
-        <Badge className="text-[9px] uppercase font-black tracking-widest bg-amber-100 text-amber-700 hover:bg-amber-200 border-none shadow-sm px-2 py-0.5">
-          En Agenda
-        </Badge>
-      </div>
-    </div>
+      <Badge variant="outline" className="text-[10px] font-mono font-bold border-indigo-500/30 text-indigo-600 dark:text-indigo-400 bg-indigo-500/5 px-2 py-0.5 shrink-0">
+        {formatDate(evaluacion.fecha)}
+      </Badge>
+    </Link>
   );
 }
 
 function CourseCard({ curso }: { curso: CursoDocente }) {
   return (
-    <div className="rounded-2xl p-6 group border border-border/50 bg-card/80 shadow-sm transition-[background-color,border-color,box-shadow,transform] duration-300 hover:bg-card hover:shadow-md hover:-translate-y-0.5 hover:border-primary/40 relative overflow-hidden flex flex-col h-full">
-       <div className="absolute top-0 right-0 w-40 h-40 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/15 transition-colors duration-500" />
-       
-      <div className="flex justify-between items-start mb-6 relative z-10">
-        <div className="size-16 rounded-2xl bg-background/80 shadow-sm border flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-[color,background-color,transform] duration-300 group-hover:rotate-6 group-hover:scale-110">
-          <IconBook size={32} strokeWidth={1.5} />
+    <div className="rounded-2xl p-4 border border-border/40 bg-card/80 backdrop-blur-md shadow-xs hover:border-indigo-500/30 transition-all duration-200 flex flex-col justify-between space-y-3">
+      <div className="flex justify-between items-start">
+        <div className="space-y-1 min-w-0">
+          <Badge variant="outline" className="rounded-full text-[9px] font-bold uppercase border-indigo-500/30 text-indigo-600 dark:text-indigo-400 bg-indigo-500/5 px-2 py-0">
+            {curso.nivelAcademico.nivel.nombre}
+          </Badge>
+          <h4 className="text-sm font-bold text-foreground truncate uppercase">
+            {curso.areaCurricular.nombre}
+          </h4>
+          <p className="text-xs text-muted-foreground font-medium">
+            {curso.nivelAcademico.grado.nombre} — Sección &quot;{curso.nivelAcademico.seccion}&quot;
+          </p>
         </div>
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full bg-background/50 hover:bg-background shadow-sm size-10 border border-transparent hover:border-border">
-              <IconDotsVertical size={20} />
+            <Button variant="ghost" size="icon" className="rounded-xl size-7 text-muted-foreground hover:text-foreground cursor-pointer">
+              <IconDotsVertical size={16} />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2 shadow-lg border border-border/50 bg-background">
-            <DropdownMenuItem className="rounded-xl cursor-pointer font-medium py-2">Ver Estudiantes</DropdownMenuItem>
-            <DropdownMenuItem className="rounded-xl cursor-pointer font-medium py-2 text-primary focus:bg-primary/10 focus:text-primary">Subir Notas</DropdownMenuItem>
-            <DropdownMenuItem className="rounded-xl cursor-pointer font-medium py-2">Tomar Asistencia</DropdownMenuItem>
+          <DropdownMenuContent align="end" className="w-48 rounded-xl p-1 shadow-lg border border-border/40 z-[80]">
+            <DropdownMenuItem className="rounded-lg text-xs font-medium cursor-pointer" asChild>
+              <Link href="/gestion/estudiantes">Ver Estudiantes</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="rounded-lg text-xs font-medium cursor-pointer text-indigo-600 dark:text-indigo-400" asChild>
+              <Link href="/evaluaciones">Ingresar Notas</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="rounded-lg text-xs font-medium cursor-pointer" asChild>
+              <Link href="/asistencia">Tomar Asistencia</Link>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      
-      <div className="space-y-2 relative z-10 flex-1">
-        <Badge variant="outline" className="rounded-full text-[10px] font-black uppercase tracking-widest bg-primary/5 border-primary/20 text-primary mb-2 shadow-sm">
-          {curso.nivelAcademico.nivel.nombre}
-        </Badge>
-        <h4 className="text-xl font-black tracking-tight group-hover:text-primary transition-colors leading-tight drop-shadow-sm">
-          {curso.areaCurricular.nombre}
-        </h4>
-        <p className="text-sm text-muted-foreground font-medium">
-          {curso.nivelAcademico.grado.nombre} - Sección &quot;{curso.nivelAcademico.seccion}&quot;
-        </p>
-      </div>
 
-      <div className="mt-8 pt-5 border-t border-border/50 flex items-center justify-between relative z-10">
-        <div className="flex items-center gap-3">
-          <div className="size-10 rounded-full bg-background/90 border flex items-center justify-center shadow-sm">
-            <IconUsers size={18} className="text-muted-foreground" />
-          </div>
-          <span className="text-sm font-black text-foreground drop-shadow-sm">{curso._count?.estudiantes || 0} alumnos</span>
-        </div>
-        <Button variant="ghost" size="sm" className="h-10 px-4 rounded-xl text-sm font-bold bg-background/50 border hover:bg-primary hover:border-primary hover:text-primary-foreground shadow-sm transition-[color,background-color,border-color] duration-300">
-          Detalles <IconChevronRight size={16} className="ml-1" />
+      <div className="pt-2 border-t border-border/30 flex items-center justify-between text-xs">
+        <span className="text-[11px] font-bold text-muted-foreground flex items-center gap-1.5">
+          <IconUsers size={14} className="text-indigo-500" />
+          {curso._count?.estudiantes || 0} Alumnos
+        </span>
+        <Button variant="ghost" size="sm" className="h-7 px-2.5 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10 rounded-lg cursor-pointer gap-1" asChild>
+          <Link href="/evaluaciones">
+            <span>Gestionar</span>
+            <IconChevronRight size={13} />
+          </Link>
         </Button>
       </div>
     </div>
@@ -516,21 +540,17 @@ function CourseCard({ curso }: { curso: CursoDocente }) {
 
 function AlertItem({ alert }: { alert: AlertaAsistencia }) {
   return (
-    <div className="group flex items-center gap-4 p-4 rounded-2xl bg-muted/50 border border-border/30 shadow-sm hover:shadow-md transition-[border-color,box-shadow] duration-300 hover:border-border relative overflow-hidden">
-      <div className="absolute inset-0 bg-red-500/0 group-hover:bg-red-500/5 transition-colors duration-300" />
-      <div className="size-12 rounded-xl bg-red-100 dark:bg-red-900/50 flex items-center justify-center text-red-600 shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-inner">
-        <IconUsers size={24} />
-      </div>
-      <div className="min-w-0 flex-1 relative z-10">
-        <p className="text-sm font-black truncate leading-tight uppercase tracking-tight text-foreground group-hover:text-red-700 dark:group-hover:text-red-400 transition-colors">
+    <div className="flex items-center justify-between p-2.5 rounded-xl bg-muted/20 border border-border/30 text-xs">
+      <div className="min-w-0 pr-2">
+        <p className="font-bold text-foreground truncate uppercase text-[11px]">
           {alert.estudiante.name} {alert.estudiante.apellidoPaterno}
         </p>
-        <p className="text-xs text-muted-foreground font-medium mt-1">
-          Falta el {formatDate(alert.fecha)}
+        <p className="text-[10px] text-muted-foreground">
+          Inasistencia: {formatDate(alert.fecha)}
         </p>
       </div>
-      <Badge variant="destructive" className="h-6 text-[10px] px-2 rounded-md font-black uppercase shadow-sm">
-        Inasist.
+      <Badge variant="outline" className="text-[9px] font-bold text-red-600 border-red-500/30 bg-red-500/10 px-2 py-0.5 rounded-full shrink-0">
+        Inasistente
       </Badge>
     </div>
   );
@@ -538,25 +558,19 @@ function AlertItem({ alert }: { alert: AlertaAsistencia }) {
 
 function PendingGradeItem({ evalu }: { evalu: EvaluacionDocente }) {
   return (
-    <div className="group flex items-center justify-between p-4 rounded-2xl bg-muted/50 border border-border/30 shadow-sm hover:shadow-md transition-[border-color,box-shadow] duration-300 hover:border-border cursor-pointer relative overflow-hidden">
-      <div className="absolute inset-0 bg-emerald-500/0 group-hover:bg-emerald-500/5 transition-colors duration-300" />
-      <div className="min-w-0 relative z-10">
-        <p className="text-sm font-black truncate leading-tight uppercase tracking-tight group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
+    <Link
+      href={`/evaluaciones/${evalu.id}/notas`}
+      className="flex items-center justify-between p-2.5 rounded-xl bg-muted/20 border border-border/30 hover:border-amber-500/30 transition-all duration-200 text-xs group"
+    >
+      <div className="min-w-0 pr-2">
+        <p className="font-bold text-foreground truncate uppercase text-[11px] group-hover:text-amber-600 dark:group-hover:text-amber-400">
           {evalu.curso.areaCurricular.nombre}
         </p>
-        <div className="flex items-center gap-2 mt-1.5">
-           <Badge variant="outline" className="text-[9px] font-bold uppercase border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 shadow-sm px-1.5">
-             {evalu.tipoEvaluacion.nombre}
-           </Badge>
-           <span className="text-[10px] text-muted-foreground font-medium">
-            {formatDate(evalu.fecha)}
-          </span>
-        </div>
+        <p className="text-[10px] text-muted-foreground font-medium">
+          {evalu.tipoEvaluacion.nombre} — {formatDate(evalu.fecha)}
+        </p>
       </div>
-      <div className="size-10 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-800 transition-colors duration-300 relative z-10 shadow-inner">
-        <IconChevronRight size={20} className="group-hover:translate-x-0.5 transition-transform" />
-      </div>
-    </div>
+      <IconChevronRight size={14} className="text-muted-foreground group-hover:translate-x-0.5 transition-transform shrink-0" />
+    </Link>
   );
 }
-

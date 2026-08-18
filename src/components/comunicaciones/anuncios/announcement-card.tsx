@@ -60,11 +60,18 @@ export function AnnouncementCard({
 
   return (
     <>
-      <article>
-        <button
-          type="button"
+      <article className="h-full">
+        <div
+          role="button"
+          tabIndex={0}
           onClick={() => setShowDetail(true)}
-          className="w-full text-left bg-transparent p-0 border-0 cursor-pointer flex flex-col h-full"
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setShowDetail(true);
+            }
+          }}
+          className="w-full text-left bg-transparent p-0 border-0 cursor-pointer flex flex-col h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-2xl"
         >
           <MagicCard className="group relative bg-card rounded-2xl overflow-hidden border border-border/40 shadow-xs transition-transform hover:-translate-y-1 cursor-pointer flex flex-col h-full w-full">
           <div className="relative h-48 overflow-hidden bg-muted/20">
@@ -122,6 +129,7 @@ export function AnnouncementCard({
             <div
               className="absolute top-3 right-3 z-30 opacity-0 group-hover:opacity-100 transition-opacity"
               onClick={(e) => e.stopPropagation()}
+              onKeyDown={(e) => e.stopPropagation()}
             >
               <EditAnnouncementButton anuncio={anuncio} />
             </div>
@@ -171,7 +179,7 @@ export function AnnouncementCard({
             </div>
           </div>
         </MagicCard>
-        </button>
+        </div>
       </article>
 
       <ViewAnnouncementDialog

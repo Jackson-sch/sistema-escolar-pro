@@ -6,13 +6,10 @@ import {
   View,
   Image,
 } from "@react-pdf/renderer";
-import { Heading } from "@/components/pdfx/heading/pdfx-heading";
-import { Stack } from "@/components/pdfx/stack/pdfx-stack";
-import { Divider } from "@/components/pdfx/divider/pdfx-divider";
 
 // Dimensiones estándar CR80 (85.6mm x 53.98mm) convertidas a puntos
 const CARD_WIDTH = 242.6; // ~85.6mm
-const CARD_HEIGHT = 153; // ~54mm
+const CARD_HEIGHT = 153;  // ~54mm
 
 interface StudentCardPDFProps {
   student: {
@@ -43,124 +40,411 @@ export const StudentCardPDF = ({
   qrCode,
 }: StudentCardPDFProps) => {
   const currentYear = new Date().getFullYear();
-  const fullName = `${student.name} ${student.apellidoPaterno} ${student.apellidoMaterno}`;
+  const fullName = `${student.name} ${student.apellidoPaterno} ${student.apellidoMaterno}`.trim();
+  const gradoNivel = student.nivelAcademico
+    ? `${student.nivelAcademico.grado.nombre} "${student.nivelAcademico.seccion}" - ${student.nivelAcademico.nivel.nombre}`
+    : "ESTUDIANTE REGULAR";
 
-  // Estilos base compartidos
   const cardBaseStyle: any = {
     width: CARD_WIDTH,
     height: CARD_HEIGHT,
     borderRadius: 8,
     overflow: "hidden",
     backgroundColor: "#ffffff",
-    borderWidth: 0.5,
-    borderColor: "#e2e8f0",
-    position: "relative"
-  }
+    borderWidth: 1,
+    borderColor: "#cbd5e1",
+    position: "relative",
+  };
+
+  const Watermark = () => (
+    <View
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        alignItems: "center",
+        justifyContent: "center",
+        opacity: 0.04,
+        overflow: "hidden",
+      }}
+    >
+      <Text
+        style={{
+          fontSize: 13,
+          fontWeight: "bold",
+          color: "#0f172a",
+          textTransform: "uppercase",
+          textAlign: "center",
+          transform: "rotate(-25deg)",
+          width: 300,
+          lineHeight: 1.4,
+        }}
+      >
+        {institucion.nombreInstitucion} • {institucion.nombreInstitucion} • {institucion.nombreInstitucion}
+      </Text>
+    </View>
+  );
 
   return (
     <Document title={`Carnet-${student.dni}`}>
-      <Page size="A4" style={{ backgroundColor: "#f1f5f9", padding: 30, flexDirection: "row", flexWrap: "wrap", gap: 20 }}>
-        
-        {/* LADO FRONTAL */}
+      <Page
+        size="A4"
+        style={{
+          backgroundColor: "#f8fafc",
+          padding: 30,
+          flexDirection: "row",
+          flexWrap: "wrap",
+          gap: 20,
+        }}
+      >
+        {/* ================= FRONTAL ================= */}
         <View style={cardBaseStyle}>
-          {/* Acento lateral */}
-          <View style={{ position: "absolute", top: 0, left: 0, bottom: 0, width: 8, backgroundColor: "#0f172a" }} />
-          
-          <Stack direction="vertical" style={{ flex: 1, paddingLeft: 18, paddingRight: 10, paddingTop: 10 }}>
-            {/* Header */}
-            <Stack direction="horizontal" justify="between" align="start" style={{ marginBottom: 6 }}>
-              <View style={{ flex: 1 }}>
-                <Heading level={6} noMargin weight="bold" color="primary">{institucion.nombreInstitucion.toUpperCase()}</Heading>
-                <Text style={{ fontSize: 4.5, color: "#94a3b8", textTransform: 'uppercase', marginTop: 1 }}>
-                  {student.nivelAcademico?.sede?.nombre || institucion.lema || "Excelencia Académica"}
+          <Watermark />
+          {/* Header Superior */}
+          <View
+            style={{
+              backgroundColor: "#0f172a",
+              height: 34,
+              paddingHorizontal: 10,
+              paddingVertical: 4,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <View style={{ flex: 1, paddingRight: 6 }}>
+              <Text
+                style={{
+                  fontSize: 7.5,
+                  fontWeight: "bold",
+                  color: "#ffffff",
+                  textTransform: "uppercase",
+                  letterSpacing: 0.3,
+                }}
+              >
+                {institucion.nombreInstitucion}
+              </Text>
+              <Text
+                style={{
+                  fontSize: 4.5,
+                  color: "#93c5fd",
+                  marginTop: 1,
+                }}
+              >
+                {student.nivelAcademico?.sede?.nombre || institucion.lema || "Excelencia Educativa"}
+              </Text>
+            </View>
+            {institucion.logo ? (
+              <View
+                style={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: 12,
+                  backgroundColor: "#ffffff",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  overflow: "hidden",
+                }}
+              >
+                <Image
+                  src={institucion.logo}
+                  style={{ width: 20, height: 20, objectFit: "contain" }}
+                />
+              </View>
+            ) : null}
+          </View>
+
+          {/* Banda de Acento Dorado/Azul */}
+          <View style={{ height: 2, backgroundColor: "#3b82f6" }} />
+
+          {/* Cuerpo Principal */}
+          <View
+            style={{
+              flex: 1,
+              flexDirection: "row",
+              paddingHorizontal: 10,
+              paddingTop: 8,
+              paddingBottom: 4,
+            }}
+          >
+            {/* Marco de Foto */}
+            <View
+              style={{
+                width: 52,
+                height: 64,
+                borderRadius: 5,
+                borderWidth: 1,
+                borderColor: "#cbd5e1",
+                backgroundColor: "#f1f5f9",
+                overflow: "hidden",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {student.image ? (
+                <Image
+                  src={student.image}
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
+              ) : (
+                <View
+                  style={{
+                    flex: 1,
+                    width: "100%",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: "#e2e8f0",
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 20,
+                      fontWeight: "bold",
+                      color: "#64748b",
+                    }}
+                  >
+                    {student.name ? student.name.charAt(0).toUpperCase() : "E"}
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            {/* Información del Estudiante */}
+            <View style={{ flex: 1, marginLeft: 10, justifyContent: "space-between" }}>
+              {/* Nombre */}
+              <View>
+                <Text
+                  style={{
+                    fontSize: 4.5,
+                    fontWeight: "bold",
+                    color: "#64748b",
+                    letterSpacing: 0.5,
+                  }}
+                >
+                  ESTUDIANTE
+                </Text>
+                <Text
+                  style={{
+                    fontSize: fullName.length > 22 ? 6.5 : 7.5,
+                    fontWeight: "bold",
+                    color: "#0f172a",
+                    marginTop: 1,
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {fullName}
                 </Text>
               </View>
-              {institucion.logo && (
-                <Image src={institucion.logo} style={{ width: 18, height: 18, objectFit: "contain" }} />
-              )}
-            </Stack>
 
-            {/* Contenido */}
-            <Stack direction="horizontal" gap="md" style={{ flex: 1 }}>
-              {/* Foto */}
-              <View style={{ width: 55, height: 65, borderRadius: 4, borderWidth: 0.5, borderColor: "#e2e8f0", backgroundColor: "#f8fafc", overflow: "hidden" }}>
-                {student.image ? (
-                  <Image src={student.image} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                ) : (
-                  <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-                    <Text style={{ fontSize: 16, color: "#cbd5e1" }}>{student.name.charAt(0)}</Text>
-                  </View>
-                )}
+              {/* Grado / Nivel Badge */}
+              <View style={{ marginTop: 2 }}>
+                <Text
+                  style={{
+                    fontSize: 4.5,
+                    fontWeight: "bold",
+                    color: "#64748b",
+                    letterSpacing: 0.5,
+                    marginBottom: 1,
+                  }}
+                >
+                  GRADO / NIVEL
+                </Text>
+                <View
+                  style={{
+                    backgroundColor: "#1e293b",
+                    paddingVertical: 1.5,
+                    paddingHorizontal: 5,
+                    borderRadius: 3,
+                    alignSelf: "flex-start",
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 5.5,
+                      fontWeight: "bold",
+                      color: "#ffffff",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {gradoNivel}
+                  </Text>
+                </View>
               </View>
 
-              {/* Info */}
-              <Stack direction="vertical" gap="sm" style={{ flex: 1 }}>
+              {/* DNI y Vigencia */}
+              <View style={{ flexDirection: "row", marginTop: 2 }}>
+                <View style={{ marginRight: 14 }}>
+                  <Text
+                    style={{
+                      fontSize: 4.5,
+                      fontWeight: "bold",
+                      color: "#64748b",
+                    }}
+                  >
+                    DNI
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 6.5,
+                      fontWeight: "bold",
+                      color: "#0f172a",
+                      marginTop: 1,
+                    }}
+                  >
+                    {student.dni}
+                  </Text>
+                </View>
                 <View>
-                  <Text style={{ fontSize: 4, color: "#94a3b8", fontWeight: "bold" }}>ESTUDIANTE</Text>
-                  <Text style={{ fontSize: fullName.length > 25 ? 7 : 8, fontWeight: "bold", color: "#0f172a", textTransform: "uppercase" }}>{fullName}</Text>
+                  <Text
+                    style={{
+                      fontSize: 4.5,
+                      fontWeight: "bold",
+                      color: "#64748b",
+                    }}
+                  >
+                    VIGENCIA
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 6.5,
+                      fontWeight: "bold",
+                      color: "#2563eb",
+                      marginTop: 1,
+                    }}
+                  >
+                    DIC {currentYear}
+                  </Text>
                 </View>
-
-                <View style={{ marginTop: 2 }}>
-                  <Text style={{ fontSize: 4, color: "#94a3b8", fontWeight: "bold" }}>GRADO / NIVEL</Text>
-                  <View style={{ backgroundColor: "#0f172a", paddingVertical: 1, paddingHorizontal: 4, borderRadius: 2, alignSelf: "flex-start" }}>
-                    <Text style={{ fontSize: 5, color: "#ffffff", fontWeight: "bold" }}>
-                      {student.nivelAcademico?.grado.nombre || "N/A"} - {student.nivelAcademico?.nivel.nombre || "N/A"}
-                    </Text>
-                  </View>
-                </View>
-
-                <Stack direction="horizontal" gap="md" style={{ marginTop: 2 }}>
-                  <View>
-                    <Text style={{ fontSize: 4, color: "#94a3b8", fontWeight: "bold" }}>DNI</Text>
-                    <Text style={{ fontSize: 6, fontWeight: "bold" }}>{student.dni}</Text>
-                  </View>
-                  <View>
-                    <Text style={{ fontSize: 4, color: "#94a3b8", fontWeight: "bold" }}>VIGENCIA</Text>
-                    <Text style={{ fontSize: 6, fontWeight: "bold", color: "#64748b" }}>DIC {currentYear}</Text>
-                  </View>
-                </Stack>
-              </Stack>
-            </Stack>
-
-            {/* Footer Front */}
-            <Stack direction="horizontal" align="center" gap="sm" style={{ height: 25, marginTop: 5, borderTopWidth: 0.5, borderTopColor: "#f1f5f9" }}>
-              <View style={{ width: 14, height: 14, backgroundColor: "#ffffff" }}>
-                {qrCode && <Image src={qrCode} style={{ width: "100%", height: "100%" }} />}
               </View>
-              <View>
-                <Text style={{ fontSize: 4.5, fontWeight: "bold", color: "#0f172a" }}>ESTUDIANTE REGULAR</Text>
-                <Text style={{ fontSize: 4, color: "#94a3b8" }}>MODULAR: {institucion.codigoModular || "---"}</Text>
-              </View>
-            </Stack>
-          </Stack>
+            </View>
+          </View>
+
+          {/* Pie de Carnet */}
+          <View
+            style={{
+              height: 20,
+              borderTopWidth: 0.5,
+              borderTopColor: "#e2e8f0",
+              flexDirection: "row",
+              alignItems: "center",
+              paddingHorizontal: 10,
+              backgroundColor: "#f8fafc",
+            }}
+          >
+            <View
+              style={{
+                width: 14,
+                height: 14,
+                backgroundColor: "#ffffff",
+                marginRight: 6,
+              }}
+            >
+              {qrCode ? (
+                <Image src={qrCode} style={{ width: "100%", height: "100%" }} />
+              ) : null}
+            </View>
+            <View>
+              <Text
+                style={{
+                  fontSize: 4.5,
+                  fontWeight: "bold",
+                  color: "#0f172a",
+                  letterSpacing: 0.3,
+                }}
+              >
+                CARNET ESCOLAR OFICIAL
+              </Text>
+              <Text style={{ fontSize: 4, color: "#64748b", marginTop: 0.5 }}>
+                CÓD. MODULAR: {institucion.codigoModular || "---"}
+              </Text>
+            </View>
+          </View>
         </View>
 
-        {/* LADO POSTERIOR (REVERSO) */}
+        {/* ================= POSTERIOR (REVERSO) ================= */}
         <View style={cardBaseStyle}>
-          <View style={{ height: 3, backgroundColor: "#0f172a" }} />
-          <Stack direction="vertical" align="center" justify="center" gap="md" style={{ flex: 1, padding: 10 }}>
-            <Heading level={6} noMargin weight="bold" align="center" color="primary">CONDICIONES DE USO</Heading>
-            <Text style={{ fontSize: 5, color: "#64748b", textAlign: "center", lineHeight: 1.4, paddingHorizontal: 10 }}>
-              Este carnet es personal e intransferible. Identifica al portador como estudiante regular de nuestra institución. En caso de pérdida, informar a la dirección.
+          <Watermark />
+          {/* Franja Superior */}
+          <View style={{ height: 4, backgroundColor: "#0f172a" }} />
+
+          {/* Contenido Reverso */}
+          <View
+            style={{
+              flex: 1,
+              alignItems: "center",
+              justifyContent: "space-between",
+              paddingHorizontal: 14,
+              paddingTop: 10,
+              paddingBottom: 8,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 7.5,
+                fontWeight: "bold",
+                color: "#0f172a",
+                letterSpacing: 0.5,
+                textTransform: "uppercase",
+              }}
+            >
+              CONDICIONES DE USO
             </Text>
-            
-            <Stack direction="vertical" align="center" gap="sm">
-              <View style={{ padding: 3, backgroundColor: "#ffffff", borderRadius: 4, borderWidth: 1, borderColor: "#f1f5f9" }}>
+
+            <Text
+              style={{
+                fontSize: 5,
+                color: "#475569",
+                textAlign: "center",
+                lineHeight: 1.4,
+              }}
+            >
+              Este carnet es personal e intransferible. Identifica al portador como estudiante regular de nuestra institución educativa. En caso de pérdida o hallazgo, favor de reportarlo a la dirección general.
+            </Text>
+
+            {/* QR de Validación Digital */}
+            <View style={{ alignItems: "center" }}>
+              <View
+                style={{
+                  padding: 2,
+                  backgroundColor: "#ffffff",
+                  borderRadius: 4,
+                  borderWidth: 1,
+                  borderColor: "#cbd5e1",
+                }}
+              >
                 {qrCode ? (
-                  <Image src={qrCode} style={{ width: 40, height: 40 }} />
+                  <Image src={qrCode} style={{ width: 38, height: 38 }} />
                 ) : (
-                  <View style={{ width: 40, height: 40, backgroundColor: "#f8fafc" }} />
+                  <View
+                    style={{
+                      width: 38,
+                      height: 38,
+                      backgroundColor: "#f1f5f9",
+                    }}
+                  />
                 )}
               </View>
-              <Text style={{ fontSize: 4.5, fontWeight: "bold", color: "#0f172a", letterSpacing: 0.5 }}>VALIDACIÓN DIGITAL</Text>
-            </Stack>
-
-            <View style={{ position: "absolute", bottom: 5 }}>
-              <Text style={{ fontSize: 4, color: "#cbd5e1" }}>© {currentYear} {institucion.nombreInstitucion}</Text>
+              <Text
+                style={{
+                  fontSize: 4.5,
+                  fontWeight: "bold",
+                  color: "#0f172a",
+                  letterSpacing: 0.5,
+                  marginTop: 2,
+                }}
+              >
+                VALIDACIÓN DIGITAL
+              </Text>
             </View>
-          </Stack>
-        </View>
 
+            {/* Copyright */}
+            <Text style={{ fontSize: 4, color: "#94a3b8" }}>
+              © {currentYear} {institucion.nombreInstitucion}
+            </Text>
+          </View>
+        </View>
       </Page>
     </Document>
   );

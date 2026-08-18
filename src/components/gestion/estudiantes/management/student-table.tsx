@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useQueryState, parseAsString, parseAsInteger } from "nuqs";
 import { ColumnDef, type Table } from "@tanstack/react-table";
 import { DataTable } from "@/components/ui/data-table";
@@ -12,10 +12,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { DownloadPadronButton } from "@/components/gestion/estudiantes/components/download-padron-button";
 import {
   IconFilter,
   IconSchool,
-  IconX,
   IconFilterSearch,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
@@ -32,6 +32,8 @@ interface StudentTableProps<TData, TValue> {
   data: TData[];
   totalCount?: number;
   meta?: StudentTableMeta;
+  /** Muestra el botón de exportación del padrón en el toolbar */
+  showPadronExport?: boolean;
 }
 
 interface StudentFiltersProps<TData> {
@@ -62,6 +64,16 @@ function StudentFilters<TData>({
       ?.setFilterValue(nivelFilter === "ALL" ? "" : nivelFilter);
   }, [nivelFilter, table]);
 
+  const uniqueEstados = useMemo(() => {
+    if (!meta?.estados) return [];
+    const seen = new Set<string>();
+    return meta.estados.filter((e) => {
+      if (!e.nombre || seen.has(e.nombre)) return false;
+      seen.add(e.nombre);
+      return true;
+    });
+  }, [meta?.estados]);
+
   return (
     <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
       <Select value={estadoFilter} onValueChange={meta.setEstadoFilter}>
@@ -84,11 +96,11 @@ function StudentFilters<TData>({
             <SelectValue placeholder="Estado" />
           </div>
         </SelectTrigger>
-        <SelectContent className="border-border/40 rounded-2xl bg-background/95 p-1 shadow-lg">
+        <SelectContent align="end" className="border-border/40 rounded-2xl bg-background/95 p-1 shadow-lg">
           <SelectItem value="ALL" className="font-bold text-xs">
             Todos los Estados
           </SelectItem>
-          {meta?.estados?.map((e) => (
+          {uniqueEstados.map((e) => (
             <SelectItem
               key={e.id}
               value={e.nombre}
@@ -145,6 +157,7 @@ export function StudentTable<TData, TValue>({
   columns,
   data,
   meta,
+  showPadronExport = false,
 }: StudentTableProps<TData, TValue>) {
   const [searchQuery, setSearchQuery] = useQueryState(
     "q",
@@ -211,6 +224,14 @@ export function StudentTable<TData, TValue>({
             nivelFilter={nivelFilter}
             meta={{ ...meta, setEstadoFilter, setNivelFilter }}
           />
+
+          {showPadronExport && (
+            <DownloadPadronButton
+              rows={table
+                .getFilteredRowModel()
+                .rows.map((row: any) => row.original)}
+            />
+          )}
 
           {activeFilterCount > 0 && (
             <Badge

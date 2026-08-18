@@ -1,4 +1,4 @@
-import { IconDeviceFloppy, IconLoader2, IconCircleCheck, IconAlertCircle } from "@tabler/icons-react";
+import { IconDeviceFloppy, IconLoader2, IconCircleCheck, IconAlertCircle, IconDownload } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -8,6 +8,7 @@ interface NotasFormHeaderProps {
   isPending: boolean;
   isDirty?: boolean;
   onGuardar: () => void;
+  onExportExcel?: () => void;
 }
 
 export function NotasFormHeader({
@@ -15,6 +16,7 @@ export function NotasFormHeader({
   isPending,
   isDirty = false,
   onGuardar,
+  onExportExcel,
 }: NotasFormHeaderProps) {
   const isLiteral = escala === "LITERAL";
 
@@ -61,6 +63,16 @@ export function NotasFormHeader({
         </p>
       </div>
       <div className="flex items-center gap-3 w-full md:w-auto">
+        {onExportExcel && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onExportExcel}
+            className="w-full md:w-auto rounded-full border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 text-xs font-bold gap-1.5 shadow-sm"
+          >
+            <IconDownload className="size-4" /> Exportar Excel
+          </Button>
+        )}
         <Button
           onClick={onGuardar}
           disabled={isPending || !isDirty}

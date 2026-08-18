@@ -19,6 +19,8 @@ import {
   IconChevronDown,
   IconChevronUp,
   IconSparkles,
+  IconBook,
+  IconFileSpreadsheet,
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -55,6 +57,7 @@ interface EstudiantePromocion {
   name?: string | null;
   apellidoPaterno?: string | null;
   apellidoMaterno?: string | null;
+  dni?: string | null;
   documentoIdentidad?: string | null;
 }
 
@@ -94,6 +97,8 @@ const VALIDATION_ITEMS = [
   },
 ];
 
+import { useQueryState, parseAsString } from "nuqs";
+
 export function PromocionesView({
   seccionesOrigen,
   seccionesDestino,
@@ -105,17 +110,32 @@ export function PromocionesView({
   const [loadingStudents, setLoadingStudents] = useState(false);
 
   // Stepper State
-  const [activeTab, setActiveTab] = useState<ActiveTab>("auditoria");
+  const [activeTab, setActiveTab] = useQueryState(
+    "step",
+    parseAsString.withDefault("auditoria")
+  ) as [ActiveTab, (v: ActiveTab | null) => void];
 
   // States
-  const [selectedLevelId, setSelectedLevelId] = useState<string>("all");
-  const [sourceSeccionId, setSourceSeccionId] = useState<string>("");
-  const [targetSeccionId, setTargetSeccionId] = useState<string>("");
+  const [selectedLevelId, setSelectedLevelId] = useQueryState(
+    "nivelId",
+    parseAsString.withDefault("")
+  );
+  const [sourceSeccionId, setSourceSeccionId] = useQueryState(
+    "sourceId",
+    parseAsString.withDefault("")
+  );
+  const [targetSeccionId, setTargetSeccionId] = useQueryState(
+    "targetId",
+    parseAsString.withDefault("")
+  );
   const [isAutoSelectedTarget, setIsAutoSelectedTarget] =
     useState<boolean>(false);
   const [students, setStudents] = useState<EstudiantePromocion[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useQueryState(
+    "q",
+    parseAsString.withDefault("")
+  );
 
   const niveles = useMemo<Array<{ id: string; nombre: string }>>(() => {
     const map = new Map<string, { id: string; nombre: string }>();
@@ -125,15 +145,24 @@ export function PromocionesView({
     return Array.from(map.values());
   }, [seccionesOrigen]);
 
+  // Auto-selección inicial del primer nivel activo
+  useEffect(() => {
+    if (niveles.length > 0 && !selectedLevelId) {
+      setSelectedLevelId(niveles[0].id);
+    }
+  }, [niveles, selectedLevelId]);
+
+  const activeLevelId = selectedLevelId || (niveles[0]?.id ?? "");
+
   const filteredSourceSecciones = useMemo(() => {
-    if (selectedLevelId === "all") return seccionesOrigen;
-    return seccionesOrigen.filter((s) => s.nivel?.id === selectedLevelId);
-  }, [seccionesOrigen, selectedLevelId]);
+    if (!activeLevelId) return seccionesOrigen;
+    return seccionesOrigen.filter((s) => s.nivel?.id === activeLevelId);
+  }, [seccionesOrigen, activeLevelId]);
 
   const filteredTargetSecciones = useMemo(() => {
-    if (selectedLevelId === "all") return seccionesDestino;
-    return seccionesDestino.filter((s) => s.nivel?.id === selectedLevelId);
-  }, [seccionesDestino, selectedLevelId]);
+    if (!activeLevelId) return seccionesDestino;
+    return seccionesDestino.filter((s) => s.nivel?.id === activeLevelId);
+  }, [seccionesDestino, activeLevelId]);
 
   // Detección e inferencia automática de la sección destino (ej. 2° A -> 3° A)
   const autoDetectTargetSeccion = (sourceId: string) => {
@@ -144,14 +173,12 @@ export function PromocionesView({
     const sourceLetter = sourceObj.seccion?.trim().toUpperCase();
     const gradeName = sourceObj.grado?.nombre || "";
 
-    // Extraer número de grado (ej: "2° Primaria" -> 2, "2do Grado" -> 2)
     const match = gradeName.match(/\d+/);
     const currentGradeNum = match ? parseInt(match[0], 10) : null;
 
     if (currentGradeNum !== null) {
       const nextGradeNum = currentGradeNum + 1;
 
-      // Buscar en seccionesDestino la sección con mismo nivel, misma letra y grado + 1
       const matchTarget = seccionesDestino.find((t) => {
         const sameNivel =
           t.nivel?.id === sourceNivelId ||
@@ -166,14 +193,13 @@ export function PromocionesView({
         setTargetSeccionId(matchTarget.id);
         setIsAutoSelectedTarget(true);
         toast.info(
-          `Preselección automática: ${matchTarget.nivel?.nombre || ""} ${matchTarget.grado?.nombre || ""} "${matchTarget.seccion}" (${anioDestino}).`,
+          `Sugerencia automática: ${matchTarget.nivel?.nombre || ""} ${matchTarget.grado?.nombre || ""} "${matchTarget.seccion}" (${anioDestino}).`,
           { id: "auto-target-toast" },
         );
         return;
       }
     }
 
-    // Fallback: Si no se encuentra grado + 1, intentar por misma letra de sección
     const fallbackTarget = seccionesDestino.find((t) => {
       const sameNivel = t.nivel?.id === sourceNivelId;
       const sameLetter = t.seccion?.trim().toUpperCase() === sourceLetter;
@@ -202,7 +228,6 @@ export function PromocionesView({
   useEffect(() => {
     let ignore = false;
     if (sourceSeccionId) {
-      // El flag de carga se difiere para evitar setState síncrono dentro del efecto
       const timer = setTimeout(() => setLoadingStudents(true), 0);
       getStudentsInSeccionAction(sourceSeccionId)
         .then((res) => {
@@ -225,7 +250,6 @@ export function PromocionesView({
         clearTimeout(timer);
       };
     }
-    // Limpieza diferida para evitar setState síncrono dentro del efecto
     const timer = setTimeout(() => {
       setStudents([]);
       setSelectedIds([]);
@@ -320,7 +344,7 @@ export function PromocionesView({
         />
       )}
 
-      {/* ── PASO 2: MAPEO DE SECCIONES ── */}
+      {/* ── PASO 2: MAPEO Y NÓMINA DE PROMOCIÓN ── */}
       {activeTab === "mapeo" && (
         <MappingStep
           anioOrigen={anioOrigen}
@@ -358,12 +382,17 @@ export function PromocionesView({
         />
       )}
 
-      {/* ── PASO 3: CENTRO DE CONTROL Y RESULTADOS ── */}
+      {/* ── PASO 3: CENTRO DE CONTROL Y RESULTADOS DE PROMOCIÓN ── */}
       {activeTab === "ejecucion" && (
         <PromotionResultCard
           isPending={isPending}
           selectedCount={selectedIds.length}
+          sourceSeccionObj={sourceSeccionObj}
+          targetSeccionObj={targetSeccionObj}
+          anioOrigen={anioOrigen}
+          anioDestino={anioDestino}
           onContinue={resetMapping}
+          onGoToEnrollments={() => router.push("/gestion/matriculas")}
         />
       )}
     </div>
@@ -393,13 +422,12 @@ function PromotionGuideCard({
               <h3 className="text-xs sm:text-sm font-semibold text-foreground tracking-tight">
                 Guía Operativa: Cierre Escolar y Promoción Masiva
               </h3>
-              <Badge className="bg-indigo-600 text-white text-[9px] font-semibold px-1.5 py-0.2 rounded">
-                EduNova PRO
+              <Badge className="bg-indigo-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">
+                SISTEMA ESCOLAR PRO
               </Badge>
             </div>
             <p className="text-[11px] text-muted-foreground">
-              Proceso institucional para la transición de alumnos entre el ciclo
-              lectivo{" "}
+              Transición institucional de matrículas y asignación de aulas entre el ciclo{" "}
               <span className="font-bold text-indigo-400">{anioOrigen}</span> y{" "}
               <span className="font-bold text-emerald-400">{anioDestino}</span>.
             </p>
@@ -410,7 +438,7 @@ function PromotionGuideCard({
           variant="ghost"
           size="sm"
           onClick={() => setShowGuide(!showGuide)}
-          className="h-8 px-2.5 rounded-xl text-xs font-semibold text-muted-foreground hover:text-foreground shrink-0 gap-1"
+          className="h-8 px-3 rounded-xl text-xs font-semibold text-muted-foreground hover:text-foreground shrink-0 gap-1.5 cursor-pointer"
         >
           <span>{showGuide ? "Ocultar guía" : "Ver indicaciones"}</span>
           {showGuide ? (
@@ -421,42 +449,35 @@ function PromotionGuideCard({
         </Button>
       </div>
 
-      {/* Contenido Desplegable de las Indicaciones */}
       {showGuide && (
         <div className="pt-3 border-t border-indigo-500/20 grid grid-cols-1 md:grid-cols-3 gap-3 animate-in fade-in animation-duration-">
-          <div className="p-3 rounded-xl bg-background/40 border border-border/30 space-y-1">
+          <div className="p-3.5 rounded-xl bg-background/50 border border-border/40 space-y-1">
             <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400">
               <IconShieldCheck className="size-4 shrink-0" />
               <span>1. Auditoría Inicial</span>
             </div>
             <p className="text-[11px] text-muted-foreground leading-relaxed">
-              Revisa el estado de actas de notas, asistencia y finanzas para
-              certificar que la institución está lista para el cierre.
+              Verifica el cierre de calificaciones y solvencia para certificar que el ciclo escolar está apto para promoción.
             </p>
           </div>
 
-          <div className="p-3 rounded-xl bg-background/40 border border-border/30 space-y-1">
+          <div className="p-3.5 rounded-xl bg-background/50 border border-border/40 space-y-1">
             <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400">
               <IconTrendingUp className="size-4 shrink-0" />
-              <span>2. Mapeo de Secciones</span>
+              <span>2. Mapeo Automático</span>
             </div>
             <p className="text-[11px] text-muted-foreground leading-relaxed">
-              Al elegir una sección origen (ej: 2° A {anioOrigen}), el sistema{" "}
-              <strong className="text-foreground font-semibold">
-                preselecciona automáticamente
-              </strong>{" "}
-              la correlativa (3° A {anioDestino}).
+              Al elegir la sección origen (ej. 2° A {anioOrigen}), el sistema <strong className="text-foreground font-semibold">detecta y sugiere</strong> la sección correlativa (3° A {anioDestino}).
             </p>
           </div>
 
-          <div className="p-3 rounded-xl bg-background/40 border border-border/30 space-y-1">
+          <div className="p-3.5 rounded-xl bg-background/50 border border-border/40 space-y-1">
             <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400">
               <IconRocket className="size-4 shrink-0" />
-              <span>3. Promoción Masiva</span>
+              <span>3. Generación de Matrículas</span>
             </div>
             <p className="text-[11px] text-muted-foreground leading-relaxed">
-              Filtra y confirma los alumnos promovibles. Al hacer clic en
-              Promover, se generan sus matrículas para el nuevo ciclo lectivo.
+              Confirma los alumnos promovibles. Al procesar, se formalizan automáticamente sus matrículas para el periodo {anioDestino}.
             </p>
           </div>
         </div>
@@ -488,7 +509,7 @@ function PromotionStepper({
         completed={activeTab === "ejecucion"}
         icon={<IconTrendingUp className="size-4" />}
         label="Paso 2"
-        title="Mapeo de Secciones"
+        title="Mapeo & Nómina"
         onClick={() =>
           activeTab !== "auditoria" ? onTabChange("mapeo") : null
         }
@@ -500,7 +521,7 @@ function PromotionStepper({
         completed={false}
         icon={<IconRocket className="size-4" />}
         label="Paso 3"
-        title="Centro de Promoción"
+        title="Confirmación & Cierre"
         disabled={activeTab !== "ejecucion"}
       />
     </div>
@@ -519,15 +540,14 @@ function AuditoriaTab({
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-3 animation-duration-">
       <div className="text-center space-y-1.5">
-        <Badge className="bg-indigo-50 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800 rounded-lg px-3 py-1 text-[11px] font-bold">
-          Ciclo Lectivo {anioOrigen} → {anioDestino}
+        <Badge className="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 rounded-full px-3.5 py-1 text-xs font-bold">
+          Transición Institucional {anioOrigen} → {anioDestino}
         </Badge>
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-          Auditoría Institucional de Cierre
+          Auditoría de Cierre Escolar
         </h1>
-        <p className="text-xs text-muted-foreground max-w-lg mx-auto">
-          Verificación automática de prerrequisitos académicos antes de iniciar
-          la promoción masiva.
+        <p className="text-xs text-muted-foreground max-w-lg mx-auto leading-relaxed">
+          Verificación automática de condiciones académicas y administrativas previas a la promoción masiva.
         </p>
       </div>
 
@@ -535,12 +555,12 @@ function AuditoriaTab({
         {VALIDATION_ITEMS.map((item) => (
           <Card
             key={item.id}
-            className="p-5 rounded-2xl border-border/50 bg-card/80 space-y-4 hover:border-indigo-500/30 transition-[border-color] shadow-xs"
+            className="p-5 rounded-2xl border-border/40 bg-card/80 space-y-4 hover:border-indigo-500/30 transition-all duration-200 shadow-xs"
           >
             <div className="flex items-center justify-between">
               <div
                 className={cn(
-                  "size-10 rounded-xl flex items-center justify-center border transition-[color,background-color,border-color]",
+                  "size-10 rounded-xl flex items-center justify-center border transition-colors",
                   item.status === "complete"
                     ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500"
                     : "bg-amber-500/10 border-amber-500/30 text-amber-500",
@@ -555,7 +575,7 @@ function AuditoriaTab({
               <Badge
                 variant="outline"
                 className={cn(
-                  "text-[10px] font-semibold rounded-lg px-2.5 py-0.5",
+                  "text-[10px] font-semibold rounded-full px-2.5 py-0.5",
                   item.status === "complete"
                     ? "border-emerald-500/30 text-emerald-600 bg-emerald-500/5"
                     : "border-amber-500/30 text-amber-600 bg-amber-500/5",
@@ -573,29 +593,28 @@ function AuditoriaTab({
                 {item.description}
               </p>
             </div>
-            <p className="text-[10px] font-semibold text-muted-foreground/70 pt-1 border-t border-border/30">
+            <p className="text-[10px] font-semibold text-muted-foreground/70 pt-2 border-t border-border/30">
               {item.detail}
             </p>
           </Card>
         ))}
       </div>
 
-      <Card className="p-6 rounded-2xl border-indigo-500/20 bg-indigo-950/20 flex flex-col md:flex-row items-center justify-between gap-5 relative overflow-hidden">
+      <Card className="p-6 rounded-2xl border-indigo-500/30 bg-gradient-to-r from-indigo-950/30 via-indigo-950/20 to-transparent flex flex-col md:flex-row items-center justify-between gap-5 relative overflow-hidden shadow-md">
         <div className="space-y-1 text-center md:text-left relative z-10">
-          <h2 className="text-lg font-bold text-foreground flex items-center justify-center md:justify-start gap-2">
+          <h2 className="text-base font-bold text-foreground flex items-center justify-center md:justify-start gap-2">
             <IconShieldCheck className="size-5 text-indigo-500" />
-            Sistema Listo para el Mapeo
+            Condiciones Validadas para Iniciar Mapeo
           </h2>
           <p className="text-xs text-muted-foreground max-w-md">
-            El ciclo {anioOrigen} cumple con las verificaciones requeridas.
-            Procede a configurar las secciones de origen y destino.
+            El ciclo {anioOrigen} se encuentra apto. Haz clic a continuación para mapear las secciones origen y destino.
           </p>
         </div>
         <Button
           onClick={onContinue}
-          className="rounded-xl h-11 px-6 font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20 transition-colors text-xs gap-2 shrink-0"
+          className="rounded-xl h-10 px-6 font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 transition-all duration-200 text-xs gap-2 shrink-0 cursor-pointer"
         >
-          <span>Configurar Mapeo</span>
+          <span>Iniciar Mapeo de Secciones</span>
           <IconArrowRight size={16} />
         </Button>
       </Card>
@@ -603,7 +622,7 @@ function AuditoriaTab({
   );
 }
 
-/* ── Paso 2: Mapeo de Secciones ── */
+/* ── PASO 2: MAPEO Y SELECCIÓN NÓMINA ── */
 
 function MappingStep({
   anioOrigen,
@@ -656,266 +675,148 @@ function MappingStep({
   isPending: boolean;
   onPromote: () => void;
 }) {
+  const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+
   return (
     <div className="space-y-5 animate-in fade-in animation-duration-">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-card/80 p-4 rounded-2xl border border-border/40">
+      {/* Top Header Bar */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-card/80 p-4 rounded-2xl border border-border/40 backdrop-blur-md shadow-xs">
         <Button
           variant="ghost"
           size="sm"
           onClick={onBack}
-          className="gap-2 rounded-xl text-xs font-semibold"
+          className="gap-2 rounded-xl text-xs font-semibold cursor-pointer"
         >
           <IconArrowLeft size={14} />
           Volver a Auditoría
         </Button>
         <div className="flex items-center gap-2">
           <span className="text-xs font-semibold text-muted-foreground">
-            Transferencia Lectiva:
+            Transferencia de Alumnos:
           </span>
-          <Badge className="bg-indigo-600 text-white text-xs font-bold px-3 py-0.5 rounded-md">
-            {anioOrigen} → {anioDestino}
+          <Badge className="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-xs">
+            {anioOrigen} ➔ {anioDestino}
           </Badge>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        <SectionMappingPanel
-          niveles={niveles}
-          selectedLevelId={selectedLevelId}
-          onLevelChange={onLevelChange}
-          sourceSeccionId={sourceSeccionId}
-          onSourceChange={onSourceChange}
-          filteredSourceSecciones={filteredSourceSecciones}
-          targetSeccionId={targetSeccionId}
-          onTargetChange={onTargetChange}
-          filteredTargetSecciones={filteredTargetSecciones}
-          isAutoSelectedTarget={isAutoSelectedTarget}
-          sourceSeccionObj={sourceSeccionObj}
-          targetSeccionObj={targetSeccionObj}
-          anioOrigen={anioOrigen}
-          anioDestino={anioDestino}
-        />
-
-        <StudentsSelectionPanel
-          sourceSeccionId={sourceSeccionId}
-          targetSeccionId={targetSeccionId}
-          loadingStudents={loadingStudents}
-          filteredStudents={filteredStudents}
-          searchQuery={searchQuery}
-          onSearchChange={onSearchChange}
-          selectedIds={selectedIds}
-          onToggleStudent={onToggleStudent}
-          onToggleAll={onToggleAll}
-          isPending={isPending}
-          onPromote={onPromote}
-        />
-      </div>
-    </div>
-  );
-}
-
-function SectionMappingPanel({
-  niveles,
-  selectedLevelId,
-  onLevelChange,
-  sourceSeccionId,
-  onSourceChange,
-  filteredSourceSecciones,
-  targetSeccionId,
-  onTargetChange,
-  filteredTargetSecciones,
-  isAutoSelectedTarget,
-  sourceSeccionObj,
-  targetSeccionObj,
-  anioOrigen,
-  anioDestino,
-}: {
-  niveles: Array<{ id: string; nombre: string }>;
-  selectedLevelId: string;
-  onLevelChange: (val: string) => void;
-  sourceSeccionId: string;
-  onSourceChange: (val: string) => void;
-  filteredSourceSecciones: SeccionPromocion[];
-  targetSeccionId: string;
-  onTargetChange: (val: string) => void;
-  filteredTargetSecciones: SeccionPromocion[];
-  isAutoSelectedTarget: boolean;
-  sourceSeccionObj?: SeccionPromocion;
-  targetSeccionObj?: SeccionPromocion;
-  anioOrigen: number;
-  anioDestino: number;
-}) {
-  return (
-    <div className="lg:col-span-5 space-y-4">
-      <Card className="p-5 rounded-2xl border-border/40 bg-card/80 space-y-5">
-        <div className="flex items-center gap-2.5 pb-3 border-b border-border/30">
-          <div className="size-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
-            <IconFilter className="text-indigo-500 size-4" />
-          </div>
-          <div>
-            <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">
-              Filtro de Nivel
-            </h3>
-            <p className="text-[10px] text-muted-foreground">
-              Selecciona el nivel académico
-            </p>
-          </div>
+      {/* ── BANNER DE CONTROL DE CONEXIÓN DE SECCIONES (FLOW BANNER) ── */}
+      <Card className="p-4 rounded-2xl border-border/40 bg-card/80 backdrop-blur-md shadow-xs space-y-4">
+        {/* Level Switcher */}
+        <div className="flex items-center justify-between pb-3 border-b border-border/30">
+          <LevelSegmentedControl
+            levels={niveles.map((n) => ({ id: n.id, label: n.nombre }))}
+            value={selectedLevelId || (niveles[0]?.id ?? "")}
+            onChange={onLevelChange}
+            label="Nivel Educativo"
+          />
         </div>
 
-        <LevelSegmentedControl
-          levels={[
-            { id: "all", label: "TODOS" },
-            ...niveles.map((n) => ({ id: n.id, label: n.nombre })),
-          ]}
-          value={selectedLevelId}
-          onChange={onLevelChange}
-          label="1. Nivel Educativo"
-        />
-
-        <div className="p-4 rounded-xl bg-muted/20 border border-border/30 space-y-4">
-          {/* Origen */}
-          <div className="space-y-1.5">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-              2. Sección Origen ({anioOrigen})
-            </span>
+        {/* Dynamic Transfer Bridge */}
+        <div className="grid grid-cols-1 md:grid-cols-11 gap-3 items-center">
+          {/* Section Origen Box */}
+          <div className="md:col-span-5 p-3.5 rounded-2xl border border-indigo-500/30 bg-indigo-500/5 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">
+                <IconSchool className="size-3.5" />
+                1. Sección Origen ({anioOrigen})
+              </span>
+              {sourceSeccionObj && (
+                <Badge variant="outline" className="text-[9px] font-bold bg-indigo-500/10 text-indigo-600 border-indigo-500/20 px-2 py-0.5 rounded-full">
+                  {filteredStudents.length} Alumnos
+                </Badge>
+              )}
+            </div>
             <Select value={sourceSeccionId} onValueChange={onSourceChange}>
-              <SelectTrigger className="rounded-xl border-border/40 bg-background h-10 text-xs font-medium">
-                <SelectValue placeholder="Selecciona origen..." />
+              <SelectTrigger className="rounded-xl border-border/50 bg-background h-10 text-xs font-semibold">
+                <SelectValue placeholder="Seleccionar aula de origen..." />
               </SelectTrigger>
-              <SelectContent className="rounded-xl border-border/40">
+              <SelectContent className="rounded-xl border-border/50 bg-background shadow-lg z-[80]">
                 {filteredSourceSecciones.map((s) => (
-                  <SelectItem key={s.id} value={s.id} className="text-xs">
-                    {s.nivel?.nombre} - {s.grado?.nombre} &quot;{s.seccion}&quot;
+                  <SelectItem key={s.id} value={s.id} className="text-xs font-medium">
+                    {s.grado?.nombre} &quot;{s.seccion}&quot;
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
 
-          <div className="flex justify-center -my-1">
-            <div className="size-7 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow-md">
-              <IconArrowRight
-                className="size-3.5 rotate-90 lg:rotate-0"
-                strokeWidth={3}
-              />
+          {/* Transfer Arrow Indicator */}
+          <div className="md:col-span-1 flex flex-col items-center justify-center py-1">
+            <div className="size-9 rounded-full bg-gradient-to-br from-indigo-600 to-emerald-600 text-white flex items-center justify-center shadow-md shadow-indigo-500/20 shrink-0">
+              <IconArrowRight className="size-4.5 rotate-90 md:rotate-0" strokeWidth={2.5} />
             </div>
           </div>
 
-          {/* Destino */}
-          <div className="space-y-1.5">
+          {/* Section Destino Box */}
+          <div className="md:col-span-5 p-3.5 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                3. Sección Destino ({anioDestino})
+              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                <IconRocket className="size-3.5" />
+                2. Sección Destino ({anioDestino})
               </span>
               {isAutoSelectedTarget && (
                 <Badge
                   variant="outline"
-                  className="text-[9px] font-semibold bg-emerald-500/10 text-emerald-600 border-emerald-500/30 px-1.5 py-0 gap-1 rounded"
+                  className="text-[9px] font-bold bg-emerald-500/10 text-emerald-600 border-emerald-500/30 px-2 py-0.5 gap-1 rounded-full animate-pulse"
                 >
-                  <IconSparkles className="size-2.5" />
-                  Auto-Sugerido
+                  <IconSparkles className="size-3" />
+                  Correlativo
                 </Badge>
               )}
             </div>
             <Select value={targetSeccionId} onValueChange={onTargetChange}>
-              <SelectTrigger className="rounded-xl border-emerald-500/30 bg-emerald-500/5 h-10 text-xs font-medium">
-                <SelectValue placeholder="Selecciona destino..." />
+              <SelectTrigger className="rounded-xl border-emerald-500/40 bg-emerald-500/10 h-10 text-xs font-bold text-foreground">
+                <SelectValue placeholder="Seleccionar aula de destino..." />
               </SelectTrigger>
-              <SelectContent className="rounded-xl border-border/40">
+              <SelectContent className="rounded-xl border-border/50 bg-background shadow-lg z-[80]">
                 {filteredTargetSecciones.map((s) => (
-                  <SelectItem key={s.id} value={s.id} className="text-xs">
-                    {s.nivel?.nombre} - {s.grado?.nombre} &quot;{s.seccion}&quot;
+                  <SelectItem key={s.id} value={s.id} className="text-xs font-medium">
+                    {s.grado?.nombre} &quot;{s.seccion}&quot;
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
         </div>
-
-        {/* Resumen del Mapeo Seleccionado */}
-        {sourceSeccionObj && targetSeccionObj && (
-          <div className="p-3.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-xs space-y-1">
-            <p className="font-bold text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5">
-              <span>Mapeo Establecido</span>
-              {isAutoSelectedTarget && (
-                <span className="text-[10px] font-normal text-emerald-600 dark:text-emerald-400">
-                  (Detección correlativa automática ✨)
-                </span>
-              )}
-            </p>
-            <p className="text-[11px] text-muted-foreground">
-              De{" "}
-              <span className="font-semibold text-foreground">
-                {sourceSeccionObj.grado?.nombre} &quot;{sourceSeccionObj.seccion}
-                &quot;
-              </span>{" "}
-              a{" "}
-              <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                {targetSeccionObj.grado?.nombre} &quot;{targetSeccionObj.seccion}
-                &quot;
-              </span>
-            </p>
-          </div>
-        )}
       </Card>
-    </div>
-  );
-}
 
-function StudentsSelectionPanel({
-  sourceSeccionId,
-  targetSeccionId,
-  loadingStudents,
-  filteredStudents,
-  searchQuery,
-  onSearchChange,
-  selectedIds,
-  onToggleStudent,
-  onToggleAll,
-  isPending,
-  onPromote,
-}: {
-  sourceSeccionId: string;
-  targetSeccionId: string;
-  loadingStudents: boolean;
-  filteredStudents: EstudiantePromocion[];
-  searchQuery: string;
-  onSearchChange: (value: string) => void;
-  selectedIds: string[];
-  onToggleStudent: (id: string) => void;
-  onToggleAll: () => void;
-  isPending: boolean;
-  onPromote: () => void;
-}) {
-  const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
-
-  return (
-    <div className="lg:col-span-7 space-y-4">
-      <Card className="p-5 rounded-2xl border-border/40 bg-card/80 space-y-4">
+      {/* ── NÓMINA Y SELECCIÓN DE ALUMNOS ── */}
+      <Card className="p-5 rounded-2xl border-border/40 bg-card/80 backdrop-blur-md space-y-4 shadow-md">
+        {/* Header nómina */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-border/30">
           <div className="flex items-center gap-2">
-            <IconUserCheck className="size-4 text-indigo-500" />
-            <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">
-              Estudiantes de la Sección Origen
-            </h3>
+            <div className="size-8 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-500">
+              <IconUserCheck className="size-4" />
+            </div>
+            <div>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">
+                Nómina de Alumnos para Promoción
+              </h3>
+              <p className="text-[11px] text-muted-foreground">
+                {sourceSeccionObj
+                  ? `Sección ${sourceSeccionObj.grado?.nombre} "${sourceSeccionObj.seccion}" (${anioOrigen})`
+                  : "Selecciona una sección de origen para ver la lista"}
+              </p>
+            </div>
           </div>
           <Badge
             variant="outline"
-            className="text-[10px] font-bold rounded-md px-2 py-0.5"
+            className="text-[11px] font-bold rounded-full px-3 py-1 bg-indigo-500/10 border-indigo-500/20 text-indigo-600 dark:text-indigo-400"
           >
             {selectedIds.length} de {filteredStudents.length} Seleccionados
           </Badge>
         </div>
 
-        {/* Toolbar: Búsqueda y Botón Seleccionar Todo */}
-        <div className="flex items-center gap-2">
+        {/* Toolbar: Búsqueda y Marca Masiva */}
+        <div className="flex items-center gap-2.5">
           <div className="relative flex-1">
             <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
             <Input
               placeholder="Buscar por apellido o nombre..."
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="pl-8 h-9 text-xs rounded-xl border-border/40"
+              className="pl-8 h-9.5 text-xs rounded-xl border-border/40 bg-background/80"
             />
           </div>
           <Button
@@ -923,7 +824,7 @@ function StudentsSelectionPanel({
             size="sm"
             onClick={onToggleAll}
             disabled={filteredStudents.length === 0}
-            className="h-9 text-[11px] font-semibold rounded-xl shrink-0"
+            className="h-9.5 text-xs font-semibold rounded-xl shrink-0 cursor-pointer border-border/50"
           >
             {selectedIds.length === filteredStudents.length
               ? "Desmarcar Todos"
@@ -931,25 +832,29 @@ function StudentsSelectionPanel({
           </Button>
         </div>
 
-        {/* Lista de Estudiantes */}
+        {/* Lista de Alumnos */}
         {!sourceSeccionId ? (
-          <div className="flex flex-col items-center justify-center h-64 border border-dashed border-border/40 rounded-xl p-6 text-center gap-2 text-muted-foreground">
-            <IconSchool className="size-8 opacity-30" />
-            <p className="text-xs font-semibold">
-              Selecciona una sección de origen para listar los estudiantes.
+          <div className="flex flex-col items-center justify-center h-64 border border-dashed border-border/40 rounded-2xl p-6 text-center gap-2 bg-muted/20">
+            <IconSchool className="size-10 text-muted-foreground/30 mb-1" />
+            <p className="text-xs font-bold text-foreground">
+              Selecciona una Sección de Origen
+            </p>
+            <p className="text-[11px] text-muted-foreground max-w-xs">
+              Usa el panel de arriba para seleccionar el aula del ciclo {anioOrigen}.
             </p>
           </div>
         ) : loadingStudents ? (
-          <div className="flex items-center justify-center h-64 text-xs font-semibold text-muted-foreground">
-            Cargando nómina de estudiantes...
+          <div className="flex flex-col items-center justify-center h-64 border border-border/30 rounded-2xl text-xs font-bold text-muted-foreground gap-2">
+            <IconRefresh className="size-6 text-indigo-500 animate-spin" />
+            <span>Cargando nómina de estudiantes...</span>
           </div>
         ) : filteredStudents.length === 0 ? (
-          <div className="flex items-center justify-center h-64 text-xs font-semibold text-muted-foreground">
-            No se encontraron estudiantes en esta sección.
+          <div className="flex flex-col items-center justify-center h-64 border border-dashed border-border/40 rounded-2xl text-xs font-semibold text-muted-foreground p-6 text-center">
+            No se encontraron alumnos matriculados en esta sección.
           </div>
         ) : (
           <ScrollArea className="h-[360px] pr-2">
-            <div className="space-y-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
               {filteredStudents.map((st) => {
                 const isSelected = selectedSet.has(st.id);
                 return (
@@ -966,31 +871,31 @@ function StudentsSelectionPanel({
                       }
                     }}
                     className={cn(
-                      "flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-[background-color,border-color] outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                      "flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all duration-200 outline-none",
                       isSelected
-                        ? "bg-indigo-500/10 border-indigo-500/30"
-                        : "bg-muted/10 border-border/30 hover:bg-muted/20",
+                        ? "bg-indigo-500/10 border-indigo-500/40 shadow-xs"
+                        : "bg-background/60 border-border/40 hover:bg-card hover:border-indigo-500/30",
                     )}
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 min-w-0 pr-2">
                       <Checkbox
                         checked={isSelected}
                         onCheckedChange={() => onToggleStudent(st.id)}
                       />
-                      <div className="flex flex-col">
-                        <span className="text-xs font-bold text-foreground">
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-xs font-bold text-foreground truncate">
                           {st.apellidoPaterno} {st.apellidoMaterno}, {st.name}
                         </span>
                         <span className="text-[10px] text-muted-foreground font-mono">
-                          DNI: {st.documentoIdentidad || "Sin registro"}
+                          DNI: {st.dni || st.documentoIdentidad || "Sin registro"}
                         </span>
                       </div>
                     </div>
                     <Badge
                       variant="outline"
-                      className="text-[10px] font-bold rounded-md bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                      className="text-[9px] font-bold rounded-full bg-emerald-500/10 text-emerald-600 border-emerald-500/20 shrink-0"
                     >
-                      Promovible
+                      Apto 2027
                     </Badge>
                   </div>
                 );
@@ -999,15 +904,32 @@ function StudentsSelectionPanel({
           </ScrollArea>
         )}
 
-        {/* Accion de Promoción Masiva */}
-        <div className="pt-2 flex justify-end">
+        {/* Footer Action Bar */}
+        <div className="pt-3 border-t border-border/30 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="text-xs text-muted-foreground">
+            {sourceSeccionObj && targetSeccionObj ? (
+              <span>
+                Transición:{" "}
+                <strong className="text-foreground font-semibold">
+                  {sourceSeccionObj.grado?.nombre} &quot;{sourceSeccionObj.seccion}&quot;
+                </strong>{" "}
+                ➔{" "}
+                <strong className="text-emerald-600 dark:text-emerald-400 font-bold">
+                  {targetSeccionObj.grado?.nombre} &quot;{targetSeccionObj.seccion}&quot;
+                </strong>
+              </span>
+            ) : (
+              <span>Selecciona la sección de destino para activar el botón de promoción.</span>
+            )}
+          </div>
+
           <Button
             onClick={onPromote}
             disabled={selectedIds.length === 0 || !targetSeccionId || isPending}
-            className="rounded-xl h-11 px-6 font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20 text-xs gap-2"
+            className="w-full sm:w-auto rounded-xl h-11 px-7 font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20 text-xs gap-2 cursor-pointer transition-all duration-200 hover:scale-[1.02]"
           >
             <IconRocket className="size-4" />
-            <span>Promover {selectedIds.length} Estudiante(s)</span>
+            <span>Promover {selectedIds.length} Alumno(s)</span>
           </Button>
         </div>
       </Card>
@@ -1015,53 +937,112 @@ function StudentsSelectionPanel({
   );
 }
 
+/* ── PASO 3: CONFIRMACIÓN Y CENTRO DE RESULTADOS ── */
+
 function PromotionResultCard({
   isPending,
   selectedCount,
+  sourceSeccionObj,
+  targetSeccionObj,
+  anioOrigen,
+  anioDestino,
   onContinue,
+  onGoToEnrollments,
 }: {
   isPending: boolean;
   selectedCount: number;
+  sourceSeccionObj?: SeccionPromocion;
+  targetSeccionObj?: SeccionPromocion;
+  anioOrigen: number;
+  anioDestino: number;
   onContinue: () => void;
+  onGoToEnrollments: () => void;
 }) {
   return (
-    <div className="max-w-xl mx-auto py-10 text-center space-y-6 animate-in zoom-in-95 animation-duration-">
-      <Card className="p-8 rounded-3xl border-border/40 bg-card/80 space-y-6 shadow-xl">
+    <div className="max-w-2xl mx-auto py-8 space-y-6 animate-in zoom-in-95 animation-duration-">
+      <Card className="p-8 rounded-3xl border-border/40 bg-card/80 backdrop-blur-md space-y-6 shadow-xl text-center relative overflow-hidden">
+        {/* Glow Accent */}
+        <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-48 h-48 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
+
         <div
           className={cn(
-            "size-20 rounded-2xl flex items-center justify-center mx-auto shadow-lg transition-[color,background-color,border-color]",
+            "size-20 rounded-2xl flex items-center justify-center mx-auto shadow-lg transition-colors relative z-10",
             isPending
               ? "bg-indigo-500/10 border-2 border-indigo-500/30 text-indigo-600 animate-pulse"
-              : "bg-emerald-500/10 border-2 border-emerald-500/30 text-emerald-500",
+              : "bg-emerald-500/10 border-2 border-emerald-500/30 text-emerald-500 shadow-emerald-500/20",
           )}
         >
           {isPending ? (
             <IconRefresh className="size-9 animate-spin" />
           ) : (
-            <IconCheck className="size-9" />
+            <IconCheck className="size-9" strokeWidth={3} />
           )}
         </div>
 
-        <div className="space-y-2">
-          <h2 className="text-xl font-semibold text-foreground">
+        <div className="space-y-2 relative z-10">
+          <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 rounded-full px-3 py-1 text-xs font-bold">
+            {isPending ? "Procesando..." : "Transición Formalizada Exitosamente"}
+          </Badge>
+          <h2 className="text-2xl font-bold text-foreground">
             {isPending
-              ? "Procesando Promoción Masiva..."
-              : "¡Promoción Completada!"}
+              ? "Generando Matrículas para el Nuevo Ciclo..."
+              : "¡Promoción Masiva Registrada!"}
           </h2>
-          <p className="text-xs text-muted-foreground leading-relaxed max-w-sm mx-auto">
+          <p className="text-xs text-muted-foreground leading-relaxed max-w-md mx-auto">
             {isPending
-              ? "Actualizando registros de matrícula y asignación de secciones para el nuevo ciclo."
-              : `Se han promovido ${selectedCount} estudiante(s) a la sección destino exitosamente.`}
+              ? "Actualizando asignación de aulas, vacantes e historial académico en la base de datos."
+              : `Se formalizó la inscripción de ${selectedCount} alumnos al ciclo académico ${anioDestino}.`}
           </p>
         </div>
 
+        {/* Resumen de Transición */}
         {!isPending && (
-          <div className="pt-2 flex flex-col items-center gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-2xl bg-muted/30 border border-border/40 text-left relative z-10">
+            <div className="space-y-0.5">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                Alumnos Promovidos
+              </span>
+              <p className="text-lg font-bold text-indigo-600 dark:text-indigo-400">
+                {selectedCount} Estudiantes
+              </p>
+            </div>
+            <div className="space-y-0.5">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                Sección Origen ({anioOrigen})
+              </span>
+              <p className="text-xs font-bold text-foreground truncate">
+                {sourceSeccionObj?.grado?.nombre} &quot;{sourceSeccionObj?.seccion}&quot;
+              </p>
+            </div>
+            <div className="space-y-0.5">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                Sección Destino ({anioDestino})
+              </span>
+              <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 truncate">
+                {targetSeccionObj?.grado?.nombre} &quot;{targetSeccionObj?.seccion}&quot;
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Botones de Acción Final */}
+        {!isPending && (
+          <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3 relative z-10">
             <Button
               onClick={onContinue}
-              className="rounded-xl h-10 px-6 font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-500/20 text-xs"
+              variant="outline"
+              className="w-full sm:w-auto rounded-xl h-10 px-5 font-bold border-border/50 hover:bg-muted/60 text-xs cursor-pointer"
             >
-              Continuar con otra sección
+              <IconRefresh className="size-4" />
+              <span>Promover Otra Sección</span>
+            </Button>
+
+            <Button
+              onClick={onGoToEnrollments}
+              className="w-full sm:w-auto rounded-xl h-10 px-6 font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-500/20 text-xs gap-2 cursor-pointer"
+            >
+              <IconFileSpreadsheet className="size-4" />
+              <span>Ver Registro de Matrículas {anioDestino}</span>
             </Button>
           </div>
         )}

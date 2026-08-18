@@ -1,9 +1,8 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { IconTrash, IconClock, IconCopy } from "@tabler/icons-react";
+import { IconTrash, IconClock, IconCopy, IconUserCheck, IconMapPin, IconCoffee } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { DIAS, BLOQUES_HORARIO } from "@/lib/constants";
 import { useDroppable, useDraggable } from "@dnd-kit/core";
@@ -39,17 +38,17 @@ export function ScheduleGrid({ horarios, onDelete, onDuplicate }: ScheduleGridPr
   };
 
   return (
-    <div className="overflow-x-auto rounded-2xl border border-primary/10 shadow-xl">
+    <div className="overflow-x-auto rounded-2xl border border-border/40 bg-card/70 backdrop-blur-md shadow-xl">
       <table className="w-full border-collapse">
         <thead>
-          <tr className="bg-white/5 border-b border-primary/10 ">
-            <th className="p-4 text-center text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 border-r border-primary/10  w-28">
+          <tr className="bg-muted/40 border-b border-border/40">
+            <th className="p-3.5 text-center text-[10px] font-bold uppercase tracking-widest text-muted-foreground border-r border-border/40 w-28">
               HORARIO
             </th>
             {DIAS.map((dia) => (
               <th
                 key={dia.id}
-                className="p-4 text-center text-[10px] font-bold uppercase tracking-widest text-foreground/80 border-r border-primary/10  min-w-44"
+                className="p-3.5 text-center text-[10px] font-bold uppercase tracking-widest text-foreground/90 border-r border-border/40 min-w-44"
               >
                 {dia.label}
               </th>
@@ -61,19 +60,19 @@ export function ScheduleGrid({ horarios, onDelete, onDuplicate }: ScheduleGridPr
             <tr
               key={`${bloque.inicio}-${bloque.tipo}`}
               className={cn(
-                "border-b border-primary/10  transition-colors",
+                "border-b border-border/30 transition-colors",
                 bloque.tipo === "receso"
-                  ? "bg-violet-500/5"
-                  : "hover:bg-white/2",
-                timeIdx % 2 === 0 ? "bg-transparent" : "bg-white/1",
+                  ? "bg-violet-500/10 dark:bg-violet-500/15"
+                  : "hover:bg-muted/20",
+                timeIdx % 2 === 0 ? "bg-transparent" : "bg-muted/10",
               )}
             >
-              <td className="p-3 text-center border-r border-primary/10  bg-background/20">
+              <td className="p-3 text-center border-r border-border/40 bg-muted/20 font-mono">
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-xs font-black text-foreground tabular-nums">
+                  <span className="text-xs font-bold text-foreground tabular-nums">
                     {bloque.inicio}
                   </span>
-                  <span className="text-[9px] font-bold text-muted-foreground/40 tabular-nums">
+                  <span className="text-[9px] font-semibold text-muted-foreground/60 tabular-nums">
                     {bloque.fin}
                   </span>
                 </div>
@@ -84,12 +83,12 @@ export function ScheduleGrid({ horarios, onDelete, onDuplicate }: ScheduleGridPr
                   colSpan={DIAS.length}
                   className="p-0 h-12 relative overflow-hidden"
                 >
-                  <div className="absolute inset-0 flex items-center justify-center gap-4 bg-linear-to-r from-transparent via-violet-500/10 to-transparent">
-                    <div className="h-px flex-1 bg-violet-500/20" />
-                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-violet-400 flex items-center gap-2">
-                      ☕ RECESO ESCOLAR (30 min)
+                  <div className="absolute inset-0 flex items-center justify-center gap-4 bg-gradient-to-r from-transparent via-violet-500/15 to-transparent">
+                    <div className="h-px flex-1 bg-violet-500/30" />
+                    <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-violet-600 dark:text-violet-300 flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 shadow-xs">
+                      <IconCoffee className="size-3.5" /> RECESO ESCOLAR (30 MIN)
                     </span>
-                    <div className="h-px flex-1 bg-violet-500/20" />
+                    <div className="h-px flex-1 bg-violet-500/30" />
                   </div>
                 </td>
               ) : (
@@ -101,9 +100,14 @@ export function ScheduleGrid({ horarios, onDelete, onDuplicate }: ScheduleGridPr
                   const droppableId = `${dia.id}-${bloque.inicio}`;
                   return (
                     <DroppableCell key={dia.id} id={droppableId}>
-                        {slots.map((slot) => (
-                           <DraggableCard key={slot.id} slot={slot} onDelete={onDelete} onDuplicate={onDuplicate} />
-                        ))}
+                      {slots.map((slot) => (
+                        <DraggableCard
+                          key={slot.id}
+                          slot={slot}
+                          onDelete={onDelete}
+                          onDuplicate={onDuplicate}
+                        />
+                      ))}
                     </DroppableCell>
                   );
                 })
@@ -116,92 +120,107 @@ export function ScheduleGrid({ horarios, onDelete, onDuplicate }: ScheduleGridPr
   );
 }
 
-function DroppableCell({ id, children }: { id: string, children: React.ReactNode }) {
-    const { isOver, setNodeRef } = useDroppable({ id });
-    return (
-        <td
-            ref={setNodeRef}
-            className={cn(
-                "p-2 border-r border-primary/10 align-top h-24 relative group transition-colors",
-                isOver ? "bg-primary/5 border-primary/40 shadow-inner" : ""
-            )}
-        >
-            <div className="flex flex-col gap-2 h-full">
-                {children}
-            </div>
-        </td>
-    )
+function DroppableCell({ id, children }: { id: string; children: React.ReactNode }) {
+  const { isOver, setNodeRef } = useDroppable({ id });
+  return (
+    <td
+      ref={setNodeRef}
+      className={cn(
+        "p-2 border-r border-border/40 align-top h-24 relative group transition-colors",
+        isOver ? "bg-indigo-500/10 border-indigo-500/40 shadow-inner" : ""
+      )}
+    >
+      <div className="flex flex-col gap-2 h-full min-h-[5rem]">
+        {children}
+      </div>
+    </td>
+  );
 }
 
-function DraggableCard({ slot, onDelete, onDuplicate }: { slot: any, onDelete: (id: string) => void, onDuplicate: (slot: any) => void }) {
-    const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-        id: slot.id,
-        data: slot
-    });
-    
-    const areaColor = slot.curso.areaCurricular.color || "#3b82f6";
-    
-    return (
-        <div
-            ref={setNodeRef}
-            {...attributes}
-            {...listeners}
-            className={cn(
-                "p-3 rounded-lg border border-primary/10 shadow-md relative overflow-hidden group/card transition-[border-color,box-shadow,opacity,transform,padding] duration-300",
-                isDragging ? "opacity-30 scale-95" : "hover:scale-[1.02] hover:shadow-xl hover:ring-1 hover:ring-primary/20 cursor-grab active:cursor-grabbing"
-            )}
-            style={{
-                borderLeft: `2px solid ${areaColor}`,
-                backgroundColor: `${areaColor}15`,
-            }}
+function DraggableCard({
+  slot,
+  onDelete,
+  onDuplicate,
+}: {
+  slot: any;
+  onDelete: (id: string) => void;
+  onDuplicate: (slot: any) => void;
+}) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: slot.id,
+    data: slot,
+  });
+
+  const areaColor = slot.curso?.areaCurricular?.color || "#4f46e5";
+
+  return (
+    <div
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      className={cn(
+        "p-2.5 rounded-xl border border-border/50 shadow-xs relative overflow-hidden group/card transition-all duration-200",
+        isDragging
+          ? "opacity-30 scale-95"
+          : "hover:scale-[1.02] hover:shadow-md hover:border-indigo-500/40 cursor-grab active:cursor-grabbing bg-card/90"
+      )}
+      style={{
+        borderLeft: `3px solid ${areaColor}`,
+        backgroundColor: `${areaColor}12`,
+      }}
+    >
+      <div className="absolute top-1 right-1 opacity-0 group-hover/card:opacity-100 transition-opacity z-10 flex items-center gap-0.5 print:hidden no-print bg-background/90 p-0.5 rounded-md border border-border/40 shadow-xs">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-5 text-muted-foreground hover:text-indigo-600 hover:bg-indigo-500/10 rounded-md transition-colors"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDuplicate(slot);
+          }}
+          onPointerDown={(e) => e.stopPropagation()}
+          title="Duplicar horario"
         >
-             <div className="absolute top-1 right-1 opacity-0 group-hover/card:opacity-100 transition-opacity z-10 flex items-center gap-0.5 print:hidden no-print">
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="size-6 text-primary hover:bg-primary/20 rounded-full"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onDuplicate(slot);
-                    }}
-                    onPointerDown={(e) => e.stopPropagation()} // Prevent dragging when clicking the button
-                >
-                    <IconCopy className="size-3" />
-                </Button>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="size-6 text-red-500 hover:bg-red-500/20 rounded-full"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onDelete(slot.id);
-                    }}
-                    onPointerDown={(e) => e.stopPropagation()} // Prevent dragging when clicking the button
-                >
-                    <IconTrash className="size-3" />
-                </Button>
-            </div>
+          <IconCopy className="size-3" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-5 text-muted-foreground hover:text-rose-600 hover:bg-rose-500/10 rounded-md transition-colors"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(slot.id);
+          }}
+          onPointerDown={(e) => e.stopPropagation()}
+          title="Eliminar de la grilla"
+        >
+          <IconTrash className="size-3" />
+        </Button>
+      </div>
 
-            <h4 className="text-[10px] font-black leading-tight text-foreground uppercase mb-1.5 tracking-tight line-clamp-2 pr-12">
-                {slot.curso.nombre}
-            </h4>
+      <h4 className="text-xs font-bold leading-snug text-foreground uppercase mb-1 truncate pr-10">
+        {slot.curso?.nombre || "Asignatura"}
+      </h4>
 
-            <div className="space-y-1">
-                <p className="text-[9px] font-medium text-muted-foreground flex items-center gap-1.5 truncate capitalize">
-                    <span
-                        className="size-1 rounded-full shrink-0"
-                        style={{ backgroundColor: areaColor }}
-                    />
-                    {slot.curso.profesor?.name ?? "Sin docente"}{" "}
-                    {slot.curso.profesor?.apellidoPaterno ?? ""}
-                </p>
-                {slot.aula && (
-                    <div className="flex items-center gap-1 text-[8px] font-bold text-muted-foreground/60 uppercase tracking-tighter">
-                        <IconClock className="size-2.5" />
-                        <span>{slot.aula}</span>
-                    </div>
-                )}
-            </div>
-        </div>
-    )
+      <div className="space-y-0.5">
+        <p className="text-[10px] font-medium text-muted-foreground flex items-center gap-1.5 truncate capitalize">
+          <span
+            className="size-1.5 rounded-full shrink-0"
+            style={{ backgroundColor: areaColor }}
+          />
+          <span className="truncate">
+            {slot.curso?.profesor?.name
+              ? `${slot.curso.profesor.name} ${slot.curso.profesor.apellidoPaterno || ""}`
+              : "Sin docente"}
+          </span>
+        </p>
+        {slot.aula && (
+          <div className="flex items-center gap-1 text-[9px] font-semibold text-muted-foreground/70 uppercase">
+            <IconMapPin className="size-2.5 text-indigo-500 shrink-0" />
+            <span className="truncate">{slot.aula}</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }

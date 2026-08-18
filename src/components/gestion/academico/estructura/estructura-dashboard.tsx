@@ -63,6 +63,7 @@ interface EstructuraDashboardProps {
   institucionId: string;
 }
 
+import { useQueryState, parseAsString } from "nuqs";
 import { SectionMasterDetail } from "./components/section-master-detail";
 
 export function EstructuraDashboard({
@@ -75,11 +76,18 @@ export function EstructuraDashboard({
   institucionId,
 }: EstructuraDashboardProps) {
   const router = useRouter();
-  const [selectedNivelId, setSelectedNivelId] = useState<string>(
-    initialNiveles[0]?.id || "",
+  const [selectedNivelId, setSelectedNivelId] = useQueryState(
+    "nivelId",
+    parseAsString.withDefault(initialNiveles[0]?.id || "")
   );
-  const [selectedSeccionId, setSelectedSeccionId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedSeccionId, setSelectedSeccionId] = useQueryState(
+    "seccionId",
+    parseAsString
+  );
+  const [searchQuery, setSearchQuery] = useQueryState(
+    "q",
+    parseAsString.withDefault("")
+  );
   const [mobileView, setMobileView] = useState<"niveles" | "grados">("niveles");
 
   const [nivelModal, setNivelModal] = useState<{ open: boolean; data?: any }>({
@@ -746,6 +754,7 @@ function StructureFormModals({
         institucionId={institucionId}
         currentAnio={selectedYear}
         initialGradeId={wizardModal.gradeId}
+        selectedNivelId={selectedNivelId}
       />
     </>
   );

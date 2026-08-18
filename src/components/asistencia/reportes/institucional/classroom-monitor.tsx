@@ -1,117 +1,131 @@
-"use client"
+"use client";
 
-import { IconSchool } from "@tabler/icons-react"
-import { Progress } from "@/components/ui/progress"
-import { cn } from "@/lib/utils"
+import { IconSchool, IconUsers, IconClockHour4, IconUserCheck } from "@tabler/icons-react";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 interface SeccionResumen {
-  id: string
-  nombre: string
-  nivelNombre: string
-  perc: number
-  tardanzas: number
-  total: number
-  presentes: number
+  id: string;
+  nombre: string;
+  nivelNombre: string;
+  perc: number;
+  tardanzas: number;
+  tasaTardanza?: number;
+  total: number;
+  presentes: number;
 }
 
 interface ClassroomMonitorProps {
-  resumen: SeccionResumen[]
+  resumen: SeccionResumen[];
 }
 
 export function ClassroomMonitor({ resumen }: ClassroomMonitorProps) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 animate-in fade-in animation-duration-">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-1.5 h-6 bg-primary rounded-full shadow-[0_0_15px_rgba(var(--primary-rgb),0.5)]" />
-          <div className="space-y-0.5">
-            <h3 className="text-sm font-black tracking-widest uppercase text-foreground/80">Monitor de Aulas</h3>
-            <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-50">Seguimiento operativo por sección</p>
+        <div className="flex items-center gap-2.5">
+          <div className="size-8 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-500 flex items-center justify-center shrink-0">
+            <IconSchool className="size-4" />
+          </div>
+          <div>
+            <h3 className="text-xs font-black uppercase tracking-wider text-foreground">
+              Monitor de Aulas y Secciones
+            </h3>
+            <p className="text-[10px] text-muted-foreground font-medium">
+              Seguimiento de asistencia y puntualidad por aula
+            </p>
           </div>
         </div>
-        <div className="px-4 py-1.5 rounded-full bg-muted/50 border border-border/30">
-          <span className="text-[9px] font-bold text-muted-foreground">
-            {resumen.length} Secciones Analizadas
-          </span>
-        </div>
+        <Badge variant="outline" className="text-[10px] font-bold border-indigo-500/30 text-indigo-600 dark:text-indigo-400 bg-indigo-500/5 rounded-full px-2.5 py-0.5">
+          {resumen.length} Secciones Analizadas
+        </Badge>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {resumen.map((section) => {
-          const perc = section.perc
-          const statusColor = perc < 75 ? "#ef4444" : perc < 90 ? "#f59e0b" : "#10b981"
-          const textColor = perc < 75 ? "text-red-500" : perc < 90 ? "text-amber-500" : "text-emerald-500"
+          const perc = section.perc;
+          const statusBadgeColor =
+            perc < 75
+              ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20"
+              : perc < 90
+                ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20"
+                : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20";
+
+          const textColor =
+            perc < 75
+              ? "text-rose-600 dark:text-rose-400"
+              : perc < 90
+                ? "text-amber-600 dark:text-amber-400"
+                : "text-emerald-600 dark:text-emerald-400";
+
+          const progressFill =
+            perc < 75 ? "bg-rose-500" : perc < 90 ? "bg-amber-500" : "bg-emerald-500";
+
+          const tasaTardanzas = (
+            section.tasaTardanza ??
+            ((section.tardanzas / (section.total || 1)) * 100)
+          ).toFixed(0);
 
           return (
             <div
               key={section.id}
-              className="group relative rounded-2xl border border-border/50 bg-card/80 shadow-sm p-6 transition-[border-color,box-shadow] duration-500 hover:border-primary/40 hover:shadow-md overflow-hidden"
+              className="group relative rounded-2xl border border-border/40 bg-card/80 backdrop-blur-md shadow-xs hover:shadow-md hover:border-indigo-500/30 p-5 transition-all duration-200 flex flex-col justify-between space-y-4 overflow-hidden"
             >
-              {/* Flow Glow (Blob animado con color de estado) */}
-              <div 
-                className="absolute -top-10 -left-10 w-32 h-32 rounded-full blur-3xl opacity-0 group-hover:opacity-20 transition-opacity duration-700 animate-blob"
-                style={{ backgroundColor: statusColor }}
-              />
-              <div 
-                className="absolute -bottom-10 -right-10 w-32 h-32 rounded-full blur-3xl opacity-0 group-hover:opacity-10 transition-opacity duration-700 animate-blob"
-                style={{ backgroundColor: statusColor, animationDelay: '2s' }}
-              />
+              <div className="flex items-start justify-between gap-2">
+                <div className="space-y-0.5 min-w-0">
+                  <Badge variant="outline" className="text-[9px] font-bold uppercase border-indigo-500/20 text-indigo-600 dark:text-indigo-400 bg-indigo-500/5 px-2 py-0">
+                    {section.nivelNombre}
+                  </Badge>
+                  <h4 className="text-sm font-extrabold uppercase tracking-tight text-foreground truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                    {section.nombre}
+                  </h4>
+                </div>
+                <Badge className={cn("text-[9px] font-bold uppercase border px-2 py-0.5 rounded-full shrink-0", statusBadgeColor)}>
+                  {perc >= 90 ? "Óptimo" : perc >= 75 ? "Regular" : "Alerta"}
+                </Badge>
+              </div>
 
-              <div className="relative z-10 space-y-5">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-0.5">
-                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">{section.nivelNombre}</p>
-                    <h4 className="text-sm font-black uppercase tracking-tighter text-foreground group-hover:text-primary transition-colors">{section.nombre}</h4>
-                  </div>
-                  <div className="p-2 rounded-2xl bg-muted/50 border border-border/30 group-hover:border-primary/30 transition-[border-color] duration-300">
-                    <IconSchool className="size-3.5 text-muted-foreground/60 group-hover:text-primary" />
+              <div className="grid grid-cols-2 gap-3 items-end pt-1">
+                <div className="space-y-0.5">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/70">
+                    Asistencia
+                  </span>
+                  <div className={cn("text-2xl font-black font-mono tracking-tight", textColor)}>
+                    {perc.toFixed(0)}%
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 items-end">
-                  <div className="space-y-1">
-                    <p className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/30">Asistencia</p>
-                    <div className="relative inline-block">
-                      <span className={cn("text-3xl font-black tracking-tighter leading-none block", textColor)}>
-                        {perc.toFixed(0)}%
-                      </span>
-                      {/* LCD Glow Effect */}
-                      <span className={cn("absolute inset-0 blur-sm opacity-40 select-none", textColor)} aria-hidden="true">
-                        {perc.toFixed(0)}%
-                      </span>
-                    </div>
+                <div className="space-y-0.5 text-right">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/70">
+                    Tardanzas
+                  </span>
+                  <div className="text-sm font-black font-mono text-amber-600 dark:text-amber-400">
+                    {tasaTardanzas}%
                   </div>
-                  <div className="space-y-1 text-right">
-                    <p className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/30">Tardanza</p>
-                    <span className="text-sm font-black text-amber-500/80 tracking-tighter">
-                      {((section.tardanzas / (section.total || 1)) * 100).toFixed(0)}%
-                    </span>
-                  </div>
-                </div>
-
-                <div className="space-y-2 pt-2">
-                  <div className="flex justify-between items-center px-0.5">
-                    <span className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-widest">Presentismo</span>
-                    <span className="text-[10px] font-black text-muted-foreground/60 tracking-tighter">
-                      {section.presentes} <span className="opacity-30">/</span> {section.total}
-                    </span>
-                  </div>
-                  <Progress 
-                    value={perc} 
-                    className="h-1.5 bg-muted/10 rounded-full overflow-hidden" 
-                    indicatorClassName={cn(
-                      perc < 75 ? "bg-red-500" : perc < 90 ? "bg-amber-500" : "bg-primary"
-                    )} 
-                  />
                 </div>
               </div>
-              
-              {/* Decoración Inferior Sutil - Refinada */}
-              <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+              <div className="space-y-1.5 pt-1">
+                <div className="flex justify-between items-center text-[10px]">
+                  <span className="font-bold text-muted-foreground/70 flex items-center gap-1">
+                    <IconUserCheck size={12} className="text-emerald-500" />
+                    Presentismo
+                  </span>
+                  <span className="font-mono font-bold text-foreground">
+                    {section.presentes} <span className="text-muted-foreground/40">/</span> {section.total}
+                  </span>
+                </div>
+                <Progress
+                  value={perc}
+                  className="h-1.5 bg-muted/60"
+                  indicatorClassName={progressFill}
+                />
+              </div>
             </div>
-          )
+          );
         })}
       </div>
     </div>
-  )
+  );
 }

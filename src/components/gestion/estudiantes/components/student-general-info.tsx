@@ -5,7 +5,6 @@ import {
   IconMapPin,
   IconCalendar,
   IconAlertCircle,
-  IconUser,
   IconId,
   IconPhone,
   IconBuilding,
@@ -14,7 +13,6 @@ import {
 } from "@tabler/icons-react";
 import { Badge } from "@/components/ui/badge";
 import { StudentTableType } from "@/components/gestion/estudiantes/components/columns";
-import { formatDate } from "@/lib/formats";
 import { calculateAge } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
@@ -33,9 +31,14 @@ export function StudentGeneralInfo({ student }: StudentGeneralInfoProps) {
     if (!guardian?.telefono) return;
     const cleanPhone = guardian.telefono.replace(/\D/g, "");
     const fullPhone = cleanPhone.length === 9 ? `51${cleanPhone}` : cleanPhone;
-    const studentName = `${student.name} ${student.apellidoPaterno}`;
+    const studentName = `${student.name} ${student.apellidoPaterno} ${student.apellidoMaterno}`;
+    const instName =
+      (student as any).institucion?.nombreInstitucion ||
+      student.nivelAcademico?.sede?.nombre ||
+      "";
+    const instText = instName ? ` ${instName}` : "";
     const msg = encodeURIComponent(
-      `Estimado(a) ${guardian.name || "Apoderado"}, le saludamos de la institución educativa respecto al alumno(a) ${studentName}.`
+      `Estimado(a) ${guardian.name || "Apoderado"}, le saludamos de la institución educativa${instText} respecto al alumno(a) ${studentName}.`
     );
     window.open(`https://wa.me/${fullPhone}?text=${msg}`, "_blank");
   };

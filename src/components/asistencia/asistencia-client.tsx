@@ -56,6 +56,8 @@ interface SeccionAsistencia {
   turno?: string | null;
   nivel?: { id: string; nombre: string } | null;
   grado?: { id: string; nombre: string } | null;
+  tutor?: { id: string } | null;
+  cursos?: any[];
 }
 
 interface AlumnoAsistencia {
@@ -135,9 +137,30 @@ export function AsistenciaClient({
     return secciones.filter((s) => s.grado?.id === gradoId);
   }, [secciones, gradoId]);
 
-  const isFirstRender = useRef(true);
+  const prevAnioRef = useRef(anio);
 
   // ── Effects ───────────────────────────────────────────────────────────────
+  // Auto-seleccionar nivel, grado y sección si hay secciones disponibles y no hay selección previa
+  useEffect(() => {
+    if (secciones.length > 0 && !nivelId) {
+      const targetSeccion =
+        (profesorId
+          ? secciones.find((s) => s.tutor?.id === profesorId) ||
+            secciones.find((s) =>
+              s.cursos?.some(
+                (c: any) => c.profesorId === profesorId || c.profesor?.id === profesorId,
+              ),
+            )
+          : null) || secciones[0];
+
+      if (targetSeccion) {
+        if (targetSeccion.nivel?.id) setNivelId(targetSeccion.nivel.id);
+        if (targetSeccion.grado?.id) setGradoId(targetSeccion.grado.id);
+        if (targetSeccion.id) setSeccionId(targetSeccion.id);
+      }
+    }
+  }, [secciones, nivelId, profesorId, setNivelId, setGradoId, setSeccionId]);
+
   useEffect(() => {
     let ignore = false;
     const loadSecciones = async () => {
@@ -147,15 +170,15 @@ export function AsistenciaClient({
       if (ignore) return;
       if (res.data) {
         setSecciones(res.data);
-        if (!isFirstRender.current) {
+        if (prevAnioRef.current !== anio) {
           setNivelId("");
           setGradoId("");
           setSeccionId("");
           setAlumnos([]);
+          prevAnioRef.current = anio;
         }
       }
       setIsLoadingSecciones(false);
-      isFirstRender.current = false;
     };
     loadSecciones();
     return () => {
@@ -209,12 +232,16 @@ export function AsistenciaClient({
       prev.map((a) => (a.id === id ? { ...a, justificacion } : a)),
     );
 
+  const isAusente = (estado: string) => estado === "ausente" || estado === "falta";
+  const isJustificado = (estado: string) => estado === "justificado" || estado === "justificada";
+  const isTarde = (estado: string) => estado === "tarde" || estado === "tardanza";
+
   const filteredAlumnos = alumnos.filter((a) => {
     const matchesSearch = `${a.name} ${a.apellidoPaterno} ${a.apellidoMaterno}`
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
-    if (filterStatus === "ausentes") return matchesSearch && a.estado === "ausente";
-    if (filterStatus === "tardanzas") return matchesSearch && a.estado === "tarde";
+    if (filterStatus === "ausentes") return matchesSearch && isAusente(a.estado);
+    if (filterStatus === "tardanzas") return matchesSearch && isTarde(a.estado);
     return matchesSearch;
   });
 
@@ -229,9 +256,9 @@ export function AsistenciaClient({
         estudianteId: a.id,
         cursoId: cursoIdRef.current,
         fecha,
-        presente: a.estado !== "ausente",
-        tardanza: a.estado === "tarde",
-        justificada: a.estado === "justificado",
+        presente: !isAusente(a.estado),
+        tardanza: isTarde(a.estado),
+        justificada: isJustificado(a.estado),
         justificacion: a.justificacion,
       }));
       const res = await upsertAsistenciaAction(data);
@@ -245,8 +272,8 @@ export function AsistenciaClient({
   // ── Computed Stats ────────────────────────────────────────────────────────
   const seccionActual = secciones.find((s) => s.id === seccionId);
   const presentesCount = alumnos.filter((a) => a.estado === "presente").length;
-  const ausentesCount = alumnos.filter((a) => a.estado === "ausente").length;
-  const tardanzasCount = alumnos.filter((a) => a.estado === "tarde").length;
+  const ausentesCount = alumnos.filter((a) => isAusente(a.estado)).length;
+  const tardanzasCount = alumnos.filter((a) => isTarde(a.estado)).length;
   const totalAlumnos = alumnos.length;
   const marcados = alumnos.filter((a) => a.estado !== "").length;
   const progressPercent = totalAlumnos > 0 ? Math.round((marcados / totalAlumnos) * 100) : 0;

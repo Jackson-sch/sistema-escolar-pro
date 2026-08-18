@@ -7,7 +7,7 @@ import { auth } from "@/auth";
 import { getRankingEstudianteAction } from "@/actions/evaluations";
 import { formatTitleCase } from "@/lib/formats";
 
-import { resolvePdfImage } from "@/lib/pdf-server-utils";
+import { collectPdfBuffer, resolvePdfImage } from "@/lib/pdf-server-utils";
 
 export async function GET(req: NextRequest) {
   const session = await auth();
@@ -179,7 +179,10 @@ export async function GET(req: NextRequest) {
 
     const { pdf } = await import("@react-pdf/renderer");
     const pdfInstance = pdf(React.createElement(GradeReportPDF, { data: pdfData as any }) as any);
-    const buffer = await pdfInstance.toBuffer();
+    // In @react-pdf/renderer 4.x `toBuffer()` returns a pdfkit stream, so collect it
+    // into a real Buffer before sending it as the response body.
+    const fileStream = await pdfInstance.toBuffer();
+    const buffer = await collectPdfBuffer(fileStream);
 
     return new NextResponse(buffer as any, {
       status: 200,

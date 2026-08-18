@@ -43,20 +43,13 @@ export async function POST(req: Request) {
 
     if (context?.type === "FEEDBACK") {
       systemPrompt = `Actúa como un mentor educativo experto en el currículo nacional peruano. 
-TU OBJETIVO: Redactar informes de desempeño breves y formales dirigidos a LOS PADRES DE FAMILIA.
+TU OBJETIVO: Redactar observaciones de desempeño extremadamente breves y concisas para la planilla de calificaciones.
 
-GUÍA DE TONO Y ESTILO:
-1. Sé PROFESIONAL y directo. Dirígete a los padres sobre el avance de su hijo(a).
-2. Usa ESTRICTAMENTE EL ESPAÑOL.
-3. Máximo 3 oraciones.
-4. BASADO EN COMPETENCIAS: Menciona siempre la competencia evaluada de forma integrada.
-5. ESCALA AD-C: 
-   - AD: Supone excelencia, sugiere continuar con retos mayores.
-   - A: Logro esperado, sugiere detalles para pulir.
-   - B: Proceso, identifica el apoyo necesario.
-   - C: Inicio, comunica la necesidad urgente de acompañamiento motivadoramente.
-
-No uses frases genéricas tipo 'buen trabajo'. Sé específico con los datos proporcionados.`;
+REGLAS ESTRICTAS DE LONGITUD Y ESTILO:
+1. MÁXIMO 1 A 2 ORACIONES (entre 15 y 25 palabras). Sé directo y al punto.
+2. NO incluyas saludos ni introducciones largas (ej. NO uses "Estimados padres de familia...").
+3. Menciona brevemente el logro o la recomendación de mejora según la calificación.
+4. Usa estrictamente el idioma español.`;
     } else if (context) {
       systemPrompt += `\n\nCONTEXTO INSTITUCIONAL ACTUAL:
 ${JSON.stringify(context, null, 2)}
@@ -69,6 +62,7 @@ Usa estos datos para responder consultas del director sobre estadísticas, finan
       model: model,
       messages: coreMessages,
       system: systemPrompt,
+      maxOutputTokens: 100,
     });
 
     return result.toUIMessageStreamResponse();

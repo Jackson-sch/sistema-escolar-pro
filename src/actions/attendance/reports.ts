@@ -12,19 +12,24 @@ export async function getMonthlyAsistenciaReportAction(
   anio: number,
 ) {
   try {
-    const startDate = new Date(anio, mes, 1);
+    const startDate = new Date(anio, mes, 1, 0, 0, 0, 0);
     const endDate = new Date(anio, mes + 1, 0, 23, 59, 59, 999);
 
-    // Obtener alumnos matriculados en esta sección
+    // Obtener alumnos matriculados en esta sección (User o Matricula activa)
     const alumnos = await prisma.user.findMany({
       where: {
         role: "estudiante",
-        nivelAcademicoId: seccionId,
-        matriculas: {
-          some: {
-            estado: "activo",
+        OR: [
+          { nivelAcademicoId: seccionId },
+          {
+            matriculas: {
+              some: {
+                nivelAcademicoId: seccionId,
+                estado: "activo",
+              },
+            },
           },
-        },
+        ],
       },
       select: {
         id: true,
@@ -78,7 +83,7 @@ export async function getStudentAnnualAttendanceAction(
         estudianteId,
         fecha: {
           gte: new Date(anio, 0, 1),
-          lte: new Date(anio, 11, 31),
+          lte: new Date(anio, 11, 31, 23, 59, 59, 999),
         },
       },
       orderBy: { fecha: "asc" },
@@ -117,20 +122,38 @@ export async function getJustificacionesAction(
   gradoId?: string,
 ) {
   try {
+    const studentFilter =
+      seccionId && seccionId !== "all"
+        ? {
+            OR: [
+              { nivelAcademicoId: seccionId },
+              {
+                matriculas: {
+                  some: {
+                    nivelAcademicoId: seccionId,
+                    estado: "activo",
+                  },
+                },
+              },
+            ],
+          }
+        : !seccionId || seccionId === "all"
+          ? {
+              nivelAcademico: {
+                nivelId: nivelId || undefined,
+                gradoId: gradoId || undefined,
+              },
+            }
+          : undefined;
+
     const justificaciones = await prisma.asistencia.findMany({
       where: {
         justificada: true,
         fecha: {
           gte: new Date(anio, 0, 1),
-          lte: new Date(anio, 11, 31),
+          lte: new Date(anio, 11, 31, 23, 59, 59, 999),
         },
-        estudiante: {
-          nivelAcademicoId: seccionId && seccionId !== "all" ? seccionId : undefined,
-          nivelAcademico: (!seccionId || seccionId === "all") ? {
-            nivelId: nivelId || undefined,
-            gradoId: gradoId || undefined,
-          } : undefined,
-        },
+        estudiante: studentFilter as any,
       },
       include: {
         estudiante: {
@@ -153,7 +176,9 @@ export async function getJustificacionesAction(
       id: j.id,
       fecha: j.fecha,
       estudiante: `${j.estudiante.apellidoPaterno} ${j.estudiante.apellidoMaterno}, ${j.estudiante.name}`,
-      seccion: `${j.estudiante.nivelAcademico?.grado.nombre} "${j.estudiante.nivelAcademico?.seccion}"`,
+      seccion: j.estudiante.nivelAcademico
+        ? `${j.estudiante.nivelAcademico.grado.nombre} "${j.estudiante.nivelAcademico.seccion}"`
+        : "Sin sección",
       justificacion: j.justificacion || "Sin detalle",
     }));
 

@@ -63,7 +63,8 @@ export function CompetencyRowActions({ row }: CompetencyRowActionsProps) {
       icon: IconTrash,
       label: "Eliminar Competencia",
       onClick: () => setShowConfirmModal(true),
-      variant: "destructive",
+      variant: "ghost",
+      className: "text-red-600",
     },
   ];
 

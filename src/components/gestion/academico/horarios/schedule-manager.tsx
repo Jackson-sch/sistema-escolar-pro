@@ -328,19 +328,19 @@ function ScheduleToolbar({
   onAdd: () => void;
 }) {
   return (
-    <div className="px-4 sm:px-5 py-3 flex items-center justify-between gap-3 border-b border-border/30">
-      <div className="flex items-center gap-3 min-w-0">
+    <div className="p-4 rounded-2xl border border-border/40 bg-card/80 backdrop-blur-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+      <div className="flex items-center gap-3 min-w-0 flex-wrap">
         {/* Year Selector */}
         <Select
           key={selectedYear}
           defaultValue={selectedYear.toString()}
           onValueChange={onYearChange}
         >
-          <SelectTrigger className="h-8 w-auto min-w-[90px] gap-1.5 rounded-full border-border/60 bg-white/5 px-3 text-[12px] font-bold focus:ring-1 focus:ring-primary/40 shrink-0">
-            <IconCalendarEvent size={13} className="text-primary/70" />
+          <SelectTrigger className="h-9 w-auto min-w-[100px] gap-1.5 rounded-xl border-border/50 bg-background/80 px-3 text-xs font-bold focus:ring-indigo-500/30 shrink-0 cursor-pointer">
+            <IconCalendarEvent size={14} className="text-indigo-500" />
             <SelectValue />
           </SelectTrigger>
-          <SelectContent className="rounded-xl border-border/50 bg-[#09090b] text-white">
+          <SelectContent className="rounded-xl border border-border/50 bg-background shadow-lg z-[80]">
             {[
               selectedYear - 1,
               selectedYear,
@@ -350,9 +350,9 @@ function ScheduleToolbar({
               <SelectItem
                 key={y}
                 value={y.toString()}
-                className="text-[12px] rounded-lg"
+                className="text-xs font-medium rounded-lg"
               >
-                {y}
+                Periodo {y}
               </SelectItem>
             ))}
           </SelectContent>
@@ -362,27 +362,23 @@ function ScheduleToolbar({
         <div className="h-5 w-px bg-border/40 shrink-0 hidden sm:block" />
 
         {/* Breadcrumb */}
-        <div className="min-w-0 hidden sm:block">
+        <div className="min-w-0">
           {nivelName ? (
-            <div className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground truncate">
-              <IconSchool size={13} className="text-primary/60 shrink-0" />
-              <span className="text-foreground/80 font-semibold">
-                {nivelName}
-              </span>
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground truncate">
+              <IconSchool size={14} className="text-indigo-500 shrink-0" />
+              <span className="text-foreground font-bold">{nivelName}</span>
               {gradoName && (
                 <>
-                  <IconChevronRight size={10} className="opacity-30 shrink-0" />
-                  <span className="text-foreground/80 font-semibold">
-                    {gradoName}
-                  </span>
+                  <IconChevronRight size={12} className="opacity-40 shrink-0" />
+                  <span className="text-foreground font-bold">{gradoName}</span>
                 </>
               )}
               {seccionName && (
                 <>
-                  <IconChevronRight size={10} className="opacity-30 shrink-0" />
+                  <IconChevronRight size={12} className="opacity-40 shrink-0" />
                   <Badge
                     variant="outline"
-                    className="h-5 text-[10px] font-bold border-primary/30 text-primary bg-primary/5 px-2"
+                    className="h-6 text-[10px] font-bold border-indigo-500/30 text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-2.5 rounded-full uppercase"
                   >
                     Sección {seccionName}
                   </Badge>
@@ -390,42 +386,41 @@ function ScheduleToolbar({
               )}
             </div>
           ) : (
-            <p className="text-[11px] text-muted-foreground/50 italic">
-              Selecciona nivel, grado y sección
+            <p className="text-xs text-muted-foreground/60 italic">
+              Selecciona nivel, grado y sección para gestionar el horario.
             </p>
           )}
         </div>
       </div>
 
       {/* Action Buttons */}
-      <div className="flex items-center gap-2 shrink-0">
+      <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-end">
         <Button
           onClick={onPrint}
           size="sm"
           variant="outline"
-          className="h-8 rounded-lg px-3 gap-1.5 text-[11px] font-semibold border-border/60 hover:bg-muted/60"
+          className="h-9 rounded-xl px-3.5 gap-1.5 text-xs font-semibold border-border/50 hover:bg-muted/60 cursor-pointer"
           disabled={!hasSeccion || horariosCount === 0}
         >
-          <IconPrinter size={13} className="text-muted-foreground" />
-          <span className="hidden sm:inline">Imprimir Horario</span>
+          <IconPrinter size={14} className="text-muted-foreground" />
+          <span>Imprimir Horario</span>
         </Button>
 
         <Button
           onClick={onAdd}
           size="sm"
-          className="h-8 rounded-lg px-3.5 gap-1.5 text-[11px] font-bold shadow-md shadow-indigo-500/10 transition-[background-color,transform] hover:scale-[1.02] active:scale-[0.98] bg-indigo-600 hover:bg-indigo-700 text-white"
+          className="h-9 rounded-xl px-4 gap-1.5 text-xs font-bold shadow-md shadow-indigo-500/20 transition-all duration-200 hover:scale-[1.02] bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer"
           disabled={!hasSeccion}
         >
-          <IconPlus size={13} strokeWidth={3} />
-          <span className="hidden sm:inline">Asignar Hora</span>
-          <span className="sm:hidden">Nuevo</span>
+          <IconPlus size={14} strokeWidth={2.5} />
+          <span>Asignar Hora</span>
         </Button>
       </div>
     </div>
   );
 }
 
-/* ─── Selector de campo (helper) ─── */
+/* ─── Selector de campo ─── */
 
 function SelectField({
   label,
@@ -453,7 +448,7 @@ function SelectField({
           className={cn(
             "size-4 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 transition-colors",
             completed
-              ? "bg-primary text-primary-foreground"
+              ? "bg-indigo-600 text-white shadow-xs"
               : "bg-muted-foreground/15 text-muted-foreground/50",
           )}
         >
@@ -461,8 +456,8 @@ function SelectField({
         </span>
         <span
           className={cn(
-            "text-[10px] font-bold uppercase transition-colors",
-            completed ? "text-primary/80" : "text-muted-foreground/60",
+            "text-[10px] font-bold uppercase tracking-wider transition-colors",
+            completed ? "text-indigo-600 dark:text-indigo-400" : "text-muted-foreground/60",
           )}
         >
           {label}
@@ -471,16 +466,18 @@ function SelectField({
       <Select value={value} onValueChange={onValueChange} disabled={disabled}>
         <SelectTrigger
           className={cn(
-            "h-9 w-full rounded-lg border text-sm transition-[color,background-color,border-color,box-shadow,opacity]",
+            "h-9 w-full rounded-xl border text-xs font-semibold transition-all duration-200",
             completed
-              ? "border-primary/30 bg-primary/5 text-foreground focus:ring-primary/30"
-              : "border-border/60 bg-muted/30 focus:ring-primary/30",
+              ? "border-indigo-500/30 bg-indigo-500/10 text-foreground focus:ring-indigo-500/30"
+              : "border-border/50 bg-background/80 focus:ring-indigo-500/30",
             disabled && "opacity-40 cursor-not-allowed",
           )}
         >
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
-        <SelectContent className="rounded-xl">{children}</SelectContent>
+        <SelectContent className="rounded-xl border border-border/50 bg-background shadow-lg z-[80]">
+          {children}
+        </SelectContent>
       </Select>
     </div>
   );
@@ -510,21 +507,21 @@ function ScheduleSelectorsRow({
   onSeccionChange: (val: string) => void;
 }) {
   return (
-    <div className="px-4 sm:px-5 py-4 bg-muted/5 grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+    <div className="px-4 py-3.5 bg-card/80 backdrop-blur-md rounded-2xl border border-border/40 grid grid-cols-1 md:grid-cols-12 gap-3.5 items-center shadow-xs">
       {/* 1. Level Selector */}
-      <div className="md:col-span-5">
+      <div className="md:col-span-6 lg:col-span-6">
         <LevelSegmentedControl
           levels={niveles.map((n) => ({ id: n.id, label: n.nombre }))}
           value={selectedNivelId}
           onChange={onNivelChange}
-          label="1. Nivel"
+          label="Nivel Educativo"
         />
       </div>
 
       {/* 2. Grade Selector */}
-      <div className="md:col-span-4 lg:col-span-3">
+      <div className="md:col-span-3 lg:col-span-3">
         <SelectField
-          label="2. Grado / Año"
+          label="Grado / Año"
           placeholder="Selecciona grado"
           value={selectedGradoId}
           onValueChange={onGradoChange}
@@ -533,7 +530,7 @@ function ScheduleSelectorsRow({
           completed={!!selectedGradoId}
         >
           {grados.map((g) => (
-            <SelectItem key={g.id} value={g.id} className="rounded-lg text-sm">
+            <SelectItem key={g.id} value={g.id} className="rounded-xl text-xs font-medium">
               {g.nombre}
             </SelectItem>
           ))}
@@ -541,9 +538,9 @@ function ScheduleSelectorsRow({
       </div>
 
       {/* 3. Section Selector */}
-      <div className="md:col-span-3 lg:col-span-4">
+      <div className="md:col-span-3 lg:col-span-3">
         <SelectField
-          label="3. Sección"
+          label="Sección"
           placeholder="Selecciona sección"
           value={selectedSeccionId}
           onValueChange={onSeccionChange}
@@ -552,7 +549,7 @@ function ScheduleSelectorsRow({
           completed={!!selectedSeccionId}
         >
           {filteredSecciones.map((s) => (
-            <SelectItem key={s.id} value={s.id} className="rounded-lg text-sm">
+            <SelectItem key={s.id} value={s.id} className="rounded-xl text-xs font-semibold">
               Sección {s.seccion}
             </SelectItem>
           ))}
@@ -685,6 +682,8 @@ function ScheduleEmptyState({
 
 /* ─── Componente principal ─── */
 
+import { useQueryState, parseAsString } from "nuqs";
+
 export function ScheduleManager({
   secciones,
   allCourses,
@@ -692,9 +691,18 @@ export function ScheduleManager({
 }: ScheduleManagerProps) {
   const router = useRouter();
 
-  const [selectedNivelId, setSelectedNivelId] = useState<string>("");
-  const [selectedGradoId, setSelectedGradoId] = useState<string>("");
-  const [selectedSeccionId, setSelectedSeccionId] = useState<string>("");
+  const [selectedNivelId, setSelectedNivelId] = useQueryState(
+    "nivelId",
+    parseAsString.withDefault("")
+  );
+  const [selectedGradoId, setSelectedGradoId] = useQueryState(
+    "gradoId",
+    parseAsString.withDefault("")
+  );
+  const [selectedSeccionId, setSelectedSeccionId] = useQueryState(
+    "seccionId",
+    parseAsString.withDefault("")
+  );
   const [horarios, setHorarios] = useState<Horario[]>([]);
   const [loading, setLoading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -722,6 +730,25 @@ export function ScheduleManager({
     if (!selectedGradoId) return [];
     return secciones.filter((s) => s.grado.id === selectedGradoId);
   }, [secciones, selectedGradoId]);
+
+  // Auto-selección en cascada al cargar o cambiar niveles
+  useEffect(() => {
+    if (niveles.length > 0 && !selectedNivelId) {
+      setSelectedNivelId(niveles[0].id);
+    }
+  }, [niveles, selectedNivelId]);
+
+  useEffect(() => {
+    if (grados.length > 0 && (!selectedGradoId || !grados.some((g) => g.id === selectedGradoId))) {
+      setSelectedGradoId(grados[0].id);
+    }
+  }, [grados, selectedGradoId]);
+
+  useEffect(() => {
+    if (filteredSecciones.length > 0 && (!selectedSeccionId || !filteredSecciones.some((s) => s.id === selectedSeccionId))) {
+      setSelectedSeccionId(filteredSecciones[0].id);
+    }
+  }, [filteredSecciones, selectedSeccionId]);
 
   useEffect(() => {
     let ignore = false;

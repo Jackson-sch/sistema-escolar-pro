@@ -8,7 +8,7 @@ import {
 import { getCoursesAction, getInstitucionesAction } from "@/actions/academic";
 import { EvaluacionTable } from "@/components/evaluaciones/management/evaluacion-table";
 import { EvaluacionReports } from "@/components/evaluaciones/reportes/evaluacion-reports";
-import { AddEvaluacionButton } from "@/components/evaluaciones/management/add-evaluacion-button";
+import { EvaluacionButton } from "@/components/evaluaciones/management/evaluacion-button";
 import { AddPeriodoButton } from "@/components/evaluaciones/management/add-periodo-button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { EvaluacionesTabs } from "@/components/evaluaciones/evaluaciones-tabs";
@@ -104,7 +104,7 @@ export default async function EvaluacionesPage() {
                       {hayPeriodos && (
                         <AddPeriodoButton institucionId={institucionId} />
                       )}
-                      <AddEvaluacionButton
+                      <EvaluacionButton
                         tipos={tipos}
                         periodos={periodos}
                         cursos={cursos}
