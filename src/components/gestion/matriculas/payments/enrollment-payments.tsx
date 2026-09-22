@@ -1,220 +1,170 @@
 "use client";
 
 import * as React from "react";
-import { getCronogramaAction } from "@/actions/finance";
-import {
-  IconReceipt,
-  IconCalendar,
-  IconAlertTriangle,
-  IconCheck,
-  IconLoader2,
-  IconClock,
-} from "@tabler/icons-react";
-import { Badge } from "@/components/ui/badge";
+import { getStudentCobroDetailsAction } from "@/actions/finance/cronograma";
+import { IconLoader2, IconReceipt, IconRefresh } from "@tabler/icons-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardDescription,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { formatCurrency, formatDate } from "@/lib/formats";
-import { cn } from "@/lib/utils";
+  EnrollmentPaymentsSummary,
+} from "./components/enrollment-payments-summary";
+import {
+  EnrollmentPaymentsFilter,
+  PaymentFilterType,
+} from "./components/enrollment-payments-filter";
+import {
+  EnrollmentPaymentItem,
+  PaymentItemData,
+} from "./components/enrollment-payment-item";
 
 interface EnrollmentPaymentsProps {
   estudianteId: string;
+  onGuardianLoaded?: (guardian: any) => void;
 }
 
-export function EnrollmentPayments({ estudianteId }: EnrollmentPaymentsProps) {
-  const [payments, setPayments] = React.useState<any[]>([]);
+export function EnrollmentPayments({
+  estudianteId,
+  onGuardianLoaded,
+}: EnrollmentPaymentsProps) {
+  const [data, setData] = React.useState<any | null>(null);
   const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+  const [filter, setFilter] = React.useState<PaymentFilterType>("todos");
 
-  React.useEffect(() => {
+  const loadData = React.useCallback(async () => {
     if (!estudianteId) return;
     setLoading(true);
-    let cancelled = false;
-
-    getCronogramaAction({ estudianteId })
-      .then((res) => {
-        if (cancelled) return;
-        if (res.success) {
-          setPayments(res.success);
+    setError(null);
+    try {
+      const res = await getStudentCobroDetailsAction({ estudianteId });
+      if (res.success) {
+        setData(res.success);
+        if (res.success.primaryGuardian && onGuardianLoaded) {
+          onGuardianLoaded(res.success.primaryGuardian);
         }
-      })
-      .catch((error) => {
-        if (!cancelled) console.error(error);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+      } else {
+        setError(res.error || "No se pudo cargar el expediente de cobranza");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Error inesperado al consultar finanzas del estudiante");
+    } finally {
+      setLoading(false);
+    }
+  }, [estudianteId, onGuardianLoaded]);
 
-    return () => {
-      cancelled = true;
-    };
-  }, [estudianteId]);
+  React.useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   if (loading) {
     return (
-      <Card className="w-full h-[400px] flex flex-col items-center justify-center border-dashed">
-        <div className="flex flex-col items-center gap-2 text-muted-foreground">
-          <IconLoader2 className="h-8 w-8 animate-spin text-primary/60" />
-          <p className="text-sm font-medium">Cargando cronograma...</p>
+      <div className="h-72 flex flex-col items-center justify-center gap-3 p-6 rounded-2xl border border-dashed border-border/70 bg-card/40">
+        <IconLoader2 className="size-7 animate-spin text-primary" />
+        <div className="text-center space-y-1">
+          <p className="text-xs font-bold text-foreground">
+            Consultando expediente de pagos...
+          </p>
+          <p className="text-[11px] text-muted-foreground">
+            Sincronizando cuotas, pensiones y estados de cuenta
+          </p>
         </div>
-      </Card>
+      </div>
     );
   }
 
-  if (payments.length === 0) {
+  if (error || !data) {
     return (
-      <Card className="w-full">
-        <CardContent className="flex flex-col items-center justify-center py-12 gap-4 text-center">
-          <div className="h-12 w-12 bg-muted rounded-full flex items-center justify-center">
-            <IconReceipt className="h-6 w-6 text-muted-foreground" />
-          </div>
-          <div className="space-y-1">
-            <h3 className="font-semibold text-foreground">
-              Sin pagos registrados
-            </h3>
-            <p className="text-sm text-muted-foreground max-w-[250px]">
-              No se ha generado un cronograma de pagos para este estudiante.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="h-64 flex flex-col items-center justify-center gap-3 p-6 rounded-2xl border border-border/60 bg-card/40 text-center">
+        <p className="text-xs font-bold text-destructive">
+          {error || "No se encontró información financiera"}
+        </p>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={loadData}
+          className="rounded-xl text-xs gap-1.5 cursor-pointer"
+        >
+          <IconRefresh className="size-3.5" /> Reintentar
+        </Button>
+      </div>
     );
   }
 
-  // Cálculos
-  const today = new Date();
-  const totalDeuda = payments.reduce(
-    (acc, p) =>
-      p.pagado ? acc : acc + (Number(p.monto) - Number(p.montoPagado)),
-    0
-  );
-  const cuotasPendientes = payments.filter((p) => !p.pagado).length;
+  const cronogramas: PaymentItemData[] = data.cronogramas || [];
+
+  if (cronogramas.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 px-4 rounded-2xl border border-dashed border-border/70 bg-card/40 text-center gap-3">
+        <div className="size-12 rounded-2xl bg-muted/70 flex items-center justify-center text-muted-foreground">
+          <IconReceipt className="size-6" />
+        </div>
+        <div className="space-y-1">
+          <h4 className="text-sm font-bold text-foreground">
+            Sin cronograma de pagos generado
+          </h4>
+          <p className="text-xs text-muted-foreground max-w-xs">
+            Este estudiante no cuenta con cuotas o pensiones programadas para el ciclo actual.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const counts = {
+    todos: cronogramas.length,
+    pendientes: cronogramas.filter((c) => c.estado !== "PAID" && !c.pagado).length,
+    pagados: cronogramas.filter((c) => c.estado === "PAID" || c.pagado).length,
+  };
+
+  const filteredItems = cronogramas.filter((c) => {
+    if (filter === "pendientes") return c.estado !== "PAID" && !c.pagado;
+    if (filter === "pagados") return c.estado === "PAID" || c.pagado;
+    return true;
+  });
+
+  const resumen = data.resumen || {
+    totalCobrado: 0,
+    totalPorCobrarAnio: 0,
+    totalDeudaVencida: 0,
+    cuotasVencidasCount: 0,
+  };
 
   return (
-    <Card className="w-full shadow-sm">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-lg font-semibold flex items-center gap-2">
-          <IconReceipt className="h-5 w-5 text-primary" />
-          Cronograma de Pagos
-        </CardTitle>
-        <CardDescription>
-          Resumen de cuotas y estado de cuenta del estudiante.
-        </CardDescription>
-      </CardHeader>
+    <div className="space-y-4">
+      {/* 1. Bento KPI Resumen Financiero */}
+      <EnrollmentPaymentsSummary
+        totalCobrado={resumen.totalCobrado}
+        totalPorCobrar={resumen.totalPorCobrarAnio}
+        totalDeudaVencida={resumen.totalDeudaVencida}
+        cuotasVencidasCount={resumen.cuotasVencidasCount}
+      />
 
-      <CardContent className="space-y-6">
-        {/* Resumen de Deuda - Diseño Sutil */}
-        <div className="bg-muted/40 border rounded-lg p-4 flex flex-row items-center justify-between">
-          <div className="space-y-1">
-            <p className="text-sm font-medium text-muted-foreground">
-              Deuda Total Pendiente
-            </p>
-            <p className="text-2xl font-bold tracking-tight text-foreground tabular-nums">
-              {formatCurrency(totalDeuda)}
-            </p>
-          </div>
-          <div className="text-right">
-            <Badge
-              variant="secondary"
-              className="px-3 py-1 text-xs font-medium"
-            >
-              {cuotasPendientes} cuota{cuotasPendientes !== 1 ? "s" : ""} por
-              pagar
-            </Badge>
-          </div>
+      {/* 2. Filtros Rápidos de Cuotas */}
+      <EnrollmentPaymentsFilter
+        currentFilter={filter}
+        onFilterChange={setFilter}
+        counts={counts}
+      />
+
+      {/* 3. Lista de Cuotas Detalladas */}
+      <ScrollArea className="h-[360px] sm:h-[420px] pr-2">
+        <div className="space-y-2.5 pb-2">
+          {filteredItems.length === 0 ? (
+            <div className="py-8 text-center text-xs text-muted-foreground">
+              No hay cuotas en este filtro.
+            </div>
+          ) : (
+            filteredItems.map((payment) => (
+              <EnrollmentPaymentItem
+                key={payment.id}
+                payment={payment}
+                estudianteId={estudianteId}
+              />
+            ))
+          )}
         </div>
-
-        <Separator />
-
-        {/* Lista de Pagos */}
-        <ScrollArea className="h-[400px] pr-4 -mr-4">
-          <div className="space-y-3 pr-4">
-            {payments.map((p) => {
-              const isVencido =
-                new Date(p.fechaVencimiento) < today && !p.pagado;
-              const pendiente = Number(p.monto) - Number(p.montoPagado);
-
-              return (
-                <div
-                  key={p.id}
-                  className={cn(
-                    "flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg border bg-card transition-colors hover:bg-muted/30",
-                    isVencido && "border-destructive/30 bg-destructive/5"
-                  )}
-                >
-                  {/* Info Izquierda */}
-                  <div className="space-y-1.5 mb-2 sm:mb-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-sm leading-none">
-                        {p.concepto.nombre}
-                      </span>
-                      {isVencido && (
-                        <span
-                          className="flex h-2 w-2 rounded-full bg-destructive"
-                          title="Vencido"
-                        />
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <IconCalendar className="h-3 w-3" />
-                        <span>Vence: {formatDate(p.fechaVencimiento)}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Info Derecha (Estado y Monto) */}
-                  <div className="flex items-center justify-between sm:justify-end gap-4 min-w-[140px]">
-                    <div className="flex flex-col items-end">
-                      <span className="text-sm font-semibold tabular-nums">
-                        {formatCurrency(Number(p.monto))}
-                      </span>
-                      {pendiente > 0 &&
-                        !p.pagado &&
-                        pendiente !== Number(p.monto) && (
-                          <span className="text-[10px] text-muted-foreground">
-                            Resta: {formatCurrency(pendiente)}
-                          </span>
-                        )}
-                    </div>
-
-                    <div className="w-[90px] flex justify-end">
-                      {p.pagado ? (
-                        <Badge
-                          variant="outline"
-                          className="text-primary border-primary/20 bg-primary/5 hover:bg-primary/10 gap-1 pr-2.5"
-                        >
-                          <IconCheck className="h-3 w-3" /> Pagado
-                        </Badge>
-                      ) : isVencido ? (
-                        <Badge
-                          variant="destructive"
-                          className="gap-1 pr-2.5 shadow-none"
-                        >
-                          <IconAlertTriangle className="h-3 w-3" /> Vencido
-                        </Badge>
-                      ) : (
-                        <Badge
-                          variant="secondary"
-                          className="text-muted-foreground gap-1 pr-2.5"
-                        >
-                          <IconClock className="h-3 w-3" /> Pendiente
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </ScrollArea>
-      </CardContent>
-    </Card>
+      </ScrollArea>
+    </div>
   );
 }

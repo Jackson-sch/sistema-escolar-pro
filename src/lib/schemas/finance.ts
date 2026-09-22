@@ -13,6 +13,7 @@ export const CronogramaFilterSchema = z.object({
   estudianteId: z.string().optional(),
   conceptoId: z.string().optional(),
   pagado: z.boolean().optional(),
+  anioAcademico: z.number().optional(),
 }).optional()
 
 export const CreateCronogramaMasivoSchema = z.object({

@@ -1,4 +1,4 @@
-import { Document, Page, Text, StyleSheet, View } from "@react-pdf/renderer";
+import { Document, Page, Text, StyleSheet, View } from "@/lib/pdf";
 import { Heading } from "@/components/pdfx/heading/pdfx-heading";
 import { KeyValue } from "@/components/pdfx/key-value/pdfx-key-value";
 import { Table, TableHeader, TableBody, TableRow, TableCell } from "@/components/pdfx/table/pdfx-table";

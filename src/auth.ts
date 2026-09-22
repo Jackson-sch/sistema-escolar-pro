@@ -20,33 +20,38 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session
     },
     async jwt({ token, user }) {
-      if (user) {
-        const dbUser = await prisma.user.findUnique({
-          where: { id: user.id },
-          select: {
-            role: true,
-            institucionId: true,
-            apellidoPaterno: true,
-            apellidoMaterno: true,
-            name: true,
-            email: true,
-            estado: { select: { esActivo: true, permiteLogin: true } },
-          },
-        })
+      if (user || !token.role || token.institucionId === undefined) {
+        const userId = (user?.id as string) || (token.sub as string);
+        if (userId) {
+          const dbUser = await prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+              role: true,
+              institucionId: true,
+              apellidoPaterno: true,
+              apellidoMaterno: true,
+              name: true,
+              email: true,
+              estado: { select: { esActivo: true, permiteLogin: true } },
+            },
+          });
 
-        if (dbUser?.estado && dbUser.estado.esActivo === false) {
-          console.warn(`[Auth JWT] Revocando token para usuario inactivo: '${user.email}'`);
-          return null as any;
+          if (dbUser?.estado && dbUser.estado.esActivo === false) {
+            console.warn(`[Auth JWT] Revocando token para usuario inactivo: '${dbUser.email || user?.email}'`);
+            return null as any;
+          }
+
+          if (dbUser) {
+            token.role = dbUser.role || "estudiante";
+            token.institucionId = dbUser.institucionId;
+            token.apellidoPaterno = dbUser.apellidoPaterno;
+            token.apellidoMaterno = dbUser.apellidoMaterno;
+            token.name = dbUser.name;
+            token.email = dbUser.email;
+          }
         }
-
-        token.role = dbUser?.role || "estudiante"
-        token.institucionId = dbUser?.institucionId
-        token.apellidoPaterno = dbUser?.apellidoPaterno
-        token.apellidoMaterno = dbUser?.apellidoMaterno
-        token.name = dbUser?.name
-        token.email = dbUser?.email
       }
-      return token
+      return token;
     },
   },
   pages: {

@@ -127,7 +127,7 @@ export const theme: PdfxTheme = {
       lineHeight: 1.6,
     },
     heading: {
-      fontFamily: "Times-Roman",
+      fontFamily: "Helvetica",
       fontWeight: 700,
       lineHeight: 1.25,
       fontSize: {

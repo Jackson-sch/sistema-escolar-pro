@@ -25,36 +25,61 @@ interface InstitucionFormProps {
   initialData: any;
 }
 
+function getInstitucionDefaultValues(initialData: any): InstitucionFormValues {
+  const formatDate = (val?: string | Date) =>
+    val ? new Date(val).toISOString().split("T")[0] : "";
+
+  return {
+    nombreInstitucion: initialData?.nombreInstitucion || "",
+    nombreComercial: initialData?.nombreComercial || "",
+    codigoModular: initialData?.codigoModular || "",
+    tipoGestion: initialData?.tipoGestion || "PRIVADA",
+    modalidad: initialData?.modalidad || "PRESENCIAL",
+    ugel: initialData?.ugel || "",
+    dre: initialData?.dre || "",
+    direccion: initialData?.direccion || "",
+    distrito: initialData?.distrito || "",
+    provincia: initialData?.provincia || "",
+    departamento: initialData?.departamento || "",
+    telefono: initialData?.telefono || "",
+    email: initialData?.email || "",
+    sitioWeb: initialData?.sitioWeb || "",
+    logo: initialData?.logo || "",
+    cicloEscolarActual: initialData?.cicloEscolarActual || 2026,
+    fechaInicioClases: formatDate(initialData?.fechaInicioClases),
+    fechaFinClases: formatDate(initialData?.fechaFinClases),
+  };
+}
+
+function InstitucionSubmitButton({ isPending }: { isPending: boolean }) {
+  return (
+    <Button
+      type="submit"
+      className="rounded-xl px-6 h-10 font-bold text-xs bg-primary hover:bg-primary/90 text-primary-foreground shadow-md shadow-primary/20 gap-2 min-w-[200px] cursor-pointer transition-transform active:scale-95"
+      disabled={isPending}
+    >
+      {isPending ? (
+        <>
+          <IconLoader2 className="size-4 animate-spin" />
+          <span>Guardando cambios...</span>
+        </>
+      ) : (
+        <>
+          <IconDeviceFloppy className="size-4" />
+          <span>Guardar Configuración</span>
+        </>
+      )}
+    </Button>
+  );
+}
+
 export function InstitucionForm({ initialData }: InstitucionFormProps) {
   const [isPending, setIsPending] = React.useState(false);
 
   const form = useForm<InstitucionFormValues>({
     // @ts-expect-error - el tipo del resolver de zod difiere del esperado por RHF v7
     resolver: zodResolver(institucionFormSchema),
-    defaultValues: {
-      nombreInstitucion: initialData?.nombreInstitucion || "",
-      nombreComercial: initialData?.nombreComercial || "",
-      codigoModular: initialData?.codigoModular || "",
-      tipoGestion: initialData?.tipoGestion || "PRIVADA",
-      modalidad: initialData?.modalidad || "PRESENCIAL",
-      ugel: initialData?.ugel || "",
-      dre: initialData?.dre || "",
-      direccion: initialData?.direccion || "",
-      distrito: initialData?.distrito || "",
-      provincia: initialData?.provincia || "",
-      departamento: initialData?.departamento || "",
-      telefono: initialData?.telefono || "",
-      email: initialData?.email || "",
-      sitioWeb: initialData?.sitioWeb || "",
-      logo: initialData?.logo || "",
-      cicloEscolarActual: initialData?.cicloEscolarActual || 2025,
-      fechaInicioClases: initialData?.fechaInicioClases
-        ? new Date(initialData.fechaInicioClases).toISOString().split("T")[0]
-        : "",
-      fechaFinClases: initialData?.fechaFinClases
-        ? new Date(initialData.fechaFinClases).toISOString().split("T")[0]
-        : "",
-    },
+    defaultValues: getInstitucionDefaultValues(initialData),
   });
 
   const onSubmit = async (values: InstitucionFormValues) => {
@@ -67,7 +92,6 @@ export function InstitucionForm({ initialData }: InstitucionFormProps) {
     setIsPending(true);
     try {
       const res = await updateInstitucionAction(institucionId, values);
-
       if (res.success) {
         toast.success(res.success);
       } else {
@@ -83,9 +107,11 @@ export function InstitucionForm({ initialData }: InstitucionFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit as any)} className="space-y-6">
+      <form
+        onSubmit={form.handleSubmit(onSubmit as any)}
+        className="space-y-6 animate-in fade-in duration-200"
+      >
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Left Column: Sidebar (Logo & Summary) */}
           <div className="lg:col-span-4 flex flex-col gap-6 sticky top-6">
             <LogoInstitucionalCard
               control={form.control}
@@ -94,33 +120,14 @@ export function InstitucionForm({ initialData }: InstitucionFormProps) {
             <ResumenInstitucionalCard control={form.control} />
           </div>
 
-          {/* Right Column: Main Content */}
           <div className="lg:col-span-8 flex flex-col gap-6">
             <InformacionGeneralCard control={form.control} />
             <UbicacionContactoCard control={form.control} />
             <CalendarioSistemaCard control={form.control} />
-
-            {/* Guía de Atajos de Teclado */}
             <FormKeyboardHelpBar />
 
             <div className="flex justify-end pt-2">
-              <Button
-                type="submit"
-                className="rounded-xl px-6 h-10 font-semibold text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 gap-2 min-w-[200px] cursor-pointer"
-                disabled={isPending}
-              >
-                {isPending ? (
-                  <>
-                    <IconLoader2 className="size-4 animate-spin" />
-                    <span>Guardando...</span>
-                  </>
-                ) : (
-                  <>
-                    <IconDeviceFloppy className="size-4" />
-                    <span>Guardar Configuración</span>
-                  </>
-                )}
-              </Button>
+              <InstitucionSubmitButton isPending={isPending} />
             </div>
           </div>
         </div>

@@ -12,6 +12,9 @@ import { PoliticasAsistenciaClient } from "@/components/asistencia/politicas/pol
 
 import { auth } from "@/auth";
 
+import { PageHeader } from "@/components/common/page-header";
+import { IconCalendarCheck } from "@tabler/icons-react";
+
 export default async function AsistenciaPage() {
   const session = await auth();
   const isProfessor = session?.user?.role === "profesor";
@@ -37,17 +40,18 @@ export default async function AsistenciaPage() {
   const finalAnios = anios.length > 0 ? anios : [dbYear];
 
   return (
-    <div className="flex flex-1 flex-col gap-4 sm:gap-6 p-0 sm:p-4 pt-0 @container/main">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-4 sm:px-2">
-        <div>
-          <h1 className="text-xl sm:text-3xl font-bold tracking-tight">
-            Control de Asistencia
-          </h1>
-          <p className="text-xxs sm:text-sm text-muted-foreground">
-            Gestión diaria y reportes consolidados por nivel y sección.
-          </p>
-        </div>
-      </div>
+    <div className="flex flex-1 flex-col gap-6 p-4 sm:p-6 pt-0">
+      <PageHeader
+        icon={<IconCalendarCheck size={20} />}
+        title="Control de Asistencia"
+        badge="Diario & QR"
+        description={`Registro y monitoreo de asistencia, tardanzas y justificaciones · Periodo ${dbYear}`}
+        breadcrumbs={[
+          { label: "Inicio", href: "/dashboard" },
+          { label: "Académico", href: "/asistencia" },
+          { label: "Asistencia" },
+        ]}
+      />
 
       <Suspense
         fallback={

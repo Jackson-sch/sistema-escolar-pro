@@ -49,6 +49,12 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/sistema-escolar-pro
 
+      - name: Run tests
+        run: bun run test
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/sistema-escolar-pro
+          AUTH_SECRET: ci-secret-do-not-use-in-production
+
       - name: Build
         run: bun run build
         env:

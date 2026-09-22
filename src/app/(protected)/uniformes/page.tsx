@@ -13,11 +13,11 @@ import { SalesTable } from "@/components/uniformes/sales-table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UniformTabs } from "@/components/uniformes/uniform-tabs";
 import { Badge } from "@/components/ui/badge";
-import { Shirt, Package, Layers, ShoppingBag } from "lucide-react";
+import { Store, Package, Layers, ShoppingBag, BookOpen } from "lucide-react";
 
 export const metadata = {
-  title: "Gestión de Uniformes | Sistema Escolar Pro",
-  description: "Administración de catálogo, inventario y ventas de uniformes.",
+  title: "Tienda Escolar & Inventario | Sistema Escolar Pro",
+  description: "Administración de catálogo multiproducto (uniformes, libros, agendas, útiles) e inventario institucional.",
 };
 
 export default async function UniformesPage() {
@@ -46,14 +46,14 @@ export default async function UniformesPage() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
         <div className="space-y-2">
           <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-4 py-1 rounded-full text-xxs font-semibold uppercase tracking-widest flex items-center gap-2 w-fit">
-            <Shirt size={14} />
-            Indumentaria e Inventario
+            <Store size={14} />
+            Bazar & Almacén Institucional
           </Badge>
           <h1 className="text-3xl md:text-5xl font-bold tracking-tight leading-none">
-            Gestión de Uniformes
+            Tienda Escolar
           </h1>
           <p className="text-muted-foreground text-sm md:text-base max-w-2xl font-normal leading-relaxed">
-            Administra el catálogo de prendas escolares, controla el inventario por sede y procesa pedidos de padres de familia.
+            Administra el catálogo de uniformes, libros de texto, agendas y material escolar, controla el inventario por sede y procesa pedidos institucionales.
           </p>
         </div>
       </div>
@@ -62,11 +62,11 @@ export default async function UniformesPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="p-4 rounded-2xl bg-card/80 border border-border/50 shadow-sm flex items-center justify-between">
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Prendas en Catálogo</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Artículos en Catálogo</span>
             <h3 className="text-2xl font-bold font-mono text-foreground mt-0.5">{uniforms.length}</h3>
           </div>
           <div className="size-10 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
-            <Shirt className="size-5" />
+            <BookOpen className="size-5" />
           </div>
         </div>
 
@@ -82,7 +82,7 @@ export default async function UniformesPage() {
 
         <div className="p-4 rounded-2xl bg-card/80 border border-border/50 shadow-sm flex items-center justify-between">
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Tallas y Variantes</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Presentaciones / Variantes</span>
             <h3 className="text-2xl font-bold font-mono text-foreground mt-0.5">{variants.length}</h3>
           </div>
           <div className="size-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">

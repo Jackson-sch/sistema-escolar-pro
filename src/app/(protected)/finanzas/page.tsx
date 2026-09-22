@@ -5,7 +5,7 @@ import {
   getEstadisticasCobranzaAction,
 } from "@/actions/finance";
 import { getInstitucionesAction } from "@/actions/academic";
-import { getSeccionesAction } from "@/actions/academic-structure";
+import { getNivelesAction } from "@/actions/academic-structure";
 import { getVariableByKeyAction } from "@/actions/variables";
 import {
   FORMATO_COMPROBANTE_KEY,
@@ -13,141 +13,115 @@ import {
 } from "@/lib/comprobante-constants";
 import { ConceptoTable } from "@/components/finanzas/conceptos/concepto-table";
 import { CronogramaTable } from "@/components/finanzas/cronogramas/cronograma-table";
-import { AddConceptoButton } from "@/components/finanzas/conceptos/add-concepto-button";
-import { AddPensionButton } from "@/components/finanzas/cronogramas/add-pension-button";
-import { BulkActionsButton } from "@/components/finanzas/cronogramas/bulk-actions-button";
 import { FinanzasDashboard } from "@/components/finanzas/dashboard";
 import { FinanzasReportes } from "@/components/finanzas/reportes/reportes";
 import { FinanzasTabs } from "@/components/finanzas/finanzas-tabs";
+import { CajaRapidaPOS } from "@/components/finanzas/pos/caja-rapida-pos";
 import { DataTableSkeleton } from "@/components/ui/data-table-skeleton";
 import { FinanzasDashboardSkeleton } from "@/components/finanzas/dashboard-skeleton";
-import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/common/page-header";
 import { IconWallet } from "@tabler/icons-react";
 
 /**
  * Componente que carga las estadísticas del dashboard
  */
-async function DashboardWrapper() {
-  const { success: estadisticas } = await getEstadisticasCobranzaAction({});
+async function DashboardData() {
+  const statsRes = await getEstadisticasCobranzaAction({});
+  const estadisticas = statsRes.success || {
+    pendiente: 0,
+    cobrado: 0,
+    deudasVencidas: 0,
+    totalMora: 0,
+    pagosPendientesVerificacion: 0,
+    recaudacionMensual: 0,
+    proyeccionMensual: 0,
+  };
+
   return <FinanzasDashboard estadisticas={estadisticas} />;
 }
 
 /**
- * Componente que carga el cuerpo principal (Tabs)
+ * Componente que carga el contenido principal de finanzas
  */
 async function FinanzasContent() {
-  const currentYear = new Date().getFullYear();
   const [
-    { success: conceptos = [] },
-    { success: cronograma = [] },
-    { data: instituciones = [] },
-    { data: secciones = [] },
-    formatoRes,
+    conceptosRes,
+    cronogramaRes,
+    institucionesRes,
+    nivelesRes,
+    formatoVarRes,
   ] = await Promise.all([
-    getConceptosAction({}),
+    getConceptosAction({ includeInactive: true }),
     getCronogramaAction({}),
     getInstitucionesAction(),
-    getSeccionesAction({ anioAcademico: currentYear }),
+    getNivelesAction(),
     getVariableByKeyAction(FORMATO_COMPROBANTE_KEY),
   ]);
 
+  const conceptos = (conceptosRes as any).success || (conceptosRes as any).data || [];
+  const cronograma = (cronogramaRes as any).success || (cronogramaRes as any).data || [];
+  const instituciones = (institucionesRes as any).data || (institucionesRes as any).success || [];
+  const niveles = (nivelesRes as any).data || (nivelesRes as any).success || [];
   const institucionId = instituciones[0]?.id || "";
-  const formatoComprobante = (formatoRes.data?.valor ||
-    "A4") as FormatoComprobante;
-
-  // Extraer niveles únicos de las secciones
-  const nivelesMap = new Map();
-  secciones.forEach((s: any) => {
-    if (s.nivel && !nivelesMap.has(s.nivel.id)) {
-      nivelesMap.set(s.nivel.id, s.nivel);
-    }
-  });
-  const niveles = Array.from(nivelesMap.values());
+  const formatoComprobante =
+    (formatoVarRes.data?.valor as FormatoComprobante) || "TICKET";
 
   return (
     <FinanzasTabs>
       {{
+        caja: <CajaRapidaPOS />,
         cronograma: (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 px-2">
-              <div>
-                <h3 className="text-xl font-semibold tracking-tight">Cronograma de Pagos</h3>
-                <p className="text-sm text-muted-foreground font-normal">
-                  Seguimiento detallado de cuotas por estudiante.
-                </p>
-              </div>
-              <div className="flex justify-end items-center gap-3">
-                <BulkActionsButton
-                  conceptos={conceptos}
-                  niveles={niveles}
-                />
-                <AddPensionButton conceptos={conceptos} niveles={niveles} />
-              </div>
-            </div>
-            <CronogramaTable
-              data={cronograma as any}
-              conceptos={conceptos}
-              niveles={niveles}
-              institucion={instituciones[0]}
-              formatoComprobante={formatoComprobante}
-            />
-          </div>
+          <CronogramaTable
+            data={cronograma as any}
+            conceptos={conceptos}
+            niveles={niveles}
+            institucion={instituciones[0]}
+            formatoComprobante={formatoComprobante}
+          />
         ),
         conceptos: (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 px-2">
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 px-1">
               <div>
-                <h3 className="text-xl font-semibold tracking-tight">Catálogo de Conceptos</h3>
-                <p className="text-sm text-muted-foreground font-normal">
-                  Configuración de pensiones, matrículas y otros servicios.
+                <h3 className="text-base font-extrabold text-foreground tracking-tight">
+                  Catálogo de Conceptos de Cobro
+                </h3>
+                <p className="text-xs text-muted-foreground font-normal">
+                  Configuración de pensiones mensuales, matrículas, APAFA y
+                  servicios escolares.
                 </p>
-              </div>
-              <div className="order-1 sm:order-2">
-                <AddConceptoButton institucionId={institucionId} />
               </div>
             </div>
             <ConceptoTable data={conceptos} meta={{ institucionId }} />
           </div>
         ),
-        reportes: <FinanzasReportes cronograma={cronograma} institucion={instituciones[0]} />,
+        reportes: (
+          <FinanzasReportes
+            cronograma={cronograma}
+            institucion={instituciones[0]}
+          />
+        ),
       }}
     </FinanzasTabs>
   );
 }
 
-export default async function FinanzasPage() {
+export default function FinanzasPage() {
   return (
-    <div className="min-h-screen flex flex-col gap-8 p-4 md:p-8 pt-6 @container/main">
-      {/* ── HEADER ── */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
-        <div className="space-y-2">
-          <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-4 py-1 rounded-full text-xxs font-medium uppercase tracking-widest flex items-center gap-2 w-fit">
-            <IconWallet size={14} />
-            Tesorería & Cobranzas
-          </Badge>
-          <h1 className="text-4xl md:text-5xl font-semibold tracking-tighter leading-none">
-            Gestión Financiera
-          </h1>
-          <p className="text-muted-foreground text-sm md:text-base max-w-2xl font-normal leading-relaxed">
-            Administra el ciclo de vida financiero de la institución con herramientas de cobranza avanzada y análisis de recaudación en tiempo real.
-          </p>
-        </div>
-      </div>
+    <div className="space-y-6">
+      <PageHeader
+        title="Gestión de Finanzas"
+        description="Panel central de recaudación, cronogramas de pensiones, caja y reportes de tesorería"
+        icon={<IconWallet className="size-6 text-primary" />}
+      />
 
-      {/* ── DASHBOARD ── */}
-      <div className="px-2">
-        <Suspense fallback={<FinanzasDashboardSkeleton />}>
-          <DashboardWrapper />
-        </Suspense>
-      </div>
+      <Suspense fallback={<FinanzasDashboardSkeleton />}>
+        <DashboardData />
+      </Suspense>
 
-      {/* ── TABS & CONTENT ── */}
-      <div>
-        <Suspense fallback={<DataTableSkeleton rowCount={8} />}>
-          <FinanzasContent />
-        </Suspense>
-      </div>
+      <Suspense fallback={<DataTableSkeleton />}>
+        <FinanzasContent />
+      </Suspense>
     </div>
   );
 }
-

@@ -64,24 +64,24 @@ export function CapacityForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-2">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="nombre"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nombre de la Capacidad</FormLabel>
+              <FormLabel className="text-xs font-bold text-foreground">Nombre de la Capacidad</FormLabel>
               <FormControl>
                 <div className="relative">
-                  <IconCircleCheck className="absolute left-3 top-2.5 h-4 w-4 text-emerald-500" />
+                  <IconCircleCheck className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-emerald-600" />
                   <Input
                     {...field}
-                    placeholder="Ej: Obtiene información..."
-                    className="pl-10 rounded-full"
+                    placeholder="Ej: Obtiene información del texto escrito"
+                    className="pl-9 h-9 text-xs rounded-xl border-border/60 bg-background"
                   />
                 </div>
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-xxs" />
             </FormItem>
           )}
         />
@@ -91,27 +91,41 @@ export function CapacityForm({
           name="descripcion"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Descripción (Opcional)</FormLabel>
+              <FormLabel className="text-xs font-bold text-foreground">Descripción / Indicadores de Logro (Opcional)</FormLabel>
               <FormControl>
                 <Textarea
                   {...field}
-                  placeholder="Detalle los indicadores de esta capacidad..."
-                  className="resize-none min-h-[100px] rounded-xl"
+                  placeholder="Detalle los indicadores o desempeños de esta capacidad..."
+                  rows={3}
+                  className="resize-none text-xs rounded-xl border-border/60 bg-background"
                 />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-xxs" />
             </FormItem>
           )}
         />
 
-        <Button
-          disabled={isPending}
-          type="submit"
-          className="w-full rounded-full mt-4 hover:scale-105"
-        >
-          {isPending && <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {id ? "Guardar Cambios" : "Añadir Capacidad"}
-        </Button>
+        <div className="flex items-center justify-end gap-2 pt-2 border-t border-border/40">
+          {onSuccess && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onSuccess}
+              className="h-9 px-4 text-xs font-bold rounded-xl border-border/60 cursor-pointer"
+              disabled={isPending}
+            >
+              Cancelar
+            </Button>
+          )}
+          <Button
+            disabled={isPending}
+            type="submit"
+            className="h-9 px-5 text-xs font-extrabold rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer shadow-xs"
+          >
+            {isPending && <IconLoader2 className="mr-1.5 size-3.5 animate-spin" />}
+            {id ? "Guardar Cambios" : "Añadir Capacidad"}
+          </Button>
+        </div>
       </form>
     </Form>
   );

@@ -1,4 +1,4 @@
-import { StyleSheet } from '@react-pdf/renderer';
+import { StyleSheet } from "@/lib/pdf";
 import { usePdfxTheme } from '../../../lib/pdfx-theme-context';
 type PdfxTheme = ReturnType<typeof usePdfxTheme>;
 

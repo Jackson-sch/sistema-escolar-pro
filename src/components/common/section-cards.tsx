@@ -4,7 +4,6 @@ import {
   IconUsers,
   IconCreditCard,
   IconCalendarCheck,
-  IconMinus,
   IconAlertTriangle,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
@@ -31,7 +30,7 @@ export function SectionCards({ stats, isLoading }: SectionCardsProps) {
     return (
       <div className="grid grid-cols-1 gap-4 px-1 sm:grid-cols-2 lg:grid-cols-4">
         {[1, 2, 3, 4].map((i) => (
-          <Skeleton key={i} className="h-[130px] w-full rounded-2xl" />
+          <Skeleton key={i} className="h-[120px] w-full rounded-2xl" />
         ))}
       </div>
     );
@@ -41,7 +40,7 @@ export function SectionCards({ stats, isLoading }: SectionCardsProps) {
     {
       title: "Recaudación Total",
       value: formatCurrency(stats?.totalRevenue || 0),
-      sub: "Ingresos confirmados en caja",
+      sub: "Ingresos liquidados en caja",
       icon: IconCreditCard,
       trend: "up" as const,
       trendLabel: "Cobranza activa",
@@ -58,14 +57,14 @@ export function SectionCards({ stats, isLoading }: SectionCardsProps) {
           ? ("down" as const)
           : ("neutral" as const),
       trendLabel:
-        (stats?.totalOverdue || 0) > 0 ? "Requiere gestión" : "En orden",
+        (stats?.totalOverdue || 0) > 0 ? "Gestión requerida" : "Sin morosidad",
       iconColor: "text-rose-600 dark:text-rose-400",
       iconBg: "bg-rose-500/10 border-rose-500/20",
     },
     {
-      title: "Asistencia Hoy",
+      title: "Asistencia de Hoy",
       value: `${stats?.attendanceRate?.toFixed(1) ?? "0"}%`,
-      sub: "Monitor de presencia diaria",
+      sub: "Presencia de alumnos en aula",
       icon: IconCalendarCheck,
       trend:
         (stats?.attendanceRate ?? 0) >= 90
@@ -79,10 +78,10 @@ export function SectionCards({ stats, isLoading }: SectionCardsProps) {
     {
       title: "Padrón Estudiantil",
       value: (stats?.totalStudents ?? 0).toLocaleString("es-PE"),
-      sub: `${stats?.activeEnrollments ?? 0} matrículas activas`,
+      sub: `${stats?.activeEnrollments ?? 0} matrículas vigentes`,
       icon: IconUsers,
       trend: "up" as const,
-      trendLabel: "Padrón activo",
+      trendLabel: "Población activa",
       iconColor: "text-violet-600 dark:text-violet-400",
       iconBg: "bg-violet-500/10 border-violet-500/20",
     },
@@ -93,32 +92,32 @@ export function SectionCards({ stats, isLoading }: SectionCardsProps) {
       {cards.map((card) => (
         <div
           key={card.title}
-          className={cn(
-            "p-4 rounded-2xl bg-card/80 border border-border/50 shadow-sm flex items-center justify-between transition-[background-color,box-shadow,transform] hover:bg-card hover:shadow-md hover:-translate-y-0.5",
-          )}
+          className="p-5 rounded-2xl bg-card border border-border/60 shadow-xs flex flex-col justify-between transition-[border-color,box-shadow] hover:border-primary/40 hover:shadow-sm"
         >
-          <div className="space-y-1 min-w-0 pr-2">
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate">
-                {card.title}
-              </span>
+          {/* Fila superior: Título a la izquierda y el icono a un costado a la misma altura */}
+          <div className="flex items-center justify-between gap-2 mb-3">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate">
+              {card.title}
+            </span>
+            <div
+              className={cn(
+                "size-9 rounded-xl border flex items-center justify-center shrink-0 shadow-2xs",
+                card.iconBg,
+                card.iconColor,
+              )}
+            >
+              <card.icon className="size-4.5" />
             </div>
-            <h3 className="text-2xl md:text-3xl font-bold font-mono text-foreground truncate">
-              {card.value}
-            </h3>
-            <p className="text-[11px] text-muted-foreground/80 truncate">
-              {card.sub}
-            </p>
           </div>
 
-          <div
-            className={cn(
-              "size-11 rounded-xl border flex items-center justify-center shrink-0 shadow-xs",
-              card.iconBg,
-              card.iconColor,
-            )}
-          >
-            <card.icon className="size-5" />
+          {/* Fila inferior: Cifra y descripción */}
+          <div className="space-y-1">
+            <h3 className="text-2xl font-mono font-black tracking-tight text-foreground truncate">
+              {card.value}
+            </h3>
+            <p className="text-[11px] text-muted-foreground truncate">
+              {card.sub}
+            </p>
           </div>
         </div>
       ))}

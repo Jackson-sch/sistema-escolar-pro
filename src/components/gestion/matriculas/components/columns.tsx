@@ -8,6 +8,7 @@ import {
   IconAlertCircle,
   IconRotate2,
   IconLogout,
+  IconClockHour4,
 } from "@tabler/icons-react";
 import { formatDate } from "@/lib/formats";
 
@@ -164,32 +165,42 @@ export const columns: ColumnDef<EnrollmentTableType>[] = [
 
       const statusConfig: Record<
         string,
-        { bg: string; text: string; icon: any }
+        { bg: string; text: string; icon: any; label?: string }
       > = {
         activo: {
-          bg: "bg-green-500/10",
-          text: "text-green-500",
+          bg: "bg-green-500/10 border-green-500/20",
+          text: "text-green-600 dark:text-green-400",
           icon: IconCheck,
+          label: "Activo",
+        },
+        pendiente: {
+          bg: "bg-amber-500/15 border-amber-500/30",
+          text: "text-amber-700 dark:text-amber-300 font-semibold",
+          icon: IconClockHour4,
+          label: "Por Ratificar",
         },
         retirado: {
-          bg: "bg-red-500/10",
-          text: "text-red-500",
+          bg: "bg-red-500/10 border-red-500/20",
+          text: "text-red-600 dark:text-red-400",
           icon: IconLogout,
+          label: "Retirado",
         },
         suspendido: {
-          bg: "bg-yellow-500/10",
-          text: "text-yellow-500",
+          bg: "bg-yellow-500/10 border-yellow-500/20",
+          text: "text-yellow-600 dark:text-yellow-400",
           icon: IconAlertCircle,
+          label: "Suspendido",
         },
         egresado: {
-          bg: "bg-blue-500/10",
-          text: "text-blue-500",
+          bg: "bg-blue-500/10 border-blue-500/20",
+          text: "text-blue-600 dark:text-blue-400",
           icon: IconCheck,
+          label: "Egresado",
         },
       };
 
       const config = statusConfig[estado] || {
-        bg: "bg-muted",
+        bg: "bg-muted border-border",
         text: "text-muted-foreground",
         icon: IconAlertCircle,
       };
@@ -197,10 +208,10 @@ export const columns: ColumnDef<EnrollmentTableType>[] = [
 
       return (
         <Badge
-          className={`gap-2 ${config.bg} ${config.text} border transition-colors`}
+          className={`gap-1.5 ${config.bg} ${config.text} border transition-colors shadow-none`}
         >
           <Icon className="size-3.5" />
-          <span className="capitalize">{estado}</span>
+          <span className="capitalize">{config.label || estado}</span>
         </Badge>
       );
     },

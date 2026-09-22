@@ -12,7 +12,7 @@ export async function getPortalUniformesDataAction(targetPadreId?: string) {
     }
 
     const rawRole = (session.user.role || "").toString().toLowerCase();
-    const isAdmin = ["super_admin", "admin", "administrador", "director"].includes(rawRole);
+    const isAdmin = ["super_admin", "admin", "administrador", "administrativo", "director"].includes(rawRole);
     const padreId = isAdmin && targetPadreId ? targetPadreId : session.user.id;
 
     const [uniforms, categorias, sedes, relaciones] = await Promise.all([

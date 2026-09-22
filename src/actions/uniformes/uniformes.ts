@@ -79,40 +79,42 @@ export async function upsertUniformeAction(data: any) {
         });
       }
 
-      for (const v of variantes) {
-        if (v.id) {
-          await prisma.varianteUniforme.update({
-            where: { id: v.id },
-            data: {
-              talla: v.talla,
-              precio: v.precio,
-              stock: v.stock,
-              sedeId: v.sedeId,
-            },
-          });
-        } else {
-          await prisma.varianteUniforme.upsert({
-            where: {
-              uniformeId_talla_sedeId: {
-                uniformeId: id,
+      await Promise.all(
+        variantes.map((v: any) => {
+          if (v.id) {
+            return prisma.varianteUniforme.update({
+              where: { id: v.id },
+              data: {
                 talla: v.talla,
+                precio: v.precio,
+                stock: v.stock,
                 sedeId: v.sedeId,
               },
-            },
-            update: {
-              precio: v.precio,
-              stock: v.stock,
-            },
-            create: {
-              uniformeId: id,
-              talla: v.talla,
-              precio: v.precio,
-              stock: v.stock,
-              sedeId: v.sedeId,
-            },
-          });
-        }
-      }
+            });
+          } else {
+            return prisma.varianteUniforme.upsert({
+              where: {
+                uniformeId_talla_sedeId: {
+                  uniformeId: id,
+                  talla: v.talla,
+                  sedeId: v.sedeId,
+                },
+              },
+              update: {
+                precio: v.precio,
+                stock: v.stock,
+              },
+              create: {
+                uniformeId: id,
+                talla: v.talla,
+                precio: v.precio,
+                stock: v.stock,
+                sedeId: v.sedeId,
+              },
+            });
+          }
+        })
+      );
     }
 
     revalidatePath("/uniformes");

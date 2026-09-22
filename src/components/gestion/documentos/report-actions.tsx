@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition, useEffect, useRef } from "react";
 import {
   IconClipboardList,
   IconDownload,
@@ -53,7 +53,7 @@ export function ReportActions({
   const [periodos, setPeriodos] = useState<any[]>([]);
   const [selectedPeriodo, setSelectedPeriodo] = useState<string>("");
   const [reportData, setReportData] = useState<any>(null);
-  const [verificationCode, setVerificationCode] = useState<string>("");
+  const verificationCodeRef = useRef<string>("");
   const [isLoadingData, setIsLoadingData] = useState(false);
 
   // Cargar periodos al abrir
@@ -109,7 +109,7 @@ export function ReportActions({
         }
 
         setReportData(res.data);
-        setVerificationCode(vCode);
+        verificationCodeRef.current = vCode;
         toast.success("Reporte preparado y certificado para descarga");
       } else {
         toast.error(res.error || "Error al preparar el reporte");
@@ -136,7 +136,7 @@ export function ReportActions({
           periodoNombre={reportData.periodoNombre}
           anioAcademico={reportData.anioAcademico}
           institucion={reportData.institucion}
-          verificationCode={verificationCode}
+          verificationCode={verificationCodeRef.current}
         />
       ).toBlob();
 
@@ -160,7 +160,7 @@ export function ReportActions({
       <DialogTrigger asChild>
         <Button
           variant="outline"
-          className="w-full rounded-full text-xs md:text-sm h-9 md:h-10 font-semibold border-border/60 hover:bg-accent hover:text-accent-foreground transition-all duration-200 shadow-sm"
+          className="w-full rounded-full text-xs md:text-sm h-9 md:h-10 font-semibold border-border/60 hover:bg-accent hover:text-accent-foreground transition-colors duration-200 shadow-sm"
         >
           <IconClipboardList className="size-3.5 md:size-4 mr-1.5 md:mr-2 text-emerald-500" />{" "}
           Boleta de Notas

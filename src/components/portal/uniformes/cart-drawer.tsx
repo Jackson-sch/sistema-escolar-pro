@@ -77,6 +77,7 @@ export default function CartDrawer({
               variant="ghost"
               size="icon"
               onClick={() => setIsCartOpen(false)}
+              aria-label="Cerrar carrito"
               className="size-8 rounded-xl border border-border/40 hover:bg-muted text-muted-foreground cursor-pointer"
             >
               <X className="size-4" />

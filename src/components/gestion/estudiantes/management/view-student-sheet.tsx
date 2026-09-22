@@ -1,4 +1,7 @@
 import { useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { IconExternalLink } from "@tabler/icons-react";
 import {
   Sheet,
   SheetContent,
@@ -27,6 +30,14 @@ interface ViewStudentSheetProps {
   metaData?: any;
 }
 
+const STUDENT_SHEET_TABS = [
+  { id: "general", label: "General" },
+  { id: "familia", label: "Familia" },
+  { id: "salud", label: "Salud" },
+  { id: "disciplina", label: "Disciplina" },
+  { id: "asistencia", label: "Logros" },
+];
+
 export function ViewStudentSheet({
   student,
   isOpen,
@@ -37,13 +48,6 @@ export function ViewStudentSheet({
 }: ViewStudentSheetProps) {
   const [activeTab, setActiveTab] = useState("general");
 
-  const TABS = [
-    { id: "general", label: "General" },
-    { id: "familia", label: "Familia" },
-    { id: "salud", label: "Salud" },
-    { id: "disciplina", label: "Disciplina" },
-    { id: "asistencia", label: "Logros" },
-  ];
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -57,9 +61,23 @@ export function ViewStudentSheet({
         <StudentProfileHeader student={student} />
 
         <div className="flex-1 flex flex-col min-h-0 bg-card">
-          <div className="px-6 shrink-0 bg-background/50 p-3">
+          <div className="px-4 py-2.5 bg-muted/20 border-b border-border/40 flex items-center justify-between gap-2">
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="w-full h-8.5 rounded-xl font-bold text-xs bg-background border-border/60 hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-colors shadow-2xs gap-1.5 cursor-pointer"
+            >
+              <Link href={`/gestion/estudiantes/${student.id}`}>
+                <IconExternalLink className="size-3.5" />
+                <span>Abrir Expediente 360° Completo</span>
+              </Link>
+            </Button>
+          </div>
+
+          <div className="px-6 shrink-0 bg-background/50 p-2.5">
             <AnimatedTabs
-              tabs={TABS}
+              tabs={STUDENT_SHEET_TABS}
               activeTab={activeTab}
               onTabChange={setActiveTab}
             />

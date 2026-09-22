@@ -8,7 +8,7 @@ import {
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer 
-} from "recharts"
+} from "@/lib/charts"
 import { IconTrendingUp } from "@tabler/icons-react"
 
 interface TrendChartProps {

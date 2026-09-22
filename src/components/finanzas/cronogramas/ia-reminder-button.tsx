@@ -197,6 +197,7 @@ export function IAReminderButton({ cronograma }: IAReminderButtonProps) {
                 <Button
                   size="icon"
                   variant="ghost"
+                  aria-label="Regenerar recordatorio"
                   className="absolute bottom-4 right-4 rounded-xl size-10 bg-background/80 border border-white/5 hover:bg-violet-600 hover:text-white transition-colors shadow-lg"
                   onClick={handleGenerate}
                   disabled={loading}
@@ -231,6 +232,7 @@ export function IAReminderButton({ cronograma }: IAReminderButtonProps) {
               <Button
                 variant="outline"
                 size="icon"
+                aria-label="Compartir"
                 className="rounded-full text-violet-400"
                 onClick={shareNative}
               >

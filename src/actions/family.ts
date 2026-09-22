@@ -52,104 +52,170 @@ export async function upsertFamilyMemberAction(studentId: string, values: any, r
       ...userData
     } = sanitizedValues
 
-    // 1. Buscar o Crear/Actualizar el Usuario del Familiar
-    let parent = await prisma.user.findUnique({
-      where: { dni: dni || undefined } // No buscar si el DNI es null
-    })
+    const cleanEmail = email ? email.trim().toLowerCase() : "";
+    if (!cleanEmail) {
+      return { error: "El correo electrónico es obligatorio para el acceso a la plataforma." };
+    }
+
+    const cleanDni = (dni || "").trim();
+    if (!cleanDni || cleanDni.length < 8) {
+      return { error: "El número de documento debe tener al menos 8 caracteres." };
+    }
+
+    // 1. Obtener la relación existente si se está editando
+    let existingRelation = null;
+    if (relationId) {
+      existingRelation = await prisma.relacionFamiliar.findUnique({
+        where: { id: relationId },
+        include: { padreTutor: true },
+      });
+      if (!existingRelation) {
+        return { error: "La relación familiar no fue encontrada." };
+      }
+    }
+
+    // 2. Buscar si ya existe un usuario con este DNI
+    const userWithDni = await prisma.user.findUnique({
+      where: { dni: cleanDni },
+    });
 
     // VALIDACIÓN DE SEGURIDAD: Si existe pero no es padre, bloquear.
-    if (parent && parent.role !== "padre") {
-      const roleText = parent.role === "estudiante" ? "Estudiante" : "Personal";
+    if (userWithDni && userWithDni.role !== "padre") {
+      const roleText = userWithDni.role === "estudiante" ? "Estudiante" : "Personal";
       return { 
-        error: `El DNI ${dni} ya está registrado como ${roleText} y no puede ser usado como familiar.` 
-      }
+        error: `El documento ${cleanDni} ya está registrado como ${roleText} y no puede ser usado como familiar.` 
+      };
     }
 
-    if (!parent) {
-      // Buscar el estado "activo" por su código
-      const estadoActivo = await prisma.estadoUsuario.findFirst({
-        where: { 
-          OR: [
-            { codigo: "activo" },
-            { codigo: "ACTIVO" },
-            { esActivo: true }
-          ]
-        }
-      })
-      
-      if (!estadoActivo) {
-        return { error: "No se encontró un estado activo en el sistema" }
-      }
+    // Verificar unicidad de correo
+    const targetUserId = userWithDni?.id || existingRelation?.padreTutorId;
+    const userWithEmail = await prisma.user.findFirst({
+      where: {
+        email: cleanEmail,
+        ...(targetUserId ? { id: { not: targetUserId } } : {}),
+      },
+      select: { id: true },
+    });
 
-      // Si no existe, lo creamos con una contraseña por defecto (su DNI o uno aleatorio si no hay)
-      const passwordToHash = dni || randomBytes(6).toString("base64url");
-      const hashedPassword = await bcrypt.hash(passwordToHash, 10)
-      
-      parent = await prisma.user.create({
-        data: {
-          dni,
-          name,
-          apellidoPaterno,
-          apellidoMaterno,
-          telefono,
-          email,
-          role: "padre" as Role,
-          password: hashedPassword,
-          estadoId: estadoActivo.id,
-          mustChangePassword: true,
-          institucionId: institucionId || undefined,
-          ...userData
-        }
-      })
+    if (userWithEmail) {
+      return { error: `El correo "${cleanEmail}" ya está registrado por otro usuario.` };
+    }
+
+    let parent;
+
+    if (existingRelation) {
+      // MODO EDICIÓN:
+      if (userWithDni && userWithDni.id !== existingRelation.padreTutorId) {
+        // Se cambió el DNI a uno de otro padre ya existente en el sistema
+        parent = await prisma.user.update({
+          where: { id: userWithDni.id },
+          data: {
+            name,
+            apellidoPaterno,
+            apellidoMaterno,
+            telefono,
+            email: cleanEmail,
+            ...userData,
+          },
+        });
+      } else {
+        // Mismo padre o corrección de DNI mal digitado
+        parent = await prisma.user.update({
+          where: { id: existingRelation.padreTutorId },
+          data: {
+            dni: cleanDni,
+            name,
+            apellidoPaterno,
+            apellidoMaterno,
+            telefono,
+            email: cleanEmail,
+            ...userData,
+          },
+        });
+      }
     } else {
-      // Si existe, actualizamos sus datos básicos
-      parent = await prisma.user.update({
-        where: { id: parent.id },
-        data: {
-          name,
-          apellidoPaterno,
-          apellidoMaterno,
-          telefono,
-          email,
-          ...userData
+      // MODO CREACIÓN:
+      if (userWithDni) {
+        parent = await prisma.user.update({
+          where: { id: userWithDni.id },
+          data: {
+            name,
+            apellidoPaterno,
+            apellidoMaterno,
+            telefono,
+            email: cleanEmail,
+            ...userData,
+          },
+        });
+      } else {
+        const estadoActivo = await prisma.estadoUsuario.findFirst({
+          where: { 
+            OR: [
+              { codigo: "activo" },
+              { codigo: "ACTIVO" },
+              { esActivo: true },
+            ],
+          },
+        });
+        
+        if (!estadoActivo) {
+          return { error: "No se encontró un estado activo en el sistema" };
         }
-      })
+
+        const passwordToHash = cleanDni || randomBytes(6).toString("base64url");
+        const hashedPassword = await bcrypt.hash(passwordToHash, 10);
+        
+        parent = await prisma.user.create({
+          data: {
+            dni: cleanDni,
+            name,
+            apellidoPaterno,
+            apellidoMaterno,
+            telefono,
+            email: cleanEmail,
+            role: "padre" as Role,
+            password: hashedPassword,
+            estadoId: estadoActivo.id,
+            mustChangePassword: true,
+            institucionId: institucionId || undefined,
+            ...userData,
+          },
+        });
+      }
     }
 
-    // 2. Gestionar la Relación Familiar
+    // 3. Gestionar la Relación Familiar
     if (contactoPrimario) {
-      // Si este será el contacto primario, quitamos la marca a los demás
       await prisma.relacionFamiliar.updateMany({
         where: { hijoId: studentId },
-        data: { contactoPrimario: false }
-      })
+        data: { contactoPrimario: false },
+      });
     }
 
     if (relationId) {
-      // Actualizar relación existente
       await prisma.relacionFamiliar.update({
         where: { id: relationId },
         data: {
+          padreTutorId: parent.id,
           parentesco,
           contactoPrimario,
           autorizadoRecoger,
-          viveCon
-        }
-      })
+          viveCon,
+        },
+      });
     } else {
-      // Crear nueva relación
       await prisma.relacionFamiliar.upsert({
         where: {
           padreTutorId_hijoId: {
             padreTutorId: parent.id,
-            hijoId: studentId
-          }
+            hijoId: studentId,
+          },
         },
         update: {
           parentesco,
           contactoPrimario,
           autorizadoRecoger,
-          viveCon
+          viveCon,
         },
         create: {
           padreTutorId: parent.id,
@@ -157,9 +223,9 @@ export async function upsertFamilyMemberAction(studentId: string, values: any, r
           parentesco,
           contactoPrimario,
           autorizadoRecoger,
-          viveCon
-        }
-      })
+          viveCon,
+        },
+      });
     }
 
     revalidatePath(REVALIDATE_PATH)

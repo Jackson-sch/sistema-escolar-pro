@@ -50,6 +50,71 @@ interface AreaFormProps {
   defaultNivelId?: string;
 }
 
+function getAreaDefaultValues(
+  initialData: any,
+  defaultNivelId?: string,
+  institucionId?: string
+): CurricularAreaValues {
+  if (initialData) {
+    return {
+      ...initialData,
+      nombre: initialData.nombre || "",
+      codigo: initialData.codigo || "",
+      descripcion: initialData.descripcion || "",
+      orden: initialData.orden ?? 0,
+      color: initialData.color || "#3b82f6",
+      icono: initialData.icono || "",
+      creditos: initialData.creditos || 0,
+      nivelId: initialData.nivelId || defaultNivelId || "",
+      institucionId: initialData.institucionId || (institucionId ?? ""),
+    };
+  }
+  return {
+    nombre: "",
+    codigo: "",
+    descripcion: "",
+    orden: 0,
+    color: "#3b82f6",
+    icono: "",
+    activa: true,
+    creditos: 0,
+    nivelId: defaultNivelId || "",
+    institucionId: institucionId ?? "",
+  };
+}
+
+function AreaFormActions({
+  isPending,
+  isEdit,
+  onCancel,
+}: {
+  isPending: boolean;
+  isEdit: boolean;
+  onCancel?: () => void;
+}) {
+  return (
+    <div className="flex items-center justify-end gap-2 pt-3 border-t border-border/40">
+      <Button
+        type="button"
+        variant="outline"
+        onClick={onCancel}
+        className="h-9 px-4 text-xs font-bold rounded-xl border-border/60 cursor-pointer"
+        disabled={isPending}
+      >
+        Cancelar
+      </Button>
+      <Button
+        disabled={isPending}
+        type="submit"
+        className="h-9 px-5 text-xs font-extrabold rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer shadow-xs"
+      >
+        {isPending && <IconLoader2 className="mr-1.5 size-3.5 animate-spin" />}
+        {isPending ? "Guardando..." : isEdit ? "Guardar Cambios" : "Crear Área"}
+      </Button>
+    </div>
+  );
+}
+
 export function AreaForm({
   id,
   initialData,
@@ -63,31 +128,7 @@ export function AreaForm({
 
   const form = useForm<CurricularAreaValues>({
     resolver: zodResolver(CurricularAreaSchema),
-    defaultValues: initialData
-      ? {
-          ...initialData,
-          nombre: initialData.nombre || "",
-          codigo: initialData.codigo || "",
-          descripcion: initialData.descripcion || "",
-          orden: initialData.orden ?? 0,
-          color: initialData.color || "#3b82f6",
-          icono: initialData.icono || "",
-          creditos: initialData.creditos || 0,
-          nivelId: initialData.nivelId || defaultNivelId || "",
-          institucionId: initialData.institucionId || institucionId,
-        }
-      : {
-          nombre: "",
-          codigo: "",
-          descripcion: "",
-          orden: 0,
-          color: "#3b82f6",
-          icono: "",
-          activa: true,
-          creditos: 0,
-          nivelId: defaultNivelId || "",
-          institucionId,
-        },
+    defaultValues: getAreaDefaultValues(initialData, defaultNivelId, institucionId),
   });
 
   useEffect(() => {
@@ -124,26 +165,26 @@ export function AreaForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Nombre del Área */}
           <FormField
             control={form.control}
             name="nombre"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Nombre del Área</FormLabel>
+                <FormLabel className="text-xs font-bold text-foreground">Nombre del Área</FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <IconFileDescription className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <IconFileDescription className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/60" />
                     <Input
                       {...field}
-                      placeholder="Ejem: Ciencia y Tecnología"
-                      className="pl-10 rounded-full"
+                      placeholder="Ej: Ciencia y Tecnología"
+                      className="pl-9 h-9 text-xs rounded-xl border-border/60 bg-background"
                     />
                   </div>
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xxs" />
               </FormItem>
             )}
           />
@@ -154,25 +195,25 @@ export function AreaForm({
             name="nivelId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Nivel Educativo</FormLabel>
+                <FormLabel className="text-xs font-bold text-foreground">Nivel Educativo</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   value={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger className="rounded-full">
+                    <SelectTrigger className="h-9 text-xs font-medium rounded-xl border-border/60 bg-background">
                       <SelectValue placeholder="Seleccione un nivel..." />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent className="rounded-xl">
                     {niveles.map((nivel) => (
-                      <SelectItem key={nivel.id} value={nivel.id}>
+                      <SelectItem key={nivel.id} value={nivel.id} className="text-xs">
                         {nivel.nombre}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                <FormMessage />
+                <FormMessage className="text-xxs" />
               </FormItem>
             )}
           />
@@ -183,18 +224,18 @@ export function AreaForm({
             name="codigo"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Código</FormLabel>
+                <FormLabel className="text-xs font-bold text-foreground">Código Curricular</FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <IconHash className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <IconHash className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/60" />
                     <Input
                       {...field}
                       placeholder="CYT-CORE"
-                      className="pl-10 rounded-full"
+                      className="pl-9 h-9 text-xs font-mono rounded-xl border-border/60 bg-background"
                     />
                   </div>
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xxs" />
               </FormItem>
             )}
           />
@@ -205,21 +246,21 @@ export function AreaForm({
             name="orden"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Orden de Visualización</FormLabel>
+                <FormLabel className="text-xs font-bold text-foreground">Orden en Boleta</FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <IconArrowUp className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <IconArrowUp className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/60" />
                     <Input
                       {...field}
                       type="number"
                       onChange={(e) =>
                         field.onChange(parseInt(e.target.value) || 0)
                       }
-                      className="pl-10 rounded-full"
+                      className="pl-9 h-9 text-xs font-mono rounded-xl border-border/60 bg-background"
                     />
                   </div>
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xxs" />
               </FormItem>
             )}
           />
@@ -230,44 +271,42 @@ export function AreaForm({
             name="color"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Etiqueta Visual (Color)</FormLabel>
+                <FormLabel className="text-xs font-bold text-foreground">Color Identificador</FormLabel>
                 <FormControl>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2.5 pt-1">
                     {/* Colores predefinidos */}
-                    <div className="flex flex-wrap gap-2">
-                      {colors.map((c) => (
+                    <div className="flex flex-wrap gap-1.5">
+                      {colors.slice(0, 7).map((c) => (
                         <button
                           key={c}
                           type="button"
                           onClick={() => field.onChange(c)}
                           className={cn(
-                            "size-6 rounded-full border transition-[outline-color,box-shadow] focus:outline-none focus:ring-2 focus:ring-offset-2",
+                            "size-5.5 rounded-lg border transition-all cursor-pointer",
                             field.value === c
-                              ? "ring-2 ring-offset-2 ring-slate-900 scale-110 shadow-sm"
-                              : "border-transparent opacity-60 hover:opacity-100",
+                              ? "ring-2 ring-offset-1 ring-primary scale-110 shadow-xs"
+                              : "border-transparent opacity-70 hover:opacity-100",
                           )}
                           style={{ backgroundColor: c }}
-                          aria-label={`Seleccionar color ${c}`}
+                          aria-label={`Color ${c}`}
                         />
                       ))}
                     </div>
                     {/* Selector personalizado nativo */}
                     <div className="relative group">
-                      <div className="absolute inset-0 rounded-full ring-1 ring-inset ring-black/10 pointer-events-none group-hover:ring-black/20 transition-shadow" />
                       <Input
                         type="color"
                         {...field}
-                        className="size-6 p-0 border-none bg-transparent cursor-pointer rounded-full overflow-hidden opacity-0 absolute inset-0 z-10"
+                        className="size-6 p-0 border-none bg-transparent cursor-pointer rounded-lg overflow-hidden opacity-0 absolute inset-0 z-10"
                       />
-                      {/* Vista previa del color custom */}
                       <div
-                        className="size-6 rounded-full shadow-sm"
+                        className="size-6 rounded-lg shadow-2xs border border-border/60"
                         style={{ backgroundColor: field.value }}
                       />
                     </div>
                   </div>
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xxs" />
               </FormItem>
             )}
           />
@@ -278,59 +317,44 @@ export function AreaForm({
             name="icono"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Icono Representativo</FormLabel>
+                <FormLabel className="text-xs font-bold text-foreground">Icono Representativo</FormLabel>
                 <FormControl>
                   <IconPicker
                     value={field.value || ""}
                     onChange={field.onChange}
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xxs" />
               </FormItem>
             )}
           />
-
         </div>
+
         {/* Descripción */}
-        <div className="pt-6 border-b border-muted pb-6">
-          <FormField
-            control={form.control}
-            name="descripcion"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Descripción / Propósito Pedagógico</FormLabel>
-                <FormControl>
-                  <Textarea
-                    {...field}
-                    placeholder="Describe los objetivos y el alcance de esta área curricular..."
-                    className="resize-none min-h-[60px]"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        <FormField
+          control={form.control}
+          name="descripcion"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-xs font-bold text-foreground">Descripción / Propósito Pedagógico</FormLabel>
+              <FormControl>
+                <Textarea
+                  {...field}
+                  placeholder="Describe los objetivos y el alcance de esta área curricular..."
+                  rows={2}
+                  className="resize-none text-xs rounded-xl border-border/60 bg-background"
+                />
+              </FormControl>
+              <FormMessage className="text-xxs" />
+            </FormItem>
+          )}
+        />
 
-        <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onSuccess}
-            className="w-full sm:w-auto rounded-full border-border/40 hover:bg-accent/50 hover:scale-105"
-            disabled={isPending}
-          >
-            Cancelar
-          </Button>
-          <Button
-            disabled={isPending}
-            type="submit"
-            className="w-full sm:w-auto font-medium rounded-full px-8 hover:scale-105"
-          >
-            {isPending && <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isPending ? "Guardando..." : id ? "Guardar Cambios" : "Crear Área"}
-          </Button>
-        </div>
+        <AreaFormActions
+          isPending={isPending}
+          isEdit={Boolean(id)}
+          onCancel={onSuccess}
+        />
       </form>
     </Form>
   );

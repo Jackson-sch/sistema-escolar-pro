@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { IconCalendarEvent, IconFilter } from "@tabler/icons-react";
+import { cn } from "@/lib/utils";
 
 interface EnrollmentTableMeta {
   nivelesAcademicos?: unknown[];
@@ -54,49 +55,55 @@ function EnrollmentFilters<TData>({
   }, [estadoFilter, table]);
 
   return (
-    <div className="flex items-center gap-3 flex-wrap">
-      <div className="flex items-center bg-slate-100 dark:bg-zinc-900 rounded-full p-1 border border-slate-200/50 dark:border-zinc-800/50 gap-1 pl-3">
-        <IconCalendarEvent className="size-4 text-muted-foreground/75 shrink-0" />
-        <span className="text-[10px] uppercase font-black tracking-wider text-muted-foreground/50 mr-1 hidden sm:inline select-none">
-          Periodo
-        </span>
-        <Button
-          variant="ghost"
+    <div className="flex items-center gap-2 flex-wrap">
+      <div className="inline-flex items-center h-9 p-0.5 bg-muted/40 rounded-xl border border-border/50 gap-0.5">
+        <div className="flex items-center gap-1 px-2 text-[10px] uppercase font-bold text-muted-foreground/60 select-none">
+          <IconCalendarEvent className="size-3.5 opacity-70" />
+          <span>Periodo</span>
+        </div>
+        <button
+          type="button"
           onClick={() => meta.setAnioFilter(currentYear)}
-          className={`h-8 text-xs font-black rounded-full px-4 transition-colors duration-200 ${
+          className={cn(
+            "h-8 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer",
             anioFilter === currentYear
-              ? "bg-indigo-600 text-white shadow-md hover:bg-indigo-500 hover:text-white"
-              : "text-muted-foreground hover:bg-slate-200/50 dark:hover:bg-zinc-800"
-          }`}
+              ? "bg-background text-foreground shadow-2xs border border-border/50"
+              : "text-muted-foreground hover:text-foreground hover:bg-background/40",
+          )}
         >
           {currentYear}
-        </Button>
-        <Button
-          variant="ghost"
+        </button>
+        <button
+          type="button"
           onClick={() => meta.setAnioFilter(currentYear + 1)}
-          className={`h-8 text-xs font-black rounded-full px-4 transition-colors duration-200 ${
+          className={cn(
+            "h-8 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer",
             anioFilter === currentYear + 1
-              ? "bg-indigo-600 text-white shadow-md hover:bg-indigo-500 hover:text-white"
-              : "text-muted-foreground hover:bg-slate-200/50 dark:hover:bg-zinc-800"
-          }`}
+              ? "bg-background text-foreground shadow-2xs border border-border/50"
+              : "text-muted-foreground hover:text-foreground hover:bg-background/40",
+          )}
         >
           {currentYear + 1}
-        </Button>
+        </button>
       </div>
 
       <Select value={estadoFilter} onValueChange={meta.setEstadoFilter}>
-        <SelectTrigger className="w-full sm:w-auto min-w-[180px] h-10 bg-background border-slate-200 dark:border-zinc-800 rounded-full text-xs font-bold hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors pl-3.5 gap-2">
-          <div className="flex items-center gap-2">
-            <IconFilter className="size-3.5 text-muted-foreground/60 shrink-0" />
+        <SelectTrigger className={cn(
+          "h-9 min-w-[140px] max-w-[180px] bg-background border-border/60 rounded-xl text-xs font-bold transition-colors pl-3 pr-2.5 gap-2 shadow-2xs",
+          estadoFilter !== "ALL" && "border-primary/40 bg-primary/5 text-primary"
+        )}>
+          <div className="flex items-center gap-1.5 truncate">
+            <IconFilter className="size-3.5 opacity-60 shrink-0" />
             <SelectValue placeholder="Estado" />
           </div>
         </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="ALL" className="font-bold text-xs">Todos los Estados</SelectItem>
-          <SelectItem value="activo" className="font-bold text-xs text-green-500">Activo</SelectItem>
-          <SelectItem value="retirado" className="font-bold text-xs text-red-500">Retirado</SelectItem>
-          <SelectItem value="suspendido" className="font-bold text-xs text-yellow-600">Suspendido</SelectItem>
-          <SelectItem value="egresado" className="font-bold text-xs text-blue-500">Egresado</SelectItem>
+        <SelectContent align="start" className="border-border/60 rounded-xl bg-popover p-1 shadow-lg">
+          <SelectItem value="ALL" className="font-semibold text-xs">Todos los estados</SelectItem>
+          <SelectItem value="activo" className="font-medium text-xs text-emerald-600">✓ Activo</SelectItem>
+          <SelectItem value="pendiente" className="font-medium text-xs text-amber-600 dark:text-amber-400">🟡 Por Ratificar</SelectItem>
+          <SelectItem value="retirado" className="font-medium text-xs text-rose-600">✕ Retirado</SelectItem>
+          <SelectItem value="suspendido" className="font-medium text-xs text-amber-600">⏳ Suspendido</SelectItem>
+          <SelectItem value="egresado" className="font-medium text-xs text-blue-600">Graduado/Egresado</SelectItem>
         </SelectContent>
       </Select>
     </div>

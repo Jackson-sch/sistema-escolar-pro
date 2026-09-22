@@ -1,50 +1,91 @@
-import * as XLSX from 'xlsx-js-style';
+import {
+  buildProfessionalExcelReport,
+  type ExcelColumnDef,
+} from "./excel/excel-builder";
+import { downloadExcelWorkbook } from "./excel/excel-download";
 
 /**
- * Exporta un array de objetos a un archivo Excel (.xlsx)
+ * Exporta un array de objetos a un archivo Excel (.xlsx) con diseño corporativo profesional
  * @param data Array de objetos con los datos a exportar
  * @param fileName Nombre del archivo (sin extensión)
  * @param sheetName Nombre de la hoja de cálculo
  */
-export function exportToExcel(data: any[], fileName: string, sheetName: string = 'Datos') {
-  const worksheet = XLSX.utils.json_to_sheet(data);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
-  
-  // Generar buffer
-  const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-  const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
-  
-  // Guardar archivo
-  const fullFileName = `${fileName}_${new Date().toISOString().split('T')[0]}.xlsx`;
-  
-  // Nota: saveAs es una librería cliente, en Next.js App Router 
-  // esto debe llamarse desde un Client Component
-  try {
-    const link = document.createElement('a');
-    const url = window.URL.createObjectURL(blob);
-    link.href = url;
-    link.download = fullFileName;
-    link.click();
-    setTimeout(() => window.URL.revokeObjectURL(url), 100);
-  } catch (err) {
-    console.error('Error al descargar el archivo Excel:', err);
-  }
+export async function exportToExcel(
+  data: any[],
+  fileName: string,
+  sheetName: string = "Datos",
+  title?: string,
+) {
+  if (!data || data.length === 0) return;
+
+  const sample = data[0];
+  const columns: ExcelColumnDef[] = Object.keys(sample).map((key) => {
+    const val = sample[key];
+    const isNum = typeof val === "number";
+    const isCurrency =
+      typeof key === "string" &&
+      (key.toLowerCase().includes("monto") ||
+        key.toLowerCase().includes("total") ||
+        key.toLowerCase().includes("pagado") ||
+        key.toLowerCase().includes("saldo") ||
+        key.toLowerCase().includes("precio"));
+
+    const isDate =
+      typeof key === "string" &&
+      (key.toLowerCase().includes("fecha") ||
+        key.toLowerCase().includes("vencimiento"));
+
+    const isBadge =
+      typeof key === "string" &&
+      (key.toLowerCase().includes("estado") ||
+        key.toLowerCase().includes("condicion"));
+
+    return {
+      key,
+      header: key,
+      type: isCurrency
+        ? "currency"
+        : isNum
+          ? "number"
+          : isDate
+            ? "date"
+            : isBadge
+              ? "badge"
+              : "text",
+    };
+  });
+
+  const wb = buildProfessionalExcelReport({
+    title: title || fileName.replace(/_/g, " "),
+    sheetName,
+    columns,
+    data,
+    paletteName: "navy",
+  });
+
+  await downloadExcelWorkbook(wb, fileName);
 }
 
 /**
  * Formatea los datos del cronograma para exportación Excel
  */
 export function formatCronogramaForExcel(cronograma: any[]) {
-  return cronograma.map(item => ({
+  return cronograma.map((item) => ({
     Estudiante: `${item.estudiante.apellidoPaterno} ${item.estudiante.apellidoMaterno}, ${item.name}`,
     Concepto: item.concepto.nombre,
     Vencimiento: new Date(item.fechaVencimiento).toLocaleDateString(),
-    'Monto Original': item.monto,
-    'Mora Acumulada': item.moraAcumulada || 0,
+    "Monto Original": item.monto,
+    "Mora Acumulada": item.moraAcumulada || 0,
     Total: Number(item.monto) + Number(item.moraAcumulada || 0),
     Pagado: item.montoPagado,
-    Pendiente: (Number(item.monto) + Number(item.moraAcumulada || 0)) - Number(item.montoPagado),
-    Estado: item.pagado ? 'Pagado' : (new Date(item.fechaVencimiento) < new Date() ? 'Vencido' : 'Pendiente')
+    Pendiente:
+      Number(item.monto) +
+      Number(item.moraAcumulada || 0) -
+      Number(item.montoPagado),
+    Estado: item.pagado
+      ? "Pagado"
+      : new Date(item.fechaVencimiento) < new Date()
+        ? "Vencido"
+        : "Pendiente",
   }));
 }

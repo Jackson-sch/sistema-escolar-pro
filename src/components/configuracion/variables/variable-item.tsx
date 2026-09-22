@@ -117,6 +117,7 @@ export function VariableItem({
                 <Button
                   size="icon"
                   variant="ghost"
+                  aria-label="Guardar edición"
                   className="size-7 rounded-lg text-emerald-600 hover:bg-emerald-500/10"
                   onClick={handleSaveEdit}
                 >
@@ -125,6 +126,7 @@ export function VariableItem({
                 <Button
                   size="icon"
                   variant="ghost"
+                  aria-label="Cancelar edición"
                   className="size-7 rounded-lg text-rose-500 hover:bg-rose-500/10"
                   onClick={() => setIsEditing(false)}
                 >
@@ -137,6 +139,7 @@ export function VariableItem({
               <Button
                 variant="ghost"
                 size="icon"
+                aria-label={showValue ? "Ocultar valor" : "Ver valor"}
                 className="size-7 shrink-0 rounded-lg text-muted-foreground hover:text-foreground"
                 onClick={() => setShowValue(!showValue)}
                 title={showValue ? "Ocultar valor" : "Ver valor"}
@@ -171,6 +174,7 @@ export function VariableItem({
               <Button
                 variant="ghost"
                 size="icon"
+                aria-label="Opciones de variable"
                 className="size-8 rounded-lg text-muted-foreground hover:text-foreground"
               >
                 <IconDotsVertical className="size-4" />

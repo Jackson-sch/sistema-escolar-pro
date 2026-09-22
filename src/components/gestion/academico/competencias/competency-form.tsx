@@ -111,28 +111,28 @@ export function CompetencyForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-2">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="areaCurricularId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Área Curricular</FormLabel>
+              <FormLabel className="text-xs font-bold text-foreground">Área Curricular</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
-                  <SelectTrigger className="w-full rounded-full">
-                    <SelectValue placeholder="Seleccione un área..." />
+                  <SelectTrigger className="w-full h-9 text-xs font-medium rounded-xl border-border/60 bg-background">
+                    <SelectValue placeholder="Seleccione un área curricular..." />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent>
+                <SelectContent className="rounded-xl">
                   {areas.map((area) => (
-                    <SelectItem key={area.id} value={area.id}>
+                    <SelectItem key={area.id} value={area.id} className="text-xs">
                       {area.nombre}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              <FormMessage />
+              <FormMessage className="text-xxs" />
             </FormItem>
           )}
         />
@@ -142,18 +142,18 @@ export function CompetencyForm({
           name="nombre"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nombre de la Competencia</FormLabel>
+              <FormLabel className="text-xs font-bold text-foreground">Nombre de la Competencia (CNEB)</FormLabel>
               <FormControl>
                 <div className="relative">
-                  <IconTarget className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <IconTarget className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/60" />
                   <Input
                     {...field}
-                    placeholder="Ej: Se comunica oralmente..."
-                    className="pl-10 w-full rounded-full"
+                    placeholder="Ej: Se comunica oralmente en su lengua materna"
+                    className="pl-9 h-9 text-xs rounded-xl border-border/60 bg-background"
                   />
                 </div>
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-xxs" />
             </FormItem>
           )}
         />
@@ -163,25 +163,26 @@ export function CompetencyForm({
           name="descripcion"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Descripción (Opcional)</FormLabel>
+              <FormLabel className="text-xs font-bold text-foreground">Descripción / Criterio de Desempeño</FormLabel>
               <FormControl>
                 <Textarea
                   {...field}
-                  placeholder="Defina el alcance de esta competencia..."
-                  className="resize-none min-h-[100px] rounded-xl"
+                  placeholder="Defina el alcance o criterios de evaluación de esta competencia..."
+                  rows={3}
+                  className="resize-none text-xs rounded-xl border-border/60 bg-background"
                 />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-xxs" />
             </FormItem>
           )}
         />
 
-        <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-white/5">
+        <div className="flex items-center justify-end gap-2 pt-3 border-t border-border/40">
           <Button
             type="button"
             variant="outline"
             onClick={onSuccess}
-            className="w-full sm:w-auto rounded-full border-border/40 hover:bg-accent/50 hover:scale-105"
+            className="h-9 px-4 text-xs font-bold rounded-xl border-border/60 cursor-pointer"
             disabled={isPending}
           >
             Cancelar
@@ -189,9 +190,9 @@ export function CompetencyForm({
           <Button
             disabled={isPending}
             type="submit"
-            className="w-full sm:w-auto rounded-full px-8 hover:scale-105"
+            className="h-9 px-5 text-xs font-extrabold rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer shadow-xs"
           >
-            {isPending && <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isPending && <IconLoader2 className="mr-1.5 size-3.5 animate-spin" />}
             {id ? "Guardar Cambios" : "Crear Competencia"}
           </Button>
         </div>

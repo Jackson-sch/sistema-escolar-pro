@@ -33,6 +33,34 @@ function useIsMounted() {
   return React.useSyncExternalStore(emptySubscribe, getClientSnapshot, getServerSnapshot);
 }
 
+interface VariantConfig {
+  iconContainerClass: string;
+  buttonClass: string;
+  defaultConfirmText: string;
+  renderIcon: () => React.ReactNode;
+}
+
+const VARIANT_CONFIG: Record<"danger" | "warning" | "primary", VariantConfig> = {
+  danger: {
+    iconContainerClass: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20",
+    buttonClass: "bg-rose-600 hover:bg-rose-700 text-white shadow-rose-500/20",
+    defaultConfirmText: "Eliminar",
+    renderIcon: () => <IconAlertTriangle className="size-5" />,
+  },
+  warning: {
+    iconContainerClass: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20",
+    buttonClass: "bg-amber-500 hover:bg-amber-600 text-white shadow-amber-500/20",
+    defaultConfirmText: "Confirmar",
+    renderIcon: () => <IconStar className="size-5 fill-amber-500" />,
+  },
+  primary: {
+    iconContainerClass: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20",
+    buttonClass: "bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-500/20",
+    defaultConfirmText: "Confirmar",
+    renderIcon: () => <IconInfoCircle className="size-5" />,
+  },
+};
+
 export function ConfirmModal({
   isOpen,
   onClose,
@@ -50,37 +78,21 @@ export function ConfirmModal({
     return null;
   }
 
-  const shineColors =
-    variant === "danger"
-      ? ["#ef4444", "#f87171", "#dc2626"]
-      : variant === "warning"
-      ? ["#f59e0b", "#fbbf24", "#d97706"]
-      : ["#6366f1", "#818cf8", "#4f46e5"];
-
-  const defaultConfirmText =
-    confirmText || (variant === "danger" ? "Eliminar" : "Confirmar");
+  const config = VARIANT_CONFIG[variant] ?? VARIANT_CONFIG.danger;
+  const resolvedConfirmText = confirmText || config.defaultConfirmText;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md bg-card border-border/50 rounded-2xl overflow-hidden shadow-sm p-5">
-        
         <DialogHeader className="space-y-2">
           <div className="flex items-center gap-3">
             <div
               className={cn(
                 "p-2.5 rounded-xl flex items-center justify-center shrink-0",
-                variant === "danger" && "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20",
-                variant === "warning" && "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20",
-                variant === "primary" && "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20"
+                config.iconContainerClass
               )}
             >
-              {variant === "warning" ? (
-                <IconStar className="size-5 fill-amber-500" />
-              ) : variant === "danger" ? (
-                <IconAlertTriangle className="size-5" />
-              ) : (
-                <IconInfoCircle className="size-5" />
-              )}
+              {config.renderIcon()}
             </div>
             <DialogTitle className="text-base font-bold text-foreground">
               {title}
@@ -105,9 +117,7 @@ export function ConfirmModal({
             onClick={onConfirm}
             className={cn(
               "rounded-xl h-9 px-5 text-xs font-semibold shadow-md gap-1.5 cursor-pointer min-w-[110px]",
-              variant === "danger" && "bg-rose-600 hover:bg-rose-700 text-white shadow-rose-500/20",
-              variant === "warning" && "bg-amber-500 hover:bg-amber-600 text-white shadow-amber-500/20",
-              variant === "primary" && "bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-500/20"
+              config.buttonClass
             )}
           >
             {loading ? (
@@ -116,7 +126,7 @@ export function ConfirmModal({
                 <span>Procesando...</span>
               </>
             ) : (
-              <span>{defaultConfirmText}</span>
+              <span>{resolvedConfirmText}</span>
             )}
           </Button>
         </DialogFooter>

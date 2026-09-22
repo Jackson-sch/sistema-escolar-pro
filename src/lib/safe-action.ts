@@ -37,6 +37,7 @@ export function createSafeAction<TInput, TOutput>(
           rawRole === "super_admin" ||
           rawRole === "admin" ||
           rawRole === "administrador" ||
+          rawRole === "administrativo" ||
           rawRole === "director";
 
         const isAllowed = isSuperOrAdmin || allowedRoles.includes(rawRole);

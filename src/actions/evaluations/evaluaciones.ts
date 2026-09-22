@@ -83,7 +83,7 @@ export const getEvaluacionesAction = createSafeAction(
             include: {
               areaCurricular: true,
               nivelAcademico: {
-                include: { grado: true },
+                include: { grado: true, nivel: true },
               },
             },
           },
@@ -93,6 +93,7 @@ export const getEvaluacionesAction = createSafeAction(
               competencia: true,
             },
           },
+          notas: { select: { valor: true } },
           _count: { select: { notas: true } },
         },
         orderBy: { fecha: "desc" },

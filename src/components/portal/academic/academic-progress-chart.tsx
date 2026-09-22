@@ -1,6 +1,6 @@
 "use client";
 
-import { Area, AreaChart, ResponsiveContainer, XAxis } from "recharts";
+import { Area, AreaChart, ResponsiveContainer, XAxis } from "@/lib/charts";
 import {
   ChartConfig,
   ChartContainer,

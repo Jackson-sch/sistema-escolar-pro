@@ -1,4 +1,4 @@
-import { Text as PDFText, StyleSheet, View } from '@react-pdf/renderer';
+import { Text as PDFText, StyleSheet, View } from "@/lib/pdf";
 import type { Style } from '@react-pdf/types';
 import { usePdfxTheme, useSafeMemo } from "@/lib/pdfx-theme-context";
 type PdfxTheme = ReturnType<typeof usePdfxTheme>;

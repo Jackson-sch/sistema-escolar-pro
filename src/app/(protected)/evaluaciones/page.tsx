@@ -6,16 +6,22 @@ import {
   getPeriodosAction,
 } from "@/actions/evaluations";
 import { getCoursesAction, getInstitucionesAction } from "@/actions/academic";
+import { getSeccionesAction } from "@/actions/academic-structure";
 import { EvaluacionTable } from "@/components/evaluaciones/management/evaluacion-table";
 import { EvaluacionReports } from "@/components/evaluaciones/reportes/evaluacion-reports";
 import { EvaluacionButton } from "@/components/evaluaciones/management/evaluacion-button";
+import { CnebBatchGeneratorDialog } from "@/components/evaluaciones/management/cneb-batch-generator-dialog";
 import { AddPeriodoButton } from "@/components/evaluaciones/management/add-periodo-button";
+import { PeriodosManager } from "@/components/evaluaciones/periodos/periodos-manager";
+import { SiagieExportDialog } from "@/components/evaluaciones/siagie-export-dialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { EvaluacionesTabs } from "@/components/evaluaciones/evaluaciones-tabs";
 import { DataTableSkeleton } from "@/components/ui/data-table-skeleton";
 import { Badge } from "@/components/ui/badge";
 
 import { auth } from "@/auth";
+
+import { PageHeader } from "@/components/common/page-header";
 
 export default async function EvaluacionesPage() {
   const session = await auth();
@@ -33,39 +39,39 @@ export default async function EvaluacionesPage() {
     tiposRes,
     periodosRes,
     cursosRes,
+    seccionesRes,
   ] = await Promise.all([
     getEvaluacionesAction({ profesorId }),
     getTiposEvaluacionAction({}),
     getPeriodosAction({ anioEscolar: currentYear }),
     getCoursesAction({ anioAcademico: currentYear, profesorId }),
+    getSeccionesAction({ anioAcademico: currentYear, profesorId }),
   ]);
 
   const evaluaciones = evaluacionesRes.success || [];
   const tipos = tiposRes.success || [];
   const periodos = periodosRes.success || [];
   const cursos = cursosRes.data || [];
+  const secciones = (seccionesRes.data as any) || [];
   const instituciones = initialInstituciones.data || [];
 
   const institucionId = instituciones[0]?.id || "";
   const hayPeriodos = periodos.length > 0;
 
   return (
-    <div className="min-h-screen flex flex-col gap-8 p-4 md:p-8 pt-6 @container/main">
-      {/* ── HEADER ── */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
-        <div className="space-y-2">
-          <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-4 py-1 rounded-full text-xxs font-medium uppercase tracking-widest flex items-center gap-2 w-fit">
-            <IconClipboardCheck size={14} />
-            Académico & Calificaciones
-          </Badge>
-          <h1 className="text-4xl md:text-5xl font-semibold tracking-tighter leading-none">
-            Gestión de Evaluaciones
-          </h1>
-          <p className="text-muted-foreground text-sm md:text-base max-w-2xl font-normal leading-relaxed">
-            Planifica, programa y califica evaluaciones institucionales. Gestiona periodos académicos, tipos de evaluación y genera reportes de rendimiento.
-          </p>
-        </div>
-      </div>
+    <div className="flex flex-1 flex-col gap-6 p-4 sm:p-6 pt-0">
+      {/* ── HEADER COMPACTO INSTITUCIONAL ── */}
+      <PageHeader
+        icon={<IconClipboardCheck size={20} />}
+        title="Evaluaciones & Calificaciones"
+        badge="CNEB & SIAGIE"
+        description={`Planificación curricular, cronograma de exámenes y registro de notas · Periodo ${currentYear}`}
+        breadcrumbs={[
+          { label: "Inicio", href: "/dashboard" },
+          { label: "Académico", href: "/evaluaciones" },
+          { label: "Evaluaciones" },
+        ]}
+      />
 
       {/* ── ALERTA SI NO HAY PERIODOS ── */}
       {!hayPeriodos && (
@@ -80,7 +86,10 @@ export default async function EvaluacionesPage() {
                 Debes crear al menos un periodo académico antes de programar
                 evaluaciones.
               </span>
-              <AddPeriodoButton institucionId={institucionId} />
+              <AddPeriodoButton
+                institucionId={institucionId}
+                existingCount={0}
+              />
             </AlertDescription>
           </Alert>
         </div>
@@ -100,9 +109,23 @@ export default async function EvaluacionesPage() {
                         Listado completo de evaluaciones y su estado de calificación.
                       </p>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      <SiagieExportDialog
+                        periodos={periodos}
+                        secciones={secciones}
+                      />
                       {hayPeriodos && (
-                        <AddPeriodoButton institucionId={institucionId} />
+                        <AddPeriodoButton
+                          institucionId={institucionId}
+                          existingCount={periodos.length}
+                        />
+                      )}
+                      {hayPeriodos && secciones.length > 0 && (
+                        <CnebBatchGeneratorDialog
+                          periodos={periodos}
+                          secciones={secciones}
+                          profesorId={profesorId}
+                        />
                       )}
                       <EvaluacionButton
                         tipos={tipos}
@@ -113,7 +136,7 @@ export default async function EvaluacionesPage() {
                   </div>
                   <EvaluacionTable
                     data={evaluaciones}
-                    meta={{ tipos, periodos, cursos }}
+                    meta={{ tipos, periodos, cursos, secciones }}
                   />
                 </div>
               ),
@@ -126,6 +149,14 @@ export default async function EvaluacionesPage() {
                     </p>
                   </div>
                   <EvaluacionReports evaluaciones={evaluaciones} />
+                </div>
+              ),
+              periodos: (
+                <div className="space-y-6">
+                  <PeriodosManager
+                    periodos={periodos}
+                    institucionId={institucionId}
+                  />
                 </div>
               ),
             }}

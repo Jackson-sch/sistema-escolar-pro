@@ -113,6 +113,13 @@ export function AttendanceTodayMonitor({
   );
 }
 
+const ATTENDANCE_COLORS = {
+  emerald: "text-emerald-500 bg-emerald-500/10",
+  amber: "text-amber-500 bg-amber-500/10",
+  red: "text-red-500 bg-red-500/10",
+  blue: "text-blue-500 bg-blue-500/10",
+};
+
 function AttendanceDetail({
   icon: Icon,
   label,
@@ -124,19 +131,12 @@ function AttendanceDetail({
   value: number;
   color: "emerald" | "amber" | "red" | "blue";
 }) {
-  const colors = {
-    emerald: "text-emerald-500 bg-emerald-500/10",
-    amber: "text-amber-500 bg-amber-500/10",
-    red: "text-red-500 bg-red-500/10",
-    blue: "text-blue-500 bg-blue-500/10",
-  };
-
   return (
     <div className="flex items-center gap-2 rounded-xl border border-border/40 bg-muted/20 p-2 transition-colors hover:bg-muted/40">
       <div
         className={cn(
           "size-7 rounded-lg flex items-center justify-center shrink-0",
-          colors[color],
+          ATTENDANCE_COLORS[color],
         )}
       >
         <Icon size={14} />

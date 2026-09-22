@@ -85,7 +85,7 @@ export function UniformBasicModal({
       if (res.error) {
         toast.error(res.error);
       } else {
-        toast.success(uniform ? "Información actualizada" : "Uniforme creado");
+        toast.success(uniform ? "Información actualizada" : "Artículo creado");
         onOpenChange(false);
         form.reset();
       }
@@ -94,8 +94,8 @@ export function UniformBasicModal({
 
   return (
     <FormModal
-      title={uniform ? "Editar Uniforme" : "Nuevo Uniforme"}
-      description="Completa la información básica de la prenda para el catálogo."
+      title={uniform ? "Editar Artículo" : "Nuevo Artículo / Producto"}
+      description="Completa la información básica del artículo para el catálogo institucional."
       isOpen={isOpen}
       onOpenChange={onOpenChange}
       className="sm:max-w-lg max-w-full bg-card"
@@ -108,11 +108,11 @@ export function UniformBasicModal({
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-muted-foreground/80 ml-1">
-                  Nombre del producto
+                  Nombre del artículo
                 </FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Ej. Camisa Blanca Manga Larga"
+                    placeholder="Ej. Agenda Escolar 2026, Libro Plan Lector, Camisa..."
                     {...field}
                     className="bg-muted/10 border-border/40 focus:bg-muted/20 transition-colors h-11 rounded-full"
                   />

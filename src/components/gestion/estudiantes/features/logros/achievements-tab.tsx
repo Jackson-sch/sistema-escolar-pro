@@ -204,6 +204,7 @@ export function AchievementsTab({ studentId }: AchievementsTabProps) {
                         <Button
                           variant="ghost"
                           size="icon"
+                          aria-label={`Eliminar logro ${logro.titulo}`}
                           className="size-8 rounded-full text-muted-foreground hover:text-red-500 md:opacity-0 md:group-hover:opacity-100 transition-[color]"
                           onClick={() => setDeletingId(logro.id)}
                         >

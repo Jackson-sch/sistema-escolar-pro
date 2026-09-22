@@ -10,15 +10,13 @@ import {
 } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import {
   getEvaluacionDetailAction,
   getNotasEvaluacionAction,
   getEstudiantesCursoAction,
 } from "@/actions/evaluations";
 import { NotasForm } from "@/components/evaluaciones/notas/notas-form";
+import { PageHeader } from "@/components/common/page-header";
 
 interface NotasPageProps {
   params: Promise<{ evaluacionId: string }>;
@@ -47,12 +45,13 @@ export default async function NotasPage({ params }: NotasPageProps) {
   // Mapear notas existentes por estudiante para acceso rápido O(1)
   const notasMap = notasExistentes.reduce(
     (
-      acc: Record<string, { valor: number; valorLiteral?: string }>,
+      acc: Record<string, { valor: number; valorLiteral?: string; comentario?: string }>,
       nota: any,
     ) => {
       acc[nota.estudianteId] = {
         valor: nota.valor,
         valorLiteral: nota.valorLiteral || undefined,
+        comentario: nota.comentario || undefined,
       };
       return acc;
     },
@@ -60,107 +59,94 @@ export default async function NotasPage({ params }: NotasPageProps) {
   );
 
   return (
-    <div className="container mx-auto py-6 space-y-8 animate-in fade-in animation-duration-">
-      {/* 1. Header de Navegación y Título */}
-      <div className="flex flex-col gap-6">
-        <div className="flex items-start gap-4">
+    <div className="flex flex-1 flex-col gap-6 p-4 sm:p-6 pt-0 animate-in fade-in duration-200">
+      {/* 1. Header Compacto Institucional */}
+      <PageHeader
+        icon={<IconClipboardList size={20} />}
+        title={evaluacion.nombre}
+        badge={evaluacion.tipoEvaluacion.nombre}
+        description={`${evaluacion.curso.nombre} · ${evaluacion.curso.nivelAcademico?.grado.nombre} "${evaluacion.curso.nivelAcademico?.seccion}" · ${evaluacion.curso.areaCurricular.nombre}`}
+        breadcrumbs={[
+          { label: "Inicio", href: "/dashboard" },
+          { label: "Académico", href: "/evaluaciones" },
+          { label: "Evaluaciones", href: "/evaluaciones" },
+          { label: "Registro de Calificaciones" },
+        ]}
+        actions={
           <Button
             variant="outline"
-            size="icon"
+            size="sm"
             asChild
-            className="shrink-0 h-10 w-10 rounded-full border-dashed"
+            className="rounded-xl border-border/60 text-xs font-bold gap-1.5"
           >
-            <Link href="/evaluaciones" title="Volver al listado">
-              <IconArrowLeft className="size-5" />
+            <Link href="/evaluaciones">
+              <IconArrowLeft className="size-4" />
+              Volver
             </Link>
           </Button>
+        }
+      />
 
-          <div className="space-y-1.5 flex-1">
-            <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
-                <IconClipboardList className="size-7 text-primary hidden sm:block" />
-                {evaluacion.nombre}
-              </h1>
-              <Badge
-                variant="outline"
-                className="text-xs font-medium uppercase tracking-wider py-1"
-              >
-                {evaluacion.tipoEvaluacion.nombre}
-              </Badge>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-              <span className="font-semibold text-foreground">
-                {evaluacion.curso.nombre}
-              </span>
-              <span>•</span>
-              <span className="flex items-center gap-1">
-                {evaluacion.curso.nivelAcademico?.grado.nombre} &quot;
-                {evaluacion.curso.nivelAcademico?.seccion}&quot;
-              </span>
-              <span>•</span>
-              <span className="uppercase">
-                {evaluacion.curso.areaCurricular.nombre}
-              </span>
-            </div>
+      {/* 2. Tarjetas Bento de Metadatos de la Evaluación */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-card/60 backdrop-blur-xs border border-border/50 shadow-2xs">
+          <div className="size-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+            <IconCalendar className="size-4" />
+          </div>
+          <div className="flex flex-col min-w-0">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Periodo
+            </span>
+            <span className="text-xs font-bold text-foreground truncate">
+              {evaluacion.periodo.nombre}
+            </span>
           </div>
         </div>
 
-        {/* 2. Tarjeta de Metadatos (Resumen) */}
-        <Card className="bg-muted/40 shadow-sm border-none">
-          <CardContent className="p-4 sm:p-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {/* Periodo */}
-              <div className="flex flex-col gap-1.5 border-r last:border-0 border-border/50 pr-4">
-                <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                  <IconCalendar className="size-3.5" /> Periodo
-                </span>
-                <span className="font-semibold text-foreground">
-                  {evaluacion.periodo.nombre}
-                </span>
-              </div>
+        <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-card/60 backdrop-blur-xs border border-border/50 shadow-2xs">
+          <div className="size-9 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
+            <IconScale className="size-4" />
+          </div>
+          <div className="flex flex-col min-w-0">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Ponderación
+            </span>
+            <span className="text-xs font-bold text-foreground">
+              {evaluacion.peso}% de la nota
+            </span>
+          </div>
+        </div>
 
-              {/* Peso */}
-              <div className="flex flex-col gap-1.5 border-r md:border-r last:border-0 border-border/50 pr-4">
-                <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                  <IconScale className="size-3.5" /> Peso
-                </span>
-                <span className="font-semibold text-foreground">
-                  {evaluacion.peso}% de la nota final
-                </span>
-              </div>
+        <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-card/60 backdrop-blur-xs border border-border/50 shadow-2xs">
+          <div className="size-9 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+            <IconSchool className="size-4" />
+          </div>
+          <div className="flex flex-col min-w-0">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Escala
+            </span>
+            <span className="text-xs font-bold text-foreground">
+              {evaluacion.escalaCalificacion === "LITERAL"
+                ? "CNEB (AD, A, B, C)"
+                : "Vigesimal (0-20)"}
+            </span>
+          </div>
+        </div>
 
-              {/* Nota Minima (Conditional display styling) */}
-              <div className="flex flex-col gap-1.5 border-r last:border-0 border-border/50 pr-4">
-                <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                  <IconSchool className="size-3.5" /> Nota Mín. Aprobatoria
-                </span>
-                <span className="font-semibold text-foreground">
-                  {evaluacion.notaMinima ? (
-                    <span className="text-orange-500/90 dark:text-orange-400 font-bold">
-                      {evaluacion.notaMinima}
-                    </span>
-                  ) : (
-                    "N/A"
-                  )}
-                </span>
-              </div>
-
-              {/* Cantidad Estudiantes */}
-              <div className="flex flex-col gap-1.5">
-                <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                  <IconUsers className="size-3.5" /> Total Estudiantes
-                </span>
-                <span className="font-semibold text-foreground">
-                  {estudiantes.length} Alumnos
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-card/60 backdrop-blur-xs border border-border/50 shadow-2xs">
+          <div className="size-9 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+            <IconUsers className="size-4" />
+          </div>
+          <div className="flex flex-col min-w-0">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Padrón Aula
+            </span>
+            <span className="text-xs font-bold text-foreground">
+              {estudiantes.length} Alumnos
+            </span>
+          </div>
+        </div>
       </div>
-
-      <Separator />
 
       {/* 3. Formulario de Notas */}
       <section className="relative">

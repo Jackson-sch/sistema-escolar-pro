@@ -1,8 +1,9 @@
 "use client";
 
-import { IconSearch, IconX } from "@tabler/icons-react";
+import { IconSearch, IconX, IconLoader2 } from "@tabler/icons-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTransition, useState } from "react";
+import { Input } from "@/components/ui/input";
 
 export function InstitucionSearch() {
   const searchParams = useSearchParams();
@@ -25,29 +26,33 @@ export function InstitucionSearch() {
   };
 
   return (
-    <div className="relative group">
-      <IconSearch className={`absolute left-3 top-1/2 -translate-y-1/2 size-4 transition-colors ${isPending ? 'text-indigo-500 animate-pulse' : 'text-zinc-500 group-focus-within:text-indigo-500'}`} />
-      <input 
-        type="text" 
-        placeholder="Buscar colegio..." 
+    <div className="relative w-full sm:w-72">
+      {isPending ? (
+        <IconLoader2 className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-primary animate-spin" />
+      ) : (
+        <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+      )}
+      <Input
+        type="text"
+        placeholder="Buscar por nombre o modular..."
         value={value}
         onChange={(e) => {
           setValue(e.target.value);
           handleSearch(e.target.value);
         }}
-        className="pl-10 pr-10 py-2 bg-zinc-900 border border-white/5 rounded-xl text-sm focus:outline-none focus:border-indigo-500/50 transition-[border-color,outline-color] w-64"
+        className="pl-9 pr-8 h-9 rounded-xl border-border/60 bg-background text-xs"
         aria-label="Buscar institución"
       />
       {value && (
-        <button 
+        <button
           aria-label="Limpiar búsqueda"
           onClick={() => {
             setValue("");
             handleSearch("");
           }}
-          className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 hover:bg-white/5 rounded-md transition-colors"
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
         >
-          <IconX className="size-3 text-zinc-500" />
+          <IconX className="size-3.5" />
         </button>
       )}
     </div>

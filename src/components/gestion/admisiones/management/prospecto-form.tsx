@@ -1,46 +1,26 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { upsertProspectoAction } from "@/actions/admissions";
 import { toast } from "sonner";
 import { useFormModal } from "@/components/modals/form-modal-context";
 import { OCRButton } from "@/components/gestion/admisiones/components/ocr-button";
 import { prospectoSchema } from "@/lib/schemas/gestion/admision/prospectoSchema";
 import {
-  IconUser,
-  IconPhone,
-  IconMail,
-  IconId,
-  IconSchool,
-  IconCalendar,
   IconScan,
   IconLoader2,
   IconDeviceFloppy,
 } from "@tabler/icons-react";
-import { cn } from "@/lib/utils";
-import { useMemo } from "react";
-import { LevelSegmentedControl } from "@/components/common/level-segmented-control";
 import { FormKeyboardHelpBar } from "@/components/common/form-keyboard-help-bar";
+import {
+  ProspectoPersonalFields,
+  ProspectoApplicationSection,
+} from "./prospecto-form-sections";
 
 interface ProspectoFormProps {
   grados: any[];
@@ -48,50 +28,6 @@ interface ProspectoFormProps {
   onSuccess: () => void;
   initialData?: any;
   id?: string;
-}
-
-// ── Shared styles (EduNova Pro) ───────────────────────────────────────────────
-const inputClass =
-  "rounded-xl border-border/40 bg-background pl-9 h-9 text-xs transition-shadow focus-visible:ring-primary/25";
-const labelClass =
-  "text-[11px] font-bold uppercase tracking-wider text-muted-foreground/60 mb-1";
-
-// ── Field wrapper with leading icon ──────────────────────────────────────────
-function FieldIcon({
-  icon: Icon,
-  children,
-  className,
-}: {
-  icon: React.ElementType;
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={cn("relative", className)}>
-      <Icon className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground/50 pointer-events-none z-10" />
-      {children}
-    </div>
-  );
-}
-
-// ── Section divider ───────────────────────────────────────────────────────────
-function Section({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="space-y-3">
-      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 flex items-center gap-2">
-        <span className="h-px flex-1 bg-border/30" />
-        {title}
-        <span className="h-px flex-1 bg-border/30" />
-      </p>
-      {children}
-    </div>
-  );
 }
 
 export function ProspectoForm({
@@ -121,14 +57,10 @@ export function ProspectoForm({
     },
   });
 
-  // ── Hierarchical Level Selection ───────────────────────────────────────────
-  
-  // Derive unique levels from fixed list or from data
   const nivelesDisponibles = useMemo(() => {
     return Array.from(new Set(grados.map((g) => g.nivel.nombre))).sort();
   }, [grados]);
 
-  // Determine initial level based on initial data or default to first available
   const initialNivel = useMemo(() => {
     if (initialData?.gradoInteresId) {
       const match = grados.find((g) => g.id === initialData.gradoInteresId);
@@ -139,17 +71,15 @@ export function ProspectoForm({
 
   const [selectedNivel, setSelectedNivel] = useState(initialNivel);
 
-  // Filtered grades based on level
   const filteredGrados = useMemo(() => {
     return grados.filter((g) => g.nivel.nombre === selectedNivel);
   }, [grados, selectedNivel]);
 
-  // When level changes, reset grade if it's not in the new level
   const handleNivelChange = (nivel: string) => {
     setSelectedNivel(nivel);
     const currentGradoId = form.getValues("gradoInteresId");
     const belongsToNewLevel = grados.find(
-      (g) => g.id === currentGradoId && g.nivel.nombre === nivel
+      (g) => g.id === currentGradoId && g.nivel.nombre === nivel,
     );
     if (!belongsToNewLevel) {
       form.setValue("gradoInteresId", "", { shouldDirty: true });
@@ -201,8 +131,7 @@ export function ProspectoForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-5">
-
-        {/* ── OCR Banner ─────────────────────────────────────────────────── */}
+        {/* OCR Banner */}
         <div className="flex items-center justify-between gap-4 rounded-xl border border-indigo-500/20 bg-indigo-500/5 px-4 py-3">
           <div className="flex items-center gap-3">
             <div className="flex size-9 items-center justify-center rounded-xl bg-indigo-500/10 border border-indigo-500/20">
@@ -220,214 +149,22 @@ export function ProspectoForm({
           <OCRButton onScanComplete={handleOCRComplete} />
         </div>
 
-        {/* ── Identificación ─────────────────────────────────────────────── */}
-        <Section title="Identificación">
-          <div className="grid grid-cols-2 gap-3">
-            <FormField
-              control={form.control}
-              name="dni"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className={labelClass}>DNI</FormLabel>
-                  <FormControl>
-                    <FieldIcon icon={IconId}>
-                      <Input
-                        placeholder="00000000"
-                        {...field}
-                        className={inputClass}
-                        maxLength={8}
-                      />
-                    </FieldIcon>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="telefono"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className={labelClass}>Teléfono</FormLabel>
-                  <FormControl>
-                    <FieldIcon icon={IconPhone}>
-                      <Input
-                        placeholder="987 654 321"
-                        {...field}
-                        className={inputClass}
-                      />
-                    </FieldIcon>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </Section>
+        {/* Identificación y Datos Personales */}
+        <ProspectoPersonalFields form={form} />
 
-        {/* ── Datos del Estudiante ───────────────────────────────────────── */}
-        <Section title="Datos del Estudiante">
-          {/* Nombres en una sola fila */}
-          <FormField
-            control={form.control}
-            name="nombre"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className={labelClass}>Nombres</FormLabel>
-                <FormControl>
-                  <FieldIcon icon={IconUser}>
-                    <Input
-                      placeholder="Nombres completos"
-                      {...field}
-                      className={inputClass}
-                    />
-                  </FieldIcon>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        {/* Postulación */}
+        <ProspectoApplicationSection
+          form={form}
+          nivelesDisponibles={nivelesDisponibles}
+          selectedNivel={selectedNivel}
+          onNivelChange={handleNivelChange}
+          filteredGrados={filteredGrados}
+        />
 
-          {/* Apellidos en dos columnas */}
-          <div className="grid grid-cols-2 gap-3">
-            <FormField
-              control={form.control}
-              name="apellidoPaterno"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className={labelClass}>Ap. Paterno</FormLabel>
-                  <FormControl>
-                    <FieldIcon icon={IconUser}>
-                      <Input
-                        placeholder="Primer apellido"
-                        {...field}
-                        className={inputClass}
-                      />
-                    </FieldIcon>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="apellidoMaterno"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className={labelClass}>Ap. Materno</FormLabel>
-                  <FormControl>
-                    <FieldIcon icon={IconUser}>
-                      <Input
-                        placeholder="Segundo apellido"
-                        {...field}
-                        className={inputClass}
-                      />
-                    </FieldIcon>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          {/* Email */}
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className={labelClass}>Email de contacto</FormLabel>
-                <FormControl>
-                  <FieldIcon icon={IconMail}>
-                    <Input
-                      placeholder="correo@ejemplo.com"
-                      {...field}
-                      className={inputClass}
-                    />
-                  </FieldIcon>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </Section>
-
-        {/* ── Postulación ────────────────────────────────────────────────── */}
-        <Section title="Postulación">
-          <LevelSegmentedControl
-            levels={nivelesDisponibles}
-            value={selectedNivel}
-            onChange={handleNivelChange}
-            className="mb-3"
-          />
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <FormField
-              control={form.control}
-              name="gradoInteresId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className={labelClass}>Grado de Interés</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger
-                        className={cn(
-                          "rounded-xl border-border/40 bg-background h-9 text-xs w-full",
-                          "transition-shadow focus:ring-primary/25",
-                        )}
-                      >
-                        <div className="flex items-center gap-2 min-w-0">
-                          <IconSchool className="size-3.5 shrink-0 text-muted-foreground/50" />
-                          <SelectValue placeholder="Seleccione grado" />
-                        </div>
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent className="border-border/50 bg-popover shadow-md rounded-xl">
-                      {filteredGrados.length === 0 ? (
-                        <div className="px-4 py-6 text-center text-xs text-muted-foreground italic">
-                          No hay grados para este nivel
-                        </div>
-                      ) : (
-                        filteredGrados.map((g) => (
-                          <SelectItem key={g.id} value={g.id} className="text-xs rounded-lg">
-                            {g.nombre}
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="anioPostulacion"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className={labelClass}>Año de Postulación</FormLabel>
-                  <FormControl>
-                    <FieldIcon icon={IconCalendar}>
-                      <Input
-                        type="number"
-                        {...field}
-                        onChange={(e) => field.onChange(parseInt(e.target.value))}
-                        className={inputClass}
-                      />
-                    </FieldIcon>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </Section>
-
-        {/* ── Keyboard Shortcuts ───────────────────────────────────────────── */}
+        {/* Keyboard Shortcuts */}
         <FormKeyboardHelpBar />
 
-        {/* ── Actions ────────────────────────────────────────────────────── */}
+        {/* Actions */}
         <div className="flex items-center justify-end gap-3 border-t border-border/30 pt-4">
           <Button
             type="button"
@@ -456,7 +193,6 @@ export function ProspectoForm({
             )}
           </Button>
         </div>
-
       </form>
     </Form>
   );

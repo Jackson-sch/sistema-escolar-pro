@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { IconEdit, IconTrash, IconPlus } from "@tabler/icons-react";
+import { IconEdit, IconTrash, IconPlus, IconListCheck } from "@tabler/icons-react";
 import { Row } from "@tanstack/react-table";
 import { toast } from "sonner";
 
@@ -16,12 +16,14 @@ import { deleteCompetencyAction } from "@/actions/competencies";
 import { CompetencyTableType } from "./competency-table-columns";
 import { CompetencyForm } from "../competency-form";
 import { CapacityForm } from "../../cursos/capacity-form";
+import { CapacidadesInspectDialog } from "./capacidades-inspect-dialog";
 
 interface CompetencyRowActionsProps {
   row: Row<CompetencyTableType>;
 }
 
 export function CompetencyRowActions({ row }: CompetencyRowActionsProps) {
+  const [showInspectDialog, setShowInspectDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showCapacityDialog, setShowCapacityDialog] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -45,6 +47,13 @@ export function CompetencyRowActions({ row }: CompetencyRowActionsProps) {
 
   const actions: ActionItem[] = [
     {
+      icon: IconListCheck,
+      label: "Ver Capacidades",
+      onClick: () => setShowInspectDialog(true),
+      variant: "ghost",
+      className: "text-emerald-500",
+    },
+    {
       icon: IconEdit,
       label: "Editar Competencia",
       onClick: () => setShowEditDialog(true),
@@ -56,7 +65,7 @@ export function CompetencyRowActions({ row }: CompetencyRowActionsProps) {
       label: "Añadir Capacidad",
       onClick: () => setShowCapacityDialog(true),
       variant: "ghost",
-      className: "text-emerald-500",
+      className: "text-violet-500",
     },
     { isSeparator: true },
     {
@@ -71,6 +80,13 @@ export function CompetencyRowActions({ row }: CompetencyRowActionsProps) {
   return (
     <>
       <ResponsiveRowActions actions={actions} label="Gestión" />
+
+      {/* Dialog para Inspeccionar Capacidades */}
+      <CapacidadesInspectDialog
+        open={showInspectDialog}
+        onOpenChange={setShowInspectDialog}
+        competencia={comp}
+      />
 
       <ConfirmModal
         isOpen={showConfirmModal}

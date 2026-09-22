@@ -17,8 +17,10 @@ import { Badge } from "@/components/ui/badge";
 
 import { Suspense } from "react";
 
+import { PageHeader } from "@/components/common/page-header";
+
 export const metadata = {
-  title: "Registro de Matrículas | Sistema Escolar Pro",
+  title: "Padrón de Matrículas | Sistema Escolar Pro",
   description: "Control de inscripciones académicas, vacantes y asignación de aulas.",
 };
 
@@ -37,27 +39,25 @@ export default async function MatriculasPage() {
   ]);
 
   return (
-    <div className="min-h-screen flex flex-col gap-6 p-4 md:p-8 pt-6 @container/main">
-      {/* ── HEADER ── */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
-        <div className="space-y-2">
-          <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-4 py-1 rounded-full text-xxs font-semibold uppercase tracking-widest flex items-center gap-2 w-fit">
-            <IconSchool size={14} />
-            Inscripciones Académicas {currentAnio}
-          </Badge>
-          <h1 className="text-3xl md:text-5xl font-bold tracking-tight leading-none">
-            Registro de Matrículas
-          </h1>
-          <p className="text-muted-foreground text-sm md:text-base max-w-2xl font-normal leading-relaxed">
-            Control de vacantes por aula, ratificación de estudiantes y emisión de constancias de inscripción.
-          </p>
-        </div>
-
-        <div className="flex flex-row gap-3 items-center shrink-0">
-          <DownloadEnrollmentsReportButton />
-          <AddEnrollmentButton nivelesAcademicos={nivelesAcademicos as any} />
-        </div>
-      </div>
+    <div className="flex flex-1 flex-col gap-6 p-4 sm:p-6 pt-0">
+      {/* ── HEADER COMPACTO INSTITUCIONAL ── */}
+      <PageHeader
+        icon={<IconSchool size={20} />}
+        title="Padrón de Matrículas"
+        badge={`Ciclo ${currentAnio}`}
+        description="Control de vacantes por aula, ratificación de matrícula y emisión de constancias oficiales"
+        breadcrumbs={[
+          { label: "Inicio", href: "/dashboard" },
+          { label: "Matrícula", href: "/gestion/matriculas" },
+          { label: "Padrón" },
+        ]}
+        actions={
+          <div className="flex items-center gap-2.5">
+            <DownloadEnrollmentsReportButton />
+            <AddEnrollmentButton nivelesAcademicos={nivelesAcademicos as any} />
+          </div>
+        }
+      />
 
       {/* ── BENTO KPIS ── */}
       <div className="px-1">

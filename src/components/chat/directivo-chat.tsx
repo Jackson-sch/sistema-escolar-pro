@@ -100,6 +100,7 @@ export function DirectivoChat({ context }: DirectivoChatProps) {
               variant="ghost"
               size="icon"
               onClick={() => setIsOpen(false)}
+              aria-label="Cerrar chat directivo"
               className="size-8 rounded-full hover:bg-slate-200/50 dark:hover:bg-white/10 text-foreground"
             >
               <IconX className="size-4" />
@@ -181,6 +182,7 @@ export function DirectivoChat({ context }: DirectivoChatProps) {
               type="submit"
               size="icon"
               disabled={isLoading || !chatInput.trim()}
+              aria-label="Enviar consulta"
               className="size-12 rounded-2xl bg-indigo-600 hover:bg-indigo-500 shadow-xl shadow-indigo-600/10 transition-[background-color,transform] active:scale-95 shrink-0 hover:scale-105 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white"
             >
               <IconSend className="size-5" />

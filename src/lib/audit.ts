@@ -18,16 +18,8 @@ export interface LogAuditParams {
  */
 export async function logAuditEvent(params: LogAuditParams) {
   try {
-    let {
-      usuarioId,
-      usuarioNombre,
-      usuarioEmail,
-      institucionId,
-      accion,
-      entidad,
-      entidadId,
-      detalles,
-    } = params;
+    const { accion, entidad, entidadId, detalles } = params;
+    let { usuarioId, usuarioNombre, usuarioEmail, institucionId } = params;
 
     // Si faltan datos del usuario o institución, intentamos resolver la sesión actual
     if (!usuarioId || !institucionId) {

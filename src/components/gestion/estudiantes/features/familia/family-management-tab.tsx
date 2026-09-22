@@ -12,6 +12,8 @@ import {
   IconHome,
   IconWalk,
   IconDots,
+  IconMail,
+  IconKey,
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -76,18 +78,6 @@ export function FamilyManagementTab({
     }
   };
 
-  const hogar = familyRelations.find((rel) => rel.viveCon === true);
-  const autorizadoRecoger = familyRelations.find(
-    (rel) => rel.autorizadoRecoger === true,
-  );
-
-  /* Si vive con el alumno mostrar el texto "Vive con el Alumno" y si no "No vive con el Alumno" */
-  const viveConTexto = hogar ? "Vive con el Alumno" : "No vive con el Alumno";
-
-  /* Si esta autorizado para recoger mostrar el texto "Autorizado para recoger" y si no "No autorizado para recoger" */
-  const autorizadoRecogerTexto = autorizadoRecoger
-    ? "Autorizado para recoger"
-    : "No autorizado para recoger";
 
   return (
     <div className="space-y-6">
@@ -198,6 +188,24 @@ export function FamilyManagementTab({
                     </span>
                   </div>
                 </div>
+                <div className="flex items-start gap-2 min-w-0">
+                  <IconMail className="size-3.5 text-indigo-500/70 mt-0.5 shrink-0" />
+                  <div className="flex flex-col gap-1 min-w-0">
+                    <span className="text-xs text-muted-foreground/50 tracking-widest">
+                      Correo Electrónico
+                    </span>
+                    <span
+                      className="text-xs font-bold leading-tight truncate"
+                      title={rel.padreTutor.email || undefined}
+                    >
+                      {rel.padreTutor.email || (
+                        <span className="text-amber-500/80 font-normal italic">
+                          Sin registrar
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                </div>
                 <div className="flex items-start gap-2">
                   <IconId className="size-3.5 text-orange-500/60 mt-0.5" />
                   <div className="flex flex-col gap-1">
@@ -217,7 +225,7 @@ export function FamilyManagementTab({
                         Movilidad
                       </span>
                       <span className="text-xs font-bold leading-tight text-emerald-500/80">
-                        {autorizadoRecogerTexto}
+                        Autorizado para recoger
                       </span>
                     </div>
                   </div>
@@ -230,11 +238,26 @@ export function FamilyManagementTab({
                         Hogar
                       </span>
                       <span className="text-xs font-bold leading-tight text-blue-500/80">
-                        {viveConTexto}
+                        Vive con el Alumno
                       </span>
                     </div>
                   </div>
                 )}
+              </div>
+
+              {/* Credenciales de Acceso */}
+              <div className="pt-2.5 border-t border-border/20 flex flex-wrap items-center justify-between gap-2 text-[11px]">
+                <div className="flex items-center gap-1.5 text-muted-foreground">
+                  <IconKey className="size-3 text-indigo-500/80" />
+                  <span>Acceso al portal:</span>
+                  <span className="font-semibold text-foreground/80">
+                    {rel.padreTutor.email ? (
+                      <>Correo (usuario) · DNI (clave temporal)</>
+                    ) : (
+                      <span className="text-amber-500">Requiere correo</span>
+                    )}
+                  </span>
+                </div>
               </div>
             </div>
           ))

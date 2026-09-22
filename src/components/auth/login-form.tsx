@@ -24,6 +24,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { loginAction } from "@/actions/login";
+import Link from "next/link";
 
 export function LoginForm() {
   const [error, setError] = useState<string | undefined>("");
@@ -60,20 +61,20 @@ export function LoginForm() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Correo Electrónico</FormLabel>
+                  <FormLabel className="text-xs font-bold text-foreground/90">Correo Electrónico</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <IconMail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <IconMail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/70 pointer-events-none" />
                       <Input
                         {...field}
                         disabled={isPending}
                         placeholder="admin@colegio.edu.pe"
                         type="email"
-                        className="pl-10 h-10"
+                        className="pl-10 h-11 rounded-xl bg-background/70 border-border/80 text-sm focus-visible:ring-primary/20 focus-visible:border-primary shadow-2xs transition-colors"
                       />
                     </div>
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs" />
                 </FormItem>
               )}
             />
@@ -83,42 +84,43 @@ export function LoginForm() {
               render={({ field }) => (
                 <FormItem>
                   <div className="flex items-center justify-between">
-                    <FormLabel>Contraseña</FormLabel>
+                    <FormLabel className="text-xs font-bold text-foreground/90">Contraseña</FormLabel>
                     <Button
                       variant="link"
                       size="sm"
-                      className="px-0 font-normal h-auto py-0"
+                      className="px-0 font-semibold text-xs text-primary hover:text-primary/80 h-auto py-0 cursor-pointer"
+                      asChild
                     >
-                      ¿Olvidaste tu contraseña?
+                      <Link href="/recuperar-password">¿Olvidaste tu contraseña?</Link>
                     </Button>
                   </div>
                   <FormControl>
                     <div className="relative">
-                      <IconLock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <IconLock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/70 pointer-events-none" />
                       <Input
                         {...field}
                         disabled={isPending}
                         placeholder="••••••••"
                         type="password"
-                        className="pl-10 h-10"
+                        className="pl-10 h-11 rounded-xl bg-background/70 border-border/80 text-sm focus-visible:ring-primary/20 focus-visible:border-primary shadow-2xs transition-colors"
                       />
                     </div>
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs" />
                 </FormItem>
               )}
             />
           </div>
 
           {error && (
-            <div className="bg-destructive/15 p-3 rounded-md flex items-center gap-x-2 text-sm text-destructive animate-in fade-in zoom-in animation-duration-">
+            <div className="bg-destructive/15 border border-destructive/25 p-3 rounded-xl flex items-center gap-x-2 text-xs font-medium text-destructive animate-in fade-in zoom-in-95">
               <IconAlertCircle className="h-4 w-4 shrink-0" />
               <p>{error}</p>
             </div>
           )}
 
           {success && (
-            <div className="bg-emerald-500/15 p-3 rounded-md flex items-center gap-x-2 text-sm text-emerald-500 animate-in fade-in zoom-in animation-duration-">
+            <div className="bg-emerald-500/15 border border-emerald-500/25 p-3 rounded-xl flex items-center gap-x-2 text-xs font-medium text-emerald-600 dark:text-emerald-400 animate-in fade-in zoom-in-95">
               <IconCircleCheck className="h-4 w-4 shrink-0" />
               <p>{success}</p>
             </div>
@@ -127,11 +129,18 @@ export function LoginForm() {
           <Button
             disabled={isPending}
             type="submit"
-            className="w-full h-11 transition-transform active:scale-[0.98] hover:scale-105"
+            className="w-full h-11 rounded-xl font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-md shadow-primary/25 transition-all text-sm cursor-pointer mt-2"
           >
             {isPending && <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />}
             {isPending ? "Iniciando sesión..." : "Ingresar al sistema"}
           </Button>
+
+          {/* Ayuda de acceso para Padres de Familia */}
+          <div className="pt-1 text-center">
+            <p className="text-[11px] text-muted-foreground/80 leading-relaxed">
+              ¿Eres padre o tutor? Ingresa con tu <strong className="font-medium text-foreground/90">correo registrado</strong> y tu <strong className="font-medium text-foreground/90">DNI</strong> como contraseña inicial.
+            </p>
+          </div>
         </form>
       </Form>
     </div>

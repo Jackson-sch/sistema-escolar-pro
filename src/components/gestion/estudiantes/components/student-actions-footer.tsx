@@ -72,7 +72,7 @@ function CarnetDownloadButton({ studentId, dni }: { studentId: string; dni: stri
   return (
     <Button
       variant="outline"
-      className="w-full rounded-full text-xs md:text-sm h-9 md:h-10 font-semibold border-border/60 hover:bg-accent hover:text-accent-foreground transition-all duration-200 shadow-sm"
+      className="w-full rounded-full text-xs md:text-sm h-9 md:h-10 font-semibold border-border/60 hover:bg-accent hover:text-accent-foreground transition-colors duration-200 shadow-sm"
       onClick={handleDownload}
       disabled={loading}
     >
@@ -98,7 +98,7 @@ export function StudentActionsFooter({
         {!isProfessor && (
           <Button
             variant="outline"
-            className="w-full rounded-full text-xs md:text-sm h-9 md:h-10 font-semibold border-border/60 hover:bg-accent hover:text-accent-foreground transition-all duration-200 shadow-sm"
+            className="w-full rounded-full text-xs md:text-sm h-9 md:h-10 font-semibold border-border/60 hover:bg-accent hover:text-accent-foreground transition-colors duration-200 shadow-sm"
             onClick={onEdit}
           >
             <IconEdit className="size-3.5 md:size-4 mr-1.5 md:mr-2 text-blue-500" />{" "}

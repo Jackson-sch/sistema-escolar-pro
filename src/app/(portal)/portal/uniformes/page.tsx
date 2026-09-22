@@ -5,11 +5,11 @@ import { UniformCatalogue } from "@/components/portal/uniformes/uniform-catalogu
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { IconShirt } from "@tabler/icons-react";
+import { IconBuildingStore } from "@tabler/icons-react";
 
 export const metadata = {
-  title: "Uniformes y Prendas | Portal de Familia",
-  description: "Reserva de prendas reglamentarias, consulta de catálogo por sede y estado de pedidos.",
+  title: "Tienda Escolar Oficial | Portal de Familia",
+  description: "Reserva y compra de uniformes, libros de texto, agendas institucionales y útiles por sede y estudiante.",
 };
 
 export default async function PortalUniformesPage() {
@@ -27,7 +27,7 @@ export default async function PortalUniformesPage() {
         <div className="max-w-md rounded-2xl border border-destructive/20 bg-card/80 p-6 text-center text-destructive shadow-sm">
           <p className="font-bold text-lg mb-2">Error de Carga</p>
           <p className="text-sm">
-            {res.error || "No se pudo obtener la información de uniformes."}
+            {res.error || "No se pudo obtener la información de la tienda escolar."}
           </p>
         </div>
       </div>
@@ -42,14 +42,14 @@ export default async function PortalUniformesPage() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
         <div className="space-y-2">
           <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-4 py-1 rounded-full text-xxs font-semibold uppercase tracking-widest flex items-center gap-2 w-fit">
-            <IconShirt size={14} />
+            <IconBuildingStore size={14} />
             Tienda Escolar
           </Badge>
           <h1 className="text-3xl md:text-5xl font-bold tracking-tight leading-none">
-            Catálogo de Uniformes
+            Tienda Escolar Oficial
           </h1>
           <p className="text-muted-foreground text-sm md:text-base max-w-2xl font-normal leading-relaxed">
-            Consulta las prendas oficiales del colegio, precios por talla y realiza solicitudes de reserva.
+            Adquiere uniformes oficiales, agendas institucionales, libros y material escolar para tus hijos de manera ágil y segura.
           </p>
         </div>
       </div>

@@ -8,7 +8,7 @@ import {
   ChartLegend,
   ChartLegendContent,
 } from "@/components/ui/chart"
-import { Bar, XAxis, YAxis, CartesianGrid, ComposedChart, Line } from "recharts"
+import { Bar, XAxis, YAxis, CartesianGrid, ComposedChart, Line } from "@/lib/charts"
 import { TrendingUp, Activity } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
@@ -30,6 +30,8 @@ interface IngresosMensualesChartProps {
   data: { name: string; proyectado: number; real: number }[]
 }
 
+const MONTH_NAMES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+
 export function IngresosMensualesChart({ data }: IngresosMensualesChartProps) {
   // Calculate summary stats
   const totalProyectado = data.reduce((acc, curr) => acc + curr.proyectado, 0)
@@ -39,21 +41,20 @@ export function IngresosMensualesChart({ data }: IngresosMensualesChartProps) {
     data[0] || { name: "-", real: 0, proyectado: 0 }
   )
   const currentMonthIdx = new Date().getMonth()
-  const monthNames = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
-  const currentMonthName = monthNames[currentMonthIdx]
+  const currentMonthName = MONTH_NAMES[currentMonthIdx]
   const currentMonthData = data.find((d) => d.name === currentMonthName)
 
   return (
-    <Card className="bg-card/80 border border-border/50 rounded-2xl shadow-sm overflow-hidden h-full">
-      <CardHeader className="pb-2">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="size-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shadow-inner transition-transform duration-300 hover:scale-110">
-              <TrendingUp size={24} />
+    <Card className="bg-card/70 backdrop-blur-xs border border-border/60 rounded-2xl shadow-2xs overflow-hidden h-full">
+      <CardHeader className="p-4 pb-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="size-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shadow-2xs shrink-0">
+              <TrendingUp size={18} />
             </div>
             <div>
-              <CardTitle className="text-xl font-black tracking-tight">Tendencia de Ingresos</CardTitle>
-              <CardDescription className="text-sm font-medium opacity-60">Comparativa mensual de ingresos proyectados vs reales</CardDescription>
+              <CardTitle className="text-sm sm:text-base font-extrabold tracking-tight">Tendencia de Ingresos</CardTitle>
+              <CardDescription className="text-xs text-muted-foreground">Comparativa mensual de ingresos proyectados vs reales</CardDescription>
             </div>
           </div>
 
@@ -141,6 +142,7 @@ export function IngresosMensualesChart({ data }: IngresosMensualesChartProps) {
               dot={false}
               strokeDasharray=""
               legendType="none"
+              tooltipType="none"
             />
           </ComposedChart>
         </ChartContainer>

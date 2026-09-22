@@ -15,50 +15,50 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency, formatDate } from "@/lib/formats";
 
+function getStatusInfo(estado: string) {
+  switch (estado) {
+    case "RESERVADO":
+      return {
+        icon: <Clock className="h-5 w-5" />,
+        text: "En revisión",
+        color: "bg-amber-100 text-amber-600 border-amber-200",
+        description: "La administración está validando tu reserva.",
+      };
+    case "APROBADO":
+      return {
+        icon: <CheckCircle2 className="h-5 w-5" />,
+        text: "Pago Pendiente",
+        color: "bg-blue-100 text-blue-600 border-blue-200",
+        description:
+          "Reserva aprobada. Por favor, realiza el pago para el recojo.",
+      };
+    case "ENTREGADO":
+      return {
+        icon: <Package className="h-5 w-5" />,
+        text: "Entregado",
+        color: "bg-green-100 text-green-600 border-green-200",
+        description: "Prendas recolectadas exitosamente.",
+      };
+    case "CANCELADO":
+      return {
+        icon: <XCircle className="h-5 w-5" />,
+        text: "Cancelado",
+        color: "bg-rose-100 text-rose-600 border-rose-200",
+        description: "La reserva fue rechazada o cancelada.",
+      };
+    default:
+      return {
+        icon: <Clock className="h-5 w-5" />,
+        text: estado,
+        color: "bg-gray-100 text-gray-600 border-gray-200",
+        description: "",
+      };
+  }
+}
+
 export default function ReservationCard({ venta }: { venta: any }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
-
-  const getStatusInfo = (estado: string) => {
-    switch (estado) {
-      case "RESERVADO":
-        return {
-          icon: <Clock className="h-5 w-5" />,
-          text: "En revisión",
-          color: "bg-amber-100 text-amber-600 border-amber-200",
-          description: "La administración está validando tu reserva.",
-        };
-      case "APROBADO":
-        return {
-          icon: <CheckCircle2 className="h-5 w-5" />,
-          text: "Pago Pendiente",
-          color: "bg-blue-100 text-blue-600 border-blue-200",
-          description:
-            "Reserva aprobada. Por favor, realiza el pago para el recojo.",
-        };
-      case "ENTREGADO":
-        return {
-          icon: <Package className="h-5 w-5" />,
-          text: "Entregado",
-          color: "bg-green-100 text-green-600 border-green-200",
-          description: "Prendas recolectadas exitosamente.",
-        };
-      case "CANCELADO":
-        return {
-          icon: <XCircle className="h-5 w-5" />,
-          text: "Cancelado",
-          color: "bg-red-100 text-red-600 border-red-200",
-          description: "Reserva cancelada.",
-        };
-      default:
-        return {
-          icon: <ArrowRight className="h-5 w-5" />,
-          text: estado,
-          color: "bg-slate-100 text-slate-600 border-slate-200",
-          description: "",
-        };
-    }
-  };
 
   const statusInfo = getStatusInfo(venta.estado);
 

@@ -39,7 +39,7 @@ import { IconDeviceFloppy } from "@tabler/icons-react";
 const variantSchema = z.object({
   id: z.string().optional(),
   sedeId: z.string().min(1, "Selecciona una sede"),
-  talla: z.string().min(1, "Ingresa la talla"),
+  talla: z.string().min(1, "Ingresa la talla o presentación"),
   precio: z.coerce.number().min(0, "Precio inválido"),
   stock: z.coerce.number().min(0, "Stock inválido"),
 });
@@ -119,8 +119,8 @@ export function UniformVariantsModal({
 
   return (
     <FormModal
-      title={`Gestionar Tallas: ${uniform?.nombre || ""}`}
-      description="Configura los precios por prenda y el stock disponible por cada sede."
+      title={`Gestionar Variantes: ${uniform?.nombre || ""}`}
+      description="Configura los precios por presentación o talla y el stock disponible por cada sede."
       isOpen={isOpen}
       onOpenChange={onOpenChange}
       className="sm:max-w-3xl"
@@ -129,7 +129,7 @@ export function UniformVariantsModal({
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-1 py-1">
           <div className="flex items-center justify-between border-b border-border/30 pb-2.5">
             <span className="text-xs font-semibold text-foreground/80">
-              Combinaciones de Talla y Sede ({fields.length})
+              Combinaciones de Presentación / Talla y Sede ({fields.length})
             </span>
             <Button
               type="button"
@@ -141,7 +141,7 @@ export function UniformVariantsModal({
               className="h-8 border-indigo-500/30 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/20 rounded-xl text-xs font-semibold gap-1.5 cursor-pointer"
             >
               <Plus className="h-3.5 w-3.5" />
-              <span>Añadir Talla</span>
+              <span>Añadir Variante</span>
             </Button>
           </div>
 
@@ -192,11 +192,11 @@ export function UniformVariantsModal({
                     render={({ field }) => (
                       <FormItem className="col-span-6 sm:col-span-2">
                         <FormLabel className="text-xs font-medium text-foreground/80 flex items-center gap-1">
-                          <Ruler className="h-3.5 w-3.5 text-amber-500" /> Talla
+                          <Ruler className="h-3.5 w-3.5 text-amber-500" /> Presentación / Talla
                         </FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="Ej: 4, 6, S, M"
+                            placeholder="Ej: S, M, 2026, Única"
                             {...field}
                             className="bg-background border-border/40 h-9 rounded-xl text-xs"
                           />

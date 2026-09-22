@@ -74,6 +74,7 @@ export function VerificacionVoucher({ archivoUrl }: VerificacionVoucherProps) {
           <Button
             variant="secondary"
             size="icon"
+            aria-label="Acercar zoom"
             className="size-10 rounded-xl bg-white/90 dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800 shadow-xl hover:scale-105 active:scale-95 transition-transform text-zinc-900 dark:text-white"
             onClick={handleZoomIn}
           >
@@ -82,6 +83,7 @@ export function VerificacionVoucher({ archivoUrl }: VerificacionVoucherProps) {
           <Button
             variant="secondary"
             size="icon"
+            aria-label="Alejar zoom"
             className="size-10 rounded-xl bg-white/90 dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800 shadow-xl hover:scale-105 active:scale-95 transition-transform text-zinc-900 dark:text-white"
             onClick={handleZoomOut}
             disabled={zoomScale <= 1}
@@ -91,6 +93,7 @@ export function VerificacionVoucher({ archivoUrl }: VerificacionVoucherProps) {
           <Button
             variant="secondary"
             size="icon"
+            aria-label="Restablecer zoom"
             className="size-10 rounded-xl bg-white/90 dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800 shadow-xl hover:scale-105 active:scale-95 transition-transform text-zinc-900 dark:text-white"
             onClick={handleResetZoom}
           >

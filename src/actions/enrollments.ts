@@ -334,6 +334,12 @@ export async function promoteStudentsAction(
         },
       });
 
+      // Obtener el ciclo escolar actual para saber si actualizar el aula actual del estudiante
+      const institucion = await tx.institucionEducativa.findFirst({
+        select: { cicloEscolarActual: true },
+      });
+      const cicloActual = institucion?.cicloEscolarActual || new Date().getFullYear();
+
       for (const studentId of studentIds) {
         try {
           // 1. Validar si ya está matriculado en el año destino
@@ -366,25 +372,29 @@ export async function promoteStudentsAction(
           }
           const numeroMatricula = `MAT-${targetYear}-${String(nextNumber).padStart(5, "0")}`;
 
-          // 3. Crear matrícula
-          const enrollment = await tx.matricula.create({
+          // 3. Crear matrícula en estado 'pendiente' (reserva/vacante para el nuevo año)
+          await tx.matricula.create({
             data: {
               numeroMatricula,
               estudianteId: studentId,
               nivelAcademicoId: targetSeccionId,
               anioAcademico: targetYear,
               esRepitente: isRepitente,
-              estado: "activo",
+              estado: "pendiente",
+              observaciones: `Promovido para el ciclo ${targetYear} (Pendiente de ratificación)`,
             },
           });
 
-          // 4. Actualizar usuario
-          await tx.user.update({
-            where: { id: studentId },
-            data: { nivelAcademicoId: targetSeccionId },
-          });
+          // 4. Actualizar usuario: SOLO si la promoción es para el ciclo escolar actual en curso
+          // Si es para un año futuro (ej: 2027 estando en 2026), el estudiante conserva su aula actual
+          if (targetYear === cicloActual) {
+            await tx.user.update({
+              where: { id: studentId },
+              data: { nivelAcademicoId: targetSeccionId },
+            });
+          }
 
-          // 5. Generar deuda de matrícula
+          // 5. Generar deuda de matrícula si existe concepto
           if (conceptoMatricula) {
             await tx.cronogramaPago.create({
               data: {
@@ -411,11 +421,72 @@ export async function promoteStudentsAction(
     revalidatePath("/gestion/estudiantes");
     
     return {
-      success: `Proceso completado. ${results.processed.length} estudiantes promovidos. ${results.errors.length} errores.`,
+      success: `Proceso completado. ${results.processed.length} estudiantes promovidos con matrícula por ratificar. ${results.errors.length} errores.`,
       data: results,
     };
   } catch (error: any) {
     console.error("Error in promoteStudentsAction:", error);
     return { error: "No se pudo completar el proceso de promoción masiva" };
+  }
+}
+
+/**
+ * Ratifica y confirma una matrícula que estaba en estado 'pendiente'
+ */
+export async function ratificarMatriculaAction(matriculaId: string) {
+  const session = await auth();
+  if (!session?.user) return { error: "No autorizado" };
+
+  try {
+    const matricula = await prisma.matricula.findUnique({
+      where: { id: matriculaId },
+      include: {
+        estudiante: {
+          select: { id: true, name: true, apellidoPaterno: true },
+        },
+      },
+    });
+
+    if (!matricula) {
+      return { error: "Matrícula no encontrada" };
+    }
+
+    if (matricula.estado === "activo") {
+      return { error: "La matrícula ya se encuentra activa" };
+    }
+
+    const inst = await prisma.institucionEducativa.findFirst({
+      select: { cicloEscolarActual: true },
+    });
+    const cicloActual = inst?.cicloEscolarActual || new Date().getFullYear();
+
+    await prisma.$transaction(async (tx) => {
+      await tx.matricula.update({
+        where: { id: matriculaId },
+        data: {
+          estado: "activo",
+          fechaMatricula: new Date(),
+        },
+      });
+
+      // Si la matrícula corresponde al ciclo actual en curso, actualizamos el aula del alumno
+      if (matricula.anioAcademico === cicloActual) {
+        await tx.user.update({
+          where: { id: matricula.estudianteId },
+          data: { nivelAcademicoId: matricula.nivelAcademicoId },
+        });
+      }
+    });
+
+    revalidatePath("/gestion/matriculas");
+    revalidatePath("/gestion/estudiantes");
+    revalidatePath(`/gestion/estudiantes/${matricula.estudianteId}`);
+
+    return {
+      success: `Matrícula ratificada y activada exitosamente para ${matricula.estudiante.name} ${matricula.estudiante.apellidoPaterno}`,
+    };
+  } catch (error: any) {
+    console.error("Error al ratificar matrícula:", error);
+    return { error: "No se pudo ratificar la matrícula. Intente nuevamente." };
   }
 }

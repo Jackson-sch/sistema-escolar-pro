@@ -99,12 +99,12 @@ export function GradeTimelineItem({
         {/* Add Section Card */}
         <button
           onClick={onAddSection}
-          className="h-full min-h-[160px] border-2 border-dashed border-border/40 rounded-2xl flex flex-col items-center justify-center gap-3 text-muted-foreground hover:text-primary hover:border-primary/40 hover:bg-primary/5 transition-[color,background-color,border-color] duration-300 group/add"
+          className="h-full min-h-[140px] border-2 border-dashed border-border/50 rounded-2xl flex flex-col items-center justify-center gap-2.5 text-muted-foreground hover:text-primary hover:border-primary/50 hover:bg-primary/5 transition-colors duration-300 group/add cursor-pointer p-4"
         >
-          <div className="size-12 rounded-full bg-muted/40 flex items-center justify-center group-hover/add:bg-primary/10 group-hover/add:scale-110 transition-[background-color,transform] duration-300">
-            <IconPlus className="size-6 transition-transform group-hover/add:rotate-90 duration-500" />
+          <div className="size-10 rounded-xl bg-muted/50 border border-border/40 flex items-center justify-center group-hover/add:bg-primary/15 group-hover/add:text-primary group-hover/add:border-primary/30 group-hover/add:scale-105 transition-[color,background-color,border-color,transform] duration-300">
+            <IconPlus className="size-5 transition-transform group-hover/add:rotate-90 duration-300" />
           </div>
-          <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Añadir Sección</span>
+          <span className="text-xs font-bold tracking-wide">Añadir Sección</span>
         </button>
       </div>
     </div>

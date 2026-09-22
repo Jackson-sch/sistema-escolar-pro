@@ -22,7 +22,7 @@ export async function getSystemSettingsAction(keys: string[]) {
     }
 
     const rawRole = (session.user.role || "").toString().toLowerCase();
-    const isAdmin = ["super_admin", "admin", "administrador", "director"].includes(rawRole);
+    const isAdmin = ["super_admin", "admin", "administrador", "administrativo", "director"].includes(rawRole);
 
     // Filtrar claves no permitidas para usuarios no administradores
     const safeKeys = isAdmin

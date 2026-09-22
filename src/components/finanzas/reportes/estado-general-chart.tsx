@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Label, Pie, PieChart, Cell } from "recharts"
+import { Label, Pie, PieChart, Cell } from "@/lib/charts"
 import {
   Card,
   CardContent,
@@ -88,14 +88,14 @@ export function EstadoGeneralChart({ data }: EstadoGeneralChartProps) {
   )
 
   return (
-    <Card className="bg-card/80 border border-border/50 rounded-2xl shadow-sm overflow-hidden h-full flex flex-col">
-      <CardHeader className="flex flex-row items-center gap-4 pb-2">
-        <div className="size-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-600 border border-blue-500/20 shadow-inner transition-transform duration-300 hover:scale-110">
-          <IconChartPie size={24} />
+    <Card className="bg-card/70 backdrop-blur-xs border border-border/60 rounded-2xl shadow-2xs overflow-hidden h-full flex flex-col">
+      <CardHeader className="flex flex-row items-center gap-3 p-4 pb-2">
+        <div className="size-9 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-600 border border-blue-500/20 shadow-2xs shrink-0">
+          <IconChartPie size={18} />
         </div>
         <div>
-          <CardTitle className="text-xl font-black tracking-tight">Distribución de Estados</CardTitle>
-          <CardDescription className="text-sm font-medium opacity-60">Proporción de cuotas según su estado de pago</CardDescription>
+          <CardTitle className="text-sm sm:text-base font-extrabold tracking-tight">Estado de Cuotas</CardTitle>
+          <CardDescription className="text-xs text-muted-foreground">Distribución porcentual de comprobantes del año</CardDescription>
         </div>
       </CardHeader>
 

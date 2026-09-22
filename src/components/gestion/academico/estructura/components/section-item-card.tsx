@@ -1,7 +1,17 @@
 "use client";
 
+import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { IconUsers, IconUserCircle, IconPencil, IconTrash, IconCircleFilled } from "@tabler/icons-react";
+import {
+  IconUsers,
+  IconUserCircle,
+  IconPencil,
+  IconTrash,
+  IconDoor,
+  IconSun,
+  IconMoon,
+  IconBuilding,
+} from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -14,7 +24,10 @@ interface SectionItemCardProps {
     descripcion?: string | null;
     capacidad: number;
     color?: string | null;
-    _count?: { matriculas: number };
+    turno?: string | null;
+    aulaAsignada?: string | null;
+    sede?: { id: string; nombre: string } | null;
+    _count?: { matriculas: number; students?: number };
     tutor?: {
       id: string;
       name: string;
@@ -29,6 +42,170 @@ interface SectionItemCardProps {
   onSelectSection?: () => void;
 }
 
+const getOccupancyColor = (rate: number, fallback: string) =>
+  rate >= 95 ? "#ef4444" : rate >= 80 ? "#f59e0b" : fallback;
+
+const getOccupancyBadgeClass = (rate: number) =>
+  rate >= 90
+    ? "bg-rose-500/10 text-rose-600 dark:text-rose-400"
+    : rate >= 75
+    ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+    : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400";
+
+function TurnoBadge({ turno }: { turno: string }) {
+  const isMorning = turno === "MANANA";
+  return (
+    <>
+      <span className="opacity-40">•</span>
+      <span className="flex items-center gap-0.5 text-[10px] uppercase font-semibold">
+        {isMorning ? <IconSun className="size-2.5 text-amber-500" /> : <IconMoon className="size-2.5 text-indigo-400" />}
+        {isMorning ? "Mañana" : "Tarde"}
+      </span>
+    </>
+  );
+}
+
+function SectionCardHeader({
+  seccion,
+  sectionColor,
+  onEdit,
+  onDelete,
+}: {
+  seccion: SectionItemCardProps["seccion"];
+  sectionColor: string;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  return (
+    <div className="flex items-start justify-between gap-2">
+      <div className="flex items-center gap-2.5 min-w-0">
+        <div
+          className="size-9 rounded-xl flex items-center justify-center font-black text-sm text-white shrink-0 shadow-xs transition-transform duration-300 group-hover:scale-105"
+          style={{ backgroundColor: sectionColor }}
+        >
+          {seccion.seccion}
+        </div>
+
+        <div className="min-w-0 space-y-0.5">
+          <h4 className="font-bold text-sm tracking-tight text-foreground truncate group-hover:text-primary transition-colors">
+            Sección &quot;{seccion.seccion}&quot;
+          </h4>
+          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground font-medium flex-wrap">
+            {seccion.aulaAsignada ? (
+              <span className="flex items-center gap-1">
+                <IconDoor className="size-3 text-muted-foreground/70" />
+                {seccion.aulaAsignada}
+              </span>
+            ) : (
+              <span className="italic text-[10px]">Sin aula asignada</span>
+            )}
+            {seccion.turno && <TurnoBadge turno={seccion.turno} />}
+            {seccion.sede && (
+              <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground/80 font-medium">
+                <span className="opacity-40">•</span>
+                <IconBuilding className="size-2.5 text-muted-foreground/70" />
+                <span className="truncate max-w-[95px]">{seccion.sede.nombre}</span>
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shrink-0">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={(e) => { e.stopPropagation(); onEdit(); }}
+          title="Editar sección"
+          className="size-7 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <IconPencil className="size-3.5" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={(e) => { e.stopPropagation(); onDelete(); }}
+          title="Eliminar sección"
+          className="size-7 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+        >
+          <IconTrash className="size-3.5" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function SectionCapacityBar({
+  enrollment,
+  capacity,
+  occupancyRate,
+  vacantes,
+  sectionColor,
+}: {
+  enrollment: number;
+  capacity: number;
+  occupancyRate: number;
+  vacantes: number;
+  sectionColor: string;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between text-xs font-medium">
+        <span className="text-[11px] text-muted-foreground">
+          <strong className="text-foreground font-bold">{enrollment}</strong> / {capacity} alumnos
+        </span>
+        <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded-md", getOccupancyBadgeClass(occupancyRate))}>
+          {vacantes === 0 ? "Completo" : `${vacantes} vac.`}
+        </span>
+      </div>
+
+      <div className="h-1.5 w-full bg-muted/60 rounded-full overflow-hidden">
+        <div
+          className="h-full rounded-full transition-[width] duration-500"
+          style={{ width: `${Math.min(occupancyRate, 100)}%`, backgroundColor: getOccupancyColor(occupancyRate, sectionColor) }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function SectionTutorFooter({
+  tutor,
+  onAssignTutor,
+}: {
+  tutor: SectionItemCardProps["seccion"]["tutor"];
+  onAssignTutor: () => void;
+}) {
+  const tutorName = tutor
+    ? `${tutor.name} ${tutor.apellidoPaterno || ""} ${tutor.apellidoMaterno || ""}`.trim()
+    : "Asignar tutor...";
+
+  return (
+    <div className="pt-2.5 border-t border-border/40 flex items-center justify-between gap-2">
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onAssignTutor();
+        }}
+        className="flex items-center gap-2 rounded-lg px-1.5 py-1 -mx-1 -my-0.5 hover:bg-muted/60 transition-colors duration-200 group/tutor text-left min-w-0 flex-1 cursor-pointer"
+      >
+        <Avatar className="size-6 border border-border/50 shrink-0">
+          <AvatarImage src={tutor?.image ?? undefined} />
+          <AvatarFallback className="bg-primary/10 text-primary text-[9px] font-bold">
+            {tutor ? tutor.name[0] : <IconUserCircle className="size-3.5 text-muted-foreground" />}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex flex-col min-w-0">
+          <span className="text-[9px] text-muted-foreground font-semibold uppercase tracking-wider">Tutor(a)</span>
+          <span className={cn("text-xs font-semibold truncate capitalize transition-colors", tutor ? "text-foreground group-hover/tutor:text-primary" : "text-amber-500 group-hover/tutor:text-amber-600 font-medium italic")}>
+            {tutorName}
+          </span>
+        </div>
+      </button>
+    </div>
+  );
+}
+
 export function SectionItemCard({
   seccion,
   onEdit,
@@ -36,126 +213,28 @@ export function SectionItemCard({
   onAssignTutor,
   onSelectSection,
 }: SectionItemCardProps) {
-  const enrollment = seccion._count?.matriculas || 0;
-  const capacity = seccion.capacidad;
-  const occupancyRate = (enrollment / capacity) * 100;
+  const [isHovered, setIsHovered] = useState(false);
 
-  // Custom color or default emerald
-  const sectionColor = seccion.color || "#10b981";
+  const enrollment = seccion._count?.matriculas ?? seccion._count?.students ?? 0;
+  const capacity = seccion.capacidad || 30;
+  const occupancyRate = capacity > 0 ? (enrollment / capacity) * 100 : 0;
+  const vacantes = Math.max(0, capacity - enrollment);
+  const sectionColor = seccion.color || "#3b82f6";
 
   return (
     <Card
       onClick={onSelectSection}
-      className="group relative overflow-hidden bg-background/20 hover:bg-background/40 transition-[background-color,border-color,box-shadow] duration-500 border-border/40 hover:border-primary/40 shadow-sm hover:shadow-lg hover:shadow-primary/10 rounded-2xl cursor-pointer"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        borderColor: isHovered ? `${sectionColor}90` : undefined,
+        boxShadow: isHovered ? `0 8px 24px -4px ${sectionColor}25` : undefined,
+      }}
+      className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card p-4 transition-all duration-300 cursor-pointer flex flex-col justify-between gap-3 hover:-translate-y-0.5"
     >
-      {/* Dynamic Glow Effect */}
-      <div 
-        className="absolute -inset-1 opacity-0 group-hover:opacity-10 transition-opacity duration-700 blur-2xl pointer-events-none"
-        style={{ 
-          background: `radial-gradient(circle at center, ${sectionColor}, transparent 70%)` 
-        }}
-      />
-
-      <div className="p-4 pl-7 space-y-4 relative z-10">
-        {/* Header: Name and Actions */}
-        <div className="flex items-start justify-between">
-          <div className="space-y-0.5">
-            <h4 className="font-bold text-lg tracking-tight flex items-center gap-2 group-hover:text-primary transition-colors">
-              Sección {seccion.seccion}
-              {seccion.descripcion && (
-                <span className="text-xs font-normal text-muted-foreground italic">
-                  &quot;{seccion.descripcion}&quot;
-                </span>
-              )}
-            </h4>
-            <div className="flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-widest">
-              <IconCircleFilled className="size-2" style={{ color: sectionColor }} />
-              Estado Activo
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-[opacity,transform] duration-300 translate-x-2 group-hover:translate-x-0">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onEdit}
-              className="size-8 rounded-full hover:bg-primary/10 hover:text-primary transition-colors"
-            >
-              <IconPencil className="size-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onDelete}
-              className="size-8 rounded-full hover:bg-destructive/10 hover:text-destructive transition-colors text-muted-foreground"
-            >
-              <IconTrash className="size-4" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Enrollment Stats */}
-        <div className="space-y-2">
-          <div className="flex items-end justify-between text-xs">
-            <div className="flex flex-col gap-0.5">
-              <span className="text-muted-foreground font-medium uppercase tracking-tighter opacity-70">
-                Ocupación
-              </span>
-              <span className="font-bold text-sm">
-                {enrollment} <span className="text-muted-foreground font-normal">/ {capacity}</span>
-              </span>
-            </div>
-            <Badge 
-              variant="secondary" 
-              className={cn(
-                "rounded-md border-none px-1.5 py-0.5 text-[10px] font-bold",
-                occupancyRate > 90 ? "bg-amber-500/10 text-amber-500" : "bg-primary/10 text-primary"
-              )}
-            >
-              {Math.round(occupancyRate)}%
-            </Badge>
-          </div>
-          <div className="h-1.5 w-full bg-muted/40 rounded-full overflow-hidden">
-            <div 
-              className="h-full transition-[width] duration-1000 ease-out rounded-full shadow-[0_0_8px_rgba(var(--primary-rgb),0.3)]"
-              style={{ 
-                width: `${Math.min(occupancyRate, 100)}%`,
-                backgroundColor: sectionColor 
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Footer: Tutor (clickable for quick assign) */}
-        <div className="pt-3 border-t border-border/20 flex items-center justify-between">
-          <button 
-            onClick={onAssignTutor}
-            className="flex items-center gap-2.5 rounded-lg px-1.5 py-1 -mx-1.5 -my-1 hover:bg-primary/5 transition-colors duration-200 group/tutor cursor-pointer"
-          >
-            <Avatar className="size-7 border border-border/40 ring-2 ring-background shadow-inner group-hover/tutor:ring-primary/30 transition-shadow">
-              <AvatarImage src={seccion.tutor?.image ?? undefined} />
-              <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-bold">
-                {seccion.tutor ? seccion.tutor.name[0] : <IconUserCircle className="size-4" />}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col -space-y-0.5 text-left">
-              <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest opacity-60">
-                Tutoría
-              </span>
-              <span className={cn(
-                "text-xs font-bold truncate max-w-[120px] transition-colors capitalize",
-                seccion.tutor 
-                  ? "group-hover/tutor:text-primary" 
-                  : "text-amber-500 group-hover/tutor:text-primary"
-              )}>
-                {seccion.tutor 
-                  ? `${seccion.tutor.name} ${seccion.tutor.apellidoPaterno} ${seccion.tutor.apellidoMaterno}` 
-                  : "Por asignar"}
-              </span>
-            </div>
-          </button>
-        </div>
-      </div>
+      <SectionCardHeader seccion={seccion} sectionColor={sectionColor} onEdit={onEdit} onDelete={onDelete} />
+      <SectionCapacityBar enrollment={enrollment} capacity={capacity} occupancyRate={occupancyRate} vacantes={vacantes} sectionColor={sectionColor} />
+      <SectionTutorFooter tutor={seccion.tutor} onAssignTutor={onAssignTutor} />
     </Card>
   );
 }

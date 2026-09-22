@@ -68,20 +68,20 @@ export function CategoryForm({ onSuccess }: CategoryFormProps) {
           name="nombre"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-[11px] font-bold tracking-wider text-muted-foreground/70 ml-1">
+              <FormLabel className="text-xs font-bold text-foreground">
                 Nombre de la Categoría
               </FormLabel>
               <FormControl>
                 <div className="relative">
-                  <IconCategory className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <IconCategory className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/60" />
                   <Input
                     {...field}
-                    placeholder="Ej. Seguimiento Académico"
-                    className="pl-10 bg-muted/5 border-border/40 rounded-xl"
+                    placeholder="Ej. Seguimiento Académico / Conductual"
+                    className="pl-9 h-9 text-xs rounded-xl border-border/60 bg-background"
                   />
                 </div>
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-xxs" />
             </FormItem>
           )}
         />
@@ -91,37 +91,39 @@ export function CategoryForm({ onSuccess }: CategoryFormProps) {
           name="descripcion"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-[11px] font-bold tracking-wider text-muted-foreground/70 ml-1">
+              <FormLabel className="text-xs font-bold text-foreground">
                 Descripción (Opcional)
               </FormLabel>
               <FormControl>
                 <div className="relative">
-                  <IconFileText className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <IconFileText className="absolute left-3 top-3 size-4 text-muted-foreground/60" />
                   <Textarea
                     {...field}
                     placeholder="Breve descripción del propósito de esta categoría..."
-                    className="pl-10 min-h-24 bg-muted/5 border-border/40 rounded-xl resize-none"
+                    rows={3}
+                    className="pl-9 text-xs rounded-xl border-border/60 bg-background resize-none"
                   />
                 </div>
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-xxs" />
             </FormItem>
           )}
         />
 
-        <Button
-          disabled={isPending}
-          type="submit"
-          className="w-full rounded-full hover:scale-105"
-        >
-          {isPending ? (
-            <IconLoader2 className="animate-spin" />
-          ) : (
-            <>
-              <IconDeviceFloppy className="mr-2" /> Guardar Categoría
-            </>
-          )}
-        </Button>
+        <div className="flex items-center justify-end gap-2 pt-2 border-t border-border/40">
+          <Button
+            disabled={isPending}
+            type="submit"
+            className="h-9 px-5 text-xs font-extrabold rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer shadow-xs"
+          >
+            {isPending ? (
+              <IconLoader2 className="mr-1.5 size-3.5 animate-spin" />
+            ) : (
+              <IconDeviceFloppy className="mr-1.5 size-3.5" />
+            )}
+            Guardar Categoría
+          </Button>
+        </div>
       </form>
     </Form>
   );

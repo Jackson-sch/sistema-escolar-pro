@@ -15,7 +15,7 @@ export function AddCompetencyButton({ areaId, nivelId }: { areaId?: string; nive
     <>
       <Button
         onClick={() => setOpen(true)}
-        className="rounded-xl h-9 px-4 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 gap-1.5 cursor-pointer transition-all duration-200 hover:scale-[1.02]"
+        className="rounded-xl h-9 px-4 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 gap-1.5 cursor-pointer transition-transform duration-200 hover:scale-[1.02]"
       >
         <IconPlus className="size-4" />
         <span className="hidden sm:inline">Nueva Competencia</span>

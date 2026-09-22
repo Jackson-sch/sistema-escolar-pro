@@ -14,6 +14,12 @@ interface ComunicacionesDashboardClientProps {
   eventos: any[];
 }
 
+const COMUNICACIONES_TABS = [
+  { id: "todo", label: "Todo" },
+  { id: "academico", label: "Académico" },
+  { id: "eventos", label: "Eventos" },
+];
+
 export function ComunicacionesDashboardClient({
   anuncios,
   eventos,
@@ -23,11 +29,6 @@ export function ComunicacionesDashboardClient({
   const pinnedAnnouncement = anuncios.find((a: any) => a.fijado);
   const otherAnnouncements = anuncios.filter((a: any) => !a.fijado);
 
-  const tabs = [
-    { id: "todo", label: "Todo" },
-    { id: "academico", label: "Académico" },
-    { id: "eventos", label: "Eventos" },
-  ];
 
   return (
     <>
@@ -39,7 +40,7 @@ export function ComunicacionesDashboardClient({
               Comunicaciones
             </h2>
             <AnimatedTabs
-              tabs={tabs}
+              tabs={COMUNICACIONES_TABS}
               activeTab={activeTab}
               onTabChange={setActiveTab}
             />

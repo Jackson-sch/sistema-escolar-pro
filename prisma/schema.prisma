@@ -659,6 +659,7 @@ model Asistencia {
   presente        Boolean
   tardanza        Boolean  @default(false)
   horaLlegada     String?
+  horaSalida      String?
   justificada     Boolean  @default(false)
   justificacion   String?
   estudianteId    String

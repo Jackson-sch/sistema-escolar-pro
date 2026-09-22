@@ -10,28 +10,15 @@ import { getInstitucionByIdAction } from "@/actions/institucion";
 import { getLayoutUserAction, getPendingComprobantesCountAction } from "@/actions/auth";
 import { CommandPalette } from "@/components/common/command-palette";
 import { SiteFooter } from "@/components/layout/site-footer";
-
 import { OnboardingTourDialog } from "@/components/common/onboarding-tour-dialog";
 
 export const dynamic = "force-dynamic";
 
-export default async function ProtectedLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const session = await auth();
-
-  // Verificar autenticación
+function validateProtectedUser(session: any, user: any) {
   if (!session?.user?.id) {
     redirect("/login");
   }
 
-  // Verificar rol y obtener datos del usuario
-  const userRes = await getLayoutUserAction(session.user.id);
-  const user = userRes.success;
-
-  // Verificar si debe cambiar contraseña (para todos los roles)
   if (user?.mustChangePassword) {
     redirect("/cambiar-password");
   }
@@ -41,25 +28,45 @@ export default async function ProtectedLayout({
   }
 
   if (user?.role === "padre") {
-    // Si es padre, debe ir al portal
     redirect("/portal");
   }
 
-  // Verificar si un administrador necesita crear su institución
   if (user?.role === "administrativo" && !user?.institucionId) {
     redirect("/onboarding/institucion");
   }
+}
 
-  // Obtener conteo de comprobantes pendientes y datos generales
+function resolveProtectedProfile(user: any, sessionUser: any) {
+  return {
+    role: user?.role,
+    name: user?.name || sessionUser?.name || undefined,
+    email: user?.email || sessionUser?.email || undefined,
+    apellidoPaterno: user?.apellidoPaterno || sessionUser?.apellidoPaterno || undefined,
+    apellidoMaterno: user?.apellidoMaterno || sessionUser?.apellidoMaterno || undefined,
+  };
+}
+
+export default async function ProtectedLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const session = await auth();
+  const userRes = await getLayoutUserAction(session?.user?.id || "");
+  const user = userRes.success;
+
+  validateProtectedUser(session, user);
+
   const [pendingRes, stats, financeStats, institucionRes] = await Promise.all([
-    getPendingComprobantesCountAction(session.user.institucionId || undefined),
+    getPendingComprobantesCountAction(session?.user?.institucionId || undefined),
     getDashboardStatsAction({}),
     getEstadisticasCobranzaAction({}),
-    getInstitucionByIdAction(session.user.institucionId || undefined),
+    getInstitucionByIdAction(session?.user?.institucionId || undefined),
   ]);
 
   const pendingComprobantes = pendingRes.success ?? 0;
   const institucionData = institucionRes.data;
+  const profile = resolveProtectedProfile(user, session?.user);
 
   const contextData = {
     estadisticasGenerales: stats.success,
@@ -70,29 +77,25 @@ export default async function ProtectedLayout({
   return (
     <div className="[--header-height:calc(var(--spacing)*14)] min-h-screen flex flex-col">
       <SidebarProvider>
-        <CommandPalette />
-        <OnboardingTourDialog userRole={user?.role} />
+        <CommandPalette userRole={profile.role as "administrativo" | "profesor" | undefined} />
+        <OnboardingTourDialog userRole={profile.role} />
         <AppSidebar
-          userRole={user?.role}
-          userName={user?.name || session.user.name || undefined}
-          userEmail={user?.email || session.user.email || undefined}
-          userApellidoMaterno={
-            user?.apellidoMaterno || session.user.apellidoMaterno || undefined
-          }
-          userApellidoPaterno={
-            user?.apellidoPaterno || session.user.apellidoPaterno || undefined
-          }
+          userRole={profile.role}
+          userName={profile.name}
+          userEmail={profile.email}
+          userApellidoMaterno={profile.apellidoMaterno}
+          userApellidoPaterno={profile.apellidoPaterno}
           pendingComprobantes={pendingComprobantes}
           institucionName={institucionData?.nombreInstitucion}
           institucionLogo={institucionData?.logo}
         />
-        <SidebarInset className="flex flex-col min-h-screen">
+        <SidebarInset className="flex flex-col min-h-screen min-w-0">
           <SiteHeader
             anioAcademico={institucionData?.cicloEscolarActual || 2025}
             institucionName={institucionData?.nombreInstitucion}
           />
-          <main className="flex flex-1 flex-col gap-4 p-2 relative w-full overflow-x-hidden">
-            <div className="flex-1 w-full">{children}</div>
+          <main className="flex flex-1 flex-col gap-4 p-2 relative w-full min-w-0 overflow-x-hidden">
+            <div className="flex-1 w-full min-w-0">{children}</div>
             <DirectivoChat context={contextData} />
             <SiteFooter />
           </main>

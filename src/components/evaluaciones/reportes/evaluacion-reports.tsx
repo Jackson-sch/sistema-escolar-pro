@@ -33,6 +33,14 @@ export function EvaluacionReports({ evaluaciones }: EvaluacionReportsProps) {
     (ev) => ev._count.notas === 0,
   ).length;
 
+  // Promedio general real de las calificaciones
+  const allNotas = evaluaciones.flatMap((ev) => ev.notas || []);
+  const promedioGeneral =
+    allNotas.length > 0
+      ? allNotas.reduce((sum: number, n: any) => sum + (n.valor || 0), 0) /
+        allNotas.length
+      : null;
+
   // Datos para gráfico de barras: Notas por Curso
   const cursosData = evaluaciones
     .reduce((acc: any[], ev) => {
@@ -83,7 +91,7 @@ export function EvaluacionReports({ evaluaciones }: EvaluacionReportsProps) {
         totalEvaluaciones={totalEvaluaciones}
         totalNotas={totalNotas}
         sinCalificar={sinCalificar}
-        promedioGeneral={14.5}
+        promedioGeneral={promedioGeneral}
       />
 
       {/* Charts */}

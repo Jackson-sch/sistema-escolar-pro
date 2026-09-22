@@ -15,7 +15,7 @@ import {
 interface StaffTableMeta {
   instituciones?: unknown[];
   estados?: Array<{ id: string; nombre: string }>;
-  cargos?: unknown[];
+  cargos?: Array<{ id: string; nombre: string }>;
 }
 
 interface StaffTableProps<TData, TValue> {
@@ -28,9 +28,11 @@ interface StaffFiltersProps<TData> {
   table: Table<TData>;
   estadoFilter: string;
   rolFilter: string;
+  cargoFilter: string;
   meta: StaffTableMeta & {
     setEstadoFilter: (value: string) => void;
     setRolFilter: (value: string) => void;
+    setCargoFilter: (value: string) => void;
   };
 }
 
@@ -38,6 +40,7 @@ function StaffFilters<TData>({
   table,
   estadoFilter,
   rolFilter,
+  cargoFilter,
   meta,
 }: StaffFiltersProps<TData>) {
   useEffect(() => {
@@ -52,10 +55,16 @@ function StaffFilters<TData>({
       ?.setFilterValue(rolFilter === "ALL" ? "" : rolFilter);
   }, [rolFilter, table]);
 
+  useEffect(() => {
+    table
+      .getColumn("cargo")
+      ?.setFilterValue(cargoFilter === "ALL" ? "" : cargoFilter);
+  }, [cargoFilter, table]);
+
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2 flex-wrap">
       <Select value={estadoFilter} onValueChange={meta.setEstadoFilter}>
-        <SelectTrigger className="w-[140px] rounded-full">
+        <SelectTrigger className="w-[140px] rounded-full text-xs font-semibold h-9">
           <SelectValue placeholder="Estado" />
         </SelectTrigger>
         <SelectContent>
@@ -69,7 +78,7 @@ function StaffFilters<TData>({
       </Select>
 
       <Select value={rolFilter} onValueChange={meta.setRolFilter}>
-        <SelectTrigger className="w-[140px] rounded-full">
+        <SelectTrigger className="w-[140px] rounded-full text-xs font-semibold h-9">
           <SelectValue placeholder="Rol" />
         </SelectTrigger>
         <SelectContent>
@@ -79,6 +88,22 @@ function StaffFilters<TData>({
           <SelectItem value="director">Directivos</SelectItem>
         </SelectContent>
       </Select>
+
+      {meta?.cargos && meta.cargos.length > 0 && (
+        <Select value={cargoFilter} onValueChange={meta.setCargoFilter}>
+          <SelectTrigger className="w-[160px] rounded-full text-xs font-semibold h-9">
+            <SelectValue placeholder="Cargo" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">Todos los Cargos</SelectItem>
+            {meta.cargos.map((c) => (
+              <SelectItem key={c.id} value={c.nombre}>
+                {c.nombre}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
     </div>
   );
 }
@@ -100,6 +125,10 @@ export function StaffTable<TData, TValue>({
     "rol",
     parseAsString.withDefault("ALL"),
   );
+  const [cargoFilter, setCargoFilter] = useQueryState(
+    "cargo",
+    parseAsString.withDefault("ALL"),
+  );
 
   // Pagination states with nuqs
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
@@ -109,12 +138,16 @@ export function StaffTable<TData, TValue>({
   );
 
   const hasActiveFilters =
-    searchQuery !== "" || estadoFilter !== "ALL" || rolFilter !== "ALL";
+    searchQuery !== "" ||
+    estadoFilter !== "ALL" ||
+    rolFilter !== "ALL" ||
+    cargoFilter !== "ALL";
 
   const clearFilters = () => {
     setSearchQuery("");
     setEstadoFilter("ALL");
     setRolFilter("ALL");
+    setCargoFilter("ALL");
     setPage(1);
   };
 
@@ -144,7 +177,8 @@ export function StaffTable<TData, TValue>({
           table={table}
           estadoFilter={estadoFilter}
           rolFilter={rolFilter}
-          meta={{ ...meta, setEstadoFilter, setRolFilter }}
+          cargoFilter={cargoFilter}
+          meta={{ ...meta, setEstadoFilter, setRolFilter, setCargoFilter }}
         />
       )}
     </DataTable>

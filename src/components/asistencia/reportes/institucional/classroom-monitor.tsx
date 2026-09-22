@@ -70,7 +70,7 @@ export function ClassroomMonitor({ resumen }: ClassroomMonitorProps) {
           return (
             <div
               key={section.id}
-              className="group relative rounded-2xl border border-border/40 bg-card/80 backdrop-blur-md shadow-xs hover:shadow-md hover:border-indigo-500/30 p-5 transition-all duration-200 flex flex-col justify-between space-y-4 overflow-hidden"
+              className="group relative rounded-2xl border border-border/40 bg-card/80 backdrop-blur-md shadow-xs hover:shadow-md hover:border-indigo-500/30 p-5 transition-[border-color,box-shadow] duration-200 flex flex-col justify-between space-y-4 overflow-hidden"
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="space-y-0.5 min-w-0">

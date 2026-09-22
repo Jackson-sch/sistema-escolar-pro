@@ -54,8 +54,15 @@ export function NotasTableRow({
   const getNotaStatus = (data?: NotaData) => {
     if (!data) return "pendiente";
     if (escala === "LITERAL") {
-      if (data.valorLiteral === "C") return "desaprobado";
-      return "aprobado";
+      if (!data.valorLiteral) return "pendiente";
+      if (data.valorLiteral === "AD") return "destacado";
+      if (data.valorLiteral === "A") return "esperado";
+      if (data.valorLiteral === "B") return "proceso";
+      if (data.valorLiteral === "C") return "inicio";
+      return "pendiente";
+    }
+    if (data.valor === undefined || data.valor === null || data.valor === 0) {
+      return "pendiente";
     }
     if (data.valor >= 11) return "aprobado";
     return "desaprobado";
@@ -68,30 +75,30 @@ export function NotasTableRow({
   return (
     <TableRow
       className={cn(
-        "group hover:bg-muted/70 transition-colors border-b border-border/10 last:border-0 duration-200",
+        "group hover:bg-muted/60 transition-colors border-b border-border/20 last:border-0 duration-150",
         isModified &&
-          "bg-amber-500/[0.02] dark:bg-amber-500/[0.01] hover:bg-amber-500/[0.04] border-l-2 border-l-amber-500/80 shadow-[inset_1px_0_0_rgba(245,158,11,0.1)]"
+          "bg-amber-500/[0.03] dark:bg-amber-500/[0.02] hover:bg-amber-500/[0.06] border-l-2 border-l-amber-500 shadow-[inset_1px_0_0_rgba(245,158,11,0.15)]"
       )}
     >
-      <TableCell className="text-center font-mono text-[10px] text-muted-foreground/40 hidden md:table-cell">
+      <TableCell className="text-center font-mono text-[10px] text-muted-foreground/50 hidden md:table-cell">
         {String(index + 1).padStart(2, "0")}
       </TableCell>
       <TableCell>
         <div className="flex items-center gap-3">
-          <Avatar className="size-10 rounded-2xl border border-border/40 shadow-sm transition-transform group-hover:scale-105">
-            <AvatarFallback className="text-xs font-black">
+          <Avatar className="size-9.5 rounded-xl border border-border/50 shadow-2xs transition-transform group-hover:scale-105">
+            <AvatarFallback className="text-xs font-black bg-primary/10 text-primary">
               {initials}
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col min-w-0">
-            <span className="font-bold text-sm tracking-tight text-foreground/90 uppercase truncate">
+            <span className="font-bold text-xs sm:text-sm tracking-tight text-foreground/90 uppercase truncate">
               {estudiante.apellidoPaterno} {estudiante.apellidoMaterno},{" "}
               {estudiante.name}
             </span>
             <span className="text-[10px] font-mono text-muted-foreground/70 uppercase flex items-center gap-1.5">
               {estudiante.codigoEstudiante || "SIN CÓDIGO"}
               {isModified && (
-                <span className="text-[8px] font-black text-amber-600 dark:text-amber-400 bg-amber-500/10 dark:bg-amber-500/5 border border-amber-500/20 px-1 py-0.5 rounded-md uppercase tracking-widest animate-pulse">
+                <span className="text-[8px] font-black text-amber-600 dark:text-amber-400 bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/25 px-1 py-0.5 rounded-md uppercase tracking-wider animate-pulse">
                   Modificado
                 </span>
               )}
@@ -125,33 +132,53 @@ export function NotasTableRow({
   );
 }
 
-function StatusBadge({ status }: { status: string }) {
-  const configs: Record<string, { label: string; color: string; icon: any }> = {
-    pendiente: {
-      label: "Pte.",
-      color: "bg-muted/50 text-muted-foreground/60",
-      icon: IconClockHour4,
-    },
-    aprobado: {
-      label: "Aprobado",
-      color: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-      icon: IconCheck,
-    },
-    desaprobado: {
-      label: "Desaprobado",
-      color: "bg-red-500/10 text-red-600 border-red-500/20",
-      icon: IconX,
-    },
-  };
+const STATUS_CONFIGS: Record<string, { label: string; color: string; icon: any }> = {
+  pendiente: {
+    label: "Pte.",
+    color: "bg-muted/50 text-muted-foreground/60 border-border/40",
+    icon: IconClockHour4,
+  },
+  destacado: {
+    label: "AD · Destacado",
+    color: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30",
+    icon: IconCheck,
+  },
+  esperado: {
+    label: "A · Logrado",
+    color: "bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border-indigo-500/30",
+    icon: IconCheck,
+  },
+  proceso: {
+    label: "B · Proceso",
+    color: "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30",
+    icon: IconClockHour4,
+  },
+  inicio: {
+    label: "C · Inicio",
+    color: "bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/30",
+    icon: IconX,
+  },
+  aprobado: {
+    label: "Aprobado",
+    color: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30",
+    icon: IconCheck,
+  },
+  desaprobado: {
+    label: "Desaprobado",
+    color: "bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/30",
+    icon: IconX,
+  },
+};
 
-  const config = configs[status];
+function StatusBadge({ status }: { status: string }) {
+  const config = STATUS_CONFIGS[status] || STATUS_CONFIGS.pendiente;
   const Icon = config.icon;
 
   return (
     <Badge
       variant="outline"
       className={cn(
-        "text-[9px] font-black uppercase tracking-tight px-2.5 py-1 gap-1.5 rounded-full border shadow-sm",
+        "text-[9px] font-black uppercase tracking-tight px-2.5 py-0.5 gap-1.5 rounded-full border shadow-2xs whitespace-nowrap",
         config.color,
       )}
     >

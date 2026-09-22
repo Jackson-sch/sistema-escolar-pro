@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text as PDFText, StyleSheet, View } from '@react-pdf/renderer';
+import { Text as PDFText, StyleSheet, View } from "@/lib/pdf";
 import type { Style } from '@react-pdf/types';
 import { usePdfxTheme, useSafeMemo } from "@/lib/pdfx-theme-context";
 type PdfxTheme = ReturnType<typeof usePdfxTheme>;
@@ -220,6 +220,189 @@ function createPageFooterStyles(t: PdfxTheme) {
   });
 }
 
+function renderText(text: string | undefined, style: Style[]) {
+  if (!text) return null;
+  
+  // Check if the text has page number placeholders
+  if (text.includes('{page}') || text.includes('{total}')) {
+    return (
+      <PDFText
+        style={style}
+        render={({ pageNumber, totalPages }) =>
+          text.replace('{page}', `${pageNumber}`).replace('{total}', `${totalPages}`)
+        }
+      />
+    );
+  }
+  
+  return <PDFText style={style}>{text}</PDFText>;
+}
+
+function applyFooterOverrides(
+  base: Style[],
+  background?: string,
+  style?: Style | Style[],
+  sticky?: boolean,
+  stickyStyle?: Style,
+  colors?: any
+): Style[] {
+  const result = [...base];
+  if (background && colors) result.push({ backgroundColor: resolveColor(background, colors) });
+  if (style) result.push(style as any);
+  if (sticky && stickyStyle) result.push(stickyStyle);
+  return result;
+}
+
+function FooterBrandedVariant({
+  containerStyles,
+  styles,
+  resolvedTextColor,
+  leftText,
+  rightText,
+  noWrap,
+  isFixed,
+}: any) {
+  const lStyle: Style[] = [styles.textBranded];
+  const rStyle: Style[] = [styles.textBrandedRight];
+  if (resolvedTextColor) {
+    lStyle.push({ color: resolvedTextColor });
+    rStyle.push({ color: resolvedTextColor });
+  }
+
+  return (
+    <View wrap={!noWrap} fixed={isFixed} style={containerStyles}>
+      {renderText(leftText, lStyle)}
+      {renderText(rightText, rStyle)}
+    </View>
+  );
+}
+
+function FooterCenteredVariant({
+  containerStyles,
+  styles,
+  resolvedTextColor,
+  leftText,
+  rightText,
+  noWrap,
+  isFixed,
+}: any) {
+  const tStyle: Style[] = [styles.textCenteredVariant];
+  if (resolvedTextColor) tStyle.push({ color: resolvedTextColor });
+
+  return (
+    <View wrap={!noWrap} fixed={isFixed} style={containerStyles}>
+      {renderText(leftText, tStyle)}
+      {renderText(rightText, tStyle)}
+    </View>
+  );
+}
+
+function FooterThreeColumnVariant({
+  containerStyles,
+  styles,
+  resolvedTextColor,
+  leftText,
+  rightText,
+  address,
+  phone,
+  email,
+  website,
+  noWrap,
+  isFixed,
+}: any) {
+  const leftStyle: Style[] = [styles.companyName];
+  const centerStyle: Style[] = [styles.contactInfoCenter];
+  const rightStyle: Style[] = [styles.textRight];
+  if (resolvedTextColor) {
+    leftStyle.push({ color: resolvedTextColor });
+    centerStyle.push({ color: resolvedTextColor });
+    rightStyle.push({ color: resolvedTextColor });
+  }
+
+  return (
+    <View wrap={!noWrap} fixed={isFixed} style={containerStyles}>
+      <View style={styles.threeColumnLeft}>
+        {renderText(leftText, leftStyle)}
+        {address && <PDFText style={styles.textLeft}>{address}</PDFText>}
+      </View>
+      <View style={styles.threeColumnCenter}>
+        {phone && <PDFText style={centerStyle}>{phone}</PDFText>}
+        {email && <PDFText style={centerStyle}>{email}</PDFText>}
+        {website && <PDFText style={centerStyle}>{website}</PDFText>}
+      </View>
+      <View style={styles.threeColumnRight}>
+        {renderText(rightText, rightStyle)}
+      </View>
+    </View>
+  );
+}
+
+function FooterDetailedVariant({
+  containerStyles,
+  styles,
+  resolvedTextColor,
+  leftText,
+  rightText,
+  address,
+  phone,
+  email,
+  website,
+  noWrap,
+  isFixed,
+}: any) {
+  const companyStyle: Style[] = [styles.companyBold];
+  const addrStyle: Style[] = [styles.textLeft];
+  const contactStyle: Style[] = [styles.textRight];
+  const pageNumStyle: Style[] = [styles.detailedPageNumber];
+  if (resolvedTextColor) {
+    companyStyle.push({ color: resolvedTextColor });
+    addrStyle.push({ color: resolvedTextColor });
+    contactStyle.push({ color: resolvedTextColor });
+    pageNumStyle.push({ color: resolvedTextColor });
+  }
+
+  return (
+    <View wrap={!noWrap} fixed={isFixed} style={containerStyles}>
+      <View style={styles.detailedTopRow}>
+        <View style={styles.detailedLeft}>
+          {renderText(leftText, companyStyle)}
+          {address && <PDFText style={addrStyle}>{address}</PDFText>}
+        </View>
+        <View style={styles.detailedRight}>
+          {phone && <PDFText style={contactStyle}>{`Phone: ${phone}`}</PDFText>}
+          {email && <PDFText style={contactStyle}>{`Email: ${email}`}</PDFText>}
+          {website && <PDFText style={contactStyle}>{`Web: ${website}`}</PDFText>}
+        </View>
+      </View>
+      {renderText(rightText, pageNumStyle)}
+    </View>
+  );
+}
+
+function FooterMinimalVariant({
+  containerStyles,
+  styles,
+  resolvedTextColor,
+  leftText,
+  rightText,
+  noWrap,
+  isFixed,
+}: any) {
+  const lStyle: Style[] = [styles.textLeft];
+  const rStyle: Style[] = [styles.textRight];
+  if (resolvedTextColor) {
+    lStyle.push({ color: resolvedTextColor });
+    rStyle.push({ color: resolvedTextColor });
+  }
+
+  return (
+    <View wrap={!noWrap} fixed={isFixed} style={containerStyles}>
+      {renderText(leftText, lStyle)}
+      {renderText(rightText, rStyle)}
+    </View>
+  );
+}
+
 export function PageFooter({
   leftText,
   rightText,
@@ -241,7 +424,6 @@ export function PageFooter({
 }: PageFooterProps) {
   const theme = usePdfxTheme();
   const styles = useSafeMemo(() => createPageFooterStyles(theme), [theme]);
-  // sticky implies fixed; marginTop is irrelevant with absolute positioning
   const isFixed = fixed || sticky;
   const mt = sticky ? 0 : (marginTop ?? theme.spacing.sectionGap);
   const resolvedTextColor = textColor ? resolveColor(textColor, theme.colors) : undefined;
@@ -249,144 +431,88 @@ export function PageFooter({
     ? { position: 'absolute', bottom: pagePadding, left: pagePadding, right: pagePadding }
     : {};
 
-  function applyOverrides(base: Style[]): Style[] {
-    if (background) base.push({ backgroundColor: resolveColor(background, theme.colors) });
-    if (style) base.push(style);
-    if (sticky) base.push(stickyStyle);
-    return base;
-  }
-
-  const renderText = (text: string | undefined, style: Style[]) => {
-    if (!text) return null;
-    
-    // Check if the text has page number placeholders
-    if (text.includes('{page}') || text.includes('{total}')) {
-      return (
-        <PDFText
-          style={style}
-          render={({ pageNumber, totalPages }) =>
-            text.replace('{page}', `${pageNumber}`).replace('{total}', `${totalPages}`)
-          }
-        />
-      );
-    }
-    
-    return <PDFText style={style}>{text}</PDFText>;
-  };
+  const applyOverrides = (base: Style[]) =>
+    applyFooterOverrides(base, background, style, sticky, stickyStyle, theme.colors);
 
   if (variant === 'branded') {
-    const containerStyles = applyOverrides([styles.brandedContainer, { marginTop: mt }]);
-
-    const lStyle: Style[] = [styles.textBranded];
-    const rStyle: Style[] = [styles.textBrandedRight];
-    if (resolvedTextColor) {
-      lStyle.push({ color: resolvedTextColor });
-      rStyle.push({ color: resolvedTextColor });
-    }
-
     return (
-      <View wrap={!noWrap} fixed={isFixed} style={containerStyles}>
-        {renderText(leftText, lStyle)}
-        {renderText(rightText, rStyle)}
-      </View>
+      <FooterBrandedVariant
+        containerStyles={applyOverrides([styles.brandedContainer, { marginTop: mt }])}
+        styles={styles}
+        resolvedTextColor={resolvedTextColor}
+        leftText={leftText}
+        rightText={rightText}
+        noWrap={noWrap}
+        isFixed={isFixed}
+      />
     );
   }
 
   if (variant === 'centered') {
-    const containerStyles = applyOverrides([styles.centeredContainer, { marginTop: mt }]);
-
-    const tStyle: Style[] = [styles.textCenteredVariant];
-    if (resolvedTextColor) tStyle.push({ color: resolvedTextColor });
-
     return (
-      <View wrap={!noWrap} fixed={isFixed} style={containerStyles}>
-        {renderText(leftText, tStyle)}
-        {renderText(rightText, tStyle)}
-      </View>
+      <FooterCenteredVariant
+        containerStyles={applyOverrides([styles.centeredContainer, { marginTop: mt }])}
+        styles={styles}
+        resolvedTextColor={resolvedTextColor}
+        leftText={leftText}
+        rightText={rightText}
+        noWrap={noWrap}
+        isFixed={isFixed}
+      />
     );
   }
 
   if (variant === 'three-column') {
-    const containerStyles = applyOverrides([styles.threeColumnContainer, { marginTop: mt }]);
-
-    const leftStyle: Style[] = [styles.companyName];
-    const centerStyle: Style[] = [styles.contactInfoCenter];
-    const rightStyle: Style[] = [styles.textRight];
-    if (resolvedTextColor) {
-      leftStyle.push({ color: resolvedTextColor });
-      centerStyle.push({ color: resolvedTextColor });
-      rightStyle.push({ color: resolvedTextColor });
-    }
-
     return (
-      <View wrap={!noWrap} fixed={isFixed} style={containerStyles}>
-        <View style={styles.threeColumnLeft}>
-          {renderText(leftText, leftStyle)}
-          {address && <PDFText style={styles.textLeft}>{address}</PDFText>}
-        </View>
-        <View style={styles.threeColumnCenter}>
-          {phone && <PDFText style={centerStyle}>{phone}</PDFText>}
-          {email && <PDFText style={centerStyle}>{email}</PDFText>}
-          {website && <PDFText style={centerStyle}>{website}</PDFText>}
-        </View>
-        <View style={styles.threeColumnRight}>
-          {renderText(rightText, rightStyle)}
-        </View>
-      </View>
+      <FooterThreeColumnVariant
+        containerStyles={applyOverrides([styles.threeColumnContainer, { marginTop: mt }])}
+        styles={styles}
+        resolvedTextColor={resolvedTextColor}
+        leftText={leftText}
+        rightText={rightText}
+        address={address}
+        phone={phone}
+        email={email}
+        website={website}
+        noWrap={noWrap}
+        isFixed={isFixed}
+      />
     );
   }
 
   if (variant === 'detailed') {
-    const containerStyles = applyOverrides([styles.detailedContainer, { marginTop: mt }]);
-
-    const companyStyle: Style[] = [styles.companyBold];
-    const addrStyle: Style[] = [styles.textLeft];
-    const contactStyle: Style[] = [styles.textRight];
-    const pageNumStyle: Style[] = [styles.detailedPageNumber];
-    if (resolvedTextColor) {
-      companyStyle.push({ color: resolvedTextColor });
-      addrStyle.push({ color: resolvedTextColor });
-      contactStyle.push({ color: resolvedTextColor });
-      pageNumStyle.push({ color: resolvedTextColor });
-    }
-
     return (
-      <View wrap={!noWrap} fixed={isFixed} style={containerStyles}>
-        <View style={styles.detailedTopRow}>
-          <View style={styles.detailedLeft}>
-            {renderText(leftText, companyStyle)}
-            {address && <PDFText style={addrStyle}>{address}</PDFText>}
-          </View>
-          <View style={styles.detailedRight}>
-            {phone && <PDFText style={contactStyle}>{`Phone: ${phone}`}</PDFText>}
-            {email && <PDFText style={contactStyle}>{`Email: ${email}`}</PDFText>}
-            {website && <PDFText style={contactStyle}>{`Web: ${website}`}</PDFText>}
-          </View>
-        </View>
-        {renderText(rightText, pageNumStyle)}
-      </View>
+      <FooterDetailedVariant
+        containerStyles={applyOverrides([styles.detailedContainer, { marginTop: mt }])}
+        styles={styles}
+        resolvedTextColor={resolvedTextColor}
+        leftText={leftText}
+        rightText={rightText}
+        address={address}
+        phone={phone}
+        email={email}
+        website={website}
+        noWrap={noWrap}
+        isFixed={isFixed}
+      />
     );
   }
 
   if (variant === 'minimal') {
-    const containerStyles = applyOverrides([styles.minimalContainer, { marginTop: mt }]);
-
-    const lStyle: Style[] = [styles.textLeft];
-    const rStyle: Style[] = [styles.textRight];
-    if (resolvedTextColor) {
-      lStyle.push({ color: resolvedTextColor });
-      rStyle.push({ color: resolvedTextColor });
-    }
-
     return (
-      <View wrap={!noWrap} fixed={isFixed} style={containerStyles}>
-        {renderText(leftText, lStyle)}
-        {renderText(rightText, rStyle)}
-      </View>
+      <FooterMinimalVariant
+        containerStyles={applyOverrides([styles.minimalContainer, { marginTop: mt }])}
+        styles={styles}
+        resolvedTextColor={resolvedTextColor}
+        leftText={leftText}
+        rightText={rightText}
+        noWrap={noWrap}
+        isFixed={isFixed}
+      />
     );
   }
 
-   if (renderCustomContent) {
+  if (renderCustomContent) {
     const containerStyles = applyOverrides([{ marginTop: mt }]);
     return (
       <View wrap={!noWrap} fixed={isFixed} style={containerStyles}>
@@ -396,7 +522,6 @@ export function PageFooter({
   }
 
   const containerStyles = applyOverrides([styles.simpleContainer, { marginTop: mt }]);
-
   const lStyle: Style[] = [styles.textLeft];
   const cStyle: Style[] = [styles.textCenter];
   const rStyle: Style[] = [styles.textRight];

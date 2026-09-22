@@ -1,85 +1,184 @@
-import React from 'react'
-import { Text, View } from '@react-pdf/renderer'
-import { DocumentWrapper } from './document-wrapper'
-import { Heading } from '@/components/pdfx/heading/pdfx-heading'
-import { Stack } from '@/components/pdfx/stack/pdfx-stack'
-import { Divider } from '@/components/pdfx/divider/pdfx-divider'
-import { formatTitleCase } from '@/lib/formats'
+import React from "react";
+import { Text as PdfText, View } from "@/lib/pdf";
+import { DocumentWrapper } from "./document-wrapper";
+import { Heading } from "@/components/pdfx/heading/pdfx-heading";
+import { Stack } from "@/components/pdfx/stack/pdfx-stack";
+import { Card } from "@/components/pdfx/card/pdfx-card";
+import { KeyValue } from "@/components/pdfx/key-value/pdfx-key-value";
+import { Signature } from "@/components/pdfx/signature/pdfx-signature";
+import { formatTitleCase } from "@/lib/formats";
 
 interface ConstanciaEstudiosPDFProps {
   student: {
-    name: string
-    apellidoPaterno: string
-    apellidoMaterno: string
-    dni: string
+    name: string;
+    apellidoPaterno: string;
+    apellidoMaterno: string;
+    dni: string;
+    codigoEstudiante?: string;
     nivelAcademico: {
-      grado: { nombre: string }
-      seccion: string
-      nivel: { nombre: string }
-    }
-  }
-  anioAcademico: number
-  institucion: any
-  verificationCode?: string
+      grado: { nombre: string };
+      seccion: string;
+      nivel: { nombre: string };
+    };
+  };
+  anioAcademico: number;
+  institucion: any;
+  verificationCode?: string;
 }
 
 export const ConstanciaEstudiosPDF = ({
   student,
   anioAcademico,
   institucion,
-  verificationCode
+  verificationCode,
 }: ConstanciaEstudiosPDFProps) => {
-  const studentFull = formatTitleCase(`${student.apellidoPaterno} ${student.apellidoMaterno}, ${student.name}`)
-  const date = new Date()
-  const dateStr = `${date.getDate()} de ${date.toLocaleString('es-PE', { month: 'long' })} de ${date.getFullYear()}`
+  const studentFull = formatTitleCase(
+    `${student.apellidoPaterno} ${student.apellidoMaterno}, ${student.name}`
+  );
+  const date = new Date();
+  const dateStr = `${date.getDate()} de ${date.toLocaleString("es-PE", {
+    month: "long",
+  })} de ${date.getFullYear()}`;
+
+  const gradoStr = (student.nivelAcademico?.grado?.nombre || "-").toUpperCase();
+  const nivelStr = (student.nivelAcademico?.nivel?.nombre || "-").toUpperCase();
+  const seccionStr = (student.nivelAcademico?.seccion || "-").toUpperCase();
 
   return (
     <DocumentWrapper
       title="Constancia de Estudios"
-      docTypeLabel={`EXP: ${date.getFullYear()}-${student.dni.substring(0, 4)}`}
+      docTypeLabel={`EXP. OFICIAL ${anioAcademico}`}
       docId={student.dni}
       institucion={institucion}
       verificationCode={verificationCode}
     >
-      <Stack direction="vertical" gap="lg" style={{ marginTop: 20 }}>
-        <Text style={{ fontSize: 11, textAlign: 'justify', lineHeight: 1.8 }}>
-          EL QUE SUSCRIBE, DIRECTOR DE LA INSTITUCIÓN EDUCATIVA <Text style={{ fontWeight: 'bold' }}>{"\u0022"}{institucion.nombreInstitucion.toUpperCase()}{"\u0022"}</Text>, HACE CONSTAR QUE:
-        </Text>
+      <Stack direction="vertical" gap="md" style={{ marginTop: 18, paddingHorizontal: 6 }}>
+        {/* Párrafo de Certificación Inicial */}
+        <PdfText
+          style={{
+            fontSize: 10.5,
+            textAlign: "justify",
+            lineHeight: 1.6,
+            color: "#1e293b",
+          }}
+        >
+          EL QUE SUSCRIBE, DIRECTOR(A) DE LA INSTITUCIÓN EDUCATIVA{" "}
+          <PdfText style={{ fontWeight: "bold", color: "#0f172a" }}>
+            &quot;{(institucion.nombreInstitucion || institucion.nombre || "IE").toUpperCase()}&quot;
+          </PdfText>
+          , EN CUMPLIMIENTO DE LAS NORMAS TÉCNICAS Y LEGALES VIGENTES DEL MINISTERIO DE EDUCACIÓN, HACE CONSTAR QUE:
+        </PdfText>
 
-        <Text style={{ fontSize: 11, textAlign: 'justify', lineHeight: 1.8 }}>
-          El(la) estudiante <Text style={{ fontWeight: 'bold' }}>{studentFull}</Text>, identificado(a) con DNI N° {student.dni}, se encuentra matriculado(a) en nuestra institución educativa en el:
-        </Text>
+        {/* Párrafo de Filiación del Alumno */}
+        <PdfText
+          style={{
+            fontSize: 10.5,
+            textAlign: "justify",
+            lineHeight: 1.6,
+            color: "#1e293b",
+          }}
+        >
+          El(la) estudiante{" "}
+          <PdfText style={{ fontWeight: "bold", color: "#0f172a", fontSize: 11 }}>
+            {studentFull}
+          </PdfText>
+          , identificado(a) con Documento Nacional de Identidad N°{" "}
+          <PdfText style={{ fontWeight: "bold", color: "#0f172a" }}>{student.dni}</PdfText>
+          {student.codigoEstudiante
+            ? ` y Código de Estudiante SIAGIE N° ${student.codigoEstudiante}`
+            : ""}
+          , se encuentra regular y debidamente matriculado(a) en este centro de estudios, cursando satisfactoriamente el:
+        </PdfText>
 
-        <View style={{ padding: 15, backgroundColor: '#f8fafc', borderRadius: 6, borderWidth: 1, borderColor: '#e2e8f0', marginVertical: 10 }}>
-          <Heading level={4} align="center" weight="bold" noMargin>
-            {(student.nivelAcademico?.grado?.nombre || '-').toUpperCase()} DE {(student.nivelAcademico?.nivel?.nombre || '-').toUpperCase()}
+        {/* Tarjeta Destacada de Ubicación Académica */}
+        <Card
+          style={{
+            marginVertical: 10,
+            padding: 14,
+            backgroundColor: "#f8fafc",
+            borderWidth: 1,
+            borderColor: "#cbd5e1",
+            borderLeftWidth: 4,
+            borderLeftColor: "#2563eb",
+            borderRadius: 6,
+          }}
+        >
+          <Heading
+            level={3}
+            align="center"
+            weight="bold"
+            noMargin
+            style={{ fontSize: 13, color: "#0f172a", letterSpacing: 0.5 }}
+          >
+            {gradoStr} DE EDUCACIÓN {nivelStr}
           </Heading>
-          <Heading level={5} align="center" noMargin color="mutedForeground">
-            SECCIÓN {"\u0022"}{(student.nivelAcademico?.seccion || '-').toUpperCase()}{"\u0022"}
+          <Heading
+            level={5}
+            align="center"
+            weight="bold"
+            noMargin
+            style={{ fontSize: 10.5, color: "#2563eb", marginTop: 4 }}
+          >
+            SECCIÓN: &quot;{seccionStr}&quot; • AÑO LECTIVO {anioAcademico}
           </Heading>
+        </Card>
+
+        {/* Detalle Técnico de Respaldo */}
+        <View style={{ marginVertical: 4 }}>
+          <KeyValue
+            direction="horizontal"
+            size="sm"
+            divided
+            items={[
+              { key: "Nivel Educativo:", value: nivelStr },
+              { key: "Grado y Sección:", value: `${gradoStr} "${seccionStr}"` },
+              { key: "Año Académico:", value: `${anioAcademico}` },
+              { key: "Condición del Alumno:", value: "MATRICULADO / ACTIVO" },
+            ]}
+          />
         </View>
 
-        <Text style={{ fontSize: 11, textAlign: 'justify', lineHeight: 1.8 }}>
-          Correspondiente al Año Académico {anioAcademico}, habiendo cumplido con los requisitos exigidos por las normas legales vigentes.
-        </Text>
+        {/* Párrafo de Cierre y Validez */}
+        <PdfText
+          style={{
+            fontSize: 10,
+            textAlign: "justify",
+            lineHeight: 1.6,
+            color: "#334155",
+            marginTop: 8,
+          }}
+        >
+          Se expide la presente constancia de estudios a solicitud verbal de la parte interesada,
+          para los fines administrativos y legales que estime pertinentes.
+        </PdfText>
 
-        <Text style={{ fontSize: 11, textAlign: 'justify', lineHeight: 1.8 }}>
-          Se expide la presente constancia a solicitud de la parte interesada para los fines que estime conveniente.
-        </Text>
+        {/* Fecha y Lugar */}
+        <PdfText
+          style={{
+            marginTop: 16,
+            textAlign: "right",
+            fontSize: 10,
+            color: "#475569",
+            fontWeight: "medium",
+          }}
+        >
+          {institucion.ciudad || "Lima"}, {dateStr}
+        </PdfText>
 
-        <Text style={{ marginTop: 24, textAlign: 'right', fontSize: 11 }}>
-          Ciudad, {dateStr}
-        </Text>
-
-        {/* Firma */}
-        <Stack direction="vertical" align="center" style={{ marginTop: 60 }}>
-          <View style={{ width: 200 }}>
-            <Divider color="#0f172a" />
-            <Heading level={6} align="center" weight="bold" style={{ marginTop: 4 }}>EL DIRECTOR</Heading>
-            <Text style={{ fontSize: 8, color: '#64748b', textAlign: 'center' }}>{institucion.nombreInstitucion}</Text>
-          </View>
-        </Stack>
+        {/* Bloque de Firma Oficial del Director */}
+        <View style={{ marginTop: 40, alignItems: "center" }}>
+          <Signature
+            signers={[
+              {
+                title: "DIRECCIÓN GENERAL",
+                name: institucion.director || "DIRECCIÓN DE LA INSTITUCIÓN",
+                subtitle: institucion.nombreInstitucion || "Institución Educativa",
+              },
+            ]}
+            layout="single"
+          />
+        </View>
       </Stack>
     </DocumentWrapper>
-  )
-}
+  );
+};

@@ -34,6 +34,25 @@ interface CourseGradesCardProps {
   promedio: number;
 }
 
+function getNotaColor(nota: number) {
+  if (nota < 11) return "text-destructive";
+  if (nota < 14) return "text-warning";
+  return "text-success";
+}
+
+function getBgColor(nota: number) {
+  if (nota < 11) return "bg-destructive/5 border-destructive/10";
+  if (nota < 14) return "bg-warning/5 border-warning/10";
+  return "bg-success/5 border-success/10";
+}
+
+function getBadgeColor(nota: number) {
+  if (nota < 11)
+    return "bg-destructive/10 text-destructive border-destructive/20";
+  if (nota < 14) return "bg-warning/10 text-warning border-warning/20";
+  return "bg-success/10 text-success border-success/20";
+}
+
 export function CourseGradesCard({
   curso,
   notas,
@@ -41,24 +60,6 @@ export function CourseGradesCard({
 }: CourseGradesCardProps) {
   const [expanded, setExpanded] = useState(false);
 
-  const getNotaColor = (nota: number) => {
-    if (nota < 11) return "text-destructive";
-    if (nota < 14) return "text-warning";
-    return "text-success";
-  };
-
-  const getBgColor = (nota: number) => {
-    if (nota < 11) return "bg-destructive/5 border-destructive/10";
-    if (nota < 14) return "bg-warning/5 border-warning/10";
-    return "bg-success/5 border-success/10";
-  };
-
-  const getBadgeColor = (nota: number) => {
-    if (nota < 11)
-      return "bg-destructive/10 text-destructive border-destructive/20";
-    if (nota < 14) return "bg-warning/10 text-warning border-warning/20";
-    return "bg-success/10 text-success border-success/20";
-  };
 
   return (
     <Card className="overflow-hidden rounded-2xl border border-border/50 bg-card/80 shadow-sm transition-colors hover:border-primary/30">

@@ -13,14 +13,26 @@ const REVALIDATE_PATH = "/finanzas";
  * Obtiene los conceptos de pago de la institución (filtrado por la sesión del usuario)
  */
 export const getConceptosAction = createSafeAction(
-  z.object({}).optional(),
-  async (_, session) => {
-    const institucionId = session.user.institucionId;
+  z
+    .object({
+      includeInactive: z.boolean().optional(),
+    })
+    .optional(),
+  async (input, session) => {
+    let institucionId = session?.user?.institucionId;
+    if (!institucionId) {
+      const firstInst = await prisma.institucionEducativa.findFirst({
+        select: { id: true },
+      });
+      institucionId = firstInst?.id;
+    }
+
+    const includeInactive = input?.includeInactive ?? true;
 
     const conceptos = await prisma.conceptoPago.findMany({
       where: {
-        institucionId: institucionId || undefined,
-        activo: true,
+        ...(institucionId ? { institucionId } : {}),
+        ...(includeInactive ? {} : { activo: true }),
       },
       orderBy: { nombre: "asc" },
     });
@@ -38,21 +50,18 @@ export const upsertConceptoAction = createSafeAction(
     values: ConceptoSchema,
   }),
   async ({ id, values }, session) => {
-    const institucionId = session.user.institucionId;
+    let institucionId = session?.user?.institucionId;
+    if (!institucionId) {
+      const firstInst = await prisma.institucionEducativa.findFirst({
+        select: { id: true },
+      });
+      institucionId = firstInst?.id;
+    }
 
-    // Validar que la institución existe antes de proceder (evitar error de clave foránea huérfana)
-    const institucionExiste = await prisma.institucionEducativa.findUnique({
-      where: { id: institucionId },
-      select: { id: true },
-    });
-
-    if (!institucionExiste) {
-      console.error(
-        `ERROR CRÍTICO: La institución con ID ${institucionId} no existe en la base de datos.`,
-      );
+    if (!institucionId) {
       return {
         error:
-          "Tu sesión está vinculada a una institución que ya no existe. Por favor, cierra sesión e inicia de nuevo.",
+          "No se encontró una institución educativa vinculada a tu cuenta.",
       };
     }
 
@@ -68,7 +77,7 @@ export const upsertConceptoAction = createSafeAction(
     try {
       if (id) {
         const concepto = await prisma.conceptoPago.update({
-          where: { id, institucionId },
+          where: { id },
           data,
         });
         revalidatePath(REVALIDATE_PATH);
@@ -95,16 +104,111 @@ export const upsertConceptoAction = createSafeAction(
 );
 
 /**
- * Elimina (desactiva) un concepto de pago
+ * Crea múltiples conceptos de pago en una sola transacción atómica (Plantillas Rápidas)
+ */
+export const createBatchConceptosAction = createSafeAction(
+  z.object({
+    conceptos: z.array(ConceptoSchema),
+  }),
+  async ({ conceptos }, session) => {
+    let institucionId = session?.user?.institucionId;
+    if (!institucionId) {
+      const firstInst = await prisma.institucionEducativa.findFirst({
+        select: { id: true },
+      });
+      institucionId = firstInst?.id;
+    }
+
+    if (!institucionId) {
+      return {
+        error: "No se encontró ninguna institución educativa registrada.",
+      };
+    }
+
+    try {
+      await prisma.$transaction(
+        conceptos.map((c) =>
+          prisma.conceptoPago.create({
+            data: {
+              nombre: c.nombre,
+              montoSugerido: c.montoSugerido,
+              moneda: c.moneda,
+              moraDiaria: c.moraDiaria,
+              activo: c.activo,
+              institucionId,
+            },
+          }),
+        ),
+      );
+
+      revalidatePath(REVALIDATE_PATH);
+      return {
+        success: `Se han creado ${conceptos.length} conceptos de pago correctamente.`,
+      };
+    } catch (error) {
+      console.error("Error en createBatchConceptosAction:", error);
+      return {
+        error: "Ocurrió un error al crear el lote de conceptos.",
+      };
+    }
+  },
+  { roles: ["administrativo"] },
+);
+
+/**
+ * Activa o desactiva directamente un concepto de pago
+ */
+export const toggleConceptoActivoAction = createSafeAction(
+  z.object({
+    id: z.string(),
+    activo: z.boolean(),
+  }),
+  async ({ id, activo }, session) => {
+    let institucionId = session?.user?.institucionId;
+    if (!institucionId) {
+      const firstInst = await prisma.institucionEducativa.findFirst({
+        select: { id: true },
+      });
+      institucionId = firstInst?.id;
+    }
+
+    const concepto = await prisma.conceptoPago.update({
+      where: { id },
+      data: { activo },
+    });
+
+    revalidatePath(REVALIDATE_PATH);
+    return {
+      success: `Concepto "${concepto.nombre}" ${activo ? "activado" : "desactivado"} correctamente`,
+    };
+  },
+  { roles: ["administrativo"] },
+);
+
+/**
+ * Elimina un concepto de pago (o lo desactiva si tiene pagos asociados)
  */
 export const deleteConceptoAction = createSafeAction(
   z.object({ id: z.string() }),
-  async ({ id }, session) => {
-    const institucionId = session.user.institucionId;
+  async ({ id }) => {
+    const cronogramasAsociados = await prisma.cronogramaPago.count({
+      where: { conceptoId: id },
+    });
 
-    await prisma.conceptoPago.update({
-      where: { id, institucionId },
-      data: { activo: false },
+    if (cronogramasAsociados > 0) {
+      await prisma.conceptoPago.update({
+        where: { id },
+        data: { activo: false },
+      });
+      revalidatePath(REVALIDATE_PATH);
+      return {
+        success:
+          "El concepto tiene registros asociados, por lo que fue desactivado en lugar de eliminado físicamente.",
+      };
+    }
+
+    await prisma.conceptoPago.delete({
+      where: { id },
     });
 
     revalidatePath(REVALIDATE_PATH);

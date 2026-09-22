@@ -13,15 +13,16 @@ interface SiteHeaderProps {
   institucionName?: string;
 }
 
+const handleOpenSearch = () => {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("open-command-palette"));
+  }
+};
+
 export function SiteHeader({
   anioAcademico = 2026,
   institucionName = "EduNova Pro",
 }: SiteHeaderProps) {
-  const handleOpenSearch = () => {
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(new Event("open-command-palette"));
-    }
-  };
 
   return (
     <header className="sticky top-0 z-30 flex h-(--header-height) shrink-0 items-center gap-2 border-b bg-background/95 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height) rounded-tl-xl">

@@ -1,4 +1,14 @@
-import { IconDeviceFloppy, IconLoader2, IconCircleCheck, IconAlertCircle, IconDownload } from "@tabler/icons-react";
+"use client";
+
+import {
+  IconDeviceFloppy,
+  IconLoader2,
+  IconCircleCheck,
+  IconAlertCircle,
+  IconDownload,
+  IconSparkles,
+  IconTrash,
+} from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -9,6 +19,8 @@ interface NotasFormHeaderProps {
   isDirty?: boolean;
   onGuardar: () => void;
   onExportExcel?: () => void;
+  onBulkFillDefault?: () => void;
+  onClearAll?: () => void;
 }
 
 export function NotasFormHeader({
@@ -17,28 +29,30 @@ export function NotasFormHeader({
   isDirty = false,
   onGuardar,
   onExportExcel,
+  onBulkFillDefault,
+  onClearAll,
 }: NotasFormHeaderProps) {
   const isLiteral = escala === "LITERAL";
 
   return (
-    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-border/40 pb-6">
+    <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b border-border/40 pb-5">
       <div className="space-y-1">
         <div className="flex items-center gap-2 flex-wrap">
-          <h2 className="text-2xl font-black tracking-tight uppercase bg-clip-text text-transparent bg-linear-to-r from-foreground to-foreground/70">
-            Registro Curricular
+          <h2 className="text-xl font-bold tracking-tight text-foreground">
+            Registro de Calificaciones
           </h2>
           <Badge
             className={cn(
-              "rounded-lg px-2.5 py-0.5 font-bold border-0 shadow-sm",
+              "rounded-lg px-2.5 py-0.5 font-bold border-0 shadow-2xs text-[11px]",
               isLiteral
-                ? "bg-violet-600/10 text-violet-600"
-                : "bg-blue-600/10 text-blue-600",
+                ? "bg-primary/10 text-primary border border-primary/20"
+                : "bg-blue-600/10 text-blue-600 border border-blue-500/20",
             )}
           >
-            {escala}
+            {isLiteral ? "Escala CNEB (Literal)" : "Escala Vigesimal (0-20)"}
           </Badge>
 
-          {/* Sync / Autosave Badge Status */}
+          {/* Estado de Sincronización */}
           {isPending ? (
             <Badge className="bg-amber-500/10 text-amber-600 border border-amber-500/20 font-bold gap-1 text-[10px]">
               <IconLoader2 className="animate-spin size-3" />
@@ -47,7 +61,7 @@ export function NotasFormHeader({
           ) : isDirty ? (
             <Badge className="bg-amber-500/10 text-amber-600 border border-amber-500/20 font-bold gap-1 text-[10px]">
               <IconAlertCircle className="size-3" />
-              Borrador local guardado
+              ● Cambios pendientes
             </Badge>
           ) : (
             <Badge className="bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 font-bold gap-1 text-[10px]">
@@ -56,35 +70,75 @@ export function NotasFormHeader({
             </Badge>
           )}
         </div>
-        <p className="text-[10px] text-muted-foreground font-bold tracking-widest uppercase">
-          {isLiteral
-            ? "Escala de Logros (AD, A, B, C) · Navega con Enter / Flechas"
-            : "Escala Vigesimal (0-20) · Navega con Enter / Flechas"}
-        </p>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground font-normal flex-wrap pt-0.5">
+          <span>{isLiteral ? "Selecciona AD, A, B, C o pulsa teclado:" : "Digita notas de 00 a 20:"}</span>
+          <span className="inline-flex items-center gap-1 font-mono text-[10px] text-foreground/80 bg-muted/70 px-1.5 py-0.5 rounded-md border border-border/50">
+            <kbd>↓</kbd> / <kbd>Enter</kbd> Siguiente
+          </span>
+          <span className="inline-flex items-center gap-1 font-mono text-[10px] text-foreground/80 bg-muted/70 px-1.5 py-0.5 rounded-md border border-border/50">
+            <kbd>↑</kbd> Anterior
+          </span>
+          <span className="inline-flex items-center gap-1 font-mono text-[10px] text-foreground/80 bg-muted/70 px-1.5 py-0.5 rounded-md border border-border/50">
+            <kbd>Ctrl+S</kbd> Guardar
+          </span>
+        </div>
       </div>
-      <div className="flex items-center gap-3 w-full md:w-auto">
+
+      <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
+        {/* Acciones de Llenado Rápido */}
+        {onBulkFillDefault && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onBulkFillDefault}
+            className="rounded-xl border-primary/30 text-primary hover:bg-primary/10 text-xs font-bold gap-1.5 shadow-2xs cursor-pointer"
+            title={isLiteral ? "Asigna 'A' (Logro Esperado) a todos los alumnos sin nota" : "Asigna '14' a todos los alumnos sin nota"}
+          >
+            <IconSparkles className="size-3.5" />
+            {isLiteral ? "Rellenar con 'A' (Logro Esperado)" : "Rellenar con 14"}
+          </Button>
+        )}
+
+        {onClearAll && isDirty && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={onClearAll}
+            className="rounded-xl text-muted-foreground hover:text-destructive text-xs font-medium gap-1 cursor-pointer"
+          >
+            <IconTrash className="size-3.5" />
+            Limpiar
+          </Button>
+        )}
+
         {onExportExcel && (
           <Button
             type="button"
             variant="outline"
+            size="sm"
             onClick={onExportExcel}
-            className="w-full md:w-auto rounded-full border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 text-xs font-bold gap-1.5 shadow-sm"
+            className="rounded-xl border-emerald-500/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/10 text-xs font-bold gap-1.5 shadow-2xs cursor-pointer"
           >
-            <IconDownload className="size-4" /> Exportar Excel
+            <IconDownload className="size-3.5" /> Excel
           </Button>
         )}
+
         <Button
           onClick={onGuardar}
           disabled={isPending || !isDirty}
-          className="w-full md:w-auto min-w-[160px] rounded-full shadow-md transition-[width,height]"
+          className="rounded-xl h-9 px-4 font-bold text-xs shadow-md shadow-primary/20 cursor-pointer gap-2"
         >
           {isPending ? (
             <IconLoader2 className="animate-spin size-4" />
           ) : (
-            <>
-              <IconDeviceFloppy className="size-4 mr-2" /> Guardar Todo
-            </>
+            <IconDeviceFloppy className="size-4" />
           )}
+          <span>{isPending ? "Guardando..." : "Guardar Todo"}</span>
+          <Badge className="bg-primary-foreground/20 text-primary-foreground text-[9px] px-1 py-0 border-none font-mono">
+            Ctrl+S
+          </Badge>
         </Button>
       </div>
     </div>

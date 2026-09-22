@@ -100,7 +100,7 @@ export function StudentProfileHeader({
 
       {/* Gradientes ambientales */}
       <div
-        className="absolute inset-0 bg-gradient-to-b from-indigo-500/5 via-transparent to-transparent z-0"
+        className="absolute inset-0 bg-linear-to-b from-indigo-500/5 via-transparent to-transparent z-0"
         aria-hidden="true"
       />
 

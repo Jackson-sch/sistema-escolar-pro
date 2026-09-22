@@ -104,6 +104,7 @@ export function ChangePasswordDialog({
                 type="button"
                 variant="ghost"
                 size="icon"
+                aria-label={showNew ? "Ocultar contraseña" : "Ver contraseña"}
                 className="absolute right-1 top-1/2 -translate-y-1/2 size-8 hover:scale-105"
                 onClick={() => setShowNew(!showNew)}
               >
@@ -140,6 +141,7 @@ export function ChangePasswordDialog({
                 type="button"
                 variant="ghost"
                 size="icon"
+                aria-label={showConfirm ? "Ocultar confirmación" : "Ver confirmación"}
                 className="absolute right-1 top-1/2 -translate-y-1/2 size-8 hover:scale-105"
                 onClick={() => setShowConfirm(!showConfirm)}
               >

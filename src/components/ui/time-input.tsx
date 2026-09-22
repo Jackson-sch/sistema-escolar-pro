@@ -13,6 +13,18 @@ interface TimeInputProps extends Omit<
   onChange?: (value: string) => void;
 }
 
+function formatTime(input: string) {
+  // Remove everything except numbers
+  const digits = input.replace(/\D/g, "").slice(0, 4);
+
+  let formatted = digits;
+  if (digits.length >= 3) {
+    formatted = `${digits.slice(0, 2)}:${digits.slice(2)}`;
+  }
+
+  return formatted;
+}
+
 export function TimeInput({
   value = "",
   onChange,
@@ -28,17 +40,6 @@ export function TimeInput({
     setInternalValue(value);
   }
 
-  const formatTime = (input: string) => {
-    // Remove everything except numbers
-    const digits = input.replace(/\D/g, "").slice(0, 4);
-
-    let formatted = digits;
-    if (digits.length >= 3) {
-      formatted = `${digits.slice(0, 2)}:${digits.slice(2)}`;
-    }
-
-    return formatted;
-  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;

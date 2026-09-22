@@ -72,6 +72,165 @@ interface SedeFormContentProps {
   onSuccess: () => void;
 }
 
+function getSedeDefaultValues(sede?: any): SedeFormValues {
+  return {
+    nombre: sede?.nombre || "",
+    direccion: sede?.direccion || "",
+    telefono: sede?.telefono || "",
+    email: sede?.email || "",
+    director: sede?.director || "",
+    codigoIdentifier: sede?.codigoIdentifier || "",
+    logo: sede?.logo || "",
+    lat: sede?.lat ?? null,
+    lng: sede?.lng ?? null,
+    activo: sede?.activo ?? true,
+  };
+}
+
+function LocationFields({
+  form,
+  isPending,
+}: {
+  form: any;
+  isPending: boolean;
+}) {
+  const handlePasteCoords = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    const pasted = e.clipboardData.getData("text").trim();
+    const parts = pasted.split(/[,\s]+/).filter(Boolean);
+    if (parts.length === 2) {
+      const lat = parseFloat(parts[0]);
+      const lng = parseFloat(parts[1]);
+      if (!isNaN(lat) && !isNaN(lng)) {
+        e.preventDefault();
+        form.setValue("lat", lat, { shouldDirty: true });
+        form.setValue("lng", lng, { shouldDirty: true });
+      }
+    }
+  };
+
+  const latVal = form.watch("lat");
+  const lngVal = form.watch("lng");
+  const coordsValue = latVal != null && lngVal != null ? { lat: latVal, lng: lngVal } : null;
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <FormLabel className="text-xs font-medium text-foreground/80">Geolocalización en Mapa</FormLabel>
+        <a
+          href="https://www.google.com/maps"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 font-medium"
+        >
+          <IconExternalLink className="size-3" />
+          <span>Abrir Google Maps</span>
+        </a>
+      </div>
+      <LocationPicker
+        value={coordsValue}
+        onChange={(coords) => {
+          form.setValue("lat", coords?.lat ?? null, { shouldDirty: true });
+          form.setValue("lng", coords?.lng ?? null, { shouldDirty: true });
+        }}
+        disabled={isPending}
+      />
+
+      <div className="grid grid-cols-2 gap-3 pt-1">
+        <FormField
+          control={form.control}
+          name="lat"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-[10px] text-muted-foreground font-bold uppercase">
+                Latitud
+              </FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="-8.083672"
+                  className="bg-background border-border/40 h-8 text-xs font-mono rounded-xl"
+                  {...field}
+                  value={field.value ?? ""}
+                  onPaste={handlePasteCoords}
+                  onChange={(e) =>
+                    field.onChange(
+                      e.target.value === "" ? null : parseFloat(e.target.value),
+                    )
+                  }
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="lng"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-[10px] text-muted-foreground font-bold uppercase">
+                Longitud
+              </FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="-79.000787"
+                  className="bg-background border-border/40 h-8 text-xs font-mono rounded-xl"
+                  {...field}
+                  value={field.value ?? ""}
+                  onChange={(e) =>
+                    field.onChange(
+                      e.target.value === "" ? null : parseFloat(e.target.value),
+                    )
+                  }
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+      </div>
+    </div>
+  );
+}
+
+function SedeFormButtons({
+  isPending,
+  isEdit,
+  onCancel,
+}: {
+  isPending: boolean;
+  isEdit: boolean;
+  onCancel: () => void;
+}) {
+  return (
+    <div className="flex items-center justify-end gap-3 pt-3 border-t border-border/30">
+      <Button
+        type="button"
+        variant="outline"
+        onClick={onCancel}
+        className="rounded-xl px-5 h-10 font-semibold text-xs border-border/40"
+        disabled={isPending}
+      >
+        Cancelar
+      </Button>
+      <Button
+        type="submit"
+        disabled={isPending}
+        className="rounded-xl px-6 h-10 font-semibold text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 gap-2 min-w-[170px]"
+      >
+        {isPending ? (
+          <>
+            <IconLoader2 className="size-4 animate-spin" />
+            <span>Procesando...</span>
+          </>
+        ) : (
+          <>
+            <IconDeviceFloppy className="size-4" />
+            <span>{isEdit ? "Actualizar Sede" : "Guardar Sede"}</span>
+          </>
+        )}
+      </Button>
+    </div>
+  );
+}
+
 function SedeFormContent({ sede, onSuccess }: SedeFormContentProps) {
   const [isPending, setIsPending] = useState(false);
   const router = useRouter();
@@ -79,18 +238,7 @@ function SedeFormContent({ sede, onSuccess }: SedeFormContentProps) {
 
   const form = useForm<SedeFormValues>({
     resolver: zodResolver(SedeSchema),
-    defaultValues: {
-      nombre: sede?.nombre || "",
-      direccion: sede?.direccion || "",
-      telefono: sede?.telefono || "",
-      email: sede?.email || "",
-      director: sede?.director || "",
-      codigoIdentifier: sede?.codigoIdentifier || "",
-      logo: sede?.logo || "",
-      lat: sede?.lat ?? null,
-      lng: sede?.lng ?? null,
-      activo: sede?.activo ?? true,
-    },
+    defaultValues: getSedeDefaultValues(sede),
   });
 
   const { isDirty } = form.formState;
@@ -103,27 +251,18 @@ function SedeFormContent({ sede, onSuccess }: SedeFormContentProps) {
   const onSubmit = async (values: SedeFormValues) => {
     setIsPending(true);
     try {
-      if (sede) {
-        const res = await updateSedeAction(sede.id, values);
-        if (res.error) {
-          toast.error(res.error);
-        } else {
-          toast.success("Sede actualizada correctamente");
-          setIsDirty(false);
-          onSuccess();
-          router.refresh();
-        }
+      const res = sede
+        ? await updateSedeAction(sede.id, values)
+        : await createSedeAction(values);
+
+      if (res.error) {
+        toast.error(res.error);
       } else {
-        const res = await createSedeAction(values);
-        if (res.error) {
-          toast.error(res.error);
-        } else {
-          toast.success("Sede creada correctamente");
-          setIsDirty(false);
-          onSuccess();
-          form.reset();
-          router.refresh();
-        }
+        toast.success(sede ? "Sede actualizada correctamente" : "Sede creada correctamente");
+        setIsDirty(false);
+        onSuccess();
+        if (!sede) form.reset();
+        router.refresh();
       }
     } catch (error) {
       toast.error("Ocurrió un error inesperado");
@@ -141,6 +280,7 @@ function SedeFormContent({ sede, onSuccess }: SedeFormContentProps) {
             name="logo"
             render={({ field }) => (
               <FormItem className="w-fit">
+                <FormLabel className="sr-only">Logo de la Sede</FormLabel>
                 <FormControl>
                   <ImageUpload
                     value={field.value}
@@ -242,108 +382,7 @@ function SedeFormContent({ sede, onSuccess }: SedeFormContentProps) {
           />
         </div>
 
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <FormLabel className="text-xs font-medium text-foreground/80">Geolocalización en Mapa</FormLabel>
-            <a
-              href="https://www.google.com/maps"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 font-medium"
-            >
-              <IconExternalLink className="size-3" />
-              <span>Abrir Google Maps</span>
-            </a>
-          </div>
-          <LocationPicker
-            value={
-              form.watch("lat") != null && form.watch("lng") != null
-                ? { lat: form.watch("lat")!, lng: form.watch("lng")! }
-                : null
-            }
-            onChange={(coords) => {
-              form.setValue("lat", coords?.lat ?? null, {
-                shouldDirty: true,
-              });
-              form.setValue("lng", coords?.lng ?? null, {
-                shouldDirty: true,
-              });
-            }}
-            disabled={isPending}
-          />
-
-          <div className="grid grid-cols-2 gap-3 pt-1">
-            <FormField
-              control={form.control}
-              name="lat"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-[10px] text-muted-foreground font-bold uppercase">
-                    Latitud
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="-8.083672"
-                      className="bg-background border-border/40 h-8 text-xs font-mono rounded-xl"
-                      {...field}
-                      value={field.value ?? ""}
-                      onPaste={(e) => {
-                        const pasted = e.clipboardData.getData("text").trim();
-                        const parts = pasted.split(/[,\s]+/).filter(Boolean);
-                        if (parts.length === 2) {
-                          const lat = parseFloat(parts[0]);
-                          const lng = parseFloat(parts[1]);
-                          if (!isNaN(lat) && !isNaN(lng)) {
-                            e.preventDefault();
-                            form.setValue("lat", lat, {
-                              shouldDirty: true,
-                            });
-                            form.setValue("lng", lng, {
-                              shouldDirty: true,
-                            });
-                          }
-                        }
-                      }}
-                      onChange={(e) =>
-                        field.onChange(
-                          e.target.value === ""
-                            ? null
-                            : parseFloat(e.target.value),
-                        )
-                      }
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="lng"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-[10px] text-muted-foreground font-bold uppercase">
-                    Longitud
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="-79.000787"
-                      className="bg-background border-border/40 h-8 text-xs font-mono rounded-xl"
-                      {...field}
-                      value={field.value ?? ""}
-                      onChange={(e) =>
-                        field.onChange(
-                          e.target.value === ""
-                            ? null
-                            : parseFloat(e.target.value),
-                        )
-                      }
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-          </div>
-        </div>
+        <LocationFields form={form} isPending={isPending} />
 
         {sede && (
           <FormField
@@ -368,37 +407,13 @@ function SedeFormContent({ sede, onSuccess }: SedeFormContentProps) {
           />
         )}
 
-        {/* Guía de Atajos de Teclado */}
         <FormKeyboardHelpBar />
 
-        <div className="flex items-center justify-end gap-3 pt-3 border-t border-border/30">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onSuccess}
-            className="rounded-xl px-5 h-10 font-semibold text-xs border-border/40"
-            disabled={isPending}
-          >
-            Cancelar
-          </Button>
-          <Button
-            type="submit"
-            disabled={isPending}
-            className="rounded-xl px-6 h-10 font-semibold text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 gap-2 min-w-[170px]"
-          >
-            {isPending ? (
-              <>
-                <IconLoader2 className="size-4 animate-spin" />
-                <span>Procesando...</span>
-              </>
-            ) : (
-              <>
-                <IconDeviceFloppy className="size-4" />
-                <span>{sede ? "Actualizar Sede" : "Guardar Sede"}</span>
-              </>
-            )}
-          </Button>
-        </div>
+        <SedeFormButtons
+          isPending={isPending}
+          isEdit={!!sede}
+          onCancel={onSuccess}
+        />
       </form>
     </Form>
   );

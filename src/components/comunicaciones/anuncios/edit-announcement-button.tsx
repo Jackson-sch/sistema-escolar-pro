@@ -19,6 +19,7 @@ export function EditAnnouncementButton({ anuncio }: EditAnnouncementButtonProps)
         variant="ghost"
         size="icon"
         onClick={() => setOpen(true)}
+        aria-label="Editar Anuncio"
         className="size-8 rounded-full transition-colors"
       >
         <IconPencil className="size-4" />

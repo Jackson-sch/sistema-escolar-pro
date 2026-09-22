@@ -51,7 +51,7 @@ export function ReporteAlertas({ alertas, isPending }: ReporteAlertasProps) {
         {alertas.slice(0, 3).map((alerta) => (
           <div
             key={alerta.id}
-            className="relative overflow-hidden rounded-2xl border border-rose-500/20 bg-linear-to-br from-rose-500/[0.03] to-rose-500/[0.08] p-5 shadow-sm hover:border-rose-500/40 transition-all duration-200"
+            className="relative overflow-hidden rounded-2xl border border-rose-500/20 bg-linear-to-br from-rose-500/[0.03] to-rose-500/[0.08] p-5 shadow-sm hover:border-rose-500/40 transition-[border-color,box-shadow] duration-200"
           >
             <div className="flex items-center justify-between gap-2 mb-4">
               <Badge className="bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20 text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full gap-1">

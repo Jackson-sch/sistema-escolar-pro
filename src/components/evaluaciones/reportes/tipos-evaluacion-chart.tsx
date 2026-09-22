@@ -1,7 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Pie, PieChart, Cell } from "recharts"
+import { Pie, PieChart, Cell } from "@/lib/charts"
 import { IconChartPie } from "@tabler/icons-react"
 import { cn } from "@/lib/utils"
 import {

@@ -6,8 +6,12 @@ import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
 import { getRankingEstudianteAction } from "@/actions/evaluations";
 import { formatTitleCase } from "@/lib/formats";
+import QRCode from "qrcode";
 
 import { collectPdfBuffer, resolvePdfImage } from "@/lib/pdf-server-utils";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   const session = await auth();
@@ -29,15 +33,23 @@ export async function GET(req: NextRequest) {
   const userInstitucionId = session.user.institucionId;
 
   try {
-    // 1. Obtener datos del estudiante y su institución
+    // 1. Obtener datos del estudiante y su institución con tutor y director
     const estudiante = await prisma.user.findUnique({
       where: { id: estudianteId },
       include: {
         nivelAcademico: {
-          include: { grado: true, nivel: true }
+          include: {
+            grado: true,
+            nivel: true,
+            tutor: { select: { name: true, apellidoPaterno: true, apellidoMaterno: true } },
+          },
         },
-        institucion: true,
-      }
+        institucion: {
+          include: {
+            director: { select: { name: true, apellidoPaterno: true, apellidoMaterno: true } },
+          },
+        },
+      },
     });
 
     if (!estudiante || !estudiante.institucion) {
@@ -155,25 +167,52 @@ export async function GET(req: NextRequest) {
 
     const promediosBimestrales = puntajes.map(p => cursosFormateados.length > 0 ? Math.round(p / cursosFormateados.length) : 0);
 
+    const verificationUrl = `${origin}/verificar?codigo=LIB-${estudiante.dni || estudiante.id}-${cicloScolar}`;
+    const qrCode = await QRCode.toDataURL(verificationUrl, {
+      margin: 1,
+      width: 160,
+      color: { dark: "#000000", light: "#ffffff" },
+    });
+
+    const tutorObj = estudiante.nivelAcademico?.tutor;
+    const tutorNombre = tutorObj
+      ? formatTitleCase(`${tutorObj.name} ${tutorObj.apellidoPaterno || ""} ${tutorObj.apellidoMaterno || ""}`.trim())
+      : undefined;
+
+    const directorObj = estudiante.institucion.director;
+    const directorNombre = directorObj
+      ? formatTitleCase(`${directorObj.name} ${directorObj.apellidoPaterno || ""} ${directorObj.apellidoMaterno || ""}`.trim())
+      : undefined;
+
     const pdfData = {
       estudiante: {
         nombreCompleto: formatTitleCase(`${estudiante.apellidoPaterno || ''} ${estudiante.apellidoMaterno || ''}, ${estudiante.name || ''}`.trim()),
+        apellidoPaterno: estudiante.apellidoPaterno || '',
+        apellidoMaterno: estudiante.apellidoMaterno || '',
+        nombres: estudiante.name || '',
         dni: estudiante.dni || 'S/D',
         codigo: estudiante.codigoEstudiante || estudiante.dni || 'S/C',
         grado: estudiante.nivelAcademico?.grado?.nombre || 'N/A',
         seccion: estudiante.nivelAcademico?.seccion || 'N/A',
         nivel: estudiante.nivelAcademico?.nivel?.nombre || 'N/A',
+        tutor: tutorNombre,
+        profesor: tutorNombre,
         institucion: estudiante.institucion.nombreInstitucion,
-        institucionCompleta: estudiante.institucion,
+        institucionCompleta: {
+          ...estudiante.institucion,
+          director: directorNombre,
+        },
         logo: resolvePdfImage(estudiante.institucion.logo),
       },
       origin,
+      qrCode,
       periodos: periodosDelAnio,
       cursos: cursosFormateados,
       anioAcademico: cicloScolar,
       resumen: {
         puntajes,
-        promedios: promediosBimestrales
+        promedios: promediosBimestrales,
+        ordenMerito: [puesto, puesto, "-", "-"],
       }
     };
 
@@ -188,7 +227,7 @@ export async function GET(req: NextRequest) {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `inline; filename="Boleta_${estudiante.dni}_${cicloScolar}.pdf"`
+        "Content-Disposition": `attachment; filename="Boleta_${estudiante.dni || estudiante.id}_${cicloScolar}.pdf"`
       }
     });
 

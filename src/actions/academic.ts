@@ -350,25 +350,117 @@ export async function deleteAreaAction(id: string) {
     }
     const targetInstitucionId = session.user.institucionId;
 
-    if (role !== "super_admin" && targetInstitucionId) {
-      const existing = await prisma.areaCurricular.findFirst({
-        where: { id, institucionId: targetInstitucionId },
-      });
-      if (!existing) {
-        return { error: "Área curricular no encontrada o no tiene permisos." };
-      }
+    const area = await prisma.areaCurricular.findUnique({
+      where: { id },
+      include: {
+        _count: { select: { cursos: true } },
+        competencias: {
+          include: {
+            capacidades: {
+              include: {
+                _count: { select: { evaluaciones: true } },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!area) {
+      return { error: "Área curricular no encontrada o no tiene permisos." };
     }
 
-    await prisma.areaCurricular.delete({
-      where: { id },
+    if (role !== "super_admin" && targetInstitucionId && area.institucionId !== targetInstitucionId) {
+      return { error: "No tiene permisos para eliminar esta área." };
+    }
+
+    // Si tiene cursos asignados, informar con precisión
+    if (area._count.cursos > 0) {
+      return {
+        error: `No se puede eliminar: tiene ${area._count.cursos} curso(s) asignado(s). Transfiera los cursos a otra área primero.`,
+      };
+    }
+
+    // Verificar si alguna capacidad tiene evaluaciones registradas
+    const totalEvals = area.competencias.reduce(
+      (sum, comp) =>
+        sum +
+        comp.capacidades.reduce((cSum, cap) => cSum + cap._count.evaluaciones, 0),
+      0,
+    );
+    if (totalEvals > 0) {
+      return {
+        error: `No se puede eliminar: tiene ${totalEvals} evaluación(es) registrada(s) en sus competencias.`,
+      };
+    }
+
+    // Borrado en cascada seguro: capacidades -> competencias -> área
+    await prisma.$transaction(async (tx) => {
+      for (const comp of area.competencias) {
+        await tx.capacidad.deleteMany({
+          where: { competenciaId: comp.id },
+        });
+      }
+      await tx.competencia.deleteMany({
+        where: { areaCurricularId: area.id },
+      });
+      await tx.areaCurricular.delete({
+        where: { id: area.id },
+      });
     });
+
     revalidatePath("/gestion/academico/areas");
-    return { success: "Área eliminada correctamente" };
+    return { success: "Área curricular eliminada correctamente." };
   } catch (error) {
+    console.error("Error al eliminar área curricular:", error);
     return {
-      error:
-        "No se pudo eliminar el área (verifique si tiene cursos asociados)",
+      error: "Ocurrió un error al eliminar el área curricular.",
     };
+  }
+}
+
+/**
+ * Transfiere los cursos de un área origen a un área destino
+ */
+export async function transferAreaCoursesAction({
+  sourceAreaId,
+  targetAreaId,
+}: {
+  sourceAreaId: string;
+  targetAreaId: string;
+}) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "No autorizado." };
+    }
+    const role = session.user.role;
+    if (role !== "super_admin" && role !== "administrativo") {
+      return { error: "No tiene permisos para realizar esta acción." };
+    }
+
+    const [source, target] = await Promise.all([
+      prisma.areaCurricular.findUnique({ where: { id: sourceAreaId } }),
+      prisma.areaCurricular.findUnique({ where: { id: targetAreaId } }),
+    ]);
+
+    if (!source || !target) {
+      return { error: "Una de las áreas seleccionadas no existe." };
+    }
+
+    const updated = await prisma.curso.updateMany({
+      where: { areaCurricularId: sourceAreaId },
+      data: { areaCurricularId: targetAreaId },
+    });
+
+    revalidatePath("/gestion/academico/areas");
+    revalidatePath("/gestion/academico/carga-horaria");
+    return {
+      success: `Se transfirieron ${updated.count} cursos exitosamente de "${source.nombre}" a "${target.nombre}".`,
+    };
+  } catch (error) {
+    console.error("Error al transferir cursos:", error);
+    return { error: "Error al transferir los cursos entre áreas." };
   }
 }
 

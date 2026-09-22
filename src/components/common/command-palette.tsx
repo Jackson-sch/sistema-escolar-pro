@@ -3,7 +3,6 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import {
-  IconSearch,
   IconUser,
   IconCreditCard,
   IconSettings,
@@ -37,8 +36,11 @@ import {
 
 import { useComponentShortcuts } from "@/hooks/use-component-shortcuts";
 import { globalSearchAction, GlobalSearchResult } from "@/actions/global-search";
+import { signOut } from "next-auth/react";
 
-export function CommandPalette() {
+type UserRole = "administrativo" | "profesor" | "padre" | "super_admin" | undefined;
+
+export function CommandPalette({ userRole }: { userRole?: UserRole }) {
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
   const [results, setResults] = React.useState<GlobalSearchResult[]>([]);
@@ -87,7 +89,7 @@ export function CommandPalette() {
   return (
     <CommandDialog open={open} onOpenChange={setOpen} shouldFilter={!query}>
       <CommandInput
-        placeholder="Buscar por DNI, estudiante, personal o comando..."
+        placeholder={userRole === "padre" ? "Buscar una opción del portal..." : "Buscar por DNI, estudiante, personal o comando..."}
         value={query}
         onValueChange={setQuery}
       />
@@ -132,6 +134,29 @@ export function CommandPalette() {
           </>
         )}
 
+        {userRole === "padre" && <>
+          <CommandGroup heading="Portal de Familia">
+            <CommandItem onSelect={() => runCommand(() => router.push("/portal"))}>
+              <IconLayoutDashboard className="mr-2 h-4 w-4" />
+              <span>Inicio</span>
+            </CommandItem>
+            <CommandItem onSelect={() => runCommand(() => router.push("/portal/deudas"))}>
+              <IconCreditCard className="mr-2 h-4 w-4" />
+              <span>Deudas pendientes</span>
+            </CommandItem>
+            <CommandItem onSelect={() => runCommand(() => router.push("/portal/asistencia"))}>
+              <IconCalendar className="mr-2 h-4 w-4" />
+              <span>Asistencia diaria</span>
+            </CommandItem>
+            <CommandItem onSelect={() => runCommand(() => router.push("/portal/notas"))}>
+              <IconClipboardCheck className="mr-2 h-4 w-4" />
+              <span>Notas académicas</span>
+            </CommandItem>
+          </CommandGroup>
+          <CommandSeparator />
+        </>}
+
+        {userRole !== "padre" && <>
         <CommandGroup heading="Acceso Rápido">
           <CommandItem
             onSelect={() => runCommand(() => router.push("/dashboard"))}
@@ -147,15 +172,16 @@ export function CommandPalette() {
             <IconUsers className="mr-2 h-4 w-4" />
             <span>Estudiantes (Padrón)</span>
           </CommandItem>
-          <CommandItem
+          {userRole === "administrativo" && <CommandItem
             onSelect={() => runCommand(() => router.push("/finanzas"))}
           >
             <IconCreditCard className="mr-2 h-4 w-4" />
             <span>Finanzas y Pagos</span>
-          </CommandItem>
+          </CommandItem>}
         </CommandGroup>
         <CommandSeparator />
 
+        {userRole === "administrativo" && <>
         <CommandGroup heading="Gestión Académica">
           <CommandItem
             onSelect={() =>
@@ -191,8 +217,10 @@ export function CommandPalette() {
           </CommandItem>
         </CommandGroup>
         <CommandSeparator />
+        </>}
 
         <CommandGroup heading="Operaciones">
+          {userRole === "administrativo" && <>
           <CommandItem
             onSelect={() =>
               runCommand(() => router.push("/gestion/matriculas"))
@@ -201,20 +229,21 @@ export function CommandPalette() {
             <IconSchool className="mr-2 h-4 w-4" />
             <span>Matrículas Actuales</span>
           </CommandItem>
-          <CommandItem
+          </>}
+          {userRole === "administrativo" && <CommandItem
             onSelect={() =>
               runCommand(() => router.push("/gestion/admisiones"))
             }
           >
             <IconUserSearch className="mr-2 h-4 w-4" />
             <span>Admisiones (Prospectos)</span>
-          </CommandItem>
-          <CommandItem
+          </CommandItem>}
+          {userRole === "administrativo" && <CommandItem
             onSelect={() => runCommand(() => router.push("/gestion/personal"))}
           >
             <IconId className="mr-2 h-4 w-4" />
             <span>Personal y Docentes</span>
-          </CommandItem>
+          </CommandItem>}
           <CommandItem
             onSelect={() => runCommand(() => router.push("/asistencia"))}
           >
@@ -236,6 +265,7 @@ export function CommandPalette() {
         </CommandGroup>
         <CommandSeparator />
 
+        {userRole === "administrativo" && <>
         <CommandGroup heading="Configuración">
           <CommandItem
             onSelect={() =>
@@ -254,11 +284,16 @@ export function CommandPalette() {
             <span>Configuración General</span>
             <CommandShortcut>⌘S</CommandShortcut>
           </CommandItem>
-          <CommandItem onSelect={() => runCommand(() => console.log("Logout"))}>
+        </CommandGroup>
+        <CommandSeparator />
+        </>}
+        <CommandGroup heading="Cuenta">
+          <CommandItem onSelect={() => runCommand(() => signOut({ callbackUrl: "/login" }))}>
             <IconLogout className="mr-2 h-4 w-4" />
             <span>Cerrar Sesión</span>
           </CommandItem>
         </CommandGroup>
+        </>}
       </CommandList>
     </CommandDialog>
   );

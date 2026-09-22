@@ -98,17 +98,21 @@ export function VariableForm({ onVariableSaved }: VariableFormProps) {
       return;
     }
 
-    let successCount = 0;
-    for (const v of validVars) {
-      const result = await upsertVariableAction({
-        clave: v.key.toUpperCase().replace(/\s/g, "_"),
-        valor: v.value,
-        tipo: "string",
-        descripcion: v.note || undefined,
-        seccion: "api",
-        activo: true,
-      });
+    const results = await Promise.all(
+      validVars.map((v) =>
+        upsertVariableAction({
+          clave: v.key.toUpperCase().replace(/\s/g, "_"),
+          valor: v.value,
+          tipo: "string",
+          descripcion: v.note || undefined,
+          seccion: "api",
+          activo: true,
+        })
+      )
+    );
 
+    let successCount = 0;
+    for (const result of results) {
       if (result.data) {
         successCount++;
         onVariableSaved(result.data);

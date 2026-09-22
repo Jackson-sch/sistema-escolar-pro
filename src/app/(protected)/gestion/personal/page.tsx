@@ -1,4 +1,4 @@
-import { IconCloudDownload } from "@tabler/icons-react";
+import { IconUsers } from "@tabler/icons-react";
 import {
   getStaffAction,
   getInstitucionesAction,
@@ -8,13 +8,9 @@ import {
 import { columns } from "@/components/gestion/personal/components/columns";
 import { StaffTable } from "@/components/gestion/personal/management/staff-table";
 import { AddStaffButton } from "@/components/gestion/personal/components/add-staff-button";
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-
+import { DownloadStaffButton } from "@/components/gestion/personal/components/download-staff-button";
+import { StaffKPIs } from "@/components/gestion/personal/components/staff-kpis";
+import { PageHeader } from "@/components/common/page-header";
 import { Suspense } from "react";
 
 export default async function PersonalPage() {
@@ -32,55 +28,41 @@ export default async function PersonalPage() {
   ]);
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-0 sm:p-4 pt-0 @container/main">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-4 sm:px-2">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
-            Gestión de Personal
-          </h1>
-          <p className="text-xxs sm:text-xs text-muted-foreground">
-            Administración de perfiles, cargos y nómina docente y
-            administrativa.
-          </p>
-        </div>
-        <div className="flex flex-row gap-2 items-center">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="rounded-full sm:w-auto sm:px-3"
-              >
-                <IconCloudDownload className="sm:mr-2 h-4 w-4" />
-                <span className="hidden sm:inline">Exportar</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Exportar Personal</p>
-            </TooltipContent>
-          </Tooltip>
+    <div className="flex flex-1 flex-col gap-6 p-4 sm:p-6 pt-0 animate-in fade-in duration-200">
+      <PageHeader
+        icon={<IconUsers size={20} />}
+        title="Gestión de Personal"
+        badge={`${staff.length} Registrados`}
+        description="Administración de perfiles, cargos, asignaciones y nómina del equipo docente y administrativo."
+        breadcrumbs={[
+          { label: "Personas", href: "/gestion/personal" },
+          { label: "Personal & Docentes" },
+        ]}
+        actions={
+          <div className="flex items-center gap-2 flex-wrap">
+            <DownloadStaffButton rows={staff} />
+            <AddStaffButton
+              instituciones={instituciones as any}
+              estados={estados as any}
+              cargos={cargos as any}
+            />
+          </div>
+        }
+      />
 
-          <AddStaffButton
-            instituciones={instituciones as any}
-            estados={estados as any}
-            cargos={cargos as any}
-          />
-        </div>
-      </div>
+      <StaffKPIs staffList={staff} />
 
-      <div className="px-4 sm:px-2">
-        <Suspense
-          fallback={
-            <div className="h-[400px] w-full animate-pulse bg-muted/10 rounded-xl" />
-          }
-        >
-          <StaffTable
-            columns={columns}
-            data={staff as any}
-            meta={{ instituciones, estados, cargos }}
-          />
-        </Suspense>
-      </div>
+      <Suspense
+        fallback={
+          <div className="h-[400px] w-full animate-pulse bg-muted/10 rounded-2xl border border-border/40" />
+        }
+      >
+        <StaffTable
+          columns={columns}
+          data={staff as any}
+          meta={{ instituciones, estados, cargos }}
+        />
+      </Suspense>
     </div>
   );
 }

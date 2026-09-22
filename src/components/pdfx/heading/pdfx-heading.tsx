@@ -1,4 +1,4 @@
-import { StyleSheet, Text } from '@react-pdf/renderer';
+import { StyleSheet, Text } from "@/lib/pdf";
 import type { Style } from '@react-pdf/types';
 import { usePdfxTheme, useSafeMemo } from "@/lib/pdfx-theme-context";
 import type React from 'react';

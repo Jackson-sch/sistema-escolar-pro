@@ -57,6 +57,7 @@ export function NivelList({
         <Button
           variant="ghost"
           size="icon"
+          aria-label="Agregar nivel"
           className="size-8 rounded-full hover:bg-primary/10 hover:text-primary transition-colors"
           onClick={onAddNivel}
         >
@@ -72,40 +73,73 @@ export function NivelList({
             const gradoCount = grados.filter(g => g.nivelId === nivel.id).length;
             const seccionCount = secciones.filter(s => s.nivelId === nivel.id).length;
 
+            const nivelSecciones = secciones.filter(s => s.nivelId === nivel.id);
+            const totalAlumnos = nivelSecciones.reduce((acc, s) => acc + (s._count?.matriculas || s._count?.students || 0), 0);
+            const totalCapacidad = nivelSecciones.reduce((acc, s) => acc + (s.capacidad || 30), 0);
+            const porcentajeOcupacion = totalCapacidad > 0 ? Math.min(100, Math.round((totalAlumnos / totalCapacidad) * 100)) : 0;
+
             return (
               <div key={nivel.id} className="relative group/nivel">
                 <button
                   onClick={() => onSelectNivel(nivel.id)}
                   className={cn(
-                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border text-left transition-[color,background-color,border-color] duration-200",
+                    "w-full flex flex-col gap-2 px-3 py-2.5 rounded-xl border text-left transition-[color,background-color,border-color] duration-200",
                     isActive
-                      ? "bg-primary/10 border-primary/25 text-primary"
-                      : "bg-card border-border/50 text-foreground hover:border-border hover:bg-muted/40"
+                      ? "bg-primary/15 border-primary/40 text-primary shadow-2xs"
+                      : "bg-background/60 border-border/50 text-foreground hover:border-border hover:bg-background/90"
                   )}
                 >
-                  <div className={cn(
-                    "size-8 rounded-lg flex items-center justify-center shrink-0 transition-colors",
-                    isActive ? "bg-primary/15" : "bg-muted"
-                  )}>
-                    <IconSchool size={15} strokeWidth={1.75} className={isActive ? "text-primary" : "text-muted-foreground"} />
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm truncate leading-snug capitalize">
-                      {nivel.nombre}
-                    </p>
-                    <p className={cn(
-                      "text-[11px] font-medium mt-0.5 flex items-center gap-1.5",
-                      isActive ? "text-primary/70" : "text-muted-foreground"
+                  <div className="flex items-center gap-3 w-full">
+                    <div className={cn(
+                      "size-8 rounded-lg flex items-center justify-center shrink-0 transition-colors",
+                      isActive ? "bg-primary/15" : "bg-muted"
                     )}>
-                      <span>{gradoCount} {gradoCount === 1 ? "grado" : "grados"}</span>
-                      <span className="opacity-40">·</span>
-                      <span>{seccionCount} {seccionCount === 1 ? "sección" : "secciones"}</span>
-                    </p>
+                      <IconSchool size={15} strokeWidth={1.75} className={isActive ? "text-primary" : "text-muted-foreground"} />
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm truncate leading-snug capitalize">
+                        {nivel.nombre}
+                      </p>
+                      <p className={cn(
+                        "text-[11px] font-medium mt-0.5 flex items-center gap-1.5",
+                        isActive ? "text-primary/70" : "text-muted-foreground"
+                      )}>
+                        <span>{gradoCount} {gradoCount === 1 ? "grado" : "grados"}</span>
+                        <span className="opacity-40">·</span>
+                        <span>{seccionCount} {seccionCount === 1 ? "sección" : "secciones"}</span>
+                      </p>
+                    </div>
+
+                    {isActive && (
+                      <IconChevronRight size={14} className="text-primary shrink-0" />
+                    )}
                   </div>
 
-                  {isActive && (
-                    <IconChevronRight size={14} className="text-primary shrink-0" />
+                  {/* Barra de aforo y alumnos */}
+                  {seccionCount > 0 && (
+                    <div className="w-full pt-1 border-t border-border/30">
+                      <div className="flex items-center justify-between text-[10px] font-medium mb-1">
+                        <span className={isActive ? "text-primary/80" : "text-muted-foreground"}>
+                          {totalAlumnos} alumnos
+                        </span>
+                        <span className={cn(
+                          "font-bold",
+                          porcentajeOcupacion >= 90 ? "text-rose-500" : porcentajeOcupacion >= 75 ? "text-amber-500" : "text-emerald-500"
+                        )}>
+                          {porcentajeOcupacion}% aforo
+                        </span>
+                      </div>
+                      <div className="w-full h-1 rounded-full bg-muted overflow-hidden">
+                        <div
+                          className={cn(
+                            "h-full rounded-full transition-[width] duration-500",
+                            porcentajeOcupacion >= 90 ? "bg-rose-500" : porcentajeOcupacion >= 75 ? "bg-amber-500" : "bg-emerald-500"
+                          )}
+                          style={{ width: `${porcentajeOcupacion}%` }}
+                        />
+                      </div>
+                    </div>
                   )}
                 </button>
 
@@ -116,6 +150,7 @@ export function NivelList({
                       <Button
                         variant="ghost"
                         size="icon"
+                        aria-label="Opciones de nivel"
                         className="size-6 rounded-md bg-background/80 border border-border/40 shadow-sm hover:bg-muted transition-colors"
                       >
                         <IconDotsVertical size={12} />

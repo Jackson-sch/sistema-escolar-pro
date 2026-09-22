@@ -2,6 +2,7 @@
 
 import { IconCalendar } from "@tabler/icons-react";
 import {
+  Card,
   CardContent,
   CardDescription,
   CardHeader,
@@ -26,7 +27,6 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { type InstitucionFormControl, inputStyles, labelStyles } from "./types";
-import { MagicCard } from "@/components/ui/magic-card";
 
 interface CalendarioSistemaCardProps {
   control: InstitucionFormControl;
@@ -34,76 +34,92 @@ interface CalendarioSistemaCardProps {
 
 export function CalendarioSistemaCard({ control }: CalendarioSistemaCardProps) {
   return (
-    <MagicCard className="rounded-2xl p-0">
-      <CardHeader className="bg-linear-to-r from-blue-500/5 to-transparent border-b border-border/30 pt-4 rounded-t-xl">
+    <Card className="rounded-2xl border border-border/60 bg-card p-0 shadow-xs overflow-hidden">
+      <CardHeader className="bg-muted/20 border-b border-border/40 p-4 px-6">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-amber-500/10 rounded-xl">
-            <IconCalendar className="size-5 text-amber-500" />
+          <div className="size-9 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+            <IconCalendar className="size-5" />
           </div>
           <div>
-            <CardTitle className="text-base font-bold text-foreground">
-              Calendario y Sistema
+            <CardTitle className="text-sm font-bold text-foreground">
+              Calendario y Ciclo Escolar
             </CardTitle>
-            <CardDescription className="text-[11px] text-muted-foreground/70 font-medium">
-              Fechas clave para el ciclo escolar
+            <CardDescription className="text-xs text-muted-foreground font-normal">
+              Periodo lectivo y fechas oficiales de inicio y término de clases.
             </CardDescription>
           </div>
         </div>
       </CardHeader>
-      <CardContent className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+      <CardContent className="space-y-4 p-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <FormField
             control={control}
             name="cicloEscolarActual"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className={labelStyles}>
-                  Año Académico Actual
+                  Año Académico Lectivo
                 </FormLabel>
                 <FormControl>
-                  <Input type="number" className={inputStyles} {...field} />
+                  <Input
+                    type="number"
+                    placeholder="2026"
+                    className={`${inputStyles} font-mono font-bold`}
+                    {...field}
+                    onChange={(e) =>
+                      field.onChange(parseInt(e.target.value, 10) || "")
+                    }
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
+
           <FormField
             control={control}
             name="fechaInicioClases"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel className={labelStyles}>Inicio de Clases</FormLabel>
+                <FormLabel className={`${labelStyles} mb-1.5`}>
+                  Inicio de Clases
+                </FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
-                        variant={"outline"}
+                        variant="outline"
                         className={cn(
                           inputStyles,
-                          "w-full pl-3 text-left font-normal",
+                          "w-full pl-3 text-left font-normal flex items-center justify-between",
                           !field.value && "text-muted-foreground",
                         )}
                       >
                         {field.value ? (
-                          format(new Date(field.value), "PPP", { locale: es })
+                          format(new Date(field.value + "T00:00:00"), "PPP", {
+                            locale: es,
+                          })
                         ) : (
                           <span>Seleccionar fecha</span>
                         )}
-                        <IconCalendar className="ml-auto h-4 w-4 opacity-50" />
+                        <IconCalendar className="size-4 opacity-50 shrink-0" />
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent className="w-auto p-0 rounded-2xl" align="start">
                     <Calendar
                       mode="single"
-                      selected={field.value ? new Date(field.value) : undefined}
-                      onSelect={(date) =>
-                        field.onChange(date ? date.toISOString() : "")
+                      selected={
+                        field.value
+                          ? new Date(field.value + "T00:00:00")
+                          : undefined
                       }
-                      disabled={(date) =>
-                        date < new Date("1900-01-01") ||
-                        date > new Date("2100-12-31")
-                      }
+                      onSelect={(date) => {
+                        if (date) {
+                          field.onChange(format(date, "yyyy-MM-dd"));
+                        }
+                      }}
                       initialFocus
                     />
                   </PopoverContent>
@@ -112,43 +128,50 @@ export function CalendarioSistemaCard({ control }: CalendarioSistemaCardProps) {
               </FormItem>
             )}
           />
+
           <FormField
             control={control}
             name="fechaFinClases"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel className={labelStyles}>Fin de Clases</FormLabel>
+                <FormLabel className={`${labelStyles} mb-1.5`}>
+                  Fin de Clases
+                </FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
-                        variant={"outline"}
+                        variant="outline"
                         className={cn(
                           inputStyles,
-                          "w-full pl-3 text-left font-normal",
+                          "w-full pl-3 text-left font-normal flex items-center justify-between",
                           !field.value && "text-muted-foreground",
                         )}
                       >
                         {field.value ? (
-                          format(new Date(field.value), "PPP", { locale: es })
+                          format(new Date(field.value + "T00:00:00"), "PPP", {
+                            locale: es,
+                          })
                         ) : (
                           <span>Seleccionar fecha</span>
                         )}
-                        <IconCalendar className="ml-auto h-4 w-4 opacity-50" />
+                        <IconCalendar className="size-4 opacity-50 shrink-0" />
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent className="w-auto p-0 rounded-2xl" align="start">
                     <Calendar
                       mode="single"
-                      selected={field.value ? new Date(field.value) : undefined}
-                      onSelect={(date) =>
-                        field.onChange(date ? date.toISOString() : "")
+                      selected={
+                        field.value
+                          ? new Date(field.value + "T00:00:00")
+                          : undefined
                       }
-                      disabled={(date) =>
-                        date < new Date("1900-01-01") ||
-                        date > new Date("2100-12-31")
-                      }
+                      onSelect={(date) => {
+                        if (date) {
+                          field.onChange(format(date, "yyyy-MM-dd"));
+                        }
+                      }}
                       initialFocus
                     />
                   </PopoverContent>
@@ -159,6 +182,6 @@ export function CalendarioSistemaCard({ control }: CalendarioSistemaCardProps) {
           />
         </div>
       </CardContent>
-    </MagicCard>
+    </Card>
   );
 }

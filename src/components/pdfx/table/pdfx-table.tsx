@@ -1,5 +1,5 @@
 import React, { Children, type ReactElement, type ReactNode, cloneElement, isValidElement } from 'react';
-import { Text as PDFText, View } from '@react-pdf/renderer';
+import { Text as PDFText, View } from "@/lib/pdf";
 import type { Style } from '@react-pdf/types';
 import { usePdfxTheme, useSafeMemo } from "@/lib/pdfx-theme-context";
 import { createTableStyles } from './pdfx-table.styles';
@@ -167,30 +167,24 @@ export function TableRow({
   );
 }
 
-export function TableCell({
-  header,
-  footer,
-  align,
-  width,
-  children,
-  style,
-  variant = 'line',
-  _last,
-}: TableCellProps) {
-  const theme = usePdfxTheme();
-  const styles = useSafeMemo(() => createTableStyles(theme), [theme]);
+function resolveCellBaseStyles(
+  styles: ReturnType<typeof createTableStyles>,
+  width: number | string | undefined,
+  variant: TableVariant,
+  _last?: boolean,
+  align?: string
+): Style[] {
   const cellStyles: Style[] =
     width !== undefined ? [styles.cellFixed, { width } as Style] : [styles.cell];
 
-  const cellVariantStyle = (
-    {
-      minimal: styles.cellMinimal,
-      striped: styles.cellStriped,
-      compact: styles.cellCompact,
-      bordered: styles.cellBordered,
-      'primary-header': styles.cellPrimaryHeader,
-    } as Partial<Record<TableVariant, Style>>
-  )[variant];
+  const variantMap: Partial<Record<TableVariant, Style>> = {
+    minimal: styles.cellMinimal,
+    striped: styles.cellStriped,
+    compact: styles.cellCompact,
+    bordered: styles.cellBordered,
+    'primary-header': styles.cellPrimaryHeader,
+  };
+  const cellVariantStyle = variantMap[variant];
   if (cellVariantStyle) cellStyles.push(cellVariantStyle);
 
   if (variant === 'grid' && !_last) {
@@ -203,11 +197,17 @@ export function TableCell({
     cellStyles.push({ textAlign: align } as Style);
   }
 
-  const styleArray = style ? [...cellStyles, style] : cellStyles;
+  return cellStyles;
+}
 
-  let textStyle: Style = styles.cellText;
+function resolveCellTextStyle(
+  styles: ReturnType<typeof createTableStyles>,
+  variant: TableVariant,
+  header?: boolean,
+  footer?: boolean
+): Style {
   if (header) {
-    textStyle = {
+    const headerMap: Record<TableVariant, Style> = {
       grid: styles.cellTextHeaderGrid,
       line: styles.cellTextHeaderLine,
       minimal: styles.cellTextHeaderMinimal,
@@ -215,12 +215,33 @@ export function TableCell({
       compact: styles.cellTextHeaderCompact,
       bordered: styles.cellTextHeaderBordered,
       'primary-header': styles.cellTextHeaderPrimaryHeader,
-    }[variant];
-  } else if (footer) {
-    textStyle = styles.cellTextFooter;
-  } else if (variant === 'compact') {
-    textStyle = styles.cellTextCompact;
+    };
+    return headerMap[variant];
   }
+  if (footer) {
+    return styles.cellTextFooter;
+  }
+  if (variant === 'compact') {
+    return styles.cellTextCompact;
+  }
+  return styles.cellText;
+}
+
+export function TableCell({
+  header,
+  footer,
+  align,
+  width,
+  children,
+  style,
+  variant = 'line',
+  _last,
+}: TableCellProps) {
+  const theme = usePdfxTheme();
+  const styles = useSafeMemo(() => createTableStyles(theme), [theme]);
+  const cellStyles = resolveCellBaseStyles(styles, width, variant, _last, align);
+  const styleArray = style ? [...cellStyles, style] : cellStyles;
+  const textStyle = resolveCellTextStyle(styles, variant, header, footer);
 
   const content = React.isValidElement(children) ? (
     children

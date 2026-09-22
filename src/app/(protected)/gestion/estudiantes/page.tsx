@@ -14,8 +14,10 @@ import StudentStats from "@/components/gestion/estudiantes/components/stats";
 import { auth } from "@/auth";
 import { Badge } from "@/components/ui/badge";
 
+import { PageHeader } from "@/components/common/page-header";
+
 export const metadata = {
-  title: "Gestión de Estudiantes | Sistema Escolar Pro",
+  title: "Padrón de Estudiantes | Sistema Escolar Pro",
   description: "Administración de alumnos, expedientes académicos y padrón escolar.",
 };
 
@@ -48,43 +50,35 @@ export default async function EstudiantesPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col gap-6 p-4 md:p-8 pt-6 @container/main">
-      {/* ── HEADER ── */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
-        <div className="space-y-2">
-          <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-4 py-1 rounded-full text-xxs font-semibold uppercase tracking-widest flex items-center gap-2 w-fit">
-            <IconUsers size={14} />
-            Padrón Estudiantil
-          </Badge>
-          <h1 className="text-3xl md:text-5xl font-bold tracking-tight leading-none">
-            Gestión de Estudiantes
-          </h1>
-          <p className="text-muted-foreground text-sm md:text-base max-w-2xl font-normal leading-relaxed">
-            Administración integral del expediente personal, historial de matrículas y estado de los alumnos.
-          </p>
-        </div>
-
-        <div className="flex flex-row gap-3 items-center shrink-0">
+    <div className="flex flex-1 flex-col gap-6 p-4 sm:p-6 pt-0">
+      {/* ── HEADER COMPACTO INSTITUCIONAL ── */}
+      <PageHeader
+        icon={<IconUsers size={20} />}
+        title="Padrón de Estudiantes"
+        badge="Expedientes"
+        description={`Administración de alumnos matriculados y seguimiento académico · Periodo ${periodoAcademico}`}
+        breadcrumbs={[
+          { label: "Inicio", href: "/dashboard" },
+          { label: "Personas", href: "/gestion/estudiantes" },
+          { label: "Estudiantes" },
+        ]}
+        actions={
           <AddStudentButton
             instituciones={instituciones as any}
             estados={estados as any}
             periodoAcademico={periodoAcademico}
           />
-        </div>
-      </div>
+        }
+      />
 
-      {/* ── BENTO KPIS ── */}
-      <div className="px-1">
-        <StudentStats stats={defaultStats} />
-      </div>
-
-      {/* ── TABLA DE ESTUDIANTES ── */}
+      {/* ── TABLA / DIRECTORIO DE ESTUDIANTES CON KPIS INTERACTIVOS ── */}
       <div className="px-1">
         <StudentTable
           columns={columns}
           data={estudiantes as any}
           totalCount={totalCount}
           meta={{ instituciones, estados, nivelesAcademicos, institucion }}
+          stats={defaultStats}
           showPadronExport={isAdmin}
         />
       </div>

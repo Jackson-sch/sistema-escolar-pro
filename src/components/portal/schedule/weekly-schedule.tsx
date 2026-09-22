@@ -22,74 +22,73 @@ interface WeeklyScheduleProps {
   horarios: Horario[];
 }
 
+const WEEK_DAYS = [
+  { id: 1, label: "Lunes" },
+  { id: 2, label: "Martes" },
+  { id: 3, label: "Miércoles" },
+  { id: 4, label: "Jueves" },
+  { id: 5, label: "Viernes" },
+];
+
+const BASE_BLOCKS = [
+  { start: "07:00", end: "07:45", label: "07:00" },
+  { start: "07:45", end: "08:30", label: "07:45" },
+  { start: "08:30", end: "09:15", label: "08:30" },
+  { start: "09:15", end: "10:00", label: "09:15" },
+  {
+    start: "10:00",
+    end: "10:30",
+    type: "break",
+    label: "10:00",
+    fullEnd: "10:30",
+  },
+  { start: "10:30", end: "11:15", label: "10:30" },
+  { start: "11:15", end: "12:00", label: "11:15" },
+  { start: "12:00", end: "12:45", label: "12:00" },
+  { start: "12:45", end: "13:00", label: "12:45" },
+  {
+    start: "13:00",
+    end: "14:00",
+    type: "lunch",
+    label: "13:00",
+    fullEnd: "14:00",
+  },
+];
+
+function getRowRange(start: string, end: string) {
+  const startIndex = BASE_BLOCKS.findIndex((b) => b.start === start);
+  const endIndex = BASE_BLOCKS.findIndex((b) => b.end === end);
+  if (startIndex === -1) return null;
+  return {
+    start: startIndex + 2,
+    end: (endIndex !== -1 ? endIndex : startIndex) + 3,
+  };
+}
+
+function getAreaColor(areaName: string) {
+  const name = areaName.toLowerCase();
+  if (name.includes("cienc") || name.includes("mate"))
+    return "bg-teal-500/10 border-teal-500/30 text-teal-600 dark:text-teal-400";
+  if (name.includes("letra") || name.includes("human") || name.includes("comunic"))
+    return "bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400";
+  if (name.includes("arte") || name.includes("física") || name.includes("tall"))
+    return "bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400";
+  return "bg-indigo-500/10 border-indigo-500/30 text-indigo-600 dark:text-indigo-400";
+}
+
 export function WeeklySchedule({ horarios }: WeeklyScheduleProps) {
-  const dias = [
-    { id: 1, label: "Lunes" },
-    { id: 2, label: "Martes" },
-    { id: 3, label: "Miércoles" },
-    { id: 4, label: "Jueves" },
-    { id: 5, label: "Viernes" },
-  ];
-
-  // Definición de bloques base de horario
-  const baseBlocks = [
-    { start: "07:00", end: "07:45", label: "07:00" },
-    { start: "07:45", end: "08:30", label: "07:45" },
-    { start: "08:30", end: "09:15", label: "08:30" },
-    { start: "09:15", end: "10:00", label: "09:15" },
-    {
-      start: "10:00",
-      end: "10:30",
-      type: "break",
-      label: "10:00",
-      fullEnd: "10:30",
-    },
-    { start: "10:30", end: "11:15", label: "10:30" },
-    { start: "11:15", end: "12:00", label: "11:15" },
-    { start: "12:00", end: "12:45", label: "12:00" },
-    { start: "12:45", end: "13:00", label: "12:45" },
-    {
-      start: "13:00",
-      end: "14:00",
-      type: "lunch",
-      label: "13:00",
-      fullEnd: "14:00",
-    },
-  ];
-
-  const getRowRange = (start: string, end: string) => {
-    const startIndex = baseBlocks.findIndex((b) => b.start === start);
-    const endIndex = baseBlocks.findIndex((b) => b.end === end);
-    if (startIndex === -1) return null;
-    return {
-      start: startIndex + 2,
-      end: (endIndex !== -1 ? endIndex : startIndex) + 3,
-    };
-  };
-
-  const getAreaColor = (areaName: string) => {
-    const name = areaName.toLowerCase();
-    if (name.includes("cienc") || name.includes("mate"))
-      return "bg-teal-500/10 border-teal-500/30 text-teal-600 dark:text-teal-400";
-    if (name.includes("letra") || name.includes("human") || name.includes("comunic"))
-      return "bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400";
-    if (name.includes("arte") || name.includes("física") || name.includes("tall"))
-      return "bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400";
-    return "bg-indigo-500/10 border-indigo-500/30 text-indigo-600 dark:text-indigo-400";
-  };
-
   return (
     <div className="rounded-2xl border border-border/40 bg-card/80 p-4 md:p-6 shadow-xl overflow-x-auto">
       <div className="min-w-[850px]">
         <div
           className="grid grid-cols-[80px_1fr_1fr_1fr_1fr_1fr] gap-3"
           style={{
-            gridTemplateRows: `auto repeat(${baseBlocks.length}, minmax(44px, auto))`,
+            gridTemplateRows: `auto repeat(${BASE_BLOCKS.length}, minmax(44px, auto))`,
           }}
         >
           {/* Header Row */}
           <div className="col-start-1 h-6" />
-          {dias.map((dia, idx) => (
+          {WEEK_DAYS.map((dia, idx) => (
             <div
               key={dia.id}
               className="text-center py-2 px-3 rounded-xl bg-muted/40 border border-border/30 mb-2"
@@ -102,7 +101,7 @@ export function WeeklySchedule({ horarios }: WeeklyScheduleProps) {
           ))}
 
           {/* Time Labels Column */}
-          {baseBlocks.map((block, idx) => (
+          {BASE_BLOCKS.map((block, idx) => (
             <div
               key={`time-${block.start}`}
               className="flex flex-col items-end justify-center pr-3 border-r border-border/20 mb-2"
@@ -118,8 +117,8 @@ export function WeeklySchedule({ horarios }: WeeklyScheduleProps) {
           ))}
 
           {/* Free Slots */}
-          {dias.map((dia, dIdx) =>
-            baseBlocks.map((block, bIdx) => {
+          {WEEK_DAYS.map((dia, dIdx) =>
+            BASE_BLOCKS.map((block, bIdx) => {
               if (block.type) return null;
               return (
                 <div
@@ -184,7 +183,7 @@ export function WeeklySchedule({ horarios }: WeeklyScheduleProps) {
           })}
 
           {/* Breaks and Lunch */}
-          {baseBlocks
+          {BASE_BLOCKS
             .flatMap((block, idx) => {
               if (!block.type) return [];
               const range = getRowRange(

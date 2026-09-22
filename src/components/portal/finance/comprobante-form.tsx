@@ -3,9 +3,7 @@
 import * as React from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -15,16 +13,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  IconUpload,
   IconLoader2,
   IconCheck,
-  IconPhoto,
-  IconX,
   IconReceipt2,
   IconUser,
-  IconCalendarEvent,
-  IconBuildingBank,
-  IconHash,
   IconInfoCircle,
 } from "@tabler/icons-react";
 import { toast } from "sonner";
@@ -32,6 +24,10 @@ import { createComprobanteAction } from "@/actions/comprobantes";
 import { formatCurrency } from "@/lib/formats";
 import { Card, CardContent } from "@/components/ui/card";
 import { extractReceiptDataAction } from "@/actions/ocr";
+import {
+  ComprobanteReceiptUpload,
+  ComprobantePaymentFields,
+} from "./comprobante-form-fields";
 
 interface ComprobanteFormProps {
   opcionesDeuda: Array<{
@@ -91,7 +87,6 @@ export function ComprobanteForm({
         const base64 = reader.result as string;
         setPreview(base64);
 
-        // Si es imagen, intentamos OCR con Gemini
         if (file.type.startsWith("image/")) {
           setIsScanning(true);
           try {
@@ -120,6 +115,10 @@ export function ComprobanteForm({
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleFieldChange = (field: string, value: string) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -245,156 +244,20 @@ export function ComprobanteForm({
       )}
 
       {/* Upload de imagen */}
-      <div className="space-y-2">
-        <Label className="text-sm font-bold flex items-center gap-2 text-muted-foreground">
-          <IconPhoto className="size-4 text-primary" />
-          Comprobante de transferencia
-        </Label>
-        <div className="relative">
-          {preview ? (
-            <div className="relative rounded-lg overflow-hidden border border-border bg-muted/30 group">
-              {preview.startsWith("data:image") ? (
-                <Image
-                  src={preview}
-                  alt="Comprobante"
-                  width={400}
-                  height={256}
-                  unoptimized
-                  className="w-full max-h-64 object-contain p-2"
-                />
-              ) : (
-                <div className="h-40 flex flex-col items-center justify-center gap-2">
-                  <div className="size-14 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 shadow-inner">
-                    <IconCheck className="size-7" />
-                  </div>
-                  <p className="text-sm font-bold text-muted-foreground">
-                    Documento PDF cargado
-                  </p>
-                </div>
-              )}
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="icon"
-                  onClick={() => setPreview(null)}
-                  className="rounded-md scale-75 group-hover:scale-100 transition-transform"
-                >
-                  <IconX className="size-5" />
-                </Button>
-              </div>
-
-              {isScanning && (
-                <div className="absolute inset-0 bg-primary/20 backdrop-blur-sm flex flex-col items-center justify-center animate-in fade-in animation-duration-">
-                  <div className="bg-background p-4 rounded-lg shadow-lg flex flex-col items-center gap-3 border border-primary/20">
-                    <IconLoader2 className="size-8 animate-spin text-primary" />
-                    <div className="text-center">
-                      <p className="text-sm font-black text-primary uppercase tracking-wider">
-                        IA Escaneando
-                      </p>
-                      <p className="text-xxs text-muted-foreground font-bold">
-                        Extrayendo datos...
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
-            <label className="group flex flex-col items-center justify-center min-h-[160px] border-2 border-dashed border-border hover:border-primary/50 rounded-lg cursor-pointer transition-colors bg-card hover:bg-primary/5">
-              <div className="size-12 rounded-lg bg-muted group-hover:bg-primary/10 flex items-center justify-center text-muted-foreground group-hover:text-primary transition-colors mb-3 border border-border">
-                <IconUpload className="size-7" />
-              </div>
-              <div className="text-center">
-                <p className="font-bold text-foreground text-sm">
-                  Haz clic para buscar
-                </p>
-                <p className="text-xxs uppercase font-black tracking-widest text-muted-foreground/60 mt-1">
-                  JPG, PNG o PDF
-                </p>
-              </div>
-              <input
-                type="file"
-                accept="image/*,.pdf"
-                onChange={handleFileChange}
-                className="hidden"
-              />
-            </label>
-          )}
-        </div>
-      </div>
+      <ComprobanteReceiptUpload
+        preview={preview}
+        isScanning={isScanning}
+        onFileChange={handleFileChange}
+        onClearPreview={() => setPreview(null)}
+      />
 
       {/* Datos del pago */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-1.5">
-          <Label className="text-xs font-bold text-muted-foreground">
-            Monto transferido
-          </Label>
-          <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-black text-sm">
-              S/
-            </span>
-            <Input
-              type="number"
-              step="0.01"
-              value={form.monto}
-              onChange={(e) => setForm({ ...form, monto: e.target.value })}
-              placeholder="0.00"
-              className="h-11 pl-10 rounded-lg border-border bg-background focus:ring-primary/20 font-semibold text-base"
-            />
-          </div>
-          {isMontoMismatched && (
-            <p className="text-xxs font-bold text-red-500 mt-1.5 flex items-center gap-1 animate-pulse">
-              <IconX className="size-3" />
-              El monto no coincide con la deuda ({formatCurrency(expectedMonto)}
-              )
-            </p>
-          )}
-        </div>
-
-        <div className="space-y-1.5">
-          <Label className="text-xs font-bold text-muted-foreground flex items-center gap-1.5">
-            <IconCalendarEvent className="size-3.5" />
-            Fecha de operación
-          </Label>
-          <Input
-            type="date"
-            value={form.fechaOperacion}
-            onChange={(e) =>
-              setForm({ ...form, fechaOperacion: e.target.value })
-            }
-            className="h-11 rounded-lg border-border bg-background focus:ring-primary/20 font-medium"
-          />
-        </div>
-
-        <div className="space-y-1.5">
-          <Label className="text-xs font-bold text-muted-foreground flex items-center gap-1.5">
-            <IconBuildingBank className="size-3.5" />
-            Banco de origen
-          </Label>
-          <Input
-            value={form.bancoOrigen}
-            onChange={(e) => setForm({ ...form, bancoOrigen: e.target.value })}
-            placeholder="Ej: BCP, Interbank..."
-            className="h-11 rounded-lg border-border bg-background focus:ring-primary/20 font-medium"
-          />
-        </div>
-
-        <div className="space-y-1.5">
-          <Label className="text-xs font-bold text-muted-foreground flex items-center gap-1.5">
-            <IconHash className="size-3.5" />
-            Nro. operación
-          </Label>
-          <Input
-            value={form.numeroOperacion}
-            onChange={(e) =>
-              setForm({ ...form, numeroOperacion: e.target.value })
-            }
-            placeholder="Ej: 123456"
-            className="h-11 rounded-lg border-border bg-background focus:ring-primary/20 font-mono text-sm"
-          />
-        </div>
-      </div>
+      <ComprobantePaymentFields
+        form={form}
+        onChangeField={handleFieldChange}
+        isMontoMismatched={isMontoMismatched}
+        expectedMonto={expectedMonto}
+      />
 
       {/* Botón submit */}
       <div className="pt-2">

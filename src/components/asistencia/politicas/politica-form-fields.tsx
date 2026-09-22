@@ -70,76 +70,80 @@ export function PoliticaFormFields({
   ]);
 
   return (
-    <div className="grid gap-4 py-2">
-      <div className="grid gap-2">
-        <Label htmlFor="nombre">Nombre Descriptivo</Label>
+    <div className="grid gap-3 py-1">
+      <div className="space-y-1">
+        <Label htmlFor="nombre" className="text-xs font-bold text-foreground">
+          Nombre Descriptivo de la Regla
+        </Label>
         <Input
           id="nombre"
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
           placeholder="Ej: Primaria - Turno Mañana"
-          className="rounded-full"
+          className="h-9 text-xs rounded-xl border-border/60 bg-background"
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="grid gap-2">
-          <Label>Nivel (Opcional)</Label>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <Label className="text-xs font-bold text-foreground">Nivel Educativo</Label>
           <Select value={nivelId} onValueChange={setNivelId}>
-            <SelectTrigger className="rounded-full w-full">
-              <SelectValue placeholder="Todos" />
+            <SelectTrigger className="h-9 text-xs rounded-xl border-border/60 bg-background w-full">
+              <SelectValue placeholder="Todos los Niveles" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos los Niveles</SelectItem>
+            <SelectContent className="rounded-xl">
+              <SelectItem value="all" className="text-xs">Todos los Niveles</SelectItem>
               {niveles.map((n) => (
-                <SelectItem key={n.id} value={n.id}>
+                <SelectItem key={n.id} value={n.id} className="text-xs">
                   {n.nombre}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
-        <div className="grid gap-2">
-          <Label>Turno (Opcional)</Label>
+        <div className="space-y-1">
+          <Label className="text-xs font-bold text-foreground">Turno</Label>
           <Select value={turno} onValueChange={setTurno}>
-            <SelectTrigger className="rounded-full w-full">
-              <SelectValue placeholder="Todos" />
+            <SelectTrigger className="h-9 text-xs rounded-xl border-border/60 bg-background w-full">
+              <SelectValue placeholder="Todos los Turnos" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos los Turnos</SelectItem>
-              <SelectItem value="MANANA">Mañana</SelectItem>
-              <SelectItem value="TARDE">Tarde</SelectItem>
-              <SelectItem value="NOCHE">Noche</SelectItem>
+            <SelectContent className="rounded-xl">
+              <SelectItem value="all" className="text-xs">Todos los Turnos</SelectItem>
+              <SelectItem value="MANANA" className="text-xs">Mañana</SelectItem>
+              <SelectItem value="TARDE" className="text-xs">Tarde</SelectItem>
+              <SelectItem value="NOCHE" className="text-xs">Noche</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="grid gap-2">
-          <Label htmlFor="entrada">Hora Entrada</Label>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <Label htmlFor="entrada" className="text-xs font-bold text-foreground">Hora de Entrada</Label>
           <Input
             id="entrada"
             type="time"
             value={horaEntrada}
             onChange={(e) => setHoraEntrada(e.target.value)}
-            className="rounded-full"
+            className="h-9 text-xs font-mono rounded-xl border-border/60 bg-background text-center"
           />
         </div>
-        <div className="grid gap-2">
-          <Label htmlFor="salida">Hora Salida</Label>
+        <div className="space-y-1">
+          <Label htmlFor="salida" className="text-xs font-bold text-foreground">Hora de Salida</Label>
           <Input
             id="salida"
             type="time"
             value={horaSalida}
             onChange={(e) => setHoraSalida(e.target.value)}
-            className="rounded-full"
+            className="h-9 text-xs font-mono rounded-xl border-border/60 bg-background text-center"
           />
         </div>
       </div>
 
-      <div className="grid gap-2">
-        <Label htmlFor="tolerancia">Tolerancia (Minutos)</Label>
+      <div className="space-y-1">
+        <Label htmlFor="tolerancia" className="text-xs font-bold text-foreground">
+          Tolerancia de Tardanza (Minutos)
+        </Label>
         <div className="flex items-center gap-2">
           <Input
             id="tolerancia"
@@ -147,22 +151,23 @@ export function PoliticaFormFields({
             value={tolerancia}
             onChange={(e) => setTolerancia(parseInt(e.target.value) || 0)}
             min={0}
-            className="rounded-full"
+            className="h-9 text-xs font-mono rounded-xl border-border/60 bg-background text-center w-28"
           />
-          <span className="text-xs font-medium text-muted-foreground mr-2">
-            min
+          <span className="text-xs font-medium text-muted-foreground">
+            minutos posteriores a la hora de entrada
           </span>
         </div>
       </div>
 
-      <div className="flex items-center space-x-2 pt-2 pb-4">
+      <div className="flex items-center space-x-2 pt-2">
         <Checkbox
           id="activo"
           checked={activo}
           onCheckedChange={(checked) => setActivo(checked as boolean)}
+          className="size-4 rounded-md border-border/60 text-primary cursor-pointer"
         />
-        <Label htmlFor="activo" className="text-sm font-bold cursor-pointer">
-          Regla Activa
+        <Label htmlFor="activo" className="text-xs font-bold text-foreground cursor-pointer">
+          Regla de Control Activa
         </Label>
       </div>
     </div>

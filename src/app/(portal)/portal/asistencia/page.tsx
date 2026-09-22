@@ -11,6 +11,7 @@ import { Card } from "@/components/ui/card";
 import { IconUser, IconCalendarCheck, IconInfoCircle } from "@tabler/icons-react";
 import { Badge } from "@/components/ui/badge";
 import { Suspense } from "react";
+import { PageHeader } from "@/components/common/page-header";
 
 export const metadata = {
   title: "Control de Asistencia | Portal de Familia",
@@ -87,22 +88,18 @@ export default async function PortalAsistenciaPage({
   };
 
   return (
-    <div className="min-h-screen flex flex-col gap-6 p-4 md:p-8 pt-6 @container/main">
-      {/* ── HEADER ── */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
-        <div className="space-y-2">
-          <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-4 py-1 rounded-full text-xxs font-semibold uppercase tracking-widest flex items-center gap-2 w-fit">
-            <IconCalendarCheck size={14} />
-            Asistencia Escolar
-          </Badge>
-          <h1 className="text-3xl md:text-5xl font-bold tracking-tight leading-none">
-            Control de Asistencia
-          </h1>
-          <p className="text-muted-foreground text-sm md:text-base max-w-2xl font-normal leading-relaxed">
-            Monitorea la puntualidad, tardanzas e inasistencias registradas diariamente en el aula.
-          </p>
-        </div>
-      </div>
+    <div className="flex flex-1 flex-col gap-6 p-4 sm:p-6 pt-0">
+      {/* ── HEADER COMPACTO INSTITUCIONAL ── */}
+      <PageHeader
+        icon={<IconCalendarCheck size={20} />}
+        title="Control de Asistencia"
+        badge="Monitoreo Diario"
+        description="Puntualidad, ingresos y justificaciones registradas durante el año escolar"
+        breadcrumbs={[
+          { label: "Portal", href: "/portal" },
+          { label: "Asistencia" },
+        ]}
+      />
 
       {/* Selector de Hijo */}
       <div className="px-1">

@@ -63,6 +63,7 @@ export function PaymentHistoryDrawer({
               variant="ghost"
               size="icon"
               onClick={() => onOpenChange(false)}
+              aria-label="Cerrar historial de pagos"
               className="size-8 rounded-xl border border-border/40 hover:bg-muted text-muted-foreground cursor-pointer"
             >
               <IconX className="size-4" />

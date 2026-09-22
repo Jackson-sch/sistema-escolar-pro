@@ -5,6 +5,7 @@ import {
   IconTrash,
   IconEye,
   IconReceipt,
+  IconCheck,
 } from "@tabler/icons-react";
 import { Row } from "@tanstack/react-table";
 import { toast } from "sonner";
@@ -14,7 +15,7 @@ import {
   ActionItem,
 } from "@/components/common/responsive-row-actions";
 
-import { deleteEnrollmentAction } from "@/actions/enrollments";
+import { deleteEnrollmentAction, ratificarMatriculaAction } from "@/actions/enrollments";
 import { EnrollmentTableType } from "@/components/gestion/matriculas/components/columns";
 import { EnrollmentViewSheet } from "@/components/gestion/matriculas/management/enrollment-view-sheet";
 import { EnrollmentPaymentsSheet } from "@/components/gestion/matriculas/payments/enrollment-payments-sheet";
@@ -33,7 +34,21 @@ export function EnrollmentRowActions({
   const [showPaymentsSheet, setShowPaymentsSheet] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isRatifying, setIsRatifying] = useState(false);
   const enrollment = row.original;
+
+  const onRatify = async () => {
+    setIsRatifying(true);
+    try {
+      const res = await ratificarMatriculaAction(enrollment.id);
+      if (res.success) {
+        toast.success(res.success);
+      }
+      if (res.error) toast.error(res.error);
+    } finally {
+      setIsRatifying(false);
+    }
+  };
 
   const onDelete = async () => {
     setIsDeleting(true);
@@ -49,7 +64,23 @@ export function EnrollmentRowActions({
     }
   };
 
-  const actions: ActionItem[] = [
+  const actions: ActionItem[] = [];
+
+  if (enrollment.estado === "pendiente") {
+    actions.push(
+      {
+        icon: IconCheck,
+        label: isRatifying ? "Ratificando..." : "Ratificar Matrícula",
+        onClick: onRatify,
+        disabled: isRatifying,
+        variant: "ghost",
+        className: "text-amber-600 dark:text-amber-400 font-bold rounded-full hover:bg-amber-500/10",
+      },
+      { isSeparator: true },
+    );
+  }
+
+  actions.push(
     {
       icon: IconEye,
       label: "Ver Constancia",
@@ -71,7 +102,7 @@ export function EnrollmentRowActions({
       onClick: () => setShowConfirmModal(true),
       className: "text-red-500 rounded-full",
     },
-  ];
+  );
 
   return (
     <>

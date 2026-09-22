@@ -24,6 +24,10 @@ import {
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 
+const handleLogout = () => {
+  signOut({ callbackUrl: "/login" });
+};
+
 export function NavUser({
   user,
 }: {
@@ -47,9 +51,6 @@ export function NavUser({
     return (nameInitial + apellidoInitial).toUpperCase() || "??";
   };
 
-  const handleLogout = () => {
-    signOut({ callbackUrl: "/login" });
-  };
 
   return (
     <SidebarMenu>

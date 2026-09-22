@@ -3,10 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { useFormModal } from "@/components/modals/form-modal-context";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { ImageUpload } from "@/components/ui/image-upload";
 import { toast } from "sonner";
 import {
   saveBankAccountAction,
@@ -15,7 +13,6 @@ import {
 import {
   IconBuildingBank,
   IconDeviceMobile,
-  IconQrcode as IconQrCode,
   IconLoader2,
   IconArrowLeft,
   IconTrash,
@@ -24,6 +21,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { FormKeyboardHelpBar } from "@/components/common/form-keyboard-help-bar";
 import { ConfirmModal } from "@/components/modals/confirm-modal";
+import { BankCardVisual } from "./components/bank-card-visual";
+import { BankAccountBankFields } from "./components/bank-account-bank-fields";
+import { BankAccountWalletFields } from "./components/bank-account-wallet-fields";
 
 type TipoCuenta = "BANCO" | "BILLETERA_DIGITAL";
 
@@ -57,18 +57,11 @@ function buildInitialForm(cuenta?: CuentaBancaria): FormState {
     numero: cuenta?.numero ?? "",
     cci: cuenta?.cci ?? "",
     titular: cuenta?.titular ?? "",
-    tipoCuenta: cuenta?.tipoCuenta ?? "Cuenta Corriente",
+    tipoCuenta: cuenta?.tipoCuenta ?? "Cuenta Corriente Soles",
     qrCode: cuenta?.qrCode ?? "",
     esPrincipal: cuenta?.esPrincipal ?? false,
     activo: cuenta?.activo ?? true,
   };
-}
-
-function isFormDirty(form: FormState, cuenta?: CuentaBancaria): boolean {
-  const initial = buildInitialForm(cuenta);
-  return (Object.keys(initial) as (keyof FormState)[]).some(
-    (k) => form[k] !== initial[k],
-  );
 }
 
 export function BankAccountForm({
@@ -89,10 +82,6 @@ export function BankAccountForm({
     [],
   );
 
-  useEffect(() => {
-    setIsDirty(isFormDirty(form, cuenta));
-  }, [form, cuenta, setIsDirty]);
-
   const handleSubmit = useCallback(
     async (e?: React.FormEvent) => {
       e?.preventDefault();
@@ -100,14 +89,18 @@ export function BankAccountForm({
       try {
         const result = await saveBankAccountAction(form as any);
         if (result.success) {
-          toast.success(cuenta ? "Cuenta actualizada correctamente" : "Cuenta creada correctamente");
+          toast.success(
+            cuenta
+              ? "Cuenta actualizada correctamente"
+              : "Cuenta registrada exitosamente",
+          );
           setIsDirty(false);
           onSuccess(result.success);
         } else {
           toast.error(result.error);
         }
       } catch {
-        toast.error("Error al guardar la cuenta");
+        toast.error("Error al procesar la cuenta");
       } finally {
         setLoading(false);
       }
@@ -140,63 +133,87 @@ export function BankAccountForm({
   const isBanco = form.tipo === "BANCO";
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
-      {/* ── Header ────────────────────────────────────────── */}
-      <div className="p-4 border-b border-border/30 bg-background/50">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0">
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              className="lg:hidden shrink-0 rounded-xl size-8"
-            >
-              <IconArrowLeft className="size-4" />
-            </Button>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <h2 className="text-base font-bold text-foreground truncate">
-                  {cuenta
-                    ? `Editar: ${cuenta.nombre}`
-                    : "Nueva Entidad Bancaria"}
-                </h2>
-                {cuenta && (
-                  <Badge variant="outline" className="text-[9px] font-bold px-1.5 py-0 rounded-md bg-indigo-500/10 text-indigo-600 border-none">
-                    Modo Edición
-                  </Badge>
-                )}
-              </div>
-              <p className="text-xs text-muted-foreground truncate">
-                Configure el número de cuenta, titular y código QR de cobros.
-              </p>
+    <div className="flex flex-col h-full overflow-hidden bg-card">
+      {/* Header */}
+      <div className="p-4 px-6 border-b border-border/40 bg-muted/20 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3 min-w-0">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            aria-label="Volver atrás"
+            className="lg:hidden shrink-0 rounded-xl size-8"
+          >
+            <IconArrowLeft className="size-4" />
+          </Button>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-bold text-foreground truncate">
+                {cuenta ? `Editar: ${cuenta.nombre}` : "Nueva Entidad de Cobro"}
+              </h3>
+              {cuenta && (
+                <Badge
+                  variant="outline"
+                  className="text-[9px] font-bold px-1.5 py-0 rounded-md bg-primary/10 text-primary border-primary/20"
+                >
+                  Modo Edición
+                </Badge>
+              )}
             </div>
+            <p className="text-xs text-muted-foreground truncate">
+              Parámetros de recaudación y acreditación para padres de familia.
+            </p>
           </div>
-
-          {cuenta && (
-            <Button
-              type="button"
-              size="icon"
-              variant="ghost"
-              onClick={() => setShowDeleteModal(true)}
-              className="shrink-0 rounded-xl size-8 text-rose-500 hover:bg-rose-500/10 cursor-pointer"
-              title="Eliminar cuenta"
-            >
-              <IconTrash className="size-4" />
-            </Button>
-          )}
         </div>
+
+        {cuenta && (
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            onClick={() => setShowDeleteModal(true)}
+            className="shrink-0 rounded-xl size-8 text-destructive hover:bg-destructive/10 cursor-pointer"
+            title="Eliminar cuenta"
+          >
+            <IconTrash className="size-4" />
+          </Button>
+        )}
       </div>
 
-      {/* ── Form Body ─────────────────────────────────────── */}
+      {/* Body del Formulario con Live Card Preview */}
       <form
         onSubmit={handleSubmit}
-        className="flex-1 overflow-y-auto p-4 space-y-4"
+        className="flex-1 overflow-y-auto p-5 space-y-5"
       >
-        {/* Selector de Tipo */}
+        {/* Live Card Preview */}
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-foreground/80">Canal de Cobro</Label>
-          <div className="grid grid-cols-2 gap-2 p-1 bg-background/50 rounded-xl border border-border/40">
+          <div className="flex items-center justify-between px-1">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Vista Previa en Tiempo Real (App Padres)
+            </span>
+            <span className="text-[10px] font-medium text-muted-foreground/80">
+              Interactivo
+            </span>
+          </div>
+          <BankCardVisual
+            nombre={form.nombre}
+            tipo={form.tipo}
+            numero={form.numero}
+            cci={form.cci}
+            titular={form.titular}
+            tipoCuenta={form.tipoCuenta}
+            qrCode={form.qrCode}
+            esPrincipal={form.esPrincipal}
+          />
+        </div>
+
+        {/* Selector de Canal: Banco vs Billetera */}
+        <div className="space-y-1.5">
+          <Label className="text-xs font-bold text-foreground">
+            Tipo de Canal de Cobro
+          </Label>
+          <div className="grid grid-cols-2 gap-2 p-1 bg-muted/30 rounded-xl border border-border/60">
             {(["BANCO", "BILLETERA_DIGITAL"] as TipoCuenta[]).map((tipo) => {
               const active = form.tipo === tipo;
               const isWallet = tipo === "BILLETERA_DIGITAL";
@@ -215,11 +232,11 @@ export function BankAccountForm({
                       }));
                     }
                   }}
-                  className={`flex items-center justify-center gap-1.5 py-2 text-xs font-semibold rounded-lg transition-[color] cursor-pointer ${
+                  className={`flex items-center justify-center gap-2 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                     active
                       ? isWallet
                         ? "bg-emerald-600 text-white shadow-xs"
-                        : "bg-indigo-600 text-white shadow-xs"
+                        : "bg-primary text-primary-foreground shadow-xs"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
@@ -228,136 +245,43 @@ export function BankAccountForm({
                   ) : (
                     <IconBuildingBank className="size-4" />
                   )}
-                  <span>{isWallet ? "Billetera Digital" : "Cuenta Bancaria"}</span>
+                  <span>
+                    {isWallet ? "Billetera Digital" : "Cuenta Bancaria"}
+                  </span>
                 </button>
               );
             })}
           </div>
         </div>
 
-        {/* Form Campos - Condicional por tipo */}
+        {/* Campos Específicos */}
         {isBanco ? (
-          /* Formulario para Cuenta Bancaria */
-          <div className="space-y-3.5">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-              <div className="space-y-1">
-                <Label className="text-xs font-medium text-foreground/80">Nombre de la Entidad</Label>
-                <Input
-                  value={form.nombre}
-                  onChange={(e) => patch("nombre", e.target.value)}
-                  placeholder="Ej: BCP, BBVA, Interbank"
-                  className="bg-background border-border/40 rounded-xl text-xs h-9"
-                  required
-                />
-              </div>
-
-              <div className="space-y-1">
-                <Label className="text-xs font-medium text-foreground/80">Titular de la Cuenta</Label>
-                <Input
-                  value={form.titular || ""}
-                  onChange={(e) => patch("titular", e.target.value)}
-                  placeholder="Nombre completo o Razón Social"
-                  className="bg-background border-border/40 rounded-xl text-xs h-9"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-              <div className="space-y-1">
-                <Label className="text-xs font-medium text-foreground/80">Número de Cuenta</Label>
-                <Input
-                  value={form.numero}
-                  onChange={(e) => patch("numero", e.target.value)}
-                  placeholder="193-4589201-0-12"
-                  className="bg-background border-border/40 rounded-xl text-xs font-mono h-9"
-                  required
-                />
-              </div>
-
-              <div className="space-y-1">
-                <Label className="text-xs font-medium text-foreground/80">Código Interbancario (CCI)</Label>
-                <Input
-                  value={form.cci || ""}
-                  onChange={(e) => patch("cci", e.target.value)}
-                  placeholder="002-193-004589201012-14"
-                  className="bg-background border-border/40 rounded-xl text-xs font-mono h-9"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <Label className="text-xs font-medium text-foreground/80">Tipo de Cuenta / Descripción</Label>
-              <Input
-                value={form.tipoCuenta || ""}
-                onChange={(e) => patch("tipoCuenta", e.target.value)}
-                placeholder="Ej: Cuenta Corriente Soles - Recaudación"
-                className="bg-background border-border/40 rounded-xl text-xs h-9"
-              />
-            </div>
-          </div>
+          <BankAccountBankFields
+            nombre={form.nombre}
+            titular={form.titular || ""}
+            numero={form.numero}
+            cci={form.cci || ""}
+            tipoCuenta={form.tipoCuenta || ""}
+            onPatch={patch}
+          />
         ) : (
-          /* Formulario para Billetera Digital (Izquierda: Campos | Derecha: Código QR) */
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
-            {/* Lado Izquierdo: Campos de Billetera Digital */}
-            <div className="space-y-3">
-              <div className="space-y-1">
-                <Label className="text-xs font-medium text-foreground/80">Billetera / Entidad</Label>
-                <Input
-                  value={form.nombre}
-                  onChange={(e) => patch("nombre", e.target.value)}
-                  placeholder="Ej: Yape, Plin, Tunki"
-                  className="bg-background border-border/40 rounded-xl text-xs h-9"
-                  required
-                />
-              </div>
-
-              <div className="space-y-1">
-                <Label className="text-xs font-medium text-foreground/80">Titular de la Billetera</Label>
-                <Input
-                  value={form.titular || ""}
-                  onChange={(e) => patch("titular", e.target.value)}
-                  placeholder="Nombre completo del titular"
-                  className="bg-background border-border/40 rounded-xl text-xs h-9"
-                  required
-                />
-              </div>
-
-              <div className="space-y-1">
-                <Label className="text-xs font-medium text-foreground/80">Número de Celular</Label>
-                <Input
-                  value={form.numero}
-                  onChange={(e) => patch("numero", e.target.value)}
-                  placeholder="987 654 321"
-                  className="bg-background border-border/40 rounded-xl text-xs font-mono h-9"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Lado Derecho: Imagen del Código QR */}
-            <div className="space-y-1">
-              <Label className="text-xs font-medium text-foreground/80 flex items-center gap-1">
-                <IconQrCode className="size-3.5 text-emerald-500" /> Código QR de Recaudación
-              </Label>
-              <div className="p-2.5 rounded-xl bg-background/50 border border-border/40 flex flex-col items-center justify-center">
-                <ImageUpload
-                  value={form.qrCode || ""}
-                  onChange={(url) => patch("qrCode", url)}
-                  onRemove={() => patch("qrCode", "")}
-                  className="w-full h-44"
-                />
-              </div>
-            </div>
-          </div>
+          <BankAccountWalletFields
+            nombre={form.nombre}
+            titular={form.titular || ""}
+            numero={form.numero}
+            qrCode={form.qrCode || ""}
+            onPatch={patch}
+          />
         )}
 
-        {/* Switch Principal */}
-        <div className="flex items-center justify-between p-3 rounded-xl border border-border/40 bg-background/50">
+        {/* Switch Cuenta Principal */}
+        <div className="flex items-center justify-between p-3.5 rounded-xl border border-border/60 bg-muted/10">
           <div className="space-y-0.5">
-            <Label className="text-xs font-semibold cursor-pointer">Destacar como Cuenta Principal</Label>
+            <Label className="text-xs font-bold cursor-pointer text-foreground">
+              Establecer como Canal Principal de Pago
+            </Label>
             <p className="text-[11px] text-muted-foreground">
-              Aparecerá en primer lugar en el portal de padres.
+              Aparecerá en primer lugar en el portal y las boletas de pensiones.
             </p>
           </div>
           <Switch
@@ -366,24 +290,23 @@ export function BankAccountForm({
           />
         </div>
 
-        {/* Guía de Atajos de Teclado */}
         <FormKeyboardHelpBar />
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-end gap-3 pt-3 border-t border-border/30">
+        <div className="flex items-center justify-end gap-3 pt-3 border-t border-border/40">
           <Button
             type="button"
             variant="outline"
             onClick={onClose}
             disabled={loading}
-            className="rounded-xl px-5 h-10 font-semibold text-xs border-border/40"
+            className="rounded-xl px-5 h-9 font-bold text-xs border-border/60"
           >
             Cancelar
           </Button>
           <Button
             type="submit"
             disabled={loading}
-            className="rounded-xl px-6 h-10 font-semibold text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 gap-2 min-w-[170px]"
+            className="rounded-xl px-6 h-9 font-bold text-xs bg-primary hover:bg-primary/90 text-primary-foreground shadow-xs gap-2 min-w-[170px] cursor-pointer"
           >
             {loading ? (
               <>
@@ -393,21 +316,21 @@ export function BankAccountForm({
             ) : (
               <>
                 <IconDeviceFloppy className="size-4" />
-                <span>{cuenta ? "Actualizar Cuenta" : "Guardar Cuenta"}</span>
+                <span>{cuenta ? "Actualizar Datos" : "Guardar Cuenta"}</span>
               </>
             )}
           </Button>
         </div>
       </form>
 
-      {/* Confirm modal delete */}
+      {/* Modal de confirmación de eliminación */}
       <ConfirmModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleDelete}
         loading={isDeleting}
-        title="Eliminar Cuenta Bancaria"
-        description={`¿Estás seguro de que deseas eliminar la cuenta de "${form.nombre}"? esta acción no se puede deshacer.`}
+        title="Eliminar Entidad Bancaria"
+        description={`¿Estás seguro de que deseas eliminar "${form.nombre}"? Esta acción no se puede deshacer.`}
         variant="danger"
       />
     </div>

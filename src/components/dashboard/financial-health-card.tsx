@@ -95,6 +95,12 @@ export function FinancialHealthCard({
   );
 }
 
+const FINANCE_ITEM_COLORS = {
+  emerald: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20",
+  amber: "text-amber-500 bg-amber-500/10 border-amber-500/20",
+  red: "text-red-500 bg-red-500/10 border-red-500/20",
+};
+
 function FinanceItem({
   icon: Icon,
   label,
@@ -108,11 +114,6 @@ function FinanceItem({
   color: "emerald" | "amber" | "red";
   percentage: number;
 }) {
-  const colors = {
-    emerald: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20",
-    amber: "text-amber-500 bg-amber-500/10 border-amber-500/20",
-    red: "text-red-500 bg-red-500/10 border-red-500/20",
-  };
 
   return (
     <div className="flex items-center justify-between rounded-xl border border-border/40 bg-muted/20 p-3 transition-colors hover:bg-muted/40">
@@ -120,7 +121,7 @@ function FinanceItem({
         <div
           className={cn(
             "size-9 rounded-xl flex items-center justify-center border",
-            colors[color],
+            FINANCE_ITEM_COLORS[color],
           )}
         >
           <Icon size={18} />

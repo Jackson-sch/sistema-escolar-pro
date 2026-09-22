@@ -118,14 +118,12 @@ export function ProspectoRowActions({ row, table }: ProspectoRowActionsProps) {
               {p.apellidoMaterno}
             </SheetDescription>
           </SheetHeader>
-          {p.admision && (
-            <ScrollArea className="h-[calc(100vh-150px)] pr-4">
-              <AdmisionFlow
-                admision={{ ...p.admision, prospecto: p }}
-                onSuccess={() => setShowFlow(false)}
-              />
-            </ScrollArea>
-          )}
+          <div className="flex-1 overflow-y-auto mt-4 pr-1">
+            <AdmisionFlow
+              prospecto={p}
+              onSuccess={() => setShowFlow(false)}
+            />
+          </div>
         </SheetContent>
       </Sheet>
     </>

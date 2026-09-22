@@ -2,13 +2,14 @@
 
 import dynamic from "next/dynamic";
 import { useState } from "react";
-
+import { useRouter } from "next/navigation";
 import {
   IconEdit,
   IconTrash,
   IconEye,
   IconFilePlus,
   IconDownload,
+  IconExternalLink,
 } from "@tabler/icons-react";
 import { Row, Table } from "@tanstack/react-table";
 import { toast } from "sonner";
@@ -20,6 +21,7 @@ import {
 } from "@/components/common/responsive-row-actions";
 
 import { deleteStudentAction } from "@/actions/students";
+import { getGradeReportDataAction } from "@/actions/reports";
 import { StudentTableType } from "@/components/gestion/estudiantes/components/columns";
 import { useCurrentRole } from "@/hooks/use-current-role";
 
@@ -58,6 +60,7 @@ interface RowActionsProps {
 }
 
 export function RowActions({ row, table }: RowActionsProps) {
+  const router = useRouter();
   const role = useCurrentRole();
   const canManage = role === "administrativo" || role === "super_admin";
   const isProfessor = role === "profesor";
@@ -67,6 +70,7 @@ export function RowActions({ row, table }: RowActionsProps) {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showEnrollmentDialog, setShowEnrollmentDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isDownloadingGradeReport, setIsDownloadingGradeReport] = useState(false);
   const student = row.original;
 
   const onDelete = async () => {
@@ -93,23 +97,76 @@ export function RowActions({ row, table }: RowActionsProps) {
   const isEnrolled = !!student.matriculadoEsteAnio;
   const year = new Date().getFullYear();
 
-  const actions: ActionItem[] = [
+  const downloadGradeReport = async () => {
+    if (isDownloadingGradeReport) return;
+    setIsDownloadingGradeReport(true);
+    try {
+      const report = await getGradeReportDataAction(student.id, year);
+      if (!report.data) {
+        throw new Error(report.error || "No se pudieron obtener los datos de la boleta.");
+      }
+
+      const [{ pdf }, { GradeReportPDF }, qrModule] = await Promise.all([
+        import("@react-pdf/renderer"),
+        import("@/components/reports/grade-report-pdf"),
+        import("qrcode"),
+      ]);
+      const verificationCode = `LIB-${report.data.estudiante.dni || student.id}-${year}`;
+      const qrCode = await qrModule.default.toDataURL(
+        `${window.location.origin}/verificar?codigo=${verificationCode}`,
+        { margin: 1, width: 160 },
+      );
+      const blob = await pdf(
+        <GradeReportPDF
+          data={{ ...report.data, origin: window.location.origin, qrCode } as any}
+        />,
+      ).toBlob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `Libreta_${student.dni || student.id}_${year}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      toast.success("Libreta descargada correctamente.");
+    } catch (error) {
+      console.error("Error al descargar libreta:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "No se pudo descargar la libreta. Inténtalo nuevamente.",
+      );
+    } finally {
+      setIsDownloadingGradeReport(false);
+    }
+  };
+
+  const actions: ActionItem[] = ([
     {
       icon: IconEye,
-      label: "Ver Expediente",
+      label: "Vista Rápida",
       onClick: () => setShowViewSheet(true),
       variant: "ghost",
       className: "rounded-full",
     },
     {
+      icon: IconExternalLink,
+      label: "Expediente Completo",
+      onClick: () => router.push(`/gestion/estudiantes/${student.id}`),
+      variant: "ghost",
+      className: "text-primary rounded-full",
+    },
+    !!student.nivelAcademico && {
       icon: IconDownload,
-      label: "Descargar Boleta",
-      onClick: () => window.open(`/api/documentos/boleta?estudianteId=${student.id}&anio=${year}`, '_blank'),
+      label: "Libreta de Notas",
+      onClick: downloadGradeReport,
       variant: "ghost",
       className: "text-violet-500 rounded-full",
+      disabled: isDownloadingGradeReport,
     },
     ...(canManage
-      ? ([
+      ? [
           !isEnrolled && {
             icon: IconFilePlus,
             label: "Matricular Alumno",
@@ -132,9 +189,9 @@ export function RowActions({ row, table }: RowActionsProps) {
             variant: "ghost",
             className: "text-red-500 rounded-full",
           },
-        ].filter(Boolean) as ActionItem[])
+        ]
       : []),
-  ];
+  ].filter(Boolean) as ActionItem[]);
 
   return (
     <>

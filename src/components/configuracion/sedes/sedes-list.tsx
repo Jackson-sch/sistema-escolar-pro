@@ -1,29 +1,20 @@
 "use client";
 
-import { useState, useCallback, useEffect, useSyncExternalStore } from "react";
+import { useState, useCallback, useSyncExternalStore } from "react";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { SedeDialog } from "./sede-dialog";
 import {
   IconPlus,
   IconSearch,
-  IconChevronRight,
-  IconMapPin,
-  IconMail,
   IconBuilding,
-  IconStar,
-  IconEdit,
-  IconTrash,
-  IconCheck,
 } from "@tabler/icons-react";
 import { deleteSedeAction, setSedePrincipalAction } from "@/actions/sedes";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { SedeMap } from "./sede-map";
-import { cn } from "@/lib/utils";
 import { ConfirmModal } from "@/components/modals/confirm-modal";
+import { SedeCardItem } from "./sede-card-item";
 
 interface SedesListProps {
   initialData: any[];
@@ -52,7 +43,6 @@ export function SedesList({ initialData }: SedesListProps) {
     setActiveSedeId(id);
   }, []);
 
-  // Detección de hidratación sin setState síncrono en el efecto
   const isClient = useSyncExternalStore(
     () => () => {},
     () => true,
@@ -134,145 +124,20 @@ export function SedesList({ initialData }: SedesListProps) {
         {/* Scrollable List */}
         <div className="flex-1 lg:overflow-y-auto p-4 space-y-3 min-h-[400px]">
           {filteredSedes.map((sede) => (
-            <div
+            <SedeCardItem
               key={sede.id}
-              onClick={() => setActiveSedeId(sede.id)}
-              className={cn(
-                "p-3.5 rounded-2xl cursor-pointer transition-colors border border-border/30 bg-background/40 hover:bg-background/80 group relative",
-                activeSedeId === sede.id
-                  ? "border-indigo-500/50 bg-indigo-500/10 shadow-xs"
-                  : "hover:border-indigo-500/20",
-                !sede.activo && "opacity-50",
-              )}
-            >
-              <div className="flex gap-3">
-                <div className="size-16 rounded-xl overflow-hidden shrink-0 relative border border-border/30 bg-muted/20">
-                  {sede.logo ? (
-                    <Image
-                      alt={sede.nombre}
-                      width={64}
-                      height={64}
-                      className="w-full h-full object-cover"
-                      src={sede.logo}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
-                      <IconBuilding className="size-6" />
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-start gap-2">
-                    <div className="min-w-0">
-                      <h3 className="font-bold text-xs text-foreground flex items-center gap-1.5 truncate">
-                        <IconBuilding className="size-3.5 text-indigo-500 shrink-0" />
-                        <span className="truncate">{sede.nombre}</span>
-                        {sede.esPrincipal && (
-                          <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 text-[9px] px-1.5 py-0 rounded-md font-bold flex items-center gap-0.5">
-                            <IconStar className="size-3 fill-amber-500 text-amber-500" />
-                            Principal
-                          </Badge>
-                        )}
-                      </h3>
-                      {sede.codigoIdentifier && (
-                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-muted/40 text-muted-foreground font-mono uppercase mt-0.5 inline-block">
-                          Cod: {sede.codigoIdentifier}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      {!sede.esPrincipal && (
-                        <button
-                          title="Establecer como Sede Principal"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setConfirmPrincipal({ id: sede.id, nombre: sede.nombre });
-                          }}
-                          className="p-1 hover:bg-amber-500/10 rounded-lg text-amber-500 transition-colors"
-                        >
-                          <IconStar className="size-3.5" />
-                        </button>
-                      )}
-                      <button
-                        title="Editar Sede"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedSede(sede);
-                          setOpen(true);
-                        }}
-                        className="p-1 hover:bg-indigo-500/10 rounded-lg text-indigo-600 dark:text-indigo-400 transition-colors"
-                      >
-                        <IconEdit className="size-3.5" />
-                      </button>
-                      <button
-                        title="Eliminar Sede"
-                        disabled={sede.esPrincipal}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(sede.id, sede.nombre);
-                        }}
-                        className={cn(
-                          "p-1 rounded-lg transition-colors",
-                          sede.esPrincipal
-                            ? "text-muted-foreground/30 cursor-not-allowed"
-                            : "hover:bg-rose-500/10 text-rose-500",
-                        )}
-                      >
-                        <IconTrash className="size-3.5" />
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="mt-2 space-y-1 text-[11px] text-muted-foreground">
-                    {sede.direccion && (
-                      <div className="flex items-center gap-1.5 truncate">
-                        <IconMapPin className="size-3 shrink-0 text-indigo-500" />
-                        <span className="truncate">{sede.direccion}</span>
-                      </div>
-                    )}
-                    {sede.email && (
-                      <div className="flex items-center gap-1.5 truncate">
-                        <IconMail className="size-3 shrink-0 text-indigo-500" />
-                        <span className="truncate">{sede.email}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-3 pt-2.5 border-t border-border/20 flex justify-between items-center text-[10px] text-muted-foreground">
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="font-semibold">
-                    Niveles: {sede.nivelesAcademicos?.length || 0}
-                  </span>
-                  {sede.nivelesAcademicos?.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                      {Array.from(
-                        new Set(
-                          sede.nivelesAcademicos.map(
-                            (na: any) => na.nivel?.nombre,
-                          ),
-                        ),
-                      )
-                        .filter(Boolean)
-                        .map((nombre: any) => (
-                          <Badge
-                            key={nombre}
-                            variant="outline"
-                            className="text-[9px] px-1.5 py-0 rounded-md bg-indigo-500/10 text-indigo-600 border-none font-semibold"
-                          >
-                            {nombre}
-                          </Badge>
-                        ))}
-                    </div>
-                  )}
-                </div>
-                <span className="text-indigo-600 dark:text-indigo-400 font-semibold flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                  Ver en mapa <IconChevronRight className="size-3" />
-                </span>
-              </div>
-            </div>
+              sede={sede}
+              isActive={activeSedeId === sede.id}
+              onSelect={() => setActiveSedeId(sede.id)}
+              onEdit={() => {
+                setSelectedSede(sede);
+                setOpen(true);
+              }}
+              onDelete={() => handleDelete(sede.id, sede.nombre)}
+              onSetPrincipal={() =>
+                setConfirmPrincipal({ id: sede.id, nombre: sede.nombre })
+              }
+            />
           ))}
 
           {filteredSedes.length === 0 && (
@@ -306,7 +171,6 @@ export function SedesList({ initialData }: SedesListProps) {
         sede={selectedSede}
       />
 
-      {/* Modal de Confirmación para Asignar Sede Principal */}
       <ConfirmModal
         isOpen={!!confirmPrincipal}
         onClose={() => setConfirmPrincipal(null)}
@@ -318,7 +182,6 @@ export function SedesList({ initialData }: SedesListProps) {
         confirmText="Establecer Principal"
       />
 
-      {/* Modal de Confirmación para Eliminar */}
       <ConfirmModal
         isOpen={!!confirmDelete}
         onClose={() => setConfirmDelete(null)}

@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo } from "react"
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "@/lib/charts"
 import { IconChartBar } from "@tabler/icons-react"
 import { Badge } from "@/components/ui/badge"
 

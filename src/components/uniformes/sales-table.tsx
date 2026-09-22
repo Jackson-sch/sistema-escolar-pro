@@ -38,6 +38,37 @@ interface SalesTableProps {
   adminId: string;
 }
 
+function getStatusBadge(estado: string) {
+  switch (estado) {
+    case "RESERVADO":
+      return (
+        <Badge className="bg-amber-500/5 text-amber-500 border border-amber-500/20 shadow-[0_2px_8px_rgba(245,158,11,0.05)] px-2.5 py-1 rounded-xl font-black text-[9px] uppercase tracking-wider transition-[color,background-color,border-color,box-shadow,padding,letter-spacing] duration-300">
+          <Clock className="size-3 mr-1.5 animate-pulse" /> Reservado
+        </Badge>
+      );
+    case "APROBADO":
+      return (
+        <Badge className="bg-emerald-500/5 text-emerald-500 border border-emerald-500/20 shadow-[0_2px_8px_rgba(16,185,129,0.05)] px-2.5 py-1 rounded-xl font-black text-[9px] uppercase tracking-wider transition-[color,background-color,border-color,box-shadow,padding,letter-spacing] duration-300">
+          <CheckCircle2 className="size-3 mr-1.5" /> Aprobado
+        </Badge>
+      );
+    case "ENTREGADO":
+      return (
+        <Badge className="bg-sky-500/5 text-sky-500 border border-sky-500/20 shadow-[0_2px_8px_rgba(14,165,233,0.05)] px-2.5 py-1 rounded-xl font-black text-[9px] uppercase tracking-wider transition-[color,background-color,border-color,box-shadow,padding,letter-spacing] duration-300">
+          <Package className="size-3 mr-1.5" /> Entregado
+        </Badge>
+      );
+    case "CANCELADO":
+      return (
+        <Badge className="bg-rose-500/5 text-rose-500 border border-rose-500/20 shadow-[0_2px_8px_rgba(244,63,94,0.05)] px-2.5 py-1 rounded-xl font-black text-[9px] uppercase tracking-wider transition-[color,background-color,border-color,box-shadow,padding,letter-spacing] duration-300">
+          <XCircle className="size-3 mr-1.5" /> Cancelado
+        </Badge>
+      );
+    default:
+      return <Badge variant="outline">{estado}</Badge>;
+  }
+}
+
 export function SalesTable({ ventas, adminId }: SalesTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedVenta, setSelectedVenta] = useState<any | null>(null);
@@ -89,50 +120,6 @@ export function SalesTable({ ventas, adminId }: SalesTableProps) {
         setSelectedVenta(res.data);
       }
     });
-  };
-
-  const getStatusBadge = (estado: string) => {
-    switch (estado) {
-      case "RESERVADO":
-        return (
-          <Badge className="bg-amber-500/5 text-amber-500 border border-amber-500/20 shadow-[0_2px_8px_rgba(245,158,11,0.05)] px-2.5 py-1 rounded-xl font-black text-[9px] uppercase tracking-wider transition-[color,background-color,border-color,box-shadow,padding,letter-spacing] duration-300">
-            <Clock className="size-3 mr-1.5 animate-pulse" /> Reservado
-          </Badge>
-        );
-      case "APROBADO":
-        return (
-          <Badge className="bg-emerald-500/5 text-emerald-500 border border-emerald-500/20 shadow-[0_2px_8px_rgba(16,185,129,0.05)] px-2.5 py-1 rounded-xl font-black text-[9px] uppercase tracking-wider transition-[color,background-color,border-color,box-shadow,padding,letter-spacing] duration-300">
-            <CheckCircle2 className="size-3 mr-1.5" /> Aprobado
-          </Badge>
-        );
-      case "ENTREGADO":
-        return (
-          <Badge className="bg-sky-500/5 text-sky-500 border border-sky-500/20 shadow-[0_2px_8px_rgba(14,165,233,0.05)] px-2.5 py-1 rounded-xl font-black text-[9px] uppercase tracking-wider transition-[color,background-color,border-color,box-shadow,padding,letter-spacing] duration-300">
-            <Package className="size-3 mr-1.5" /> Entregado
-          </Badge>
-        );
-      case "EN_PRUEBA":
-        return (
-          <Badge className="bg-violet-500/5 text-violet-500 border border-violet-500/20 shadow-[0_2px_8px_rgba(139,92,246,0.05)] px-2.5 py-1 rounded-xl font-black text-[9px] uppercase tracking-wider transition-[color,background-color,border-color,box-shadow,padding,letter-spacing] duration-300">
-            <Layers className="size-3 mr-1.5" /> En Prueba
-          </Badge>
-        );
-      case "CANCELADO":
-        return (
-          <Badge className="bg-rose-500/5 text-rose-500 border border-rose-500/20 shadow-[0_2px_8px_rgba(244,63,94,0.05)] px-2.5 py-1 rounded-xl font-black text-[9px] uppercase tracking-wider transition-[color,background-color,border-color,box-shadow,padding,letter-spacing] duration-300">
-            <XCircle className="size-3 mr-1.5" /> Cancelado
-          </Badge>
-        );
-      default:
-        return (
-          <Badge
-            variant="outline"
-            className="border-border/40 text-[9px] uppercase font-bold"
-          >
-            {estado}
-          </Badge>
-        );
-    }
   };
 
   return (
@@ -219,6 +206,7 @@ export function SalesTable({ ventas, adminId }: SalesTableProps) {
                       e.stopPropagation();
                       setSelectedVenta(v);
                     }}
+                    aria-label="Ver detalles del pedido"
                     className="rounded-full hover:bg-primary/10 hover:text-primary transition-[color,background-color,transform] duration-200 hover:scale-105 active:scale-95"
                   >
                     <Eye className="size-4" />

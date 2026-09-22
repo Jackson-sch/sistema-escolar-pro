@@ -236,6 +236,7 @@ export function LogsView({
                       <Button 
                         size="icon" 
                         variant="ghost" 
+                        aria-label="Ver detalles de registro"
                         className="size-7 rounded-lg text-muted-foreground group-hover:text-indigo-600"
                       >
                         <IconInfoCircle className="size-4" />

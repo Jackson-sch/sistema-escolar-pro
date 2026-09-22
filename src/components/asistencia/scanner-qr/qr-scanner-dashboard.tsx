@@ -1,170 +1,226 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import {
-  IconCamera,
-  IconX,
-  IconRefresh,
-  IconSwitchHorizontal,
-} from "@tabler/icons-react";
 import { toast } from "sonner";
-import {
-  registerQRAsistenciaAction,
-  getRecentAttendanceLogsAction,
-} from "@/actions/attendance";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import LogsSection from "./logs-section";
+import { registerQRAsistenciaAction, getRecentAttendanceLogsAction } from "@/actions/attendance";
 import { useSpeechFeedback } from "@/hooks/use-speech-feedback";
 import { useQRScanner } from "@/hooks/use-qr-scanner";
-
-interface ScanLog {
-  id: string;
-  studentName: string;
-  dni: string | null;
-  time: string;
-  status: string;
-  image?: string;
-}
+import { playChime } from "@/lib/audio-chime";
+import { ScannerStatsBar } from "./scanner-stats-bar";
+import { ScannerCameraCard } from "./scanner-camera-card";
+import LogsSection from "./logs-section";
+import { KioskScannerView } from "./kiosk/kiosk-scanner-view";
+import type { ScanLog, ScanStats, ScannerMode } from "./scanner-types";
 
 export function QRScannerDashboard() {
   const [logs, setLogs] = useState<ScanLog[]>([]);
   const [lastScan, setLastScan] = useState<ScanLog | null>(null);
+  const [stats, setStats] = useState<ScanStats>({ total: 0, puntuales: 0, tardanzas: 0, salidas: 0 });
+  const [mode, setMode] = useState<ScannerMode>("ingreso");
+  const [isAudioEnabled, setIsAudioEnabled] = useState(true);
+  const [isKioskOpen, setIsKioskOpen] = useState(false);
+  const [isProcessingManual, setIsProcessingManual] = useState(false);
+
   const lastScanTimeRef = useRef<Record<string, number>>({});
   const { speak } = useSpeechFeedback();
 
-  const handleScan = useCallback(async (decodedText: string) => {
-    const now = Date.now();
-    if (now - (lastScanTimeRef.current[decodedText] || 0) < 10000) return;
-    lastScanTimeRef.current[decodedText] = now;
+  const handleScan = useCallback(
+    async (decodedText: string) => {
+      const now = Date.now();
+      if (now - (lastScanTimeRef.current[decodedText] || 0) < 6000) return;
+      lastScanTimeRef.current[decodedText] = now;
 
-    try {
-      const result = await registerQRAsistenciaAction(decodedText) as any;
-      if (result.success && result.data) {
-        const { student } = result.data;
-        const newLog: ScanLog = {
-          id: result.data.id,
-          studentName: `${student.name} ${student.apellidoPaterno} ${student.apellidoMaterno}`,
-          dni: student.dni,
-          time: result.data.horaLlegada || new Date().toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit", timeZone: "America/Lima" }),
-          status: result.data.tardanza ? "late" : "success",
-          image: student.image || undefined,
-        };
-        setLogs((prev) => [newLog, ...prev].slice(0, 50));
-        setLastScan(newLog);
-        toast.success(`Asistencia registrada: ${newLog.studentName}`);
-        speak(result.data.tardanza ? `Acceso registrado, ${student.name}. Tienes una tardanza.` : `Bienvenido ${student.name}, acceso correcto.`);
-      } else if (result.alreadyMarked) {
-        const { student } = result.data;
-        toast.warning(`Ya registrado hoy: ${student.name}`);
-        speak(`${student.name}, tu asistencia ya fue registrada.`);
-      } else {
-        lastScanTimeRef.current[decodedText] = now - 5000;
-        toast.error(result.error || "Error al procesar QR");
+      try {
+        const result = (await registerQRAsistenciaAction(decodedText, mode)) as any;
+        if (result.success && result.data) {
+          const { student } = result.data;
+          const isSalida = mode === "salida";
+          const isLate = Boolean(result.data.tardanza);
+          const studentFullName = `${student.name || ""} ${student.apellidoPaterno || ""} ${student.apellidoMaterno || ""}`.trim();
+          const effectiveTime = (isSalida ? result.data.horaSalida : result.data.horaLlegada) ||
+            new Date().toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit", timeZone: "America/Lima" });
+
+          const newLog: ScanLog = {
+            id: result.data.id || String(now),
+            studentName: studentFullName,
+            dni: student.dni,
+            time: effectiveTime,
+            status: isSalida ? "success" : (isLate ? "late" : "success"),
+            mode: isSalida ? "salida" : "ingreso",
+            horaSalida: result.data.horaSalida,
+            image: student.image || undefined,
+            aula: student.aula || undefined,
+            grado: student.grado || undefined,
+            seccion: student.seccion || undefined,
+            notification: result.data.notification,
+            authorizedGuardians: result.data.authorizedGuardians,
+          };
+
+          setLogs((prev) => [newLog, ...prev].slice(0, 50));
+          setLastScan(newLog);
+          setStats((prev) => ({
+            total: prev.total + (isSalida ? 0 : 1),
+            puntuales: !isSalida && !isLate ? prev.puntuales + 1 : prev.puntuales,
+            tardanzas: !isSalida && isLate ? prev.tardanzas + 1 : prev.tardanzas,
+            salidas: isSalida ? (prev.salidas || 0) + 1 : (prev.salidas || 0),
+          }));
+
+          if (isAudioEnabled) {
+            playChime(isSalida ? "success" : (isLate ? "warning" : "success"));
+            speak(
+              isSalida
+                ? `Salida registrada, hasta luego ${student.name}.`
+                : (isLate ? `Acceso registrado, ${student.name}. Tienes una tardanza.` : `Bienvenido ${student.name}, acceso correcto.`)
+            );
+          }
+          const notifSuffix = result.data.notification?.notified
+            ? " • Aviso enviado a padres 📲"
+            : "";
+          toast.success(
+            (isSalida
+              ? `Salida registrada: ${studentFullName}`
+              : (isLate ? `Tardanza: ${studentFullName}` : `Asistencia: ${studentFullName}`)) + notifSuffix
+          );
+        } else if (result.alreadyMarked) {
+          const student = result.data?.student;
+          const fullName = student ? `${student.name} ${student.apellidoPaterno || ""}`.trim() : "Estudiante";
+          const isSalida = mode === "salida";
+          if (isAudioEnabled) {
+            playChime("warning");
+            speak(
+              isSalida
+                ? `${fullName}, tu salida ya fue registrada el día de hoy.`
+                : `${fullName}, tu asistencia ya fue registrada el día de hoy.`
+            );
+          }
+          toast.warning(isSalida ? `Salida ya registrada hoy: ${fullName}` : `Ya registrado hoy: ${fullName}`);
+        } else {
+          lastScanTimeRef.current[decodedText] = now - 3000;
+          if (isAudioEnabled) playChime("error");
+          toast.error(result.error || "Código o DNI no reconocido");
+        }
+      } catch {
+        if (isAudioEnabled) playChime("error");
+        toast.error("Error de conexión al registrar asistencia");
       }
-    } catch (err) {
-      toast.error("Error de conexión");
-    }
-  }, [speak]);
+    },
+    [isAudioEnabled, mode, speak],
+  );
 
-  const { isScanning, isChangingCamera, facingMode, startScanner, stopScanner } = useQRScanner(handleScan);
+
+  const activeElementId = isKioskOpen ? "kiosk-qr-reader" : "qr-reader";
+  const {
+    isScanning,
+    isChangingCamera,
+    permissionDenied,
+    facingMode,
+    startScanner,
+    stopScanner,
+  } = useQRScanner(handleScan, activeElementId);
 
   useEffect(() => {
     let ignore = false;
     getRecentAttendanceLogsAction()
-      .then((res) => {
+      .then((res: any) => {
         if (ignore) return;
         if (res.data) setLogs(res.data);
+        if (res.stats) setStats(res.stats);
       })
-      .catch(() => {
-        /* sin logs recientes */
-      });
+      .catch(() => {});
     return () => {
       ignore = true;
-      stopScanner().catch(console.error);
+      stopScanner().catch(() => {});
     };
   }, [stopScanner]);
 
+  const handleOpenKiosk = async () => {
+    if (isScanning) {
+      await stopScanner();
+    }
+    setIsKioskOpen(true);
+  };
+
+  const handleCloseKiosk = async () => {
+    await stopScanner();
+    setIsKioskOpen(false);
+  };
+
   const toggleCamera = () => startScanner(facingMode === "user" ? "environment" : "user");
 
+  const handleManualDni = async (dni: string) => {
+    setIsProcessingManual(true);
+    try {
+      await handleScan(dni);
+    } finally {
+      setIsProcessingManual(false);
+    }
+  };
+
+  const handleStartKioskScanner = useCallback(
+    async (targetId?: string) => {
+      await startScanner(facingMode, targetId || "kiosk-qr-reader");
+    },
+    [facingMode, startScanner],
+  );
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-2 sm:p-4 lg:h-[800px]">
-      <Card className="lg:col-span-7 p-0 h-full overflow-hidden border border-border/40 shadow-lg bg-card/80 text-foreground dark:text-white flex flex-col">
-        <CardHeader className="pb-3 pt-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="size-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 shadow-inner">
-                <IconCamera className={cn("size-6 text-primary", isScanning && "animate-pulse")} />
-              </div>
-              <div>
-                <CardTitle className="text-2xl font-semibold text-foreground dark:text-white">Control de Acceso</CardTitle>
-                <CardDescription className="text-muted-foreground font-medium">{facingMode === "environment" ? "Cámara Trasera" : "Cámara Frontal"} • Digital ID</CardDescription>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="icon" onClick={() => window.location.reload()} className="rounded-full" title="Refrescar Motor">
-                <IconRefresh className="size-4" />
-              </Button>
-              {isScanning && (
-                <Button variant="outline" size="icon" onClick={toggleCamera} disabled={isChangingCamera} className="rounded-full" title="Girar Cámara">
-                  <IconSwitchHorizontal className={cn("size-5", isChangingCamera && "animate-spin")} />
-                </Button>
-              )}
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="p-0 flex flex-col items-center justify-center flex-1 relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-transparent via-primary/20 to-transparent" />
-          {isScanning ? (
-            <div className="w-full max-w-md space-y-8 animate-in fade-in zoom-in-95 animation-duration-">
-              <div className="relative group">
-                <div className="absolute -inset-4 border border-primary/10 rounded-[2.5rem] pointer-events-none" />
-                <div id="qr-reader" className="w-full border-2 border-primary/30 rounded-2xl overflow-hidden shadow-[0_0_50px_-12px_rgba(var(--primary),0.3)] bg-black/95 relative z-10 min-h-[300px]" />
-                {isChangingCamera && (
-                  <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/60 rounded-2xl backdrop-blur-sm">
-                    <IconRefresh className="size-12 text-primary animate-spin mb-2" />
-                    <p className="text-xs font-black uppercase tracking-widest text-primary">Sincronizando Sensor...</p>
-                  </div>
-                )}
-              </div>
-              <div className="flex justify-center pt-4">
-                <Button variant="destructive" onClick={stopScanner} className="rounded-full px-12 h-14 font-black shadow-lg hover:scale-105 transition-transform">
-                  <IconX className="size-5 mr-2" /> DETENER ESCANEO
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="text-center space-y-8 py-4 animate-in fade-in slide-in-from-bottom-8 animation-duration-">
-              <div className="relative flex justify-center">
-                <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-150 animate-pulse" />
-                <div className="relative size-32 bg-card/80 rounded-2xl flex items-center justify-center border border-border shadow-lg overflow-hidden group">
-                  <IconCamera className="size-16 text-primary" />
-                </div>
-              </div>
-              <div className="space-y-4">
-                <h3 className="text-2xl font-bold text-foreground dark:text-white uppercase tracking-widest">Listo para Escanear</h3>
-              </div>
-              <Button onClick={() => startScanner()} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-16 h-16 font-bold text-xl tracking-widest uppercase shadow-lg">
-                PROCESAR ENTRADA
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-      <div className="lg:col-span-5 h-full animate-in fade-in animation-duration-">
-        <LogsSection logs={logs} lastScan={lastScan} />
+    <div className="space-y-4">
+      <ScannerStatsBar
+        stats={stats}
+        mode={mode}
+        onModeChange={setMode}
+        isAudioEnabled={isAudioEnabled}
+        onToggleAudio={() => setIsAudioEnabled((prev) => !prev)}
+        onOpenKiosk={handleOpenKiosk}
+      />
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 min-h-[560px]">
+        <div className="lg:col-span-6 h-full">
+          <ScannerCameraCard
+            isScanning={isScanning}
+            isChangingCamera={isChangingCamera}
+            permissionDenied={permissionDenied}
+            facingMode={facingMode}
+            onStartScanner={() => startScanner()}
+            onStopScanner={stopScanner}
+            onToggleCamera={toggleCamera}
+            onManualSubmit={handleManualDni}
+            isProcessingManual={isProcessingManual}
+          />
+        </div>
+
+        <div className="lg:col-span-6 h-full">
+          <LogsSection logs={logs} lastScan={lastScan} />
+        </div>
       </div>
+
+      {isKioskOpen && (
+        <KioskScannerView
+          logs={logs}
+          lastScan={lastScan}
+          stats={stats}
+          mode={mode}
+          onModeChange={setMode}
+          isAudioEnabled={isAudioEnabled}
+          facingMode={facingMode}
+          isScanning={isScanning}
+          isChangingCamera={isChangingCamera}
+          permissionDenied={permissionDenied}
+          onToggleAudio={() => setIsAudioEnabled((prev) => !prev)}
+          onToggleCamera={toggleCamera}
+          onStartScanner={handleStartKioskScanner}
+          onStopScanner={stopScanner}
+          onClose={handleCloseKiosk}
+          onClearLastScan={() => setLastScan(null)}
+        />
+      )}
+
       <style jsx global>{`
-        video { border-radius: 2rem !important; object-fit: cover !important; transform: ${facingMode === "user" ? "scaleX(-1)" : "scaleX(1)"} !important; }
-        .animate-scan { position: absolute; width: 80%; left: 10%; animation: scan 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite; z-index: 30; height: 4px; border-radius: 999px; }
-        @keyframes scan { 0% { top: 15%; opacity: 0.1; } 50% { opacity: 0.8; } 100% { top: 85%; opacity: 0.1; } }
+        video {
+          border-radius: 1.25rem !important;
+          object-fit: cover !important;
+          transform: ${facingMode === "user" ? "scaleX(-1)" : "scaleX(1)"} !important;
+        }
       `}</style>
     </div>
   );

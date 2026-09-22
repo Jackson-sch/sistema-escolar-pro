@@ -205,24 +205,26 @@ export async function confirmarEntregaUniformeAction(ventaId: string) {
         );
       }
 
-      for (const detalle of venta.detalles) {
-        await tx.varianteUniforme.update({
-          where: { id: detalle.varianteId },
-          data: {
-            stock: { decrement: detalle.cantidad },
-          },
-        });
+      await Promise.all(
+        venta.detalles.map(async (detalle: any) => {
+          await tx.varianteUniforme.update({
+            where: { id: detalle.varianteId },
+            data: {
+              stock: { decrement: detalle.cantidad },
+            },
+          });
 
-        await tx.movimientoInventario.create({
-          data: {
-            varianteId: detalle.varianteId,
-            tipo: "SALIDA",
-            cantidad: detalle.cantidad,
-            motivo: `Entrega de pedido ${venta.codigo}`,
-            referencia: venta.id,
-          },
-        });
-      }
+          await tx.movimientoInventario.create({
+            data: {
+              varianteId: detalle.varianteId,
+              tipo: "SALIDA",
+              cantidad: detalle.cantidad,
+              motivo: `Entrega de pedido ${venta.codigo}`,
+              referencia: venta.id,
+            },
+          });
+        })
+      );
 
       const ventaActualizada = await tx.ventaUniforme.update({
         where: { id: ventaId },

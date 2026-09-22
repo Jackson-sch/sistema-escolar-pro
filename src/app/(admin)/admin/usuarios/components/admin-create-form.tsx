@@ -3,7 +3,9 @@
 import { useTransition } from "react";
 import { createAdminUserAction } from "@/actions/super-admin";
 import { toast } from "sonner";
-import { IconUserPlus } from "@tabler/icons-react";
+import { IconUserPlus, IconLoader2 } from "@tabler/icons-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export function AdminCreateForm() {
   const [isPending, startTransition] = useTransition();
@@ -17,8 +19,10 @@ export function AdminCreateForm() {
       if (res.error) {
         toast.error(res.error);
       } else {
-        toast.success("Administrador creado exitosamente");
-        const form = document.getElementById("admin-create-form") as HTMLFormElement;
+        toast.success("Cuenta directiva creada exitosamente.");
+        const form = document.getElementById(
+          "admin-create-form",
+        ) as HTMLFormElement;
         form?.reset();
       }
     });
@@ -26,42 +30,56 @@ export function AdminCreateForm() {
 
   return (
     <form id="admin-create-form" action={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <label htmlFor="admin-name" className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Nombre Completo</label>
-        <input 
+      <div className="space-y-1.5">
+        <label
+          htmlFor="admin-name"
+          className="text-xs font-bold text-foreground block"
+        >
+          Nombre Completo
+        </label>
+        <Input
           id="admin-name"
           name="name"
           required
-          placeholder="Ej: Juan Pérez"
-          className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500/50 transition-[border-color,outline-color] placeholder:text-zinc-700" 
+          placeholder="Ej: Lic. Carlos Mendoza"
+          className="h-9 rounded-xl border-border/60 bg-background text-xs"
         />
       </div>
-      <div className="space-y-2">
-        <label htmlFor="admin-email" className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Correo Electrónico</label>
-        <input 
+
+      <div className="space-y-1.5">
+        <label
+          htmlFor="admin-email"
+          className="text-xs font-bold text-foreground block"
+        >
+          Correo Institucional
+        </label>
+        <Input
           id="admin-email"
           name="email"
           type="email"
           required
           placeholder="director@colegio.edu.pe"
-          className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500/50 transition-[border-color,outline-color] placeholder:text-zinc-700" 
+          className="h-9 rounded-xl border-border/60 bg-background text-xs"
         />
       </div>
-      
-      <button 
+
+      <Button
         type="submit"
         disabled={isPending}
-        className="w-full py-3 bg-zinc-100 text-zinc-950 rounded-xl text-sm font-bold hover:bg-white active:scale-95 transition-[background-color,opacity,transform] disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-2"
+        className="w-full h-10 rounded-xl text-xs font-bold gap-2 bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer shadow-xs"
       >
         {isPending ? (
-          "Procesando..."
+          <>
+            <IconLoader2 className="size-4 animate-spin" />
+            <span>Creando cuenta...</span>
+          </>
         ) : (
           <>
             <IconUserPlus className="size-4" />
-            Crear Director
+            <span>Crear e Invitar Director</span>
           </>
         )}
-      </button>
+      </Button>
     </form>
-  )
+  );
 }

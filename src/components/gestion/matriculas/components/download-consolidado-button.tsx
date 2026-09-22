@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import * as XLSX from "xlsx-js-style";
 import {
   IconChevronDown,
   IconCloudDownload,
@@ -20,117 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getEnrollmentsAction } from "@/actions/enrollments";
-import { formatDate } from "@/lib/formats";
-
-const HEADERS = [
-  "N°",
-  "AÑO ACADÉMICO",
-  "FECHA MATRÍCULA",
-  "DNI ESTUDIANTE",
-  "APELLIDO PATERNO",
-  "APELLIDO MATERNO",
-  "NOMBRES",
-  "NIVEL ACADÉMICO",
-  "GRADO",
-  "SECCIÓN",
-  "SEDE",
-  "TIPO INGRESO",
-  "ESTADO MATRÍCULA",
-];
-
-const COL_WIDTHS = [
-  { wch: 5 },
-  { wch: 14 },
-  { wch: 16 },
-  { wch: 14 },
-  { wch: 20 },
-  { wch: 20 },
-  { wch: 24 },
-  { wch: 16 },
-  { wch: 14 },
-  { wch: 10 },
-  { wch: 18 },
-  { wch: 16 },
-  { wch: 14 },
-];
-
-function formatEnrollmentRows(enrollments: any[]): any[] {
-  return enrollments.map((item, index) => {
-    const est = item.estudiante || {};
-    const nac = item.nivelAcademico || {};
-
-    return {
-      "N°": index + 1,
-      "AÑO ACADÉMICO": item.anioAcademico || "",
-      "FECHA MATRÍCULA": item.fechaMatricula ? formatDate(item.fechaMatricula) : "",
-      "DNI ESTUDIANTE": est.dni || "",
-      "APELLIDO PATERNO": est.apellidoPaterno || "",
-      "APELLIDO MATERNO": est.apellidoMaterno || "",
-      NOMBRES: est.name || "",
-      "NIVEL ACADÉMICO": nac.nivel?.nombre || "",
-      GRADO: nac.grado?.nombre || "",
-      SECCIÓN: nac.seccion || "",
-      SEDE: nac.sede?.nombre || "",
-      "TIPO INGRESO": (item.tipo || "Regular").toUpperCase(),
-      "ESTADO MATRÍCULA": (item.estado || "Activo").toUpperCase(),
-    };
-  });
-}
-
-function buildEnrollmentsWorkbook(rows: any[]): XLSX.WorkBook {
-  const ws = XLSX.utils.json_to_sheet(rows, { header: HEADERS });
-
-  const headerStyle = {
-    font: { bold: true, color: { rgb: "FFFFFF" } },
-    fill: { fgColor: { rgb: "0F172A" } }, // Slate 900
-    alignment: { horizontal: "center", vertical: "center", wrapText: true },
-    border: {
-      top: { style: "thin" },
-      bottom: { style: "thin" },
-      left: { style: "thin" },
-      right: { style: "thin" },
-    },
-  } as const;
-
-  const cellStyle = {
-    font: { sz: 10 },
-    alignment: { vertical: "center" },
-    border: {
-      top: { style: "thin" },
-      bottom: { style: "thin" },
-      left: { style: "thin" },
-      right: { style: "thin" },
-    },
-  } as const;
-
-  const range = XLSX.utils.decode_range(ws["!ref"]!);
-  for (let R = range.s.r; R <= range.e.r; ++R) {
-    for (let C = range.s.c; C <= range.e.c; ++C) {
-      const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
-      if (!ws[cellAddress]) continue;
-      ws[cellAddress].s = R === 0 ? headerStyle : cellStyle;
-    }
-  }
-
-  ws["!cols"] = COL_WIDTHS;
-  ws["!autofilter"] = { ref: ws["!ref"]! };
-
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Consolidado Matrículas");
-  return wb;
-}
-
-function downloadCsv(rows: any[], fileName: string) {
-  const ws = XLSX.utils.json_to_sheet(rows, { header: HEADERS });
-  const csv = XLSX.utils.sheet_to_csv(ws);
-  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = fileName;
-  link.click();
-  setTimeout(() => URL.revokeObjectURL(url), 100);
-}
+import { exportMatriculasConsolidadoExcel } from "@/lib/excel";
 
 export function DownloadEnrollmentsReportButton() {
   const [isLoading, setIsLoading] = React.useState(false);
@@ -145,18 +34,41 @@ export function DownloadEnrollmentsReportButton() {
         return;
       }
 
-      const rows = formatEnrollmentRows(res.data);
-      const baseName = `Consolidado_Matriculas_${new Date()
-        .toISOString()
-        .split("T")[0]}`;
-
-      if (format === "csv") {
-        downloadCsv(rows, `${baseName}.csv`);
-        toast.success(`Consolidado CSV exportado: ${rows.length} registros`);
+      if (format === "xlsx") {
+        await exportMatriculasConsolidadoExcel(res.data);
+        toast.success(`Consolidado Excel exportado: ${res.data.length} registros`);
       } else {
-        const wb = buildEnrollmentsWorkbook(rows);
-        XLSX.writeFile(wb, `${baseName}.xlsx`);
-        toast.success(`Consolidado Excel exportado: ${rows.length} registros`);
+        const headers = [
+          "DNI",
+          "Estudiante",
+          "Nivel",
+          "Grado",
+          "Seccion",
+          "Sede",
+          "Estado",
+        ];
+        const csvRows = res.data.map((item: any) => [
+          item.estudiante?.dni || "",
+          `"${item.estudiante?.apellidoPaterno || ""} ${item.estudiante?.name || ""}"`,
+          `"${item.nivelAcademico?.nivel?.nombre || ""}"`,
+          `"${item.nivelAcademico?.grado?.nombre || ""}"`,
+          `"${item.nivelAcademico?.seccion || ""}"`,
+          `"${item.nivelAcademico?.sede?.nombre || ""}"`,
+          `"${item.estado || "Activo"}"`,
+        ]);
+        const csvContent =
+          "\uFEFF" +
+          [headers.join(","), ...csvRows.map((r) => r.join(","))].join("\n");
+        const blob = new Blob([csvContent], {
+          type: "text/csv;charset=utf-8;",
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `Consolidado_Matriculas_${new Date().toISOString().split("T")[0]}.csv`;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 100);
+        toast.success(`Consolidado CSV exportado: ${res.data.length} registros`);
       }
     } catch (error) {
       console.error("Error exportando consolidado de matrículas:", error);
@@ -200,7 +112,12 @@ export function DownloadEnrollmentsReportButton() {
           className="rounded-lg m-1 gap-2 cursor-pointer focus:bg-primary/10 focus:text-primary transition-colors"
         >
           <IconFileSpreadsheet className="size-4 text-emerald-600" />
-          <span className="text-xs font-medium">Excel (.xlsx)</span>
+          <div className="flex flex-col">
+            <span className="text-xs font-semibold">Excel Profesional</span>
+            <span className="text-[10px] text-muted-foreground">
+              Formato corporativo con estilos
+            </span>
+          </div>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => handleExport("csv")}

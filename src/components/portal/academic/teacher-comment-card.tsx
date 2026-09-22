@@ -104,6 +104,7 @@ export function TeacherCommentCard({
                 <Button
                   variant="ghost"
                   size="icon"
+                  aria-label="Comentario anterior"
                   className="size-7 rounded-md hover:bg-primary/10"
                   onClick={handlePrev}
                 >
@@ -115,6 +116,7 @@ export function TeacherCommentCard({
                 <Button
                   variant="ghost"
                   size="icon"
+                  aria-label="Comentario siguiente"
                   className="size-7 rounded-md hover:bg-primary/10"
                   onClick={handleNext}
                 >

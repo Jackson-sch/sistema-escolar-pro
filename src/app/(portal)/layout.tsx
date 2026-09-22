@@ -8,15 +8,9 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { getParentUserAction } from "@/actions/portal";
 import { CommandPalette } from "@/components/common/command-palette";
 import { OnboardingTourDialog } from "@/components/common/onboarding-tour-dialog";
+import { PortalMobileNav } from "@/components/portal/layout/portal-mobile-nav";
 
-export default async function PortalLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const session = await auth();
-
-  // Verificar que el usuario está autenticado y tiene un rol permitido (padre o profesor)
+function validatePortalAuth(session: any, user: any) {
   if (!session?.user?.id) {
     redirect("/login");
   }
@@ -26,46 +20,62 @@ export default async function PortalLayout({
     redirect("/");
   }
 
-  // Verificar si debe cambiar la contraseña
-  const userRes = await getParentUserAction({});
-  const user = userRes.success;
-
   if (user?.mustChangePassword) {
     redirect("/cambiar-password");
   }
+}
+
+function resolveUserProfile(user: any, sessionUser: any) {
+  const role = (user?.role || sessionUser?.role || "padre") as "padre" | "profesor";
+  return {
+    role,
+    name: user?.name || sessionUser?.name || undefined,
+    email: user?.email || sessionUser?.email || undefined,
+    apellidoPaterno: user?.apellidoPaterno || sessionUser?.apellidoPaterno || undefined,
+    apellidoMaterno: user?.apellidoMaterno || sessionUser?.apellidoMaterno || undefined,
+  };
+}
+
+export default async function PortalLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const session = await auth();
+  const userRes = await getParentUserAction({});
+  const user = userRes.success;
+
+  validatePortalAuth(session, user);
 
   const institucionRes = await getInstitucionByIdAction(
-    session.user.institucionId || undefined,
+    session?.user?.institucionId || undefined,
   );
   const institucionData = institucionRes.data;
-
+  const profile = resolveUserProfile(user, session?.user);
   const headerTitle =
-    user?.role === "profesor" ? "Portal Docente" : "Portal Padres";
+    profile.role === "profesor" ? "Portal Docente" : "Portal Padres";
 
   return (
     <div className="[--header-height:calc(var(--spacing)*14)] min-h-screen">
       <SidebarProvider>
-        <CommandPalette />
-        <OnboardingTourDialog userRole={user?.role || "padre"} />
+        <CommandPalette userRole={profile.role} />
+        <OnboardingTourDialog userRole={profile.role} />
         <AppSidebar
-          userRole={user?.role || "padre"}
-          userName={user?.name || session.user.name || undefined}
-          userEmail={user?.email || session.user.email || undefined}
-          userApellidoPaterno={
-            user?.apellidoPaterno || session.user.apellidoPaterno || undefined
-          }
-          userApellidoMaterno={
-            user?.apellidoMaterno || session.user.apellidoMaterno || undefined
-          }
+          userRole={profile.role}
+          userName={profile.name}
+          userEmail={profile.email}
+          userApellidoPaterno={profile.apellidoPaterno}
+          userApellidoMaterno={profile.apellidoMaterno}
           institucionName={institucionData?.nombreInstitucion}
           institucionLogo={institucionData?.logo}
         />
         <SidebarInset className="flex min-h-screen flex-col">
           <SiteHeader institucionName={headerTitle} />
-          <main className="relative flex flex-1 flex-col gap-4 overflow-x-hidden p-2">
+          <main className="relative flex flex-1 flex-col gap-4 overflow-x-hidden p-2 pb-16 sm:pb-2">
             <div className="flex-1 w-full">{children}</div>
             <SiteFooter />
           </main>
+          <PortalMobileNav />
         </SidebarInset>
       </SidebarProvider>
     </div>

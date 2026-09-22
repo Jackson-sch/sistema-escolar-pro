@@ -18,7 +18,7 @@ export async function getVariablesAction() {
     }
 
     const rawRole = (session.user.role || "").toString().toLowerCase();
-    const isAdmin = ["super_admin", "admin", "administrador", "director"].includes(rawRole);
+    const isAdmin = ["super_admin", "admin", "administrador", "administrativo", "director"].includes(rawRole);
     if (!isAdmin) {
       return { error: "Acceso denegado" };
     }
@@ -115,7 +115,7 @@ export async function getVariableByKeyAction(clave: string) {
     // Lista de claves públicas que el cliente puede requerir (ej. formato comprobante)
     const PUBLIC_KEYS = ["FORMATO_COMPROBANTE", "FORMATO_COMPROBANTE_DEFAULT"];
     const rawRole = (session.user.role || "").toString().toLowerCase();
-    const isAdmin = ["super_admin", "admin", "administrador", "director"].includes(rawRole);
+    const isAdmin = ["super_admin", "admin", "administrador", "administrativo", "director"].includes(rawRole);
 
     if (!isAdmin && !PUBLIC_KEYS.includes(clave.toUpperCase())) {
       return { error: "Acceso denegado a variable restringida" };

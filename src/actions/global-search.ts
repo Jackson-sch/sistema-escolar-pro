@@ -22,6 +22,11 @@ export async function globalSearchAction(query: string): Promise<GlobalSearchRes
       return [];
     }
 
+    // El portal familiar no expone el padrón institucional mediante la búsqueda global.
+    if (session.user.role === "padre") {
+      return [];
+    }
+
     const cleanQuery = query.trim();
     const institucionId = session.user.institucionId;
 
@@ -72,7 +77,7 @@ export async function globalSearchAction(query: string): Promise<GlobalSearchRes
           type: "estudiante",
           label: fullName || "Estudiante",
           sublabel: `Estudiante · ${gradoSeccion} ${dniText ? `· ${dniText}` : ""}`,
-          url: `/gestion/estudiantes?search=${encodeURIComponent(u.dni || u.codigoEstudiante || fullName)}`,
+          url: `/gestion/estudiantes/${u.id}`,
         };
       }
 

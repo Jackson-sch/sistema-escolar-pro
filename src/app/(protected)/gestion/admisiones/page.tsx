@@ -4,6 +4,7 @@ import { getInstitucionesAction } from "@/actions/academic";
 import { ProspectoTable } from "@/components/gestion/admisiones/management/prospecto-table";
 import { ProspectoKanban } from "@/components/gestion/admisiones/components/prospecto-kanban";
 import { AddProspectoButton } from "@/components/gestion/admisiones/components/add-prospecto-button";
+import { PageHeader } from "@/components/common/page-header";
 import { Suspense } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -26,18 +27,20 @@ export const metadata = {
 };
 
 interface PageProps {
-  searchParams: Promise<{ view?: string }>;
+  searchParams: Promise<{ view?: string; anio?: string }>;
 }
 
 export default async function AdmisionesPage({ searchParams }: PageProps) {
+  const { view = "kanban", anio } = await searchParams;
+  const currentYear = new Date().getFullYear();
+  const selectedYear = anio ? parseInt(anio, 10) : currentYear;
+
   const [
-    { view = "kanban" },
     prospectosRes,
     gradosRes,
     institucionesRes,
   ] = await Promise.all([
-    searchParams,
-    getProspectosAction({}),
+    getProspectosAction({ anioPostulacion: selectedYear }),
     getGradosAction(),
     getInstitucionesAction(),
   ]);
@@ -56,52 +59,66 @@ export default async function AdmisionesPage({ searchParams }: PageProps) {
   const conversionRate = totalProspectos > 0 ? Math.round((matriculados / totalProspectos) * 100) : 0;
 
   return (
-    <div className="min-h-screen flex flex-col gap-6 p-4 md:p-8 pt-6 @container/main">
-      {/* ── HEADER ── */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
-        <div className="space-y-2">
-          <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-4 py-1 rounded-full text-xxs font-semibold uppercase tracking-widest flex items-center gap-2 w-fit">
-            <IconUserSearch size={14} />
-            Pipeline de Admisiones
-          </Badge>
-          <h1 className="text-3xl md:text-5xl font-bold tracking-tight leading-none">
-            Admisiones (CRM)
-          </h1>
-          <p className="text-muted-foreground text-sm md:text-base max-w-2xl font-normal leading-relaxed">
-            Seguimiento integral de postulantes, evaluaciones de ingreso y conversión a matrículas activas.
-          </p>
-        </div>
+    <div className="flex flex-1 flex-col gap-6 p-4 sm:p-6 pt-0 animate-in fade-in duration-200">
+      {/* ── HEADER COMPACTO INSTITUCIONAL ── */}
+      <PageHeader
+        icon={<IconUserSearch size={20} />}
+        title="Admisiones & Captación (CRM)"
+        badge={`Campaña ${selectedYear}`}
+        description="Seguimiento de postulantes, evaluaciones psicopedagógicas y conversión a matrícula"
+        breadcrumbs={[
+          { label: "Personas", href: "/gestion/estudiantes" },
+          { label: "Admisiones CRM" },
+        ]}
+        actions={
+          <div className="flex items-center gap-3 shrink-0 flex-wrap">
+            {/* Selector de Año de Campaña */}
+            <div className="flex items-center bg-card border border-border/60 p-1 rounded-xl shadow-2xs text-xs font-bold">
+              {[currentYear, currentYear + 1].map((y) => (
+                <Link
+                  key={y}
+                  href={`/gestion/admisiones?view=${view}&anio=${y}`}
+                  className={`px-2.5 py-1 rounded-lg transition-all ${
+                    selectedYear === y
+                      ? "bg-primary/10 text-primary font-black"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {y}
+                </Link>
+              ))}
+            </div>
 
-        <div className="flex items-center gap-3 shrink-0">
-          {/* Selector de Vistas */}
-          <div className="flex items-center bg-card/80 border border-border/40 p-1 rounded-xl">
-            <Link
-              href="/gestion/admisiones?view=kanban"
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-[color] ${
-                view === "kanban"
-                  ? "bg-indigo-600 text-white shadow-xs"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <IconLayoutKanban className="size-3.5" />
-              Kanban
-            </Link>
-            <Link
-              href="/gestion/admisiones?view=table"
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-[color] ${
-                view === "table"
-                  ? "bg-indigo-600 text-white shadow-xs"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <IconTable className="size-3.5" />
-              Tabla
-            </Link>
+            {/* Selector de Vistas */}
+            <div className="flex items-center bg-card border border-border/60 p-1 rounded-xl shadow-2xs">
+              <Link
+                href={`/gestion/admisiones?view=kanban&anio=${selectedYear}`}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  view === "kanban"
+                    ? "bg-primary text-primary-foreground shadow-xs"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <IconLayoutKanban className="size-3.5" />
+                Kanban
+              </Link>
+              <Link
+                href={`/gestion/admisiones?view=table&anio=${selectedYear}`}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  view === "table"
+                    ? "bg-primary text-primary-foreground shadow-xs"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <IconTable className="size-3.5" />
+                Tabla
+              </Link>
+            </div>
+
+            <AddProspectoButton grados={grados} instituciones={instituciones} />
           </div>
-
-          <AddProspectoButton grados={grados} instituciones={instituciones} />
-        </div>
-      </div>
+        }
+      />
 
       {/* ── BENTO KPIS ── */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 px-1">

@@ -4,11 +4,16 @@ import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { serialize } from "@/lib/dto";
+import { dispatchAttendanceNotification } from "./notifications";
+
 
 /**
  * Registra asistencia mediante QR (Usado en el scanner de entrada)
  */
-export async function registerQRAsistenciaAction(dni: string) {
+export async function registerQRAsistenciaAction(
+  dni: string,
+  mode: "ingreso" | "salida" = "ingreso"
+) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -19,30 +24,200 @@ export async function registerQRAsistenciaAction(dni: string) {
     const startOfDay = new Date(today.setHours(0, 0, 0, 0));
     const endOfDay = new Date(today.setHours(23, 59, 59, 999));
 
-    // 1. Buscar estudiante por DNI
+    // 1. Buscar estudiante por DNI (con filtro multi-tenant y apoderados autorizados)
     const student = await prisma.user.findFirst({
       where: {
         dni,
         role: "estudiante",
+        ...(session?.user?.institucionId ? { institucionId: session.user.institucionId } : {}),
       },
       include: {
         matriculas: {
           where: { estado: "activo" },
-          include: { nivelAcademico: true },
+          include: {
+            nivelAcademico: {
+              include: {
+                grado: true,
+                nivel: true,
+              },
+            },
+          },
           orderBy: { anioAcademico: "desc" },
           take: 1,
+        },
+        padresTutores: {
+          include: {
+            padreTutor: {
+              select: {
+                id: true,
+                name: true,
+                apellidoPaterno: true,
+                apellidoMaterno: true,
+                dni: true,
+                telefono: true,
+                image: true,
+              },
+            },
+          },
         },
       },
     });
 
-    if (!student) return { error: "Estudiante no encontrado" };
+    if (!student) return { error: "Estudiante no encontrado en esta institución" };
     if (student.matriculas.length === 0)
       return { error: "Estudiante no cuenta con matrícula activa" };
 
     const matricula = student.matriculas[0];
+    const gradoNombre = matricula.nivelAcademico?.grado?.nombre || "";
+    const seccionNombre = matricula.nivelAcademico?.seccion || "";
+    const nivelNombre = matricula.nivelAcademico?.nivel?.nombre || "";
+    const aula = [gradoNombre, seccionNombre ? `"${seccionNombre}"` : "", nivelNombre ? `• ${nivelNombre}` : ""].filter(Boolean).join(" ");
 
-    // 2. Determinar si hay tardanza mediante Polticas de Asistencia
-    // Buscamos políticas aplicables: 1. Nivel + Turno, 2. Nivel, 3. Turno, 4. Global
+    // Obtener personas autorizadas para retirar al alumno (Pick-up Seguro)
+    const authorizedGuardians = (student.padresTutores || []).map((rel) => ({
+      id: rel.padreTutor.id,
+      name: `${rel.padreTutor.name || ""} ${rel.padreTutor.apellidoPaterno || ""} ${rel.padreTutor.apellidoMaterno || ""}`.trim(),
+      parentesco: rel.parentesco || "Apoderado",
+      dni: rel.padreTutor.dni,
+      telefono: rel.padreTutor.telefono,
+      image: rel.padreTutor.image,
+      autorizadoRecoger: rel.autorizadoRecoger,
+      esContactoEmergencia: rel.contactoPrimario,
+    }));
+
+    if (student.contactoEmergencia) {
+      authorizedGuardians.push({
+        id: `emergency-1-${student.id}`,
+        name: student.contactoEmergencia,
+        parentesco: student.parentescoContactoEmergencia || "Contacto Emergencia",
+        dni: null,
+        telefono: student.telefonoEmergencia || null,
+        image: null,
+        autorizadoRecoger: true,
+        esContactoEmergencia: true,
+      });
+    }
+
+    const studentData = {
+      name: student.name,
+      apellidoPaterno: student.apellidoPaterno,
+      apellidoMaterno: student.apellidoMaterno,
+      image: student.image,
+      dni: student.dni,
+      aula,
+      grado: gradoNombre,
+      seccion: seccionNombre,
+      nivel: nivelNombre,
+    };
+
+    // 2. Buscar el primer curso disponible para registrar la asistencia académica
+    const curso = await prisma.curso.findFirst({
+      where: { nivelAcademicoId: matricula.nivelAcademicoId },
+    });
+
+    if (!curso)
+      return {
+        error: "No se encontró curso asignado para registrar la asistencia",
+      };
+
+    const currentTimeStr = new Date().toLocaleTimeString("es-PE", {
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: "America/Lima",
+    });
+
+    // 3. Buscar registro existente de hoy
+    const existing = await prisma.asistencia.findFirst({
+      where: {
+        estudianteId: student.id,
+        cursoId: curso.id,
+        fecha: {
+          gte: startOfDay,
+          lte: endOfDay,
+        },
+      },
+    });
+
+    // ==========================================
+    // FLUJO MODO SALIDA (EGRESO Y PICK-UP SEGURO)
+    // ==========================================
+    if (mode === "salida") {
+      if (existing?.horaSalida) {
+        return {
+          error: "El estudiante ya registró su salida el día de hoy",
+          alreadyMarked: true,
+          data: {
+            ...serialize(existing),
+            mode: "salida",
+            horaSalida: existing.horaSalida,
+            authorizedGuardians,
+            student: studentData,
+          },
+        };
+      }
+
+      let salidaResult;
+      if (existing) {
+        salidaResult = await prisma.asistencia.update({
+          where: { id: existing.id },
+          data: { horaSalida: currentTimeStr },
+        });
+      } else {
+        salidaResult = await prisma.asistencia.create({
+          data: {
+            estudianteId: student.id,
+            cursoId: curso.id,
+            fecha: new Date(),
+            presente: true,
+            tardanza: false,
+            horaSalida: currentTimeStr,
+          },
+        });
+      }
+
+      // Notificación de salida a apoderados
+      let notifSalida: any = { notified: false };
+      try {
+        const studentFullName = `${student.name || ""} ${student.apellidoPaterno || ""}`.trim();
+        const dispatchPromise = dispatchAttendanceNotification({
+          studentId: student.id,
+          studentName: studentFullName,
+          dni: student.dni,
+          aula,
+          horaSalida: currentTimeStr,
+          tipo: "salida",
+          institucionId: student.institucionId,
+          userId: session.user.id,
+        });
+
+        notifSalida = await Promise.race([
+          dispatchPromise,
+          new Promise((resolve) =>
+            setTimeout(() => resolve({ notified: true, pending: true, channels: [] }), 350)
+          ),
+        ]);
+      } catch (notifErr) {
+        console.warn("Error en notificación de salida:", notifErr);
+      }
+
+      revalidatePath("/asistencia");
+      return {
+        success: "Salida registrada correctamente",
+        data: {
+          ...serialize(salidaResult),
+          mode: "salida",
+          horaSalida: currentTimeStr,
+          notification: notifSalida,
+          authorizedGuardians,
+          student: studentData,
+        },
+      };
+    }
+
+    // ==========================================
+    // FLUJO MODO INGRESO (ENTRADA Y PUNTUALIDAD)
+    // ==========================================
+    // Determinar si hay tardanza mediante Políticas de Asistencia
     const [hEntradaFallback, mEntradaFallback] = (
       (
         await prisma.variableSistema.findUnique({
@@ -53,17 +228,6 @@ export async function registerQRAsistenciaAction(dni: string) {
       .split(":")
       .map(Number);
 
-    const [hSalidaFallback, mSalidaFallback] = (
-      (
-        await prisma.variableSistema.findUnique({
-          where: { clave: "HORA_SALIDA" },
-        })
-      )?.valor || "13:00"
-    )
-      .split(":")
-      .map(Number);
-
-    // Intentar encontrar política específica
     const politica = await prisma.politicaAsistencia.findFirst({
       where: {
         institucionId: student.institucionId || undefined,
@@ -78,8 +242,8 @@ export async function registerQRAsistenciaAction(dni: string) {
         ],
       },
       orderBy: [
-        { nivelId: "desc" }, // Priorizar los que tienen nivelId
-        { turno: "desc" }, // Priorizar los que tienen turno
+        { nivelId: "desc" },
+        { turno: "desc" },
       ],
     });
 
@@ -95,61 +259,28 @@ export async function registerQRAsistenciaAction(dni: string) {
     const limitTime = new Date();
     limitTime.setHours(hEntrada, mEntrada, 0, 0);
 
-    // Aplicar tolerancia: si la entrada es 08:00 y tolerancia 10, el límite es 08:10
     if (tolerancia > 0) {
       limitTime.setMinutes(limitTime.getMinutes() + tolerancia);
     }
 
     const isTardanza = checkTime > limitTime;
-    const horaLlegada = checkTime.toLocaleTimeString("es-PE", {
-      hour: "2-digit",
-      minute: "2-digit",
-      timeZone: "America/Lima",
-    });
-
-    // 3. Buscar el primer curso disponible para registrar la asistencia académica
-    // (En una implementación ideal, esto sería un registro de ingreso general)
-    const curso = await prisma.curso.findFirst({
-      where: { nivelAcademicoId: matricula.nivelAcademicoId },
-    });
-
-    if (!curso)
-      return {
-        error: "No se encontró curso asignado para registrar la asistencia",
-      };
-
-    // 4. Registrar o actualizar la asistencia
-    const existing = await prisma.asistencia.findFirst({
-      where: {
-        estudianteId: student.id,
-        cursoId: curso.id,
-        fecha: {
-          gte: startOfDay,
-          lte: endOfDay,
-        },
-      },
-    });
+    const horaLlegada = currentTimeStr;
 
     let result;
     if (existing) {
-      // Si ya marcó hoy, no permitir marcar de nuevo para evitar spam
       if (existing.presente) {
         return {
           error: "El estudiante ya registró su asistencia el día de hoy",
           alreadyMarked: true,
           data: {
-            student: {
-              name: student.name,
-              apellidoPaterno: student.apellidoPaterno,
-              apellidoMaterno: student.apellidoMaterno,
-              image: student.image,
-              dni: student.dni,
-            },
+            ...serialize(existing),
+            mode: "ingreso",
+            student: studentData,
+            authorizedGuardians,
           },
         };
       }
 
-      // Si existía (quizás marcado como ausente por el sistema temprano), lo ponemos como presente
       result = await prisma.asistencia.update({
         where: { id: existing.id },
         data: {
@@ -163,7 +294,7 @@ export async function registerQRAsistenciaAction(dni: string) {
         data: {
           estudianteId: student.id,
           cursoId: curso.id,
-          fecha: new Date(), // Usar hora exacta del servidor
+          fecha: new Date(),
           presente: true,
           tardanza: isTardanza,
           horaLlegada: horaLlegada,
@@ -171,18 +302,41 @@ export async function registerQRAsistenciaAction(dni: string) {
       });
     }
 
+    // Despacho de notificación de ingreso a padres
+    let notificationResult: any = { notified: false };
+    try {
+      const studentFullName = `${student.name || ""} ${student.apellidoPaterno || ""}`.trim();
+      const dispatchPromise = dispatchAttendanceNotification({
+        studentId: student.id,
+        studentName: studentFullName,
+        dni: student.dni,
+        aula,
+        horaLlegada,
+        isTardanza,
+        tipo: "ingreso",
+        institucionId: student.institucionId,
+        userId: session.user.id,
+      });
+
+      notificationResult = await Promise.race([
+        dispatchPromise,
+        new Promise((resolve) =>
+          setTimeout(() => resolve({ notified: true, pending: true, channels: [] }), 350)
+        ),
+      ]);
+    } catch (notifErr) {
+      console.warn("Error en dispatchAttendanceNotification:", notifErr);
+    }
+
     revalidatePath("/asistencia");
     return {
       success: "Asistencia registrada correctamente",
       data: {
         ...serialize(result),
-        student: {
-          name: student.name,
-          apellidoPaterno: student.apellidoPaterno,
-          apellidoMaterno: student.apellidoMaterno,
-          image: student.image,
-          dni: student.dni,
-        },
+        mode: "ingreso",
+        notification: notificationResult,
+        authorizedGuardians,
+        student: studentData,
       },
     };
   } catch (error) {
@@ -192,47 +346,110 @@ export async function registerQRAsistenciaAction(dni: string) {
 }
 
 /**
- * Obtiene los registros de asistencia más recientes para el scanner
+ * Obtiene los registros de asistencia más recientes y métricas del día para el scanner
  */
 export async function getRecentAttendanceLogsAction() {
   try {
+    const session = await auth();
     const today = new Date();
     const startOfDay = new Date(today.setHours(0, 0, 0, 0));
     const endOfDay = new Date(today.setHours(23, 59, 59, 999));
 
-    const logs = await prisma.asistencia.findMany({
-      where: {
-        fecha: {
-          gte: startOfDay,
-          lte: endOfDay,
+    const whereCondition = {
+      fecha: {
+        gte: startOfDay,
+        lte: endOfDay,
+      },
+      presente: true,
+      ...(session?.user?.institucionId
+        ? { estudiante: { institucionId: session.user.institucionId } }
+        : {}),
+    };
+
+    const [logs, totalToday, tardanzasToday, salidasToday] = await Promise.all([
+      prisma.asistencia.findMany({
+        where: whereCondition,
+        include: {
+          estudiante: {
+            include: {
+              matriculas: {
+                where: { estado: "activo" },
+                include: {
+                  nivelAcademico: {
+                    include: {
+                      grado: true,
+                      nivel: true,
+                    },
+                  },
+                },
+                orderBy: { anioAcademico: "desc" },
+                take: 1,
+              },
+            },
+          },
         },
-        presente: true,
-      },
-      include: {
-        estudiante: true,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-      take: 20,
+        orderBy: {
+          createdAt: "desc",
+        },
+        take: 30,
+      }),
+      prisma.asistencia.count({
+        where: whereCondition,
+      }),
+      prisma.asistencia.count({
+        where: {
+          ...whereCondition,
+          tardanza: true,
+        },
+      }),
+      prisma.asistencia.count({
+        where: {
+          ...whereCondition,
+          horaSalida: { not: null },
+        },
+      }),
+    ]);
+
+    const puntualesToday = Math.max(0, totalToday - tardanzasToday);
+
+    const formattedLogs = logs.map((log) => {
+      const matricula = log.estudiante.matriculas?.[0];
+      const gNom = matricula?.nivelAcademico?.grado?.nombre || "";
+      const sNom = matricula?.nivelAcademico?.seccion || "";
+      const nNom = matricula?.nivelAcademico?.nivel?.nombre || "";
+      const aula = [gNom, sNom ? `"${sNom}"` : "", nNom ? `• ${nNom}` : ""].filter(Boolean).join(" ");
+
+      return {
+        id: log.id,
+        studentName: `${log.estudiante.name || ""} ${log.estudiante.apellidoPaterno || ""} ${log.estudiante.apellidoMaterno || ""}`.trim(),
+        dni: log.estudiante.dni,
+        time:
+          log.horaSalida ||
+          log.horaLlegada ||
+          new Date(log.createdAt).toLocaleTimeString("es-PE", {
+            hour: "2-digit",
+            minute: "2-digit",
+            timeZone: "America/Lima",
+          }),
+        status: log.tardanza ? "late" : "success",
+        mode: (log.horaSalida ? "salida" : "ingreso") as "ingreso" | "salida",
+        horaSalida: log.horaSalida || undefined,
+        image: log.estudiante.image || undefined,
+        aula: aula || undefined,
+        grado: gNom || undefined,
+        seccion: sNom || undefined,
+      };
     });
 
-    const formattedLogs = logs.map((log) => ({
-      id: log.id,
-      studentName: `${log.estudiante.name} ${log.estudiante.apellidoPaterno} ${log.estudiante.apellidoMaterno}`,
-      dni: log.estudiante.dni,
-      time:
-        log.horaLlegada ||
-        new Date(log.createdAt).toLocaleTimeString("es-PE", {
-          hour: "2-digit",
-          minute: "2-digit",
-          timeZone: "America/Lima",
-        }),
-      status: log.tardanza ? "late" : "success",
-      image: log.estudiante.image || undefined,
-    }));
-
-    return { data: serialize(formattedLogs) };
+    return {
+      data: serialize(formattedLogs),
+      stats: {
+        total: totalToday,
+        puntuales: puntualesToday,
+        tardanzas: tardanzasToday,
+        salidas: salidasToday,
+      },
+    };
   } catch (error) {
     console.error("Error fetching recent logs:", error);
     return { error: "Fallo al obtener el historial reciente" };

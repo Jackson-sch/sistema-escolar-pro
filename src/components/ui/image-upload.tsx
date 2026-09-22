@@ -17,6 +17,11 @@ interface ImageUploadProps {
   className?: string
 }
 
+const handleDragOver = (e: React.DragEvent) => {
+  e.preventDefault()
+  e.stopPropagation()
+}
+
 export function ImageUpload({
   value,
   onChange,
@@ -68,10 +73,6 @@ export function ImageUpload({
     }
   }
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-  }
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
@@ -148,6 +149,7 @@ export function ImageUpload({
               }}
               variant="destructive"
               size="icon"
+              aria-label="Eliminar imagen"
               className="absolute top-2 right-2 size-8 rounded-full shadow-lg opacity-0 group-hover:opacity-100 scale-95 group-hover:scale-100 transition-[opacity,transform] hover:scale-110 active:scale-90"
               disabled={isUploading}
             >

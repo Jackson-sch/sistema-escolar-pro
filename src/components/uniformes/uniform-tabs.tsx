@@ -13,34 +13,35 @@ interface UniformTabsProps {
   };
 }
 
+const UNIFORM_TABS = [
+  {
+    id: "catalogo",
+    label: "Catálogo",
+    icon: <Shirt className="size-4" />,
+  },
+  {
+    id: "inventario",
+    label: "Inventario",
+    icon: <Package className="size-4" />,
+  },
+  {
+    id: "ventas",
+    label: "Ventas y Reservas",
+    icon: <History className="size-4" />,
+  },
+];
+
 export function UniformTabs({ children }: UniformTabsProps) {
   const [tab, setTab] = useQueryState(
     "tab",
     parseAsString.withDefault("catalogo"),
   );
 
-  const tabs = [
-    {
-      id: "catalogo",
-      label: "Catálogo",
-      icon: <Shirt className="size-4" />,
-    },
-    {
-      id: "inventario",
-      label: "Inventario",
-      icon: <Package className="size-4" />,
-    },
-    {
-      id: "ventas",
-      label: "Ventas y Reservas",
-      icon: <History className="size-4" />,
-    },
-  ];
 
   return (
     <Tabs value={tab} onValueChange={setTab} className="space-y-6">
       <AnimatedTabs
-        tabs={tabs}
+        tabs={UNIFORM_TABS}
         activeTab={tab}
         onTabChange={setTab}
         className="ml-0"

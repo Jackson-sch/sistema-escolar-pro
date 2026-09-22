@@ -148,6 +148,101 @@ function QuantityControl({
   );
 }
 
+function getStockStatus(stock: number) {
+  if (stock === 0) {
+    return { label: "Sin stock", className: "text-red-400" };
+  }
+  if (stock <= 3) {
+    return { label: `Quedan ${stock}`, className: "text-amber-500" };
+  }
+  return { label: `${stock} disp.`, className: "text-green-500" };
+}
+
+function UniformSizesPeek({ variantes }: { variantes: any[] }) {
+  return (
+    <div className="absolute inset-x-4 bottom-4 translate-y-3 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-[opacity,transform] duration-400">
+      <div className="bg-white/80 dark:bg-slate-900/80 rounded-xl px-3 py-2.5 border border-white/40 dark:border-white/10">
+        <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">
+          Tallas
+        </p>
+        <div className="flex flex-wrap gap-1.5">
+          {variantes.map((v) => (
+            <span
+              key={v.id}
+              className={cn(
+                "text-[10px] font-black px-2 py-0.5 rounded-lg",
+                v.stock > 0
+                  ? "bg-slate-900/10 dark:bg-white/10 text-slate-700 dark:text-slate-300"
+                  : "text-slate-300 dark:text-slate-600 line-through",
+              )}
+            >
+              {v.talla}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function UniformImageRegion({
+  uniform,
+  isFavorite,
+  isLiking,
+  isOutsideSede,
+  displayVariantes,
+  onToggleFavorite,
+}: {
+  uniform: Props["uniform"];
+  isFavorite: boolean;
+  isLiking: boolean;
+  isOutsideSede: boolean;
+  displayVariantes: any[];
+  onToggleFavorite: () => void;
+}) {
+  return (
+    <div className="relative aspect-[4/5] bg-slate-100 dark:bg-slate-800 overflow-hidden">
+      {uniform.imagen ? (
+        <Image
+          src={uniform.imagen}
+          alt={uniform.nombre}
+          fill
+          sizes="(max-width: 640px) 50vw, 25vw"
+          unoptimized
+          className="object-cover transition-transform duration-700 group-hover:scale-[1.07]"
+        />
+      ) : (
+        <div className="h-full w-full flex items-center justify-center">
+          <Shirt className="h-16 w-16 text-slate-300 dark:text-slate-600" />
+        </div>
+      )}
+
+      <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+      <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-white/80 dark:bg-slate-900/80 border border-white/40 dark:border-white/10">
+        <span className="text-[10px] font-black text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+          {uniform.categoria?.nombre ?? "General"}
+        </span>
+      </div>
+
+      <FavoriteButton
+        isFavorite={isFavorite}
+        isLoading={isLiking}
+        onClick={onToggleFavorite}
+      />
+
+      {isOutsideSede && (
+        <div className="absolute bottom-4 inset-x-4 flex items-center gap-2 bg-amber-500/90 text-white text-[10px] font-bold px-3 py-2 rounded-xl">
+          <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+          No disponible en tu sede actual
+        </div>
+      )}
+
+      {!isOutsideSede && <UniformSizesPeek variantes={displayVariantes} />}
+    </div>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function PortalUniformCard({
@@ -220,76 +315,18 @@ export default function PortalUniformCard({
     }
   }, [isLiking, isFavorite, currentUserId, uniform.id]);
 
+  const stockStatus = currentVariante ? getStockStatus(currentVariante.stock) : null;
+
   return (
     <div className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border/50 bg-card/80 shadow-sm transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-md">
-      {/* ── Image Region ─────────────────────────────────── */}
-      <div className="relative aspect-[4/5] bg-slate-100 dark:bg-slate-800 overflow-hidden">
-        {uniform.imagen ? (
-          <Image
-            src={uniform.imagen}
-            alt={uniform.nombre}
-            fill
-            sizes="(max-width: 640px) 50vw, 25vw"
-            unoptimized
-            className="object-cover transition-transform duration-700 group-hover:scale-[1.07]"
-          />
-        ) : (
-          <div className="h-full w-full flex items-center justify-center">
-            <Shirt className="h-16 w-16 text-slate-300 dark:text-slate-600" />
-          </div>
-        )}
-
-        {/* Gradient overlay at bottom */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-        {/* Category label */}
-        <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-white/80 dark:bg-slate-900/80 border border-white/40 dark:border-white/10">
-          <span className="text-[10px] font-black text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-            {uniform.categoria?.nombre ?? "General"}
-          </span>
-        </div>
-
-        {/* Favorite button */}
-        <FavoriteButton
-          isFavorite={isFavorite}
-          isLoading={isLiking}
-          onClick={handleToggleFavorite}
-        />
-
-        {/* Outside-sede warning */}
-        {isOutsideSede && (
-          <div className="absolute bottom-4 inset-x-4 flex items-center gap-2 bg-amber-500/90 text-white text-[10px] font-bold px-3 py-2 rounded-xl">
-            <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
-            No disponible en tu sede actual
-          </div>
-        )}
-
-        {/* Quick sizes peek — slides up on hover */}
-        {!isOutsideSede && (
-          <div className="absolute inset-x-4 bottom-4 translate-y-3 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-[opacity,transform] duration-400">
-            <div className="bg-white/80 dark:bg-slate-900/80 rounded-xl px-3 py-2.5 border border-white/40 dark:border-white/10">
-              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">
-                Tallas
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {displayVariantes.map((v) => (
-                  <span
-                    key={v.id}
-                    className={cn(
-                      "text-[10px] font-black px-2 py-0.5 rounded-lg",
-                      v.stock > 0
-                        ? "bg-slate-900/10 dark:bg-white/10 text-slate-700 dark:text-slate-300"
-                        : "text-slate-300 dark:text-slate-600 line-through",
-                    )}
-                  >
-                    {v.talla}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+      <UniformImageRegion
+        uniform={uniform}
+        isFavorite={isFavorite}
+        isLiking={isLiking}
+        isOutsideSede={isOutsideSede}
+        displayVariantes={displayVariantes}
+        onToggleFavorite={handleToggleFavorite}
+      />
 
       {/* ── Info Region ───────────────────────────────────── */}
       <div className="flex flex-col flex-1 p-5 gap-4">
@@ -309,22 +346,9 @@ export default function PortalUniformCard({
             <p className="text-lg font-black text-slate-900 dark:text-white tabular-nums">
               {formatCurrency(currentVariante?.precio ?? 0)}
             </p>
-            {currentVariante && (
-              <p
-                className={cn(
-                  "text-[10px] font-bold",
-                  currentVariante.stock === 0
-                    ? "text-red-400"
-                    : currentVariante.stock <= 3
-                      ? "text-amber-500"
-                      : "text-green-500",
-                )}
-              >
-                {currentVariante.stock === 0
-                  ? "Sin stock"
-                  : currentVariante.stock <= 3
-                    ? `Quedan ${currentVariante.stock}`
-                    : `${currentVariante.stock} disp.`}
+            {stockStatus && (
+              <p className={cn("text-[10px] font-bold", stockStatus.className)}>
+                {stockStatus.label}
               </p>
             )}
           </div>

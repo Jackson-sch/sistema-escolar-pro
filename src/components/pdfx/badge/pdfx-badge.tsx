@@ -1,4 +1,4 @@
-import { Text as PDFText, StyleSheet, View } from '@react-pdf/renderer';
+import { Text as PDFText, StyleSheet, View } from "@/lib/pdf";
 import type { Style } from '@react-pdf/types';
 import { usePdfxTheme, useSafeMemo } from "@/lib/pdfx-theme-context";
 type PdfxTheme = ReturnType<typeof usePdfxTheme>;
@@ -121,6 +121,40 @@ function createBadgeStyles(t: PdfxTheme) {
   };
 }
 
+const TEXT_STYLE_KEYS = new Set([
+  'color',
+  'fontSize',
+  'fontWeight',
+  'fontFamily',
+  'letterSpacing',
+  'textTransform',
+  'lineHeight',
+  'textAlign',
+]);
+
+function splitCustomBadgeStyle(style: Style | Style[] | undefined): {
+  textStyle: Style;
+  containerStyle: Style;
+} {
+  const textStyle: Record<string, any> = {};
+  const containerStyle: Record<string, any> = {};
+  if (!style) return { textStyle, containerStyle };
+
+  const flatStyles = [style].flat().filter(Boolean);
+  for (const s of flatStyles) {
+    if (typeof s === 'object' && s !== null) {
+      for (const [k, v] of Object.entries(s)) {
+        if (TEXT_STYLE_KEYS.has(k)) {
+          textStyle[k] = v;
+        } else {
+          containerStyle[k] = v;
+        }
+      }
+    }
+  }
+  return { textStyle, containerStyle };
+}
+
 export function Badge({
   label,
   children,
@@ -132,19 +166,22 @@ export function Badge({
 }: BadgeProps) {
   const theme = usePdfxTheme();
   const styles = useSafeMemo(() => createBadgeStyles(theme), [theme]);
-  // `label` takes precedence; fall back to string children for React idiom compatibility
   const text = label ?? children ?? '';
+  const { textStyle: textStyleFromCustom, containerStyle: containerStyleFromCustom } =
+    splitCustomBadgeStyle(style);
+
   const containerStyles: Style[] = [
     styles.containerBase,
     styles.containerVariantMap[variant],
     styles.containerSizeMap[size],
     ...(background ? [{ backgroundColor: resolveColor(background, theme.colors) }] : []),
-    ...(style ? [style].flat() : []),
+    containerStyleFromCustom,
   ];
   const textStyles: Style[] = [
     styles.textVariantMap[variant],
     styles.textSizeMap[size],
     ...(color ? [{ color: resolveColor(color, theme.colors) }] : []),
+    textStyleFromCustom,
   ];
   return (
     <View style={containerStyles}>

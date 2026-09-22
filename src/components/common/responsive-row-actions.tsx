@@ -141,9 +141,11 @@ export function ResponsiveRowActions({
                 >
                   <Icon
                     className={cn(
-                      "mr-2 h-4 w-4",
+                      "mr-2 h-4 w-4 shrink-0",
                       action.variant === "destructive"
                         ? "text-red-500"
+                        : action.className?.includes("text-")
+                        ? undefined
                         : "text-muted-foreground",
                     )}
                   />

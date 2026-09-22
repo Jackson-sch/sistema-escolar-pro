@@ -3,22 +3,7 @@
 import * as React from "react";
 import { useQueryState, parseAsString, parseAsInteger } from "nuqs";
 import { DataTable } from "@/components/ui/data-table";
-import {
-  IconCircleDashed,
-  IconFilter,
-  IconReceipt2,
-  IconTable,
-} from "@tabler/icons-react";
-import { exportToExcel, formatCronogramaForExcel } from "@/lib/export-utils";
-
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { exportFinanceCronogramaExcel } from "@/lib/excel/templates/finance-cronograma";
 import {
   CronogramaTableType,
   getCronogramaColumns,
@@ -28,9 +13,9 @@ import { PagoDialog } from "@/components/finanzas/cronogramas/pago-dialog";
 import { ConfirmModal } from "@/components/modals/confirm-modal";
 import { anularPagoAction } from "@/actions/finance";
 import { toast } from "sonner";
-import { formatCurrency } from "@/lib/formats";
-import type { FormatoComprobante } from "@/lib/comprobante-constants";
-import { LevelSegmentedControl } from "@/components/common/level-segmented-control";
+import { FormatoComprobante } from "@/lib/comprobante-constants";
+import { CronogramaHeaderToolbar } from "./components/cronograma-header-toolbar";
+import { CronogramaFiltersBar } from "./components/cronograma-filters-bar";
 
 interface CronogramaTableProps {
   data: CronogramaTableType[];
@@ -40,158 +25,27 @@ interface CronogramaTableProps {
   formatoComprobante?: FormatoComprobante;
 }
 
-interface CronogramaFiltersProps {
-  levelFilter: string;
-  seccionFilter: string;
-  estadoFilter: string;
-  conceptoFilter: string;
-  seccionesDisponibles: any[];
-  conceptos: any[];
-  niveles: any[];
-  filteredData: any[];
-  meta: any;
-}
-
-function CronogramaFilters({
-  levelFilter,
-  seccionFilter,
-  estadoFilter,
-  conceptoFilter,
-  seccionesDisponibles,
-  conceptos,
-  niveles,
-  meta,
-}: CronogramaFiltersProps) {
-  return (
-    <div className="space-y-4 w-full">
-      {/* Control Segmentado de Nivel Educativo */}
-      {niveles && niveles.length > 0 && (
-        <LevelSegmentedControl
-          levels={[
-            { id: "all", label: "TODOS" },
-            ...niveles.map((n: any) => ({ id: n.id, label: n.nombre }))
-          ]}
-          value={levelFilter}
-          onChange={(val) => {
-            meta.setLevelFilter(val);
-            meta.setSeccionFilter("all");
-            meta.setPage(1);
-          }}
-          label="Nivel Educativo"
-        />
-      )}
-
-      {/* Selects Secundarios: Sección, Estado y Concepto */}
-      <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 flex-1">
-        <Select value={seccionFilter} onValueChange={meta.setSeccionFilter}>
-          <SelectTrigger className="w-full h-10 bg-background/50 border-border/40 rounded-xl text-xs font-semibold uppercase tracking-wider transition-[background-color,box-shadow] focus:ring-2 focus:ring-indigo-500/20 hover:bg-background/80">
-            <div className="flex items-center gap-2 truncate">
-              <IconFilter className="size-4 opacity-40 shrink-0" />
-              <SelectValue placeholder="Sección" />
-            </div>
-          </SelectTrigger>
-          <SelectContent className="border-border/40 bg-background/95 rounded-2xl">
-            <SelectItem value="all" className="text-xs font-semibold">
-              TODAS LAS SECCIONES
-            </SelectItem>
-            {seccionesDisponibles.map(([id, label]) => (
-              <SelectItem
-                key={id}
-                value={id}
-                className="text-xs"
-              >
-                {label.toUpperCase()}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={estadoFilter} onValueChange={meta.setEstadoFilter}>
-          <SelectTrigger className="w-full h-10 bg-background/50 border-border/40 rounded-xl text-xs font-semibold uppercase tracking-wider transition-[background-color,box-shadow] focus:ring-2 focus:ring-indigo-500/20 hover:bg-background/80">
-            <div className="flex items-center gap-2 truncate">
-              <IconCircleDashed className="size-4 opacity-40 shrink-0" />
-              <SelectValue placeholder="Estado" />
-            </div>
-          </SelectTrigger>
-          <SelectContent className="border-border/40 bg-background/95 rounded-2xl">
-            <SelectItem value="all" className="text-xs font-semibold">
-              TODOS LOS ESTADOS
-            </SelectItem>
-            <SelectItem value="PAID" className="text-xs text-emerald-600 font-semibold">PAGADO</SelectItem>
-            <SelectItem value="PENDING" className="text-xs text-amber-600 font-semibold">PENDIENTE</SelectItem>
-            <SelectItem value="EXPIRED" className="text-xs text-rose-500 font-semibold">VENCIDO</SelectItem>
-            <SelectItem value="PARTIALLY_PAID" className="text-xs text-blue-600 font-semibold">PARCIAL</SelectItem>
-            <SelectItem value="PENDING_VERIFICATION" className="text-xs text-indigo-600 font-semibold">
-              POR VERIFICAR (VOUCHERS)
-            </SelectItem>
-            <SelectItem value="VOIDED" className="text-xs opacity-50">ANULADO</SelectItem>
-          </SelectContent>
-        </Select>
-
-        <Select value={conceptoFilter} onValueChange={meta.setConceptoFilter}>
-          <SelectTrigger className="w-full h-10 bg-background/50 border-border/40 rounded-xl text-xs font-semibold uppercase tracking-wider transition-[background-color,box-shadow] focus:ring-2 focus:ring-indigo-500/20 hover:bg-background/80 xs:col-span-2 sm:col-span-1">
-            <div className="flex items-center gap-2 truncate">
-              <IconReceipt2 className="size-4 opacity-40 shrink-0" />
-              <SelectValue placeholder="Concepto" />
-            </div>
-          </SelectTrigger>
-          <SelectContent className="border-border/40 bg-background/95 rounded-2xl">
-            <SelectItem value="all" className="text-xs font-semibold">
-              TODOS LOS CONCEPTOS
-            </SelectItem>
-            {conceptos.map((c) => (
-              <SelectItem
-                key={c.id}
-                value={c.id}
-                className="text-xs"
-              >
-                {c.nombre.toUpperCase()}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
-  );
-}
+const DEFAULT_NIVELES: any[] = [];
 
 export function CronogramaTable({
   data,
   conceptos,
-  niveles = [],
+  niveles = DEFAULT_NIVELES,
   institucion,
   formatoComprobante,
 }: CronogramaTableProps) {
   const [showPagoDialog, setShowPagoDialog] = React.useState(false);
   const [selectedCronograma, setSelectedCronograma] =
     React.useState<CronogramaTableType | null>(null);
-  const [montoPago, setMontoPago] = React.useState("");
-  const [numeroBoleta, setNumeroBoleta] = React.useState("");
+  const [montoPago, setMontoPago] = React.useState<string>("");
+  const [numeroBoleta, setNumeroBoleta] = React.useState<string>("");
 
-  // Estados para anulación de pago
   const [showVoidDialog, setShowVoidDialog] = React.useState(false);
-  const [selectedPago, setSelectedPago] = React.useState<any | null>(null);
-  const [isPendingVoid, startTransitionVoid] = React.useTransition();
+  const [selectedPago, setSelectedPago] = React.useState<any>(null);
+  const [isVoiding, setIsVoiding] = React.useState(false);
+  const [isExporting, setIsExporting] = React.useState(false);
 
-  const onAnularPago = () => {
-    if (!selectedPago) return;
-    startTransitionVoid(async () => {
-      const res = await anularPagoAction({ pagoId: selectedPago.id });
-      if (res.success) {
-        toast.success(res.success);
-        setShowVoidDialog(false);
-        setSelectedPago(null);
-      } else {
-        toast.error(res.error || "No se pudo anular el pago");
-      }
-    });
-  };
-
-  // Estados para filtros con nuqs (persistidos en URL)
-  const [searchQuery, setSearchQuery] = useQueryState(
-    "q",
-    parseAsString.withDefault(""),
-  );
+  // Estados URL mediante nuqs
   const [levelFilter, setLevelFilter] = useQueryState(
     "nivel",
     parseAsString.withDefault("all"),
@@ -208,13 +62,40 @@ export function CronogramaTable({
     "concepto",
     parseAsString.withDefault("all"),
   );
+  const [mesFilter, setMesFilter] = useQueryState(
+    "mes",
+    parseAsString.withDefault("all"),
+  );
 
-  // Pagination states with nuqs
+  const [searchQuery, setSearchQuery] = useQueryState(
+    "q",
+    parseAsString.withDefault(""),
+  );
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
   const [limit, setLimit] = useQueryState(
     "limit",
     parseAsInteger.withDefault(10),
   );
+
+  const handleConfirmVoid = async () => {
+    if (!selectedPago) return;
+    setIsVoiding(true);
+    try {
+      const res = await anularPagoAction({
+        pagoId: selectedPago.id,
+      });
+      if (res.success) {
+        toast.success(res.success as string);
+        setShowVoidDialog(false);
+        setSelectedPago(null);
+      }
+      if (res.error) toast.error(res.error);
+    } catch {
+      toast.error("Error al anular el pago.");
+    } finally {
+      setIsVoiding(false);
+    }
+  };
 
   const columns = React.useMemo(
     () =>
@@ -230,149 +111,215 @@ export function CronogramaTable({
     [institucion],
   );
 
-  const filteredData = React.useMemo(() => {
-    let result = [...data];
-
-    // Filtro por Nivel
-    if (levelFilter !== "all") {
-      result = result.filter(
-        (item: any) =>
-          item.estudiante?.nivelAcademico?.nivel?.id === levelFilter ||
-          (item.estudiante?.nivelAcademico?.nivel as any)?.id === levelFilter ||
-          (item.estudiante?.nivelAcademico?.nivel as any)?.nombre?.toLowerCase() === levelFilter.toLowerCase(),
-      );
-    }
-
-    // Filtro por sección
-    if (seccionFilter !== "all") {
-      result = result.filter(
-        (item) => item.estudiante.nivelAcademicoId === seccionFilter,
-      );
-    }
-
-    // Filtro por estado
-    if (estadoFilter !== "all") {
-      if (estadoFilter === "PAID")
-        result = result.filter((item) => item.pagado);
-      if (estadoFilter === "PENDING")
-        result = result.filter(
-          (item) =>
-            !item.pagado &&
-            item.montoPagado === 0 &&
-            !isVencido(item.fechaVencimiento),
-        );
-      if (estadoFilter === "PARTIALLY_PAID")
-        result = result.filter((item) => !item.pagado && item.montoPagado > 0);
-      if (estadoFilter === "EXPIRED")
-        result = result.filter(
-          (item) => !item.pagado && isVencido(item.fechaVencimiento),
-        );
-      if (estadoFilter === "PENDING_VERIFICATION")
-        result = result.filter(
-          (item) =>
-            item.pagos?.some((p: any) => p.estado === "pendiente" || p.comprobante) ||
-            (item as any).estado === "PENDING_VERIFICATION",
-        );
-      if (estadoFilter === "VOIDED")
-        result = result.filter((item) =>
-          item.pagos?.some((p: any) => p.estado === "anulado"),
-        );
-    }
-
-    // Filtro por concepto
-    if (conceptoFilter !== "all") {
-      result = result.filter((item) => item.concepto.id === conceptoFilter);
-    }
-
-    return result;
-  }, [data, levelFilter, seccionFilter, estadoFilter, conceptoFilter]);
-
+  // Secciones únicas disponibles
   const seccionesDisponibles = React.useMemo(() => {
-    const map = new Map();
+    const map = new Map<string, string>();
     data.forEach((item) => {
-      const s = item.estudiante.nivelAcademico;
-      if (s) {
-        const nivelObj = s.nivel as any;
-        if (
-          levelFilter === "all" ||
-          nivelObj?.id === levelFilter ||
-          nivelObj?.nombre?.toLowerCase() === levelFilter.toLowerCase()
-        ) {
-          const id = item.estudiante.nivelAcademicoId;
-          map.set(id, `${nivelObj?.nombre || ""} - ${s.grado?.nombre || ""} "${s.seccion}"`);
-        }
+      const sec =
+        item.estudiante?.matriculas?.[0]?.nivelAcademico ??
+        item.estudiante?.nivelAcademico;
+      if (sec) {
+        const itemNivelNombre = sec.nivel?.nombre || "";
+        const label = `${sec.grado?.nombre || ""} - "${sec.seccion || ""}" (${itemNivelNombre})`;
+        map.set(label, label);
       }
     });
     return Array.from(map.entries());
-  }, [data, levelFilter]);
+  }, [data]);
 
-  const hasActiveFilters =
-    searchQuery !== "" ||
-    levelFilter !== "all" ||
-    seccionFilter !== "all" ||
-    estadoFilter !== "all" ||
-    conceptoFilter !== "all";
+  // Filtrado de datos
+  const filteredData = React.useMemo(() => {
+    return data.filter((item) => {
+      const studentName =
+        `${item.estudiante?.apellidoPaterno || ""} ${item.estudiante?.apellidoMaterno || ""} ${item.estudiante?.name || ""}`.toLowerCase();
+      const studentDni = (item.estudiante?.dni || "").toLowerCase();
+      const query = searchQuery.toLowerCase();
+      const matchSearch =
+        searchQuery === "" ||
+        studentName.includes(query) ||
+        studentDni.includes(query);
+
+      const sec =
+        item.estudiante?.matriculas?.[0]?.nivelAcademico ??
+        item.estudiante?.nivelAcademico;
+      const itemNivelNombre = sec?.nivel?.nombre || "";
+      const matchLevel =
+        levelFilter === "all" ||
+        itemNivelNombre.toLowerCase().includes(levelFilter.toLowerCase());
+
+      const seccionLabel = sec
+        ? `${sec.grado?.nombre || ""} - "${sec.seccion || ""}" (${itemNivelNombre})`
+        : "";
+      const matchSeccion =
+        seccionFilter === "all" || seccionLabel === seccionFilter;
+
+      const vencido = isVencido(item.fechaVencimiento, item.pagado);
+      let matchEstado = true;
+      if (estadoFilter === "PAID") matchEstado = item.pagado;
+      else if (estadoFilter === "EXPIRED") matchEstado = vencido;
+      else if (estadoFilter === "PENDING")
+        matchEstado = !item.pagado && !vencido;
+      else if (estadoFilter === "PARTIALLY_PAID")
+        matchEstado =
+          !item.pagado &&
+          Number(item.montoPagado) > 0 &&
+          Number(item.montoPagado) < Number(item.monto);
+      else if (estadoFilter === "PENDING_VERIFICATION")
+        matchEstado = Boolean(
+          !item.pagado &&
+            item.pagos?.some((p: any) => p.estado === "PENDING_VERIFICATION"),
+        );
+      else if (estadoFilter === "VOIDED")
+        matchEstado = Boolean(
+          item.pagos?.some((p: any) => p.estado === "VOIDED"),
+        );
+
+      const matchConcepto =
+        conceptoFilter === "all" ||
+        item.concepto?.id === conceptoFilter ||
+        item.concepto?.nombre === conceptoFilter;
+
+      // Filtro por Mes / Periodo rápido
+      let matchMes = true;
+      if (mesFilter !== "all") {
+        const conceptoName = (item.concepto?.nombre || "").toLowerCase();
+        const isMatricula = conceptoName.includes("matric");
+
+        if (mesFilter === "matricula") {
+          matchMes = isMatricula;
+        } else {
+          const monthNum = parseInt(mesFilter, 10);
+          const itemDate = new Date(item.fechaVencimiento);
+          const itemMonth = itemDate.getUTCMonth() + 1;
+
+          const monthKeywords: Record<number, string[]> = {
+            3: ["marzo", "mar"],
+            4: ["abril", "abr"],
+            5: ["mayo", "may"],
+            6: ["junio", "jun"],
+            7: ["julio", "jul"],
+            8: ["agosto", "ago"],
+            9: ["setiembre", "septiembre", "set", "sep"],
+            10: ["octubre", "oct"],
+            11: ["noviembre", "nov"],
+            12: ["diciembre", "dic"],
+          };
+
+          const matchesDate = !isMatricula && itemMonth === monthNum;
+          const matchesKeyword = monthKeywords[monthNum]?.some((kw) =>
+            conceptoName.includes(kw)
+          );
+          matchMes = matchesDate || Boolean(matchesKeyword);
+        }
+      }
+
+      return (
+        matchSearch &&
+        matchLevel &&
+        matchSeccion &&
+        matchEstado &&
+        matchConcepto &&
+        matchMes
+      );
+    }).sort((a, b) => {
+      // 1. Prioridad: Pendientes / No pagados primero (false antes que true)
+      if (a.pagado !== b.pagado) {
+        return a.pagado ? 1 : -1;
+      }
+      // 2. Fechas de vencimiento más recientes arriba
+      const timeA = new Date(a.fechaVencimiento).getTime();
+      const timeB = new Date(b.fechaVencimiento).getTime();
+      if (timeB !== timeA) {
+        return timeB - timeA;
+      }
+      // 3. Alfabético por apellido paterno
+      const apA = a.estudiante?.apellidoPaterno || "";
+      const apB = b.estudiante?.apellidoPaterno || "";
+      return apA.localeCompare(apB);
+    });
+  }, [
+    data,
+    searchQuery,
+    levelFilter,
+    seccionFilter,
+    estadoFilter,
+    conceptoFilter,
+    mesFilter,
+  ]);
 
   const clearFilters = () => {
-    setSearchQuery("");
     setLevelFilter("all");
     setSeccionFilter("all");
     setEstadoFilter("all");
     setConceptoFilter("all");
+    setMesFilter("all");
+    setSearchQuery("");
     setPage(1);
   };
 
-  return (
-    <div className="space-y-3 sm:space-y-4">
-      {/* Acciones de la tabla */}
-      <div className="flex justify-end items-center px-2">
-        <Button
-          variant="outline"
-          size="sm"
-          className="h-10 px-5 w-full sm:w-auto border-emerald-500/20 text-emerald-600 bg-emerald-500/5 hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-[background-color,border-color] rounded-xl font-semibold text-xs gap-2 shadow-xs"
-          title="Exportar a Excel"
-          onClick={() =>
-            exportToExcel(
-              formatCronogramaForExcel(filteredData),
-              `Cronograma_Pagos_${new Date().toISOString().split("T")[0]}`,
-            )
-          }
-        >
-          <IconTable className="size-4" />
-          <span>Exportar a Excel</span>
-        </Button>
-      </div>
+  const handleExportExcel = async () => {
+    if (filteredData.length === 0) {
+      toast.error("No hay registros para exportar con los filtros actuales.");
+      return;
+    }
+    setIsExporting(true);
+    try {
+      await exportFinanceCronogramaExcel(filteredData);
+      toast.success(
+        `Reporte Excel generado con éxito (${filteredData.length} cuotas).`,
+      );
+    } catch (err) {
+      console.error("Error al exportar Excel:", err);
+      toast.error("Error al generar el archivo Excel.");
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
+  return (
+    <div className="space-y-4 animate-in fade-in duration-200">
+      {/* 1. Barra de Herramientas y Acciones */}
+      <CronogramaHeaderToolbar
+        conceptos={conceptos}
+        niveles={niveles}
+        onExportExcel={handleExportExcel}
+        isExporting={isExporting}
+      />
+
+      {/* 2. Barra de Filtros Externa Desacoplada */}
+      <CronogramaFiltersBar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        levelFilter={levelFilter}
+        seccionFilter={seccionFilter}
+        estadoFilter={estadoFilter}
+        conceptoFilter={conceptoFilter}
+        mesFilter={mesFilter}
+        seccionesDisponibles={seccionesDisponibles}
+        conceptos={conceptos}
+        niveles={niveles}
+        totalFiltrados={filteredData.length}
+        totalOriginal={data.length}
+        onClearFilters={clearFilters}
+        meta={{
+          setLevelFilter,
+          setSeccionFilter,
+          setEstadoFilter,
+          setConceptoFilter,
+          setMesFilter,
+          setPage,
+        }}
+      />
+
+      {/* 3. Tabla de Datos Limpia */}
       <DataTable
         columns={columns}
         data={filteredData}
-        searchKey="estudiante"
-        searchPlaceholder="Buscar por estudiante (DNI, Nombres)..."
         pageIndex={page - 1}
         pageSize={limit}
         onPageIndexChange={(newPageIndex: number) => setPage(newPageIndex + 1)}
         onPageSizeChange={(newPageSize: number) => setLimit(newPageSize)}
-        hasActiveFilters={hasActiveFilters}
-        onClearFilters={clearFilters}
-      >
-        <CronogramaFilters
-          levelFilter={levelFilter}
-          seccionFilter={seccionFilter}
-          estadoFilter={estadoFilter}
-          conceptoFilter={conceptoFilter}
-          seccionesDisponibles={seccionesDisponibles}
-          conceptos={conceptos}
-          niveles={niveles}
-          filteredData={filteredData}
-          meta={{
-            setLevelFilter,
-            setSeccionFilter,
-            setEstadoFilter,
-            setConceptoFilter,
-            setPage,
-          }}
-        />
-      </DataTable>
+      />
 
       {/* Modal para Registrar Pago */}
       {selectedCronograma && (
@@ -398,11 +345,10 @@ export function CronogramaTable({
             setShowVoidDialog(false);
             setSelectedPago(null);
           }}
-          onConfirm={onAnularPago}
-          title="Anular Pago Registrado"
-          description={`¿Estás seguro de que deseas anular el pago de ${formatCurrency(selectedPago.monto)}? Esta acción reversará el saldo y marcará la boleta como anulada.`}
-          loading={isPendingVoid}
-          variant="danger"
+          onConfirm={handleConfirmVoid}
+          loading={isVoiding}
+          title="Anular Comprobante de Pago"
+          description={`¿Estás seguro de anular el pago por ${selectedPago.monto} registrado el ${selectedPago.fechaPago}? Esta acción revertirá el saldo pendiente del estudiante.`}
         />
       )}
     </div>

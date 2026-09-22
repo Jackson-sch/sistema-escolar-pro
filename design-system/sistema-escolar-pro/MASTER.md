@@ -1,202 +1,107 @@
-# Design System Master File
+# Sistema de Diseño Institucional (EduNova Institutional OS)
 
-> **LOGIC:** When building a specific page, first check `design-system/pages/[page-name].md`.
-> If that file exists, its rules **override** this Master file.
-> If not, strictly follow the rules below.
-
----
-
-**Project:** Sistema Escolar Pro
-**Generated:** 2026-04-22 02:12:01
-**Category:** Educational App
+> **Propósito:** Guía de diseño de primer nivel para software escolar operativo peruano (SIS).
+> **Principio Rector:** *"El staff necesita un tablero de control denso y calmado; el docente necesita su agenda operativa en 3 clics; la familia necesita el recado del día en el móvil."*
 
 ---
 
-## Global Rules
+## 1. Filosofía de Marca & White-Label
 
-### Color Palette
-
-| Role | Hex | CSS Variable |
-|------|-----|--------------|
-| Primary | `#4F46E5` | `--color-primary` |
-| Secondary | `#818CF8` | `--color-secondary` |
-| CTA/Accent | `#F97316` | `--color-cta` |
-| Background | `#EEF2FF` | `--color-background` |
-| Text | `#1E1B4B` | `--color-text` |
-
-**Color Notes:** Playful indigo + energetic orange
-
-### Typography
-
-- **Heading Font:** Fredoka
-- **Body Font:** Nunito
-- **Mood:** playful, friendly, fun, creative, warm, approachable
-- **Google Fonts:** [Fredoka + Nunito](https://fonts.google.com/share?selection.family=Fredoka:wght@400;500;600;700|Nunito:wght@300;400;500;600;700)
-
-**CSS Import:**
-```css
-@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@300;400;500;600;700&display=swap');
-```
-
-### Spacing Variables
-
-| Token | Value | Usage |
-|-------|-------|-------|
-| `--space-xs` | `4px` / `0.25rem` | Tight gaps |
-| `--space-sm` | `8px` / `0.5rem` | Icon gaps, inline spacing |
-| `--space-md` | `16px` / `1rem` | Standard padding |
-| `--space-lg` | `24px` / `1.5rem` | Section padding |
-| `--space-xl` | `32px` / `2rem` | Large gaps |
-| `--space-2xl` | `48px` / `3rem` | Section margins |
-| `--space-3xl` | `64px` / `4rem` | Hero padding |
-
-### Shadow Depths
-
-| Level | Value | Usage |
-|-------|-------|-------|
-| `--shadow-sm` | `0 1px 2px rgba(0,0,0,0.05)` | Subtle lift |
-| `--shadow-md` | `0 4px 6px rgba(0,0,0,0.1)` | Cards, buttons |
-| `--shadow-lg` | `0 10px 15px rgba(0,0,0,0.1)` | Modals, dropdowns |
-| `--shadow-xl` | `0 20px 25px rgba(0,0,0,0.15)` | Hero images, featured cards |
+* **Identidad Institucional Primero:** La Institución Educativa (Colegio) es la protagonista visual:
+  * Logotipo/Escudo y Nombre de la IE visibles en el header del Sidebar y reportes oficiales.
+  * Selector de Ciclo/Periodo Escolar activo (ej. `2025` / `2026`).
+  * "EduNova" se posiciona únicamente como motor de tecnología (*Powered by EduNova*), de forma sobria y discreta.
+* **Tono de Producto:** Serio, confiable, rápido, sin distracciones lúdicas infantiles en la operación administrativa y docente.
 
 ---
 
-## Component Specs
+## 2. Tokens de Color & Superficies
 
-### Buttons
-
-```css
-/* Primary Button */
-.btn-primary {
-  background: #F97316;
-  color: white;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 200ms ease;
-  cursor: pointer;
-}
-
-.btn-primary:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
-
-/* Secondary Button */
-.btn-secondary {
-  background: transparent;
-  color: #4F46E5;
-  border: 2px solid #4F46E5;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 200ms ease;
-  cursor: pointer;
-}
-```
-
-### Cards
-
-```css
-.card {
-  background: #EEF2FF;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: var(--shadow-md);
-  transition: all 200ms ease;
-  cursor: pointer;
-}
-
-.card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
-}
-```
-
-### Inputs
-
-```css
-.input {
-  padding: 12px 16px;
-  border: 1px solid #E2E8F0;
-  border-radius: 8px;
-  font-size: 16px;
-  transition: border-color 200ms ease;
-}
-
-.input:focus {
-  border-color: #4F46E5;
-  outline: none;
-  box-shadow: 0 0 0 3px #4F46E520;
-}
-```
-
-### Modals
-
-```css
-.modal-overlay {
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-}
-
-.modal {
-  background: white;
-  border-radius: 16px;
-  padding: 32px;
-  box-shadow: var(--shadow-xl);
-  max-width: 500px;
-  width: 90%;
-}
-```
+| Token | Light Mode (OKLCH / Hex) | Dark Mode (OKLCH / Hex) | Uso Institucional |
+|---|---|---|---|
+| **Primary (Brand IE)** | `oklch(0.51 0.24 275)` / `#4F46E5` | `oklch(0.65 0.22 275)` / `#818CF8` | Acciones primarias, botones institucionales, links clave |
+| **Background** | `oklch(0.99 0 0)` / `#FAFAFA` | `oklch(0.145 0 0)` / `#12141A` | Lienzo base |
+| **Card / Surface** | `oklch(1 0 0)` / `#FFFFFF` | `oklch(0.185 0 0)` / `#181B22` | Tarjetas de datos, tablas operativas |
+| **Border** | `oklch(0.922 0 0)` / `#E2E8F0` | `oklch(1 0 0 / 12%)` | Separadores y bordes nítidos |
+| **Text Primary** | `oklch(0.145 0 0)` / `#0F172A` | `oklch(0.985 0 0)` / `#F8FAFC` | Jerarquía tipográfica alta |
+| **Text Muted** | `oklch(0.556 0 0)` / `#64748B` | `oklch(0.708 0 0)` / `#94A3B8` | Etiquetas secundarias y metadatos |
+| **Success (Asistencia/Pago)** | `oklch(0.627 0.194 149.214)` | `oklch(0.68 0.18 149.214)` | Presente, Pago al día, Logro CNEB |
+| **Warning (Pendiente/Tardanza)**| `oklch(0.646 0.222 41.116)` | `oklch(0.70 0.20 41.116)` | Tardanza, Por Calificar, En Proceso |
+| **Destructive (Falta/Deuda)** | `oklch(0.577 0.245 27.325)` | `oklch(0.65 0.22 27.325)` | Inasistencia, Deuda vencida, En Inicio |
 
 ---
 
-## Style Guidelines
+## 3. Tipografía & Jerarquía de Densidad
 
-**Style:** Claymorphism
-
-**Keywords:** Soft 3D, chunky, playful, toy-like, bubbly, thick borders (3-4px), double shadows, rounded (16-24px)
-
-**Best For:** Educational apps, children's apps, SaaS platforms, creative tools, fun-focused, onboarding, casual games
-
-**Key Effects:** Inner+outer shadows (subtle, no hard lines), soft press (200ms ease-out), fluffy elements, smooth transitions
-
-### Page Pattern
-
-**Pattern Name:** Feature-Rich Showcase
-
-- **CTA Placement:** Above fold
-- **Section Order:** Hero > Features > CTA
+* **Tipografía Principal:** `Plus Jakarta Sans`, sans-serif (legibilidad óptima en dashboards y tablas densas).
+* **Tipografía Monospace:** `JetBrains Mono` (para DNI, Código Modular SIAGIE, montos `S/`, horas lectivas y códigos).
+* **Títulos Operativos (PageHeader):**
+  * **Título:** `text-lg sm:text-xl font-bold tracking-tight text-foreground` (Nunca `text-5xl` de landing page).
+  * **Subtítulo:** `text-xs text-muted-foreground max-w-2xl font-normal`.
+  * **Badge de Contexto:** `text-[11px] font-semibold tracking-wide uppercase px-2.5 py-0.5`.
 
 ---
 
-## Anti-Patterns (Do NOT Use)
+## 4. Radios & Geometría
 
-- ❌ Dark modes (Forbidden for administrative dashboards to maintain playful claymorphic aesthetics; permitted only for parent/student portals for nighttime legibility)
-- ❌ Complex jargon
-
-### Additional Forbidden Patterns
-
-- ❌ **Emojis as icons** — Use SVG icons (Heroicons, Lucide, Simple Icons)
-- ❌ **Missing cursor:pointer** — All clickable elements must have cursor:pointer
-- ❌ **Layout-shifting hovers** — Avoid scale transforms that shift layout
-- ❌ **Low contrast text** — Maintain 4.5:1 minimum contrast ratio
-- ❌ **Instant state changes** — Always use transitions (150-300ms)
-- ❌ **Invisible focus states** — Focus states must be visible for a11y
+* **Tarjetas:** `rounded-xl` (o `rounded-2xl` máximo para contenedores maestros).
+* **Controles (Inputs, Botones, Selects):** `rounded-lg` (8px).
+* **Badges & Chips:** `rounded-full` o `rounded-md` según si es estado o código.
+* **Prohibido:** Formas excesivamente redondeadas ("bubbly pills" o estilos inflados tipo juguete).
 
 ---
 
-## Pre-Delivery Checklist
+## 5. Arquitectura de Navegación por Rol (Job-to-be-Done)
 
-Before delivering any UI code, verify:
+### A. Staff (Dirección / Secretaría / Administración)
+1. **Inicio:** Dashboard institucional con alertas tempranas y agenda ejecutiva.
+2. **Matrícula:**
+   * Admisiones (CRM)
+   * Padrón de Estudiantes
+   * Matrículas & Vacantes
+   * Cierre & Promociones
+3. **Académico:**
+   * Secciones y Horarios
+   * Evaluaciones (CNEB & SIAGIE)
+   * Asistencia & Tardanzas
+4. **Personas:**
+   * Estudiantes & Familias
+   * Personal Docente & Administrativo
+5. **Tesorería:**
+   * Cronogramas y Deudas
+   * Verificar Pagos (conciliación rápida)
+   * Operaciones / Uniformes
+6. **Comunidad:**
+   * Anuncios y Comunicados
+   * Tutoría y Convivencia Escolar
+7. **Configuración:**
+   * Datos de la I.E.
+   * Periodos & Turnos
+   * Permisos & Auditoría
 
-- [ ] No emojis used as icons (use SVG instead)
-- [ ] All icons from consistent icon set (Heroicons/Lucide)
-- [ ] `cursor-pointer` on all clickable elements
-- [ ] Hover states with smooth transitions (150-300ms)
-- [ ] Light mode: text contrast 4.5:1 minimum
-- [ ] Focus states visible for keyboard navigation
-- [ ] `prefers-reduced-motion` respected
-- [ ] Responsive: 375px, 768px, 1024px, 1440px
-- [ ] No content hidden behind fixed navbars
-- [ ] No horizontal scroll on mobile
+### B. Docente (Agenda Operativa Diaria)
+1. **Inicio:** Mi Agenda de Hoy & Clases Activas (`/dashboard`).
+2. **Operación Diaria:**
+   * Pasar Asistencia en 20s (`/asistencia`).
+   * Cargar Notas / Registro CNEB (`/evaluaciones`).
+   * Mis Secciones & Alumnos (`/gestion/estudiantes`).
+3. **Comunidad:**
+   * Avisos & Circulares (`/comunicaciones`).
+
+### C. Familia / Apoderado (Mobile-First)
+* *"El parte del día":*
+  1. ¿Mi hijo llegó al colegio hoy? (Hora y estado en grande).
+  2. ¿Tengo pagos pendientes? (Monto claro con botón de pago/comprobante).
+  3. ¿Cómo va en sus cursos? (Últimas notas y observaciones del tutor).
+
+---
+
+## 6. Reglas de Componentes Operativos
+
+* **PageHeader Estándar:** Todas las páginas internas usan el componente `PageHeader` compacto con icono, título operativo, descripción concisa y barra de acciones a la derecha.
+* **Tablas de Datos:**
+  * Modo compacto por defecto (`py-2 px-3` en celdas).
+  * Hover sutil en fila (`hover:bg-muted/50`).
+  * Atajos de teclado en formularios (`Alt + G` Guardar, `Esc` Cancelar).
+* **Dark Mode:** Totalmente habilitado y optimizado con contraste 7:1 en textos principales.
+

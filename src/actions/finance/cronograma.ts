@@ -18,16 +18,37 @@ const REVALIDATE_PATH = "/finanzas";
 export const getCronogramaAction = createSafeAction(
   CronogramaFilterSchema,
   async (filters, session) => {
-    const institucionId = session.user.institucionId;
+    let institucionId = session?.user?.institucionId;
+    if (!institucionId) {
+      const firstInst = await prisma.institucionEducativa.findFirst({
+        select: { id: true },
+      });
+      institucionId = firstInst?.id;
+    }
+
+    const startOfYear = filters?.anioAcademico
+      ? new Date(filters.anioAcademico, 0, 1)
+      : undefined;
+    const endOfYear = filters?.anioAcademico
+      ? new Date(filters.anioAcademico, 11, 31, 23, 59, 59)
+      : undefined;
 
     const cronograma = await prisma.cronogramaPago.findMany({
       where: {
         estudiante: {
-          institucionId: institucionId || undefined,
+          ...(institucionId ? { institucionId } : {}),
           id: filters?.estudianteId,
         },
         conceptoId: filters?.conceptoId,
         pagado: filters?.pagado,
+        ...(startOfYear && endOfYear
+          ? {
+              fechaVencimiento: {
+                gte: startOfYear,
+                lte: endOfYear,
+              },
+            }
+          : {}),
       },
       include: {
         estudiante: {
@@ -67,7 +88,8 @@ export const getCronogramaAction = createSafeAction(
         pagos: true,
       },
       orderBy: [
-        { fechaVencimiento: "asc" },
+        { pagado: "asc" },
+        { fechaVencimiento: "desc" },
         { estudiante: { apellidoPaterno: "asc" } },
       ],
     });
@@ -318,3 +340,172 @@ export const applyBulkMoraAction = createSafeAction(
   },
   { roles: ["administrativo"] },
 );
+
+/**
+ * Obtiene el expediente de cobranza completo del alumno para la Caja Rápida (POS)
+ */
+export const getStudentCobroDetailsAction = createSafeAction(
+  z.object({ estudianteId: z.string() }),
+  async ({ estudianteId }, session) => {
+    const institucionId = session.user.institucionId;
+
+    const student = await prisma.user.findFirst({
+      where: {
+        id: estudianteId,
+        role: "estudiante",
+        institucionId: institucionId || undefined,
+      },
+      select: {
+        id: true,
+        name: true,
+        apellidoPaterno: true,
+        apellidoMaterno: true,
+        dni: true,
+        image: true,
+        codigoEstudiante: true,
+        codigoSiagie: true,
+        nivelAcademico: {
+          include: {
+            grado: true,
+            nivel: true,
+            sede: true,
+          },
+        },
+        padresTutores: {
+          include: {
+            padreTutor: {
+              select: {
+                id: true,
+                name: true,
+                apellidoPaterno: true,
+                apellidoMaterno: true,
+                dni: true,
+                telefono: true,
+                email: true,
+              },
+            },
+          },
+        },
+        cronogramaPagos: {
+          orderBy: { fechaVencimiento: "asc" },
+          include: {
+            concepto: true,
+            pagos: {
+              where: { estado: "completado" },
+              orderBy: { fechaPago: "desc" },
+            },
+          },
+        },
+      },
+    });
+
+    if (!student) {
+      return { error: "Estudiante no encontrado en su institución." };
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const cronogramas = student.cronogramaPagos.map((cp) => {
+      const vencimiento = new Date(cp.fechaVencimiento);
+      vencimiento.setHours(0, 0, 0, 0);
+
+      const totalMonto = Number(cp.monto) + Number(cp.moraAcumulada || 0);
+      const totalPagado = Number(cp.montoPagado || 0);
+      const saldoPendiente = Math.max(0, totalMonto - totalPagado);
+
+      let estado: "PAID" | "PENDING" | "EXPIRED" | "PARTIALLY_PAID" = "PENDING";
+      if (cp.pagado || saldoPendiente === 0) {
+        estado = "PAID";
+      } else if (totalPagado > 0) {
+        estado = "PARTIALLY_PAID";
+      } else if (vencimiento < today) {
+        estado = "EXPIRED";
+      }
+
+      return {
+        id: cp.id,
+        conceptoId: cp.conceptoId,
+        conceptoNombre: cp.concepto.nombre,
+        mes: new Date(cp.fechaVencimiento).getMonth() + 1,
+        montoBase: Number(cp.monto),
+        moraAcumulada: Number(cp.moraAcumulada || 0),
+        montoTotal: totalMonto,
+        montoPagado: totalPagado,
+        saldoPendiente,
+        fechaVencimiento: cp.fechaVencimiento,
+        estado,
+        pagado: cp.pagado,
+        diasVencido: vencimiento < today && saldoPendiente > 0 ? Math.ceil((today.getTime() - vencimiento.getTime()) / (1000 * 60 * 60 * 24)) : 0,
+        ultimosPagos: cp.pagos.map((p) => ({
+          id: p.id,
+          monto: Number(p.monto),
+          metodoPago: p.metodoPago,
+          numeroBoleta: p.numeroBoleta,
+          fechaPago: p.fechaPago,
+        })),
+      };
+    });
+
+    // Calcular KPIs de cobranza
+    const totalDeudaVencida = cronogramas
+      .filter((c) => c.estado === "EXPIRED")
+      .reduce((sum, c) => sum + c.saldoPendiente, 0);
+
+    const totalPorCobrarAnio = cronogramas
+      .filter((c) => c.estado !== "PAID")
+      .reduce((sum, c) => sum + c.saldoPendiente, 0);
+
+    const totalCobrado = cronogramas.reduce((sum, c) => sum + c.montoPagado, 0);
+
+    // Obtener siguiente correlativo sugerido
+    const ultimoPago = await prisma.pago.findFirst({
+      where: {
+        numeroBoleta: { startsWith: "B001-" },
+        estudiante: { institucionId: institucionId || undefined },
+      },
+      orderBy: { numeroBoleta: "desc" },
+      select: { numeroBoleta: true },
+    });
+
+    let nextNumeroBoleta = "B001-000001";
+    if (ultimoPago?.numeroBoleta) {
+      const parts = ultimoPago.numeroBoleta.split("-");
+      if (parts[1]) {
+        const num = parseInt(parts[1], 10) + 1;
+        nextNumeroBoleta = `B001-${num.toString().padStart(6, "0")}`;
+      }
+    }
+
+    const primaryGuardian = student.padresTutores.find((p) => p.contactoPrimario)?.padreTutor ||
+      student.padresTutores[0]?.padreTutor || null;
+
+    return {
+      success: serialize({
+        student: {
+          id: student.id,
+          name: student.name,
+          apellidoPaterno: student.apellidoPaterno,
+          apellidoMaterno: student.apellidoMaterno,
+          dni: student.dni,
+          image: student.image,
+          codigoEstudiante: student.codigoEstudiante,
+          codigoSiagie: student.codigoSiagie,
+          nivelAcademico: student.nivelAcademico,
+        },
+        primaryGuardian,
+        cronogramas,
+        resumen: {
+          totalDeudaVencida,
+          totalPorCobrarAnio,
+          totalCobrado,
+          cuotasPendientesCount: cronogramas.filter((c) => c.estado !== "PAID").length,
+          cuotasVencidasCount: cronogramas.filter((c) => c.estado === "EXPIRED").length,
+        },
+        nextNumeroBoleta,
+      }),
+    };
+  },
+  { roles: ["administrativo"] },
+);
+

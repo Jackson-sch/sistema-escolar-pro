@@ -30,37 +30,42 @@ export function DashboardContent({ data }: DashboardContentProps) {
   });
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5">
+      {/* 1. El Parte del Día & Accesos Directos */}
       <QuickSummaryHero
+        studentId={currentStudent?.id}
         studentName={currentStudent?.name || "Estudiante"}
+        studentGrade={currentStudent?.grado}
         asistenciaHoy={asistenciaHoy}
         payments={payments}
+        attendancePercentage={attendancePercentage}
       />
-      <div className="grid gap-4 @3xl:grid-cols-3">
-        <div className="@3xl:col-span-2">
-          <Card className="h-full min-h-[400px] rounded-2xl border-border/50 bg-card/80 p-6 shadow-sm">
+
+      {/* 2. Gráficos & Estado Financiero */}
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <Card className="h-full min-h-[380px] rounded-2xl border-border/60 bg-card p-5 sm:p-6 shadow-2xs">
             <div className="h-full w-full">
               <AcademicProgressChart data={chartData} />
             </div>
           </Card>
         </div>
-        <div className="@3xl:col-span-1">
+        <div className="lg:col-span-1">
           <FinancialStatus payments={payments} />
         </div>
       </div>
 
-      <div className="grid gap-4 @md:grid-cols-2 @3xl:grid-cols-3">
-        <AttendanceWidget attendancePercentage={attendancePercentage} />
-
-        {/* Psychopedagogical Widget */}
-        <PsychopedagogicalWidget
-          fichas={fichas}
+      {/* 3. Comunicados, Tutoría y Asistencia */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <SchoolAnnouncementsWidget
+          anuncios={anuncios}
           studentId={data.currentStudent.id}
         />
 
-        {/* School Announcements Widget */}
-        <SchoolAnnouncementsWidget
-          anuncios={anuncios}
+        <AttendanceWidget attendancePercentage={attendancePercentage} />
+
+        <PsychopedagogicalWidget
+          fichas={fichas}
           studentId={data.currentStudent.id}
         />
       </div>

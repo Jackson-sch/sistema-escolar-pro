@@ -10,6 +10,8 @@ import { ConfiguracionTabs } from "@/components/configuracion/configuracion-tabs
 import { Badge } from "@/components/ui/badge";
 import { IconSettings } from "@tabler/icons-react";
 
+import { PageHeader } from "@/components/common/page-header";
+
 export const metadata = {
   title: "Configuración de la Institución | Sistema Escolar Pro",
   description: "Gestión de datos institucionales, sedes y variables del sistema.",
@@ -47,22 +49,19 @@ export default async function ConfiguracionPage() {
   const bancos = bancosRes.success || [];
 
   return (
-    <div className="min-h-screen flex flex-col gap-6 p-4 md:p-8 pt-6 @container/main">
-      {/* ── HEADER ── */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
-        <div className="space-y-2">
-          <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-4 py-1 rounded-full text-xxs font-semibold uppercase tracking-widest flex items-center gap-2 w-fit">
-            <IconSettings size={14} />
-            Parámetros del Sistema
-          </Badge>
-          <h1 className="text-3xl md:text-5xl font-bold tracking-tight leading-none">
-            Configuración Institucional
-          </h1>
-          <p className="text-muted-foreground text-sm md:text-base max-w-2xl font-normal leading-relaxed">
-            Administra la identidad legal de la institución, sedes operativas, cuentas bancarias y variables dinámicas.
-          </p>
-        </div>
-      </div>
+    <div className="flex flex-1 flex-col gap-6 p-4 sm:p-6 pt-0">
+      {/* ── HEADER COMPACTO INSTITUCIONAL ── */}
+      <PageHeader
+        icon={<IconSettings size={20} />}
+        title="Datos de la Institución"
+        badge="Parámetros I.E."
+        description={`Identidad escolar, sedes operativas, cuentas bancarias y variables del sistema · ${institucion?.nombreInstitucion || "I.E."}`}
+        breadcrumbs={[
+          { label: "Inicio", href: "/dashboard" },
+          { label: "Configuración", href: "/configuracion/institucion" },
+          { label: "Datos de la I.E." },
+        ]}
+      />
 
       <div className="px-1">
         <ConfiguracionTabs>

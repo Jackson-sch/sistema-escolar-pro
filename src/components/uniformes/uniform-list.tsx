@@ -76,7 +76,7 @@ export function UniformList({ uniforms, categories, sedes }: UniformListProps) {
     try {
       const result = await deleteUniformeAction(uniformToDelete.id);
       if (result.success) {
-        toast.success("Uniforme eliminado correctamente");
+        toast.success("Artículo eliminado correctamente");
         setIsDeleteModalOpen(false);
         setUniformToDelete(null);
       } else {
@@ -96,7 +96,7 @@ export function UniformList({ uniforms, categories, sedes }: UniformListProps) {
         <div className="relative w-full sm:w-80">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/60" />
           <Input
-            placeholder="Buscar prendas por nombre o detalle..."
+            placeholder="Buscar artículos, libros, agendas o uniformes..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-9 bg-background border-border/40 rounded-xl text-xs h-9"
@@ -129,7 +129,7 @@ export function UniformList({ uniforms, categories, sedes }: UniformListProps) {
             className="rounded-xl px-4 h-9 font-semibold text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 gap-1.5 cursor-pointer shrink-0"
           >
             <Plus className="h-4 w-4" />
-            <span>Nueva Prenda</span>
+            <span>Nuevo Artículo</span>
           </Button>
         </div>
       </div>
@@ -243,12 +243,13 @@ function UniformCard({
               className="flex-1 bg-background/90 hover:bg-background border-border/40 rounded-xl text-xs font-semibold h-8"
             >
               <Ruler className="h-3.5 w-3.5 mr-1 text-amber-500" />
-              Tallas
+              Variantes
             </Button>
             <Button
               variant="outline"
               size="icon"
               onClick={onDelete}
+              aria-label="Eliminar artículo"
               className="size-8 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 border-rose-500/30 rounded-xl"
             >
               <Trash2 className="h-3.5 w-3.5" />
@@ -288,7 +289,7 @@ function UniformCard({
         </div>
         <div className="flex flex-col items-end">
           <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold">
-            Tallas
+            Variantes
           </span>
           <div className="flex items-center gap-1 mt-0.5">
             <Layers className="h-3.5 w-3.5 text-muted-foreground" />

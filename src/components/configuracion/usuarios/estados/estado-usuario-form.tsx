@@ -98,21 +98,22 @@ export function EstadoUsuarioForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           <FormField
             control={form.control}
             name="codigo"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Código</FormLabel>
+                <FormLabel className="text-xs font-bold text-foreground">Código de Estado</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="EJ: ACTIVO"
                     {...field}
                     disabled={!!initialData}
+                    className="h-9 text-xs font-mono uppercase rounded-xl border-border/60 bg-background"
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xxs" />
               </FormItem>
             )}
           />
@@ -121,11 +122,15 @@ export function EstadoUsuarioForm({
             name="nombre"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Nombre</FormLabel>
+                <FormLabel className="text-xs font-bold text-foreground">Nombre Descriptivo</FormLabel>
                 <FormControl>
-                  <Input placeholder="Ej: Activo" {...field} />
+                  <Input
+                    placeholder="Ej: Activo Regular"
+                    {...field}
+                    className="h-9 text-xs rounded-xl border-border/60 bg-background"
+                  />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xxs" />
               </FormItem>
             )}
           />
@@ -136,34 +141,42 @@ export function EstadoUsuarioForm({
           name="descripcion"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Descripción</FormLabel>
+              <FormLabel className="text-xs font-bold text-foreground">Descripción</FormLabel>
               <FormControl>
-                <Input placeholder="Breve descripción del estado" {...field} />
+                <Input
+                  placeholder="Breve descripción del alcance operativo de este estado..."
+                  {...field}
+                  className="h-9 text-xs rounded-xl border-border/60 bg-background"
+                />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-xxs" />
             </FormItem>
           )}
         />
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           <FormField
             control={form.control}
             name="color"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Color</FormLabel>
-                <div className="flex gap-2">
+                <FormLabel className="text-xs font-bold text-foreground">Color Identificador</FormLabel>
+                <div className="flex gap-2 items-center">
                   <FormControl>
-                    <Input type="color" className="h-10 w-20 p-1" {...field} />
+                    <Input
+                      type="color"
+                      className="size-9 p-0.5 rounded-xl border-border/60 cursor-pointer bg-background shrink-0"
+                      {...field}
+                    />
                   </FormControl>
                   <Input
                     value={field.value}
                     onChange={(e) => field.onChange(e.target.value)}
-                    className="flex-1"
-                    placeholder="#000000"
+                    className="flex-1 h-9 text-xs font-mono rounded-xl border-border/60 bg-background"
+                    placeholder="#3b82f6"
                   />
                 </div>
-                <FormMessage />
+                <FormMessage className="text-xxs" />
               </FormItem>
             )}
           />
@@ -172,7 +185,7 @@ export function EstadoUsuarioForm({
             name="orden"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Orden</FormLabel>
+                <FormLabel className="text-xs font-bold text-foreground">Orden de Prioridad</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
@@ -180,30 +193,32 @@ export function EstadoUsuarioForm({
                     onChange={(e) =>
                       field.onChange(e.target.valueAsNumber || 0)
                     }
+                    className="h-9 text-xs font-mono rounded-xl border-border/60 bg-background"
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xxs" />
               </FormItem>
             )}
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4 pt-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
           <FormField
             control={form.control}
             name="permiteLogin"
             render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+              <FormItem className="flex items-start gap-2.5 rounded-xl border border-border/60 bg-muted/20 p-3 space-y-0 cursor-pointer">
                 <FormControl>
                   <Checkbox
                     checked={field.value}
                     onCheckedChange={field.onChange}
+                    className="size-4 rounded-md border-border/60 text-primary cursor-pointer mt-0.5"
                   />
                 </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>Permitir Login</FormLabel>
-                  <FormDescription>
-                    Los usuarios en este estado pueden iniciar sesión.
+                <div className="space-y-0.5 leading-none">
+                  <FormLabel className="text-xs font-bold text-foreground cursor-pointer">Permitir Acceso</FormLabel>
+                  <FormDescription className="text-[11px] text-muted-foreground">
+                    Los usuarios con este estado pueden iniciar sesión en el portal.
                   </FormDescription>
                 </div>
               </FormItem>
@@ -213,17 +228,18 @@ export function EstadoUsuarioForm({
             control={form.control}
             name="esActivo"
             render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+              <FormItem className="flex items-start gap-2.5 rounded-xl border border-border/60 bg-muted/20 p-3 space-y-0 cursor-pointer">
                 <FormControl>
                   <Checkbox
                     checked={field.value}
                     onCheckedChange={field.onChange}
+                    className="size-4 rounded-md border-border/60 text-primary cursor-pointer mt-0.5"
                   />
                 </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>Es Activo</FormLabel>
-                  <FormDescription>
-                    El estado se considera operativamente &ldquo;activo&rdquo;.
+                <div className="space-y-0.5 leading-none">
+                  <FormLabel className="text-xs font-bold text-foreground cursor-pointer">Estado Activo</FormLabel>
+                  <FormDescription className="text-[11px] text-muted-foreground">
+                    Se computa en los filtros de usuarios activos institucionalmente.
                   </FormDescription>
                 </div>
               </FormItem>
@@ -231,12 +247,12 @@ export function EstadoUsuarioForm({
           />
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-white/5">
+        <div className="flex items-center justify-end gap-2 pt-3 border-t border-border/40">
           <Button
             type="button"
             variant="outline"
             onClick={onSuccess}
-            className="w-full sm:w-auto rounded-full border-border/40 hover:bg-accent/50 hover:scale-105"
+            className="h-9 px-4 text-xs font-bold rounded-xl border-border/60 cursor-pointer"
             disabled={loading}
           >
             Cancelar
@@ -244,9 +260,9 @@ export function EstadoUsuarioForm({
           <Button
             type="submit"
             disabled={loading}
-            className="w-full sm:w-auto rounded-full px-8 hover:scale-105"
+            className="h-9 px-5 text-xs font-extrabold rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer shadow-xs"
           >
-            {loading && <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {loading && <IconLoader2 className="mr-1.5 size-3.5 animate-spin" />}
             {initialData ? "Actualizar Estado" : "Crear Estado"}
           </Button>
         </div>

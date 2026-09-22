@@ -53,7 +53,7 @@ export function GradeReportButton({
   return (
     <Button
       variant="outline"
-      className="w-full rounded-full text-xs md:text-sm h-9 md:h-10 font-semibold border-border/60 hover:bg-accent hover:text-accent-foreground transition-all duration-200 shadow-sm"
+      className="w-full rounded-full text-xs md:text-sm h-9 md:h-10 font-semibold border-border/60 hover:bg-accent hover:text-accent-foreground transition-colors duration-200 shadow-sm"
       onClick={handleDownload}
       disabled={loading}
     >

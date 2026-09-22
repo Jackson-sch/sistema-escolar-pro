@@ -2,23 +2,14 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
-import Image from "next/image";
-import {
-  IconMapPin,
-  IconBadgeFilled,
-  IconStarFilled,
-  IconSchool,
-  IconLibrary,
-} from "@tabler/icons-react";
+import { IconSchool, IconLibrary } from "@tabler/icons-react";
+import { SedePopupContent } from "./sede-popup-content";
 
 interface SedeMapProps {
   sedes: any[];
   activeSedeId?: string;
   onSedeClick: (sedeId: string) => void;
 }
-
-// We dynamically import maplibre-gl inside the component to avoid SSR issues
-// This lets us use a normal import in the parent (no next/dynamic needed)
 
 export function SedeMap({ sedes, activeSedeId, onSedeClick }: SedeMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -30,7 +21,6 @@ export function SedeMap({ sedes, activeSedeId, onSedeClick }: SedeMapProps) {
   const sedesRef = useRef(sedes);
   const [isMapReady, setIsMapReady] = useState(false);
 
-  // Keep refs in sync without triggering effects
   useEffect(() => {
     onSedeClickRef.current = onSedeClick;
   }, [onSedeClick]);
@@ -39,23 +29,17 @@ export function SedeMap({ sedes, activeSedeId, onSedeClick }: SedeMapProps) {
     sedesRef.current = sedes;
   }, [sedes]);
 
-  // Initialize Map (runs once, never re-runs)
+  // Initialize Map
   useEffect(() => {
     if (!mapContainer.current) return;
-
     let cancelled = false;
 
-    // Dynamic import of maplibre-gl — this is the key to avoiding SSR errors
-    // without needing next/dynamic wrapper
     import("maplibre-gl").then((maplibregl) => {
       if (cancelled || !mapContainer.current) return;
-
-      // Import CSS
       import("maplibre-gl/dist/maplibre-gl.css");
 
       maplibreRef.current = maplibregl.default || maplibregl;
       const ml = maplibreRef.current;
-
       const center: [number, number] = [-79.000787, -8.083672];
 
       const map = new ml.Map({
@@ -63,28 +47,31 @@ export function SedeMap({ sedes, activeSedeId, onSedeClick }: SedeMapProps) {
         style: {
           version: 8,
           sources: {
-            voyager: {
+            osm: {
               type: "raster",
               tiles: [
-                "https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+                "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
               ],
               tileSize: 256,
               attribution:
-                "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors &copy; <a href='https://carto.com/attributions'>CARTO</a>",
+                "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
+              maxzoom: 19,
             },
           },
           layers: [
             {
-              id: "voyager-layer",
+              id: "osm-layer",
               type: "raster",
-              source: "voyager",
+              source: "osm",
             },
           ],
         },
         center: center,
         zoom: 16,
-        minZoom: 16,
-        maxZoom: 17,
+        minZoom: 12,
+        maxZoom: 19,
         attributionControl: false,
       });
 
@@ -95,12 +82,11 @@ export function SedeMap({ sedes, activeSedeId, onSedeClick }: SedeMapProps) {
           setIsMapReady(true);
         }
       });
-    })
-      .catch((error) => {
-        if (!cancelled) {
-          console.error("Error al inicializar el mapa:", error);
-        }
-      });
+    }).catch((error) => {
+      if (!cancelled) {
+        console.error("Error al inicializar el mapa:", error);
+      }
+    });
 
     return () => {
       cancelled = true;
@@ -111,7 +97,7 @@ export function SedeMap({ sedes, activeSedeId, onSedeClick }: SedeMapProps) {
         setIsMapReady(false);
       }
     };
-  }, []); // Empty deps — runs once on mount, never again
+  }, []);
 
   // Sync Markers + Fit Bounds
   const syncMarkers = useCallback(() => {
@@ -161,7 +147,6 @@ export function SedeMap({ sedes, activeSedeId, onSedeClick }: SedeMapProps) {
       inner.className =
         "cursor-pointer transition-transform duration-300 hover:scale-110 active:scale-95";
 
-      // Build the marker icon with DOM APIs (avoids innerHTML sinks)
       const icon = document.createElement("div");
       if (sede.esPrincipal) {
         icon.className =
@@ -185,74 +170,8 @@ export function SedeMap({ sedes, activeSedeId, onSedeClick }: SedeMapProps) {
       // Popup Content
       const popupContent = document.createElement("div");
       popupContent.className = "premium-popup-container";
-
-      const nombresNiveles = Array.from(
-        new Set(sede.nivelesAcademicos?.map((na: any) => na.nivel?.nombre)),
-      ).filter(Boolean) as string[];
-
       const root = createRoot(popupContent);
-      root.render(
-        <div className="flex flex-col gap-0 overflow-hidden">
-          {sede.logo ? (
-            <div className="relative w-full h-24 overflow-hidden rounded-t-xl mb-3">
-              <Image
-                src={sede.logo}
-                fill
-                sizes="200px"
-                unoptimized
-                className="object-cover"
-                alt={sede.nombre}
-              />
-              <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
-              <div className="absolute bottom-2 left-3 right-3 text-white">
-                <h4 className="font-bold text-sm truncate drop-shadow-md">
-                  {sede.nombre}
-                </h4>
-              </div>
-            </div>
-          ) : (
-            <div className="p-3 pb-1">
-              <h4 className="font-bold text-sm text-gray-900 mb-1">
-                {sede.nombre}
-              </h4>
-            </div>
-          )}
-
-          <div className="px-3 pb-3 space-y-2.5">
-            <div className="flex items-start gap-2">
-              <IconMapPin className="text-[14px] text-blue-600 shrink-0 mt-0.5" />
-              <p className="text-[10px] text-gray-500 leading-snug">
-                {sede.direccion || "Sin dirección física"}
-              </p>
-            </div>
-
-            {nombresNiveles.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 pt-1">
-                {nombresNiveles.map((nivel) => (
-                  <span
-                    key={nivel}
-                    className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[9px] font-bold border border-blue-200"
-                  >
-                    {nivel}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            <div className="flex justify-between items-center pt-2 border-t border-gray-200">
-              <div className="flex items-center gap-1.5 text-gray-400">
-                <IconBadgeFilled className="text-[12px]" />
-                <span className="text-[9px] font-bold uppercase tracking-wider">
-                  Sede {sede.esPrincipal ? "Principal" : "Secundaria"}
-                </span>
-              </div>
-              {sede.esPrincipal && (
-                <IconStarFilled className="text-amber-500 text-sm" />
-              )}
-            </div>
-          </div>
-        </div>,
-      );
+      root.render(<SedePopupContent sede={sede} />);
 
       const popup = new ml.Popup({
         offset: 15,
@@ -275,37 +194,30 @@ export function SedeMap({ sedes, activeSedeId, onSedeClick }: SedeMapProps) {
     });
   }, []);
 
-  // Trigger marker sync when map is ready or sedes change
   useEffect(() => {
     if (isMapReady) {
       syncMarkers();
     }
   }, [isMapReady, sedes, syncMarkers]);
 
-  // Handle Active Sede — smooth pan + popup (NO re-init, just animation)
   useEffect(() => {
     const map = mapInstance.current;
     if (!map || !activeSedeId || !isMapReady) return;
 
     const activeSede = sedes.find((s) => s.id === activeSedeId);
     if (activeSede && activeSede.lat && activeSede.lng) {
-      // Close all other popups first
       Object.entries(markersRef.current).forEach(([id, m]: [string, any]) => {
         if (id !== activeSedeId && m.getPopup()?.isOpen()) {
           m.togglePopup();
         }
       });
 
-      // Use easeTo instead of flyTo — flyTo zooms out/in through uncached
-      // zoom levels causing black tile gaps. easeTo does a direct pan at the
-      // same zoom level, keeping cached tiles visible.
       map.easeTo({
         center: [activeSede.lng, activeSede.lat],
         zoom: 16,
         duration: 600,
       });
 
-      // Open popup after animation completes
       const marker = markersRef.current[activeSedeId];
       if (marker && !marker.getPopup()?.isOpen()) {
         const onMoveEnd = () => {
@@ -313,8 +225,6 @@ export function SedeMap({ sedes, activeSedeId, onSedeClick }: SedeMapProps) {
           map.off("moveend", onMoveEnd);
         };
         map.on("moveend", onMoveEnd);
-
-        // Cleanup the temporary subscription when the effect re-runs/unmounts
         return () => map.off("moveend", onMoveEnd);
       }
     }
@@ -327,10 +237,8 @@ export function SedeMap({ sedes, activeSedeId, onSedeClick }: SedeMapProps) {
         className="w-full h-full"
         style={{ background: "#e5e7eb" }}
       />
-
-      {/* Overlay frame for depth */}
-      <div className="absolute inset-0 pointer-events-none border-t border-white/5 rounded-3xl z-10"></div>
-      <div className="absolute inset-0 pointer-events-none rounded-3xl z-10 shadow-[inset_0_0_80px_rgba(0,0,0,0.15)]"></div>
+      <div className="absolute inset-0 pointer-events-none border-t border-white/5 rounded-3xl z-10" />
+      <div className="absolute inset-0 pointer-events-none rounded-3xl z-10 shadow-[inset_0_0_80px_rgba(0,0,0,0.15)]" />
 
       <style jsx global>{`
         .marker-container {

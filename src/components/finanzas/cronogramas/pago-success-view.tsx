@@ -6,7 +6,10 @@ import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { CronogramaTableType } from "@/components/finanzas/cronogramas/cronograma-columns";
 import { ComprobanteHtml } from "@/components/finanzas/cronogramas/comprobante-html";
-import { ComprobanteTicketHtml } from "@/components/finanzas/cronogramas/comprobante-ticket-html";
+import {
+  ComprobanteTicketHtml,
+} from "@/components/finanzas/cronogramas/comprobante-ticket-html";
+import { printComprobanteTicket } from "@/components/finanzas/cronogramas/print-comprobante-ticket";
 import { createPortal } from "react-dom";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import type { FormatoComprobante } from "@/lib/comprobante-constants";
@@ -77,7 +80,17 @@ export function PagoSuccessView({
     };
   }, []);
 
-  const handlePrint = () => window.print();
+  const handlePrint = () => {
+    if (isTicket) {
+      printComprobanteTicket({
+        pago: paymentData,
+        estudiante: estudianteData,
+        institucion: institucionData,
+      });
+    } else {
+      window.print();
+    }
+  };
 
   const isTicket = formatoComprobante === "TICKET";
 
