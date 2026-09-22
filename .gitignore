@@ -43,10 +43,15 @@ next-env.d.ts
 
 /src/generated/prisma
 
-#skills
+# AI agents & skills
 .agent/
+.agents/
 .antigravity/
 .antigravitycli/
+.claude/
+
+# editor
+.vscode/
 
 # trash backup of removed files
 .trash/
